@@ -7,7 +7,7 @@ export default function({children}:Readonly <{ children: React.ReactNode}> ){
             <Navbar/>
 
             {children}
-           <section className=" bg-black w-full sm:px-16 px-8 sm:pt-24 pt-12 pb-8"> 
+           <section className=" bg-[#370E4D] w-full sm:px-16 px-8 sm:pt-24 pt-12 pb-8"> 
             <Footer/>
             </section>
         </main>

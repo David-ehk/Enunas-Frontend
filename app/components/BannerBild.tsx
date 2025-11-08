@@ -4,7 +4,7 @@ const BannerBild = () => {
   return (
     <section>
        
-     <div className="relative w-full h-[600px] mb-12">
+     <div className="relative w-full h-[600px]">
     <img 
       src="https://www.viviennewestwood.com/dw/image/v2/BJGV_PRD/on/demandware.static/-/Library-Sites-viviennewestwood-global-content/default/dwbf118223/images/hp/2025/Wk%2043/VW_HERO_AW2526_October.jpg?sw=1920&sh=1200&q=80" 
       alt="New in"

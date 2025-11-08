@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-export default function SuperQuality() {
+export default function KategorieAuswahl() {
   const [activeKategorie, setActiveKategorie] = useState('kategorie1')
 
   const kategorie = [
@@ -41,8 +41,8 @@ export default function SuperQuality() {
   const currentImage = kategorie.find(a => a.id === activeKategorie)?.image
 
   return (
-    <section className="w-full min-h-screen px-8 sm:px-16">
-      <div className="max-w-7xl mx-auto">
+    <section className="w-full  px-8 sm:px-16 sm:py-8 ">
+      <div className=" max-w-7xl mx-auto ">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           
           {/* Linke Seite - Liste */}

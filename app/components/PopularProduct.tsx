@@ -15,7 +15,7 @@ const products = [
     Brandname: "Jordan",
     name: "Worlds End Denim Boxer Jacket",
     colour: "bg-[#630393]",        // ✅ Hinzugefügt
-    colourname: "pruple",       // ✅ Hinzugefügt
+    colourname: "purple",       // ✅ Hinzugefügt
     price: "220€"
   },
   {
@@ -42,13 +42,15 @@ const products = [
 const PopularProduct = () => {
   return (
     <section id="products" className='max-container max-sm:mt-12'>
-        <div className="flex flex-col justify-start gap 5">
-            <p className="text-4xl">Beliebte Produkte</p>
-            <br/>
-              <h4> Erlebe hervorangede Qualität von Top Designern</h4>
+        <div className="flex flex-col justify-start gap 5 sm:px-3 px-4 ">
+            <p className="text-2xl md:text-3xl lg:text-4xl mb-3">Unsere Favoriten</p>
+            
+              <h4 className="text-base sm:text-lg md:text-xl text-gray-600"> Erlebe hervorangede Qualität von Top Designern</h4>
         </div>
 
-        <div className=" mt-16 grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 sm:gap-2 gap-2.5">
+          <br/>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {products.map((products)=>(
             <PopularProductCard key={products.name} {...products}/>
           ))}

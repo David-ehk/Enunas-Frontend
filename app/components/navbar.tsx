@@ -27,7 +27,7 @@ const Navbar = () => {
          </div>
 
         <a href="/" className="w-1/2 items-center flex justify-center ">
-         <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl "> Enunas </h1>    
+         <h1 className=" sm:text-3xl md:text-5xl lg:text-6xl "> Enunas </h1>    
         </a>
 
         {/* Account, Gefällt mir, Warenkorp - Rechte Hälfte */}
