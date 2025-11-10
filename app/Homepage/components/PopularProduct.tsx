@@ -1,5 +1,5 @@
-import PopularProductCard from "../components/PopularProductCard"
-import { shoe4,shoe5,shoe6, shoe7 } from "../constants"
+import PopularProductCard from "./PopularProductCard"
+import { shoe4,shoe5,shoe6, shoe7 } from "../../constants"
 
 const products = [
   {
@@ -43,9 +43,8 @@ const PopularProduct = () => {
   return (
     <section id="products" className='max-container max-sm:mt-12'>
         <div className="flex flex-col justify-start gap 5 sm:px-3 px-4 ">
-            <p className="text-2xl md:text-3xl lg:text-4xl mb-3">Unsere Favoriten</p>
-            
-              <h4 className="text-base sm:text-lg md:text-xl text-gray-600"> Erlebe hervorangede Qualität von Top Designern</h4>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl mb-3">Unsere Favoriten</h2>
+            <h4 className="text-base sm:text-lg md:text-xl text-gray-600"> Erlebe hervorangede Qualität von Top Designern</h4>
         </div>
 
           <br/>

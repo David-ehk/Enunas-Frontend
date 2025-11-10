@@ -42,14 +42,15 @@ export default function KategorieAuswahl() {
 
   return (
     <section className="w-full  px-8 sm:px-16 sm:py-8 ">
-      <div className=" max-w-7xl mx-auto ">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div className=" max-w-7xl mx-auto max-sm:hidden">
+        <div className="grid grid-cols-2 gap-12 items-center">
           
           {/* Linke Seite - Liste */}
           <div className="space-y-6">
-            <p className="text-sm tracking-widest text-gray-600">
+            {/*"<- zu allen Kategorien" hinzufügen noch  */}
+            <h2 className="text-sm tracking-widest text-gray-600">
               Kategorien
-            </p>
+            </h2>
             
             <ul className="space-y-4">
               {kategorie.map((Kategorie) => (
@@ -71,7 +72,7 @@ export default function KategorieAuswahl() {
           </div>
 
           {/* Rechte Seite - Bild */}
-          <div className="relative h-[700px] lg:h-[700px] sm:h-[750px] overflow-hidden shadow-2xl ">
+          <div className="relative h-[700px] lg:h-[700px] sm:h-[750px] overflow-hidden shadow-2xl">
             <img 
               src={currentImage}
               alt={kategorie.find(a => a.id === activeKategorie)?.name} 

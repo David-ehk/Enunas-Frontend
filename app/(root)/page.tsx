@@ -1,9 +1,9 @@
-import { Hero, KategorieAuswahl , Subscribe, PopularProduct } from "../components"
-import Geschlecht from "../components/Geschlecht"
-import BannerBild from "../components/BannerBild"
-import NewProducts from "../components/NewProducts"
-import LogoSlider from "../components/LogoSlider"
-import CategorySection from "../components/CategorySection"
+import { Hero, KategorieAuswahl , Subscribe, PopularProduct } from "../Homepage/components"
+import Geschlecht from "../Homepage/components/Geschlecht"
+import BannerBild from "../Homepage/components/BannerBild"
+import NewProducts from "../Homepage/components/NewProducts"
+import LogoSlider from "../Homepage/components/LogoSlider"
+import CategorySection from "../Homepage/components/CategorySection"
 
 export default function Home() {
   return (
@@ -12,7 +12,7 @@ export default function Home() {
       <section >
         <Hero />
       </section>
-      <section >
+      <section className="py-5">
         <KategorieAuswahl  />
       </section>
       <section >

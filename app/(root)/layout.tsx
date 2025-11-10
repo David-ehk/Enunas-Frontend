@@ -1,5 +1,5 @@
-import Navbar from "../components/navbar";
-import Footer from "../components/footer"
+import Navbar from "../Homepage/components/navbar";
+import Footer from "../Homepage/components/footer"
 export default function({children}:Readonly <{ children: React.ReactNode}> ){
     return(
         <main className="text-3xl">
