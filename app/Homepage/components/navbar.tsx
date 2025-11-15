@@ -21,10 +21,10 @@ const Navbar = () => {
 
 
   return (
-    <header className={`sm:px-10 px-4 py-2 fixed z-10 w-full transition-all duration-300 ${
+    <header className={`sm:px-10 px-4 py-2 fixed z-50 w-full transition-all duration-300 ${
       scrolled ? 'bg-white shadow-sm' : 'bg-transparent border-b-gray-300/20 border-b-1'
     }`}>
-      <nav className="flex justify-between items-center max-w-screen xl:mx-auto">
+      <nav className="flex justify-between items-center max-w-screen xl:mx-auto z-50">
         
         {/* Hamburger / Suche - Linke Hälfte */}
         <div className="w-1/4">

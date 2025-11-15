@@ -41,13 +41,13 @@ const products = [
 
 const PopularProduct = () => {
   return (
-    <section id="products" className='max-container max-sm:mt-12'>
-        <div className="flex flex-col justify-start gap 5 sm:px-3 px-4 ">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl mb-3">Unsere Favoriten</h2>
-            <h4 className="text-base sm:text-lg md:text-xl text-gray-600"> Erlebe hervorangede Qualität von Top Designern</h4>
+    <section id="products" className='max-container '>
+        <div className="flex flex-col justify-start gap 5 sm:px-3 px-4 py-2 mb-2">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl ">Unsere Favoriten</h2>
+            
         </div>
 
-          <br/>
+          
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {products.map((products)=>(

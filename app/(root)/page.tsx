@@ -18,13 +18,13 @@ export default function Home() {
       <section >
         <Geschlecht/>
       </section>
-      <section className="sm:px-3 px-5 sm:py-24 py-6">
+      <section className="sm:px-3 px-5 sm:py-6 py-3">
         <PopularProduct />
       </section>
       <section >
         <BannerBild />
       </section>
-      <section className="sm:px-3 px-8 sm:py-24 py-6" >
+      <section className="sm:px-3 px-8 sm:py-6 py-3" >
         <NewProducts />
       </section>
        <section >
@@ -33,7 +33,7 @@ export default function Home() {
       <section >
         <LogoSlider />
       </section>
-      <section className="sm:px-16 px-8 sm:py-32 py-16 w-full">
+      <section className="sm:px-16 px-8 sm:py-6 py-3 w-full">
         <Subscribe />
       </section>
     </main>

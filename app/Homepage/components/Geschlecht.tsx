@@ -1,66 +1,48 @@
-"use client"
+import React from 'react'
 
-import { useState } from "react"
-
-const Geschlecht = () => {
-  const [selectedGender, setSelectedGender] = useState<string | null>(null)
-
-  const handleGenderSelect = (gender: string) => {
-    setSelectedGender(gender)
-    // Hier kannst du zur entsprechenden Route navigieren
-    // z.B.: router.push(`/shop/${gender}`)
-    console.log(`Ausgewählt: ${gender}`)
+const geschlecht = [
+  {
+    title: "Women",
+    image: "https://diorama.dam-broadcast.com/cdn-cgi/image/width=640,format=auto/pm_11872_1164_1164642-rw8ghfoty4-whr.jpg",
+    link: "/women"
+  },
+  {
+    title: "Men",
+    image: "https://amq-mcq.dam.kering.com/asset/e5ee7220-3680-49a9-a084-c5477140578b/Original-Ecom/McQUEEN-SS26-PRE-CO_HOLIDAY_1X1_1-16.jpg",
+    link: "/men"
   }
+]
 
+export default function Geschlecht() {
   return (
-    <section className="w-full h-screen flex">
-      {/* Womenswear - Linke Hälfte */}
-      <div 
-        onClick={() => handleGenderSelect('women')}
-        className="relative w-1/2 h-full group cursor-pointer"
-      >
-        <img 
-          src="https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=1200&h=1600&fit=crop"
-          alt="Womenswear"
-          className="w-full h-full object-cover"
-        />
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 group-hover:bg-black/40 transition-all duration-500" />
-        
-        {/* Text */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <h2 className="text-white text-5xl sm:text-6xl lg:text-7xl font-light tracking-wider transition-all duration-300 group-hover:scale-105">
-            WOMEN
-          </h2>
-        </div>
-      </div>
-       
+    <div>
+      <div className="grid grid-cols-2 gap-0">
+        {geschlecht.map((ges,idx)=>(
 
-      {/* Menswear - Rechte Hälfte */}
-      <div 
-        onClick={() => handleGenderSelect('men')}
-        className="relative w-1/2 h-full group cursor-pointer"
-      >
-        <img 
-          src="https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?w=1200&h=1600&fit=crop"
-          alt="Menswear"
-          className="w-full h-full object-cover"
-        />
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 group-hover:bg-black/40 transition-all duration-500" />
-        
-        {/* Text */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <h2 className="text-white text-5xl sm:text-6xl lg:text-7xl font-light tracking-wider transition-all duration-300 group-hover:scale-105">
-            MEN
-          </h2>
-        </div>
+          <div className="relative" key={idx} style={{height: "100vh"}}>
 
-       
-        
+            <a href={ges.link}>
+
+            
+              <div className="sticky flex justify-center  top-0 z-10 p-6 sm:pt-5">
+                
+               <h2 className=" text-3xl sm:text-4xl md:text-5xl tracking-wider text-white mt-20 z-10 ">
+                {ges.title.toUpperCase()}
+              </h2>
+              
+            </div>
+
+              <div className="absolute inset-0 goup cursor-pointer ">
+                <img
+                className="w-full h-full object-cover"
+                src={ges.image}
+                alt={ges.title}/>
+              </div>
+
+            </a>
+          </div>
+        ))}
       </div>
-    </section>
+    </div>
   )
 }
-
-export default Geschlecht

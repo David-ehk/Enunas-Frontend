@@ -37,13 +37,12 @@ export default function NewProducts() {
   
   return (
     <section>
-        <div className="py-4 sm:px-3 px-4 ">
-           <p className="2xl md:3xl lg:4xl mb-3">Neue Arrivals</p> 
+        <div className="py-2 sm:px-3 px-4 mt-2 mb-2">
+           <h2 className="text-2xl md:text-3xl lg:text-4xl  ">Neue Arrivals</h2>      
            
-           <h4 className="text-base md:text-xl text-gray-600 "> Frisch eingetroffen – Die neuesten Trendsetter der Saison</h4>
         </div>
 
-        <br/>
+        
         
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {products.map((product) => {
