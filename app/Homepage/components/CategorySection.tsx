@@ -7,7 +7,7 @@ import React from 'react'
 const categories = [
   
   {
-    title: "Bekleidung",
+    title: "Marken",
     image: "https://amq-mcq.dam.kering.com/asset/fed593c2-f470-4c31-ba1d-f785e81a065b/Original-Ecom/WEBSITE-DESKTOP2.jpg",
     link: "/bekleidung"
   },

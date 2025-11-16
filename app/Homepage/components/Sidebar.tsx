@@ -25,12 +25,12 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       hasSubmenu: true,
       hasColor :false,
       submenu: {
-        showAll: { title: 'Siehe Alle Bekleidung', href: '/bekleidung/all' },
+        showAll: { title: 'Siehe Alle Bekleidung', href: '/bekleidung' },
         categories: [
           {
             title: 'Tops',
             items: [
-              { title: 'Siehe Alle Tops', href: '/bekleidung/tops/all' },
+              { title: 'Siehe Alle Tops', href: '/bekleidung/tops' },
               { title: 'T-Shirts / Oberteile', href: '/bekleidung/tops/tshirts' },
               { title: 'Sweater', href: '/bekleidung/tops/sweater' },
               { title: 'Hoodie', href: '/bekleidung/tops/hoodie' },
@@ -140,13 +140,12 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
       {/* Main Sidebar */}
       <aside 
-        className={`fixed top-0 left-0 h-full w-96 bg-black text-white z-50
+        className={`fixed top-0 left-0 h-full w-full  sm:w-96 bg-[#370E4D] text-white z-50
                     transform transition-all duration-500 ease-out
                     ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-8 border-b border-white/10">
-          <h2 className="font-cormorant text-4xl tracking-wider">MENÜ</h2>
+        <div className="flex items-center px-8 py-4 border-b border-white/10 bg-black/50">
           <button 
             onClick={onClose}
             className="w-10 h-10 flex items-center justify-center hover:bg-white/5  rounded-full transition-all duration-300 group"
@@ -156,7 +155,11 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
                     d="M6 18L18 6M6 6l12 12" />
             </svg>
+           
           </button>
+           <p className=" text-xl tracking-wider">Schließen</p>
+          
+          
         </div>
 
         {/* Navigation */}
@@ -202,12 +205,29 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       {/* Submenu Sidebar mit Accordion */}
       {activeSubmenu && (
         <aside 
-          className={`fixed top-0 h-full left-96 w-96 bg-zinc-900 text-white z-50
+          className={`fixed top-0 h-full left-0 w-full sm:left-96 sm:w-96 bg-zinc-900 text-white z-50
                      shadow-2xl transition-all duration-500 ease-out
                      ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
         >
           {/* Submenu Header */}
-          <div className="flex items-center justify-between px-6 py-8 border-b border-white/10">
+           <div className="sm:hidden flex items-center px-8 py-4 border-b border-white/10 bg-black/50">
+          <button 
+            onClick={onClose}
+            className="w-10 h-10 flex items-center justify-center hover:bg-white/5  rounded-full transition-all duration-300 group"
+          >
+            <svg className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" 
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
+                    d="M6 18L18 6M6 6l12 12" />
+            </svg>
+           
+          </button>
+           <p className=" text-xl tracking-wider">Schließen</p>
+          
+          
+        </div>
+
+          <div className="flex items-center justify-center px-6 py-8 border-b border-white/10">
             <button 
               onClick={() => setActiveSubmenu(null)}
               className="flex items-center gap-3 group"

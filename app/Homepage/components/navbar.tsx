@@ -45,7 +45,7 @@ const Navbar = () => {
         
         {/* Logo - Mitte */}
         <a href="/" className="w-1/2 items-center flex justify-center">
-          <h1 className="sm:text-3xl md:text-5xl lg:text-6xl">Enunas</h1>    
+          <h1 className="text-4xl md:text-5xl ">Enunas</h1>    
         </a>
         
         {/* Account, Gefällt mir, Warenkorb - Rechte Hälfte */}

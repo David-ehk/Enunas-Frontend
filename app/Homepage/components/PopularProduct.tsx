@@ -54,6 +54,12 @@ const PopularProduct = () => {
             <PopularProductCard key={products.name} {...products}/>
           ))}
         </div>
+
+        <div className="py-2 mt-5 flex justify-center items-center">
+        <button className=" border-1 border-gray-400/20">
+          Siehe Weiter 
+        </button>
+        </div>
     </section>
   )
 }

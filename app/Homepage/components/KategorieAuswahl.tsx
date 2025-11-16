@@ -48,9 +48,9 @@ export default function KategorieAuswahl() {
           {/* Linke Seite - Liste */}
           <div className="space-y-6">
             {/*"<- zu allen Kategorien" hinzufügen noch  */}
-            <h2 className="text-sm tracking-widest text-gray-600">
+            <p className="text-sm  tracking-widest text-gray-600">
               Kategorien
-            </h2>
+            </p>
             
             <ul className="space-y-4">
               {kategorie.map((Kategorie) => (

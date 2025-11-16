@@ -12,7 +12,7 @@ const logos = [
 
 export default function LogoSlider() {
   return (
-    <>
+    <> {/* 
       <style>{`
         @keyframes scroll {
           0% { 
@@ -33,16 +33,16 @@ export default function LogoSlider() {
         }
       `}</style>
 
-      <section className="py-16 bg-gray-50">
+      <section className="sm:py-15 py-5">
         <div className="max-container">
-          <h2 className="text-center text-3xl font-bold mb-12 italic text-gray-700">
+          <h2 className="text-center text-2xl md:text-3xl lg:text-4xl  sm:mb-12 mb-6">
             Vertraut von führenden Marken
           </h2>
           
-          {/* Overflow Container */}
+          
           <div className="relative overflow-hidden">
             <div className="animate-scroll">
-              {/* 3x duplizieren für nahtlosen Loop */}
+              
               {[...logos, ...logos, ...logos].map((logo, index) => (
                 <div 
                   key={index}
@@ -58,7 +58,9 @@ export default function LogoSlider() {
             </div>
           </div>
         </div>
-      </section>
+       
+      </section> 
+       */}
     </>
   )
 }

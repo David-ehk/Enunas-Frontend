@@ -38,7 +38,7 @@ export default function NewProducts() {
   return (
     <section>
         <div className="py-2 sm:px-3 px-4 mt-2 mb-2">
-           <h2 className="text-2xl md:text-3xl lg:text-4xl  ">Neue Arrivals</h2>      
+           <h2 className="text-2xl md:text-3xl lg:text-4xl ">Neue Arrivals</h2>      
            
         </div>
 
@@ -49,6 +49,13 @@ export default function NewProducts() {
           return <PopularProductCard key={product.name} {...product}/>
         })}
       </div>
+
+         <div className="py-2 mt-5 flex justify-center items-center">
+        <button className=" border-1 border-gray-400/20">
+          Siehe Weiter 
+        </button>
+        </div>
+        
     </section>
   )
 }

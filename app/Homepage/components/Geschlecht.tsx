@@ -24,7 +24,7 @@ export default function Geschlecht() {
             <a href={ges.link}>
 
             
-              <div className="sticky flex justify-center  top-0 z-10 p-6 sm:pt-5">
+             <div className="sticky flex justify-center  top-0 z-10 p-6 sm:pt-5">
                 
                <h2 className=" text-3xl sm:text-4xl md:text-5xl tracking-wider text-white mt-20 z-10 ">
                 {ges.title.toUpperCase()}
@@ -38,6 +38,8 @@ export default function Geschlecht() {
                 src={ges.image}
                 alt={ges.title}/>
               </div>
+
+              <div className="group-hover: bg-black/15"></div>
 
             </a>
           </div>
