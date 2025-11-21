@@ -37,9 +37,9 @@ export default function NewProducts() {
   
   return (
     <section>
-        <div className="py-2 sm:px-3 px-4 mt-2 mb-2">
+        <div className="flex flex-col justify-start gap-5 px-7 mb-4 py-6">
            <h2 className="text-2xl md:text-3xl lg:text-4xl ">Neue Arrivals</h2>      
-           
+          
         </div>
 
         
@@ -51,10 +51,12 @@ export default function NewProducts() {
       </div>
 
          <div className="py-2 mt-5 flex justify-center items-center">
-        <button className=" border-1 border-gray-400/20">
-          Siehe Weiter 
+        <button className="relative w-full py-4 px-6 tracking-widest text-white bg-[#370E4D] overflow-hidden group transition-colors duration-600">
+          <span className="absolute left-1/2 -translate-x-1/2 top-[10%] w-full h-[1px] bg-white transition-all duration-500 ease-out group-hover:w-[75%]" />
+          <span className="relative z-10">Mehr entdecken</span>
+          <span className="absolute left-1/2 -translate-x-1/2 bottom-[10%] w-full h-[1px] bg-white transition-all duration-500 ease-out group-hover:w-[75%]" />
         </button>
-        </div>
+      </div>
         
     </section>
   )

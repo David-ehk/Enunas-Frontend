@@ -2,6 +2,7 @@
 //Code analysieren und lernen
 // Code anpassen keine Ramen sondern Hover soll sich nach oben bewegen
 //sm: muss angepasst werden sieht kacke aus
+import Link from 'next/link'
 import React from 'react'
 
 const categories = [
@@ -31,10 +32,10 @@ export default function CategorySection() {
            /* RELATIVE Container - Gibt Scroll-Raum */
            <div 
               key={idx}
-              className="relative"
+              className="relative group"
               style={{ height: '100vh' }}
             >
-              <a  href={cat.link}>
+              <Link  href={cat.link}>
 
               {/* STICKY Titel - Bleibt OBEN im Container */}
               <div className="sticky top-0 z-10 p-6 pt-5">
@@ -51,7 +52,10 @@ export default function CategorySection() {
                  className="h-full w-full object-cover"
                  />
               </div>   
-         </a>
+
+              {/*Dark Overlay*/}
+              <div className="absolute inset-0 group-hover:bg-black/25"></div>
+           </Link>
       </div>
  ))}
           </div>

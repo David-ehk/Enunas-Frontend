@@ -11,30 +11,35 @@ export default function KategorieAuswahl() {
       name: 'Streetwear',
       image: "/assets/images/Test1.WebP",
       color: 'bg-[#0011A5]',
+      link: "/Bekleidung/Streetwear"
     },
     {
       id: 'kategorie2',
       name: 'Experimental',
-      image: '/assets/images/Test2.WebP',
+      image: "https://cdn.rickowens.eu/products/205600/large/RL02E1719_CTW_09_01.jpg?1757411991",
       color: 'bg-[#630393]',
+      link: "/Bekleidung/Experimental"
     },
     {
       id: 'kategorie3',
       name: 'Athleisure',
       image: '/assets/images/Test3.WebP',
       color: 'bg-[#C91E1E]',
+      link: "/Bekleidung/Athleisure"
     },
     {
       id: 'kategorie4',
       name: 'Cultural',
       image: '/assets/images/Test4.WebP',
       color: 'bg-[#EA9575]',
+      link: "/Bekleidung/Cultural"
     },
     {
       id: 'kategorie5',
       name: 'Star',
       image: '/assets/images/Test1.WebP',
       color: 'bg-[#C59F02]',
+      link: "/Bekleidung/Star"
     }
   ]
 
@@ -72,7 +77,7 @@ export default function KategorieAuswahl() {
           </div>
 
           {/* Rechte Seite - Bild */}
-          <div className="relative h-[700px] lg:h-[700px] sm:h-[750px] overflow-hidden shadow-2xl">
+          <div className="relative h-[700px] lg:h-[700px] sm:h-[750px] overflow-hidden ">
             <img 
               src={currentImage}
               alt={kategorie.find(a => a.id === activeKategorie)?.name} 

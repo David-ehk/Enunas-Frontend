@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
 interface SidebarProps {
@@ -40,7 +41,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           {
             title: 'Bottoms',
             items: [
-              { title: 'Siehe Alle Bottoms', href: '/bekleidung/bottoms/all' },
+              { title: 'Siehe Alle Bottoms', href: '/bekleidung/bottoms' },
               { title: 'Shorts', href: '/bekleidung/bottoms/shorts' },
               { title: 'Jogging', href: '/bekleidung/bottoms/jogging' },
               { title: 'Jeans', href: '/bekleidung/bottoms/jeans' }
@@ -54,12 +55,12 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       hasSubmenu: true,
       hasColor: false,
       submenu: {
-        showAll: { title: 'Siehe Alle Women', href: '/women/all' },
+        showAll: { title: 'Siehe Alle Women', href: '/women' },
         categories: [
           {
             title: 'Tops',
             items: [
-              { title: 'Siehe Alle Tops', href: '/women/tops/all' },
+              { title: 'Siehe Alle Tops', href: '/women/tops' },
               { title: 'Blusen', href: '/women/tops/blusen' },
               { title: 'T-Shirts', href: '/women/tops/tshirts' },
               { title: 'Sweater', href: '/women/tops/sweater' }
@@ -68,7 +69,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           {
             title: 'Bottoms',
             items: [
-              { title: 'Siehe Alle Bottoms', href: '/women/bottoms/all' },
+              { title: 'Siehe Alle Bottoms', href: '/women/bottoms' },
               { title: 'Röcke', href: '/women/bottoms/roecke' },
               { title: 'Hosen', href: '/women/bottoms/hosen' },
               { title: 'Jeans', href: '/women/bottoms/jeans' }
@@ -82,12 +83,12 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       hasSubmenu: true,
       hasColor: false,
       submenu: {
-        showAll: { title: 'Siehe Alle Men', href: '/men/all' },
+        showAll: { title: 'Siehe Alle Men', href: '/men' },
         categories: [
           {
             title: 'Tops',
             items: [
-              { title: 'Siehe Alle Tops', href: '/men/tops/all' },
+              { title: 'Siehe Alle Tops', href: '/men/tops' },
               { title: 'Hemden', href: '/men/tops/hemden' },
               { title: 'T-Shirts', href: '/men/tops/tshirts' },
               { title: 'Sweater', href: '/men/tops/sweater' },
@@ -97,7 +98,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           {
             title: 'Bottoms',
             items: [
-              { title: 'Siehe Alle Bottoms', href: '/men/bottoms/all' },
+              { title: 'Siehe Alle Bottoms', href: '/men/bottoms' },
               { title: 'Shorts', href: '/men/bottoms/shorts' },
               { title: 'Hosen', href: '/men/bottoms/hosen' },
               { title: 'Jeans', href: '/men/bottoms/jeans' }
@@ -145,7 +146,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                     ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Header */}
-        <div className="flex items-center px-8 py-4 border-b border-white/10 bg-black/50">
+        <div className="flex items-center px-8 py-4 border-b border-white/10 ">
           <button 
             onClick={onClose}
             className="w-10 h-10 flex items-center justify-center hover:bg-white/5  rounded-full transition-all duration-300 group"
@@ -193,7 +194,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         </nav>
 
         {/* Footer */}
-        <div className="absolute bottom-0 w-full px-8 py-6 border-t border-white/10 bg-black/50">
+        <div className="absolute bottom-0 w-full px-8 py-6 border-t border-white/10 ">
           <button className="w-full py-3 px-4 border border-white/20 rounded text-xs
                            tracking-widest uppercase hover:bg-white/5 transition-all duration-300
                            flex items-center justify-between">
@@ -205,12 +206,12 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       {/* Submenu Sidebar mit Accordion */}
       {activeSubmenu && (
         <aside 
-          className={`fixed top-0 h-full left-0 w-full sm:left-96 sm:w-96 bg-zinc-900 text-white z-50
-                     shadow-2xl transition-all duration-500 ease-out
-                     ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+          className={`fixed top-0 h-full left-0 w-full sm:left-96 sm:w-96 bg-[#F5F5F0] text-black z-50
+                      transition-all duration-500 ease-out
+                     ${isOpen ? 'translate-x-0 ' : 'translate-x-full '}`}
         >
           {/* Submenu Header */}
-           <div className="sm:hidden flex items-center px-8 py-4 border-b border-white/10 bg-black/50">
+           <div className="sm:hidden flex items-center px-8 py-4 border-b border-white/10 bg-[#370E4D]">
           <button 
             onClick={onClose}
             className="w-10 h-10 flex items-center justify-center hover:bg-white/5  rounded-full transition-all duration-300 group"
@@ -246,7 +247,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             {/* "Siehe Alle" Link */}
             <a href={menuItems.find(item => item.title === activeSubmenu)?.submenu?.showAll.href}
               onClick={handleLinkClick}
-              className="block py-4 px-5 mb-4 bg-white/5 hover:bg-white/10 rounded  transition-all duration-300 border-l-2 border-white/50"
+              className="block py-4 px-5 mb-4 bg-white/5 hover:bg-white/10 rounded  transition-all duration-300 border-l-2 border-white/50 hover:text-[#370E4D]"
             >
               <span className="font-spartan text-sm tracking-wide uppercase">
                 {menuItems.find(item => item.title === activeSubmenu)?.submenu?.showAll.title}
@@ -290,7 +291,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                       <ul className="pl-4 py-2 space-y-1">
                         {category.items.map((item: any) => (
                           <li key={item.href}>
-                            <a
+                            <Link
                               href={item.href}
                               onClick={handleLinkClick}
                               className={`block py-2 px-4 text-sm rounded transition-all duration-300
@@ -298,7 +299,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                                        ${item.title.includes('Siehe Alle') ? 'text-white/70 italic' : ''}`}
                             >
                               {item.title}
-                            </a>
+                            </Link>
                           </li>
                         ))}
                       </ul>

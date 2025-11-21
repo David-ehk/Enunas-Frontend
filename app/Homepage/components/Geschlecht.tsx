@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import React from 'react'
 
 const geschlecht = [
@@ -19,9 +20,9 @@ export default function Geschlecht() {
       <div className="grid grid-cols-2 gap-0">
         {geschlecht.map((ges,idx)=>(
 
-          <div className="relative" key={idx} style={{height: "100vh"}}>
+          <div className="relative group" key={idx} style={{height: "100vh"}}>
 
-            <a href={ges.link}>
+            <Link href={ges.link}>
 
             
              <div className="sticky flex justify-center  top-0 z-10 p-6 sm:pt-5">
@@ -32,16 +33,16 @@ export default function Geschlecht() {
               
             </div>
 
-              <div className="absolute inset-0 goup cursor-pointer ">
+              <div className="absolute inset-0 group cursor-pointer group-hover:bg-black/70">
                 <img
                 className="w-full h-full object-cover"
                 src={ges.image}
                 alt={ges.title}/>
               </div>
 
-              <div className="group-hover: bg-black/15"></div>
+              <div className="absolute inset-0 hover:bg-black/25"></div>
 
-            </a>
+            </Link>
           </div>
         ))}
       </div>

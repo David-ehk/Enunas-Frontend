@@ -1,5 +1,5 @@
 import PopularProductCard from "./PopularProductCard"
-import { shoe4,shoe5,shoe6, shoe7 } from "../../constants"
+
 
 const products = [
   {
@@ -36,32 +36,40 @@ const products = [
   }
 ]
 
-
-
-
 const PopularProduct = () => {
   return (
-    <section id="products" className='max-container '>
-        <div className="flex flex-col justify-start gap 5 sm:px-3 px-4 py-2 mb-2">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl ">Unsere Favoriten</h2>
-            
+    <section id="products" className="max-container">
+      <div className="flex justify-between">
+        
+        <div className="flex flex-col justify-start gap-5 px-7 mb-4 py-6">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl">Unsere Favoriten</h2>
         </div>
 
-          
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-          {products.map((products)=>(
-            <PopularProductCard key={products.name} {...products}/>
-          ))}
+        <div className="hidden md:flex items-center gap-4 px-4 text-gray-700">
+          <button className="text-2xl hover:text-black transition duration-200" aria-label="Zurück">
+            &lt;
+          </button>
+          <button className="text-2xl hover:text-black transition duration-200" aria-label="Weiter">
+            &gt;
+          </button>
         </div>
+      </div>
 
-        <div className="py-2 mt-5 flex justify-center items-center">
-        <button className=" border-1 border-gray-400/20">
-          Siehe Weiter 
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+        {products.map((product) => (
+          <PopularProductCard key={product.name} {...product} />
+        ))}
+      </div>
+
+      <div className="py-2 mt-5 flex justify-center items-center">
+        <button className="relative w-full py-4 px-6 tracking-widest text-white bg-[#370E4D] overflow-hidden group transition-colors duration-600">
+          <span className="absolute left-1/2 -translate-x-1/2 top-[10%] w-full h-[1px] bg-white transition-all duration-500 ease-out group-hover:w-[75%]" />
+          <span className="relative z-10">Mehr entdecken</span>
+          <span className="absolute left-1/2 -translate-x-1/2 bottom-[10%] w-full h-[1px] bg-white transition-all duration-500 ease-out group-hover:w-[75%]" />
         </button>
-        </div>
+      </div>
     </section>
-  )
-}
+  );
+};
 
-export default PopularProduct
+export default PopularProduct;

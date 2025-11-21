@@ -14,8 +14,8 @@ const BannerBild = () => {
     <div className="absolute inset-0 bg-black/30"></div>
     
     <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-      <p className="text-xs uppercase tracking-widest mb-1">NEW IN</p>
-      <h2 className="text-4xl md:text-6xl font-bold">Beliebte Produkte</h2>
+      <p className="text-xs uppercase tracking-widest mb-1">NEW Experience</p>
+      <h2 className="text-4xl md:text-6xl font-bold">Dein Shop dich zu finden</h2>
     </div>
   </div>
     </section>
