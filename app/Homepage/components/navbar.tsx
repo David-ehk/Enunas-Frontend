@@ -1,10 +1,9 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
 import Sidebar from './Sidebar'
-import { SearchBar } from './Suchleiste'
-import { Car } from 'lucide-react'
+import {SearchBar }  from './Suchleiste'
+import Link from 'next/link'
 
 
 const Navbar = () => {
@@ -15,7 +14,7 @@ const Navbar = () => {
   // Scrolleffekt transparenz
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50) //wenn um mehr als 50px gescrolled wird wird scrolled auf true gesetz
+      setScrolled(window.scrollY > 10) //wenn um mehr als 50px gescrolled wird wird scrolled auf true gesetz
     }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
@@ -58,7 +57,7 @@ const CartIconSvg = (props: React.SVGProps<SVGSVGElement>) => (
         <path d="M13.3332 8.33333C13.3332 9.2174 12.9821 10.0652 12.357 10.6904C11.7319 11.3155 10.884 11.6667 9.99984 11.6667C9.11579 11.6667 8.26794 11.3155 7.64282 10.6904C7.0177 10.0652 6.6665 9.2174 6.6665 8.33333" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
 );
-{/* Dies sind die Tailwind-Klassen für Ihren lila Zähler (Badge)*/}
+{/* Dies ist eine Tailwind-Klassen für den lila Zähler (Badge)*/}
 const ICON_BADGE_CLASSES = "absolute z-2 top-[-6px] right-[-8px] bg-[#370E4D]   text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center";
 
 
@@ -69,7 +68,7 @@ const ICON_BADGE_CLASSES = "absolute z-2 top-[-6px] right-[-8px] bg-[#370E4D]   
       <nav className="flex justify-between items-center max-w-screen xl:mx-auto z-50">
         
         {/* Hamburger / Suche - Linke Hälfte */}
-        <div className="w-1/4">
+        <div className="w-1/4 flex gap-3 md:gap-8">
         <button onClick={() => setSidebarOpen(true)}>
           <HamburgerIconSvg className="w-5 h-5 hover:text-[#370E4D]"/>
           </button>
@@ -78,26 +77,33 @@ const ICON_BADGE_CLASSES = "absolute z-2 top-[-6px] right-[-8px] bg-[#370E4D]   
           onClose={() => setSidebarOpen(false)}
           />
 
-        </div>
-        
-        {/* Logo - Mitte */}
-        <a href="/" className="w-1/2 items-center flex justify-center">
-          <h1 className="text-4xl md:text-5xl ">Enunas</h1>    
-        </a>
-        
-        {/* Account, Gefällt mir, Warenkorb - Rechte Hälfte */}
-        <div className="flex gap-3 md:gap-8 mt-3 text-base w-1/4 justify-end">
-          <div>
+          <div className="sm:hidden">
             <SearchBar 
             isOpen={searchOpen}
             onClose={() =>setSearch(false)}/>
 
             <button onClick={() => setSearch(true)} className="flex items-center gap-1.5  border-none bg-transparent cursor-pointer text-black hover:text-[#370E4D] transition duration-200"  >
             {/* Nur das korrekte SVG (20x20) */}
-            <SearchIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]" />
-            
-            {/* Text "Suche" (nur auf Geräten größer als Mobile sichtbar) */}
-            <h3 className="text-sm hidden sm:inline">Suche</h3>   
+            <SearchIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]" />   
+            </button>
+         </div>
+        </div>
+        
+        {/* Logo - Mitte */}
+        <Link href="/" className="w-1/2 items-center flex justify-center">
+          <h1 className="text-4xl md:text-5xl ">Enunas</h1>    
+        </Link>
+        
+        {/* Account, Gefällt mir, Warenkorb - Rechte Hälfte */}
+        <div className="flex gap-3 md:gap-8 mt-3 text-base w-1/4 justify-end">
+          <div className="hidden sm:block">
+            <SearchBar 
+            isOpen={searchOpen}
+            onClose={() =>setSearch(false)}/>
+
+            <button onClick={() => setSearch(true)} className="flex items-center gap-1.5  border-none bg-transparent cursor-pointer text-black hover:text-[#370E4D] transition duration-200"  >
+            {/* Nur das korrekte SVG (20x20) */}
+            <SearchIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]" />   
             </button>
          </div>
 
@@ -110,7 +116,7 @@ const ICON_BADGE_CLASSES = "absolute z-2 top-[-6px] right-[-8px] bg-[#370E4D]   
           
           {/*Muss dynamisch sein damit die Zahl inkrementiert*/}
          <div>
-            <button className="relative cursor-pointer">
+            <button className="relative cursor-pointer hidden sm:block">
                 <HeartIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]"/>
                 <span className={ICON_BADGE_CLASSES}>0</span>
             </button>

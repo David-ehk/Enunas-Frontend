@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Input } from "@/components/ui/input"
 import Link from 'next/link'
 
@@ -117,7 +117,7 @@ export function SearchBar({ isOpen, onClose }: SearchBarProps) {
                   onClick={handleLinkClick}
                   className="block text-[13px] tracking-[0.05em] uppercase
                            hover:translate-x-1 transition-transform duration-300
-                           text-[#370E4D] hover:text-black"
+                           text-black hover:text-black"
                 >
                   {item.title}
                 </Link>

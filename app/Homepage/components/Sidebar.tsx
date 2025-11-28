@@ -18,13 +18,29 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     }
   }, [isOpen])
 
-  const menuItems = [
-    { title: 'Neu', href: '/neu', hasSubmenu: false, hasColor :false },
-    { title: 'Trendy', href: '/trendy', hasSubmenu: false,hasColor :false },
+  //vlt relevant muss ich noch verstehen richtig
+interface MenuItem {
+  title: string
+  href?: string
+  hasSubmenu: boolean
+  color?: string  // <- Optional, weil nicht alle Items Farbe haben
+  submenu?: {
+    showAll: { title: string; href: string }
+    categories: Array<{
+      title: string
+      items: Array<{ title: string; href: string }>
+    }>
+  }
+}
+
+  const menuItems: MenuItem[] = [
+    { title: 'Neu', href: '/neu', hasSubmenu: false},
+    { title: 'Trendy', href: '/trendy', hasSubmenu: false},
+    { title: 'Catalogue', href: '/catalogue', hasSubmenu: false ,color: "#DAD4CB"},
     {
       title: 'Bekleidung',
       hasSubmenu: true,
-      hasColor :false,
+      
       submenu: {
         showAll: { title: 'Siehe Alle Bekleidung', href: '/bekleidung' },
         categories: [
@@ -53,7 +69,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     {
       title: 'Women',
       hasSubmenu: true,
-      hasColor: false,
+      
       submenu: {
         showAll: { title: 'Siehe Alle Women', href: '/women' },
         categories: [
@@ -81,7 +97,6 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     {
       title: 'Men',
       hasSubmenu: true,
-      hasColor: false,
       submenu: {
         showAll: { title: 'Siehe Alle Men', href: '/men' },
         categories: [
@@ -107,10 +122,10 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         ]
       }
     },
-    { title: 'Style', href: '/style', hasSubmenu: false ,hasColor :true},
-    { title: 'Marken', href: '/marken', hasSubmenu: false,hasColor :false },
-    { title: 'Drops', href: '/drop', hasSubmenu: false,hasColor :true },
-    { title: 'Sale', href: '/sale', hasSubmenu: false,hasColor :true }
+    { title: 'Marken', href: '/marken', hasSubmenu: false},
+    
+    { title: 'Drops', href: '/drop', hasSubmenu: false,color: "#000000"},
+    { title: 'Sale', href: '/sale', hasSubmenu: false,color: "#DE0000"}
   ]
 
   const handleCategoryClick = (item: any) => {
@@ -166,11 +181,11 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         {/* Navigation */}
         <nav className="h-[calc(100%-120px)] overflow-y-auto px-8 py-8">
           <ul className="space-y-2">
-            {menuItems.map((item) => (
+            {menuItems.map((item: any) => (
               <li key={item.title}>
                 <button
                   onClick={() => handleCategoryClick(item)} 
-                  className="w-full group"
+                  className="w-full group relative"
                 >
                   <div className="flex items-center justify-between py-4 border-b border-white/5
                                hover:border-white/20 transition-all duration-300">
@@ -186,7 +201,12 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                               d="M9 5l7 7-7 7" />
                       </svg>
                     )}
-                  </div>
+                   </div>
+                    {item.color && (
+                 
+                     <div className="text-color absolute left-0 bottom-0 w-full h-[1px] transition-all duration-30 group-hover:opacity-100 opacity-60" style={{ backgroundColor: item.color }} /> 
+                    )}
+                  
                 </button>
               </li>
             ))}
@@ -238,26 +258,26 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
                       d="M15 19l-7-7 7-7" />
               </svg>
-              <span className="font-cormorant text-3xl">{activeSubmenu}</span>
+              <span className="text-3xl">{activeSubmenu}</span>
             </button>
           </div>
 
           {/* Submenu Content */}
           <nav className="h-[calc(100%-100px)] overflow-y-auto px-6 py-6">
             {/* "Siehe Alle" Link */}
-            <a href={menuItems.find(item => item.title === activeSubmenu)?.submenu?.showAll.href}
+            <a href={menuItems.find((item: any) => item.title === activeSubmenu)?.submenu?.showAll.href}
               onClick={handleLinkClick}
               className="block py-4 px-5 mb-4 bg-white/5 hover:bg-white/10 rounded  transition-all duration-300 border-l-2 border-white/50 hover:text-[#370E4D]"
             >
               <span className="font-spartan text-sm tracking-wide uppercase">
-                {menuItems.find(item => item.title === activeSubmenu)?.submenu?.showAll.title}
+                {menuItems.find((item: any) => item.title === activeSubmenu)?.submenu?.showAll.title}
               </span>
             </a>
 
             {/* Accordion Categories */}
             <ul className="space-y-2">
               {menuItems
-                .find(item => item.title === activeSubmenu)
+                .find((item: any) => item.title === activeSubmenu)
                 ?.submenu?.categories?.map((category: any) => (
                   <li key={category.title}>
                     {/* Accordion Button */}

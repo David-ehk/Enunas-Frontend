@@ -1,4 +1,4 @@
-import { Hero, KategorieAuswahl , Subscribe, PopularProduct } from "../Homepage/components"
+import { Hero, CatalogueAuswahl , Subscribe, PopularProduct } from "../Homepage/components"
 import Geschlecht from "../Homepage/components/Geschlecht"
 import BannerBild from "../Homepage/components/BannerBild"
 import NewProducts from "../Homepage/components/NewProducts"
@@ -13,7 +13,7 @@ export default function Home() {
         <Hero />
       </section>
       <section className="py-5">
-        <KategorieAuswahl  />
+        <CatalogueAuswahl  />
       </section>
       <section >
         <Geschlecht/>

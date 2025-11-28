@@ -2,12 +2,27 @@ import React from 'react'
 
 function Titel() {
   return (
-    <div className="bg-white pt-20">
-        <div className="bg-purple-950  pt-4">
-          <h2 className="text-[#D2AA01]">Bekleidung</h2>
-          <h2 className="text-white">Deine <span className="text-[#D2AA01]">Geschichte</span>, dein <span className="text-[#D2AA01]">Style</span>. Jeder <span className="text-[#D2AA01]">Look</span>, ein <span className="text-[#D2AA01]">Statement</span>.</h2>
-     </div>
-    </div>
+    <section className=" bg-white sm:pt-30 pt-20">
+
+          <br/>
+          <div className="flex justify-center">
+          <h2 className="text-black mb-2 text-4xl sm:text-5xl ">Bekleidung</h2>
+          </div>
+          <br/>
+          <div className="flex justify-center ">
+          <p className="text-black font-light text-lg md:text-xl">Deine <span className="text-[#C4A47C]">Geschichte</span>, dein <span className="text-[#C4A47C]">Style</span>. Jeder <span className="text-[#C4A47C]">Look</span>, ein <span className="text-[#C4A47C]">Statement</span>.</p>
+          </div>
+        
+
+
+          {/* Muss Dynamisch zu den Artikel sein*/}
+        <div className="flex justify-center sm:pt-10 pt-5">
+          <p className="text-[#370E4D] font-light text-lg md:text-xl"> 32 Artikel</p>
+       </div>
+
+        <br className="pt-10"/>
+        
+    </section>
   )
 }
 

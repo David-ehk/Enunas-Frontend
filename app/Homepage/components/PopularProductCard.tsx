@@ -1,10 +1,10 @@
 import Link from "next/link"
 
-const PopularProductCard = ({imgURL,Brandname, name,colour, colourname, price}) => {
+const PopularProductCard = ({imgURL,Brandname, name,colour, colourname, price, href}) => {
 
   return (
  <div className="flex flex-1 flex-col w-full group">
-      <Link href="#" className="block">
+      <Link href={href} className="block">
         {/* Bild Container mit Favorite Icon */}
         <div className="relative w-full aspect-[4/5] mb-2 overflow-hidden">
           <img 

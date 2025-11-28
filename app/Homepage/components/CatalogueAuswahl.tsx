@@ -54,7 +54,7 @@ export default function KategorieAuswahl() {
           <div className="space-y-6">
             {/*"<- zu allen Kategorien" hinzufügen noch  */}
             <p className="text-sm  tracking-widest text-gray-600">
-              Kategorien
+              Catalogue
             </p>
             
             <ul className="space-y-4">
