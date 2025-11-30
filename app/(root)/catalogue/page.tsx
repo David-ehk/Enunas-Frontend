@@ -8,8 +8,8 @@ function cataloge() {
         <section>
             <Hero/>
         </section>
-        <section>
-            
+        <section className=''>
+            <CatalogueDescription/>
         </section>
         
     </main>

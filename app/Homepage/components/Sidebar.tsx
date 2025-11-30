@@ -248,7 +248,7 @@ interface MenuItem {
           
         </div>
 
-          <div className="flex items-center justify-center px-6 py-8 border-b border-white/10">
+          <div className="flex items-center justify-center px-6 py-8 border-b border-white/10 text-[#370E4D]">
             <button 
               onClick={() => setActiveSubmenu(null)}
               className="flex items-center gap-3 group"
@@ -287,7 +287,7 @@ interface MenuItem {
                     >
                       <div className="flex items-center justify-between py-3 px-4
                                    hover:bg-white/5 rounded transition-all duration-300">
-                        <span className="font-spartan text-sm tracking-wide uppercase">
+                        <span className=" text-sm tracking-wide uppercase">
                           {category.title}
                         </span>
                         <svg
@@ -316,7 +316,7 @@ interface MenuItem {
                               onClick={handleLinkClick}
                               className={`block py-2 px-4 text-sm rounded transition-all duration-300
                                        hover:bg-white/5 border-l-2 border-transparent hover:border-white/30
-                                       ${item.title.includes('Siehe Alle') ? 'text-white/70 italic' : ''}`}
+                                       ${item.title.includes('Siehe Alle') ? 'text-[#370E4D] italic' : ''}`}
                             >
                               {item.title}
                             </Link>

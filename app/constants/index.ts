@@ -23,43 +23,55 @@ export const thumbnailShoe2 = "/assets/icons/thumbnailShoe2.svg";
 export const thumbnailShoe3 = "/assets/icons/thumbnailShoe3.svg";
 
 
-export const navLinks = [
-    { href: "#home", label: "Home" },
-    { href: "#about-us", label: "About Us" },
-    { href: "#products", label: "Products" },
-    { href: "#contact-us", label: "Contact Us" },
-];
-
-
-
-export const statistics = [
-    { value: '1k+', label: 'Brands' },
-    { value: '500+', label: 'Shops' },
-    { value: '250k+', label: 'Customers' },
-];
-
-export const products = [
+export const menuItems = [
     {
-        imgURL: shoe4,
-        name: "Nike Air Jordan-01",
-        price: "$200.20",
+      title: 'Neu',
+      href: '/neu',
+      hasSubmenu: false
     },
     {
-        imgURL: shoe5,
-        name: "Nike Air Jordan-10",
-        price: "$210.20",
+      title: 'Women',
+      href: '/women',
+      hasSubmenu: true,
+      submenu: [
+        { title: 'Kleider', href: '/women/kleider' },
+        { title: 'Hosen', href: '/women/hosen' },
+        { title: 'Tops & Shirts', href: '/women/tops' },
+        { title: 'Jacken & Mäntel', href: '/women/jacken' },
+        { title: 'Schuhe', href: '/women/schuhe' },
+        { title: 'Accessoires', href: '/women/accessoires' }
+      ]
     },
     {
-        imgURL: shoe6,
-        name: "Nike Air Jordan-100",
-        price: "$220.20",
+      title: 'Men',
+      href: '/men',
+      hasSubmenu: true,
+      submenu: [
+        { title: 'Hemden', href: '/men/hemden' },
+        { title: 'Hosen', href: '/men/hosen' },
+        { title: 'T-Shirts', href: '/men/tshirts' },
+        { title: 'Jacken', href: '/men/jacken' },
+        { title: 'Schuhe', href: '/men/schuhe' }
+      ]
     },
     {
-        imgURL: shoe7,
-        name: "Nike Air Jordan-001",
-        price: "$230.20",
+      title: 'Bekleidung',
+      href: '/bekleidung',
+      hasSubmenu: true,
+      submenu: [
+        { title: 'Hemden', href: '/men/hemden' },
+        { title: 'Hosen', href: '/men/hosen' },
+        { title: 'T-Shirts', href: '/men/tshirts' },
+        { title: 'Jacken', href: '/men/jacken' },
+        { title: 'Schuhe', href: '/men/schuhe' }
+      ]
     },
-];
+    {
+      title: 'Sale',
+      href: '/sale',
+      hasSubmenu: false
+    }
+  ]
 
 export const services = [
     {
@@ -88,7 +100,7 @@ export const footerLinks = [
             { name: "About us", link: "/" },
             { name: "Marken ", link: "/" },
             { name: "Clothing Brands", link: "/" },
-            { name: "Kariere", link: "/" },
+            { name: "Karriere", link: "/" },
           
         ],
     },
@@ -99,7 +111,7 @@ export const footerLinks = [
             { name: "Sendungsverfolgung", link: "/" },
             { name: "Lieferung & Rüksendung", link: "/" },
             { name: "Kundenservice", link: "/" },
-            { name: "Sitemap", link: "/" },
+            
         ],
     },
     {

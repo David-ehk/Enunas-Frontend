@@ -8,8 +8,24 @@ interface PageProps {
   }
 }
 
+// ✅ Type für Subcategory Data definieren
+interface SubcategoryInfo {
+  title: string
+  description: string
+}
+
+// ✅ Type für Category Data
+interface CategoryData {
+  [key: string]: SubcategoryInfo
+}
+
+// ✅ Type für gesamte Struktur
+interface SubcategoryDataStructure {
+  [key: string]: CategoryData
+}
+
 // Zentrale Daten
-const subcategoryData = {
+const subcategoryData: SubcategoryDataStructure = {
   tops: {
     tshirts: {
       title: 'T-Shirts & Oberteile',
@@ -59,29 +75,27 @@ export default function SubcategoryPage({ params }: PageProps) {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Breadcrumbs */}
-      <nav className="text-sm mb-6 text-gray-600">
-        <Link href="/" className="hover:text-black">Home</Link>
-        {' / '}
-        <Link href="/bekleidung" className="hover:text-black">Bekleidung</Link>
-        {' / '}
-        <Link href={`/bekleidung/${category}`} className="hover:text-black capitalize">
-          {category}
-        </Link>
-        {' / '}
-        <span className="text-black"></span>
-      </nav>
+    <div className="max-w-7xl mx-auto px-4 py-8 bg-white sm:pt-30 pt-20 ">
+    
 
       {/* Titel */}
-      <h1 className="text-4xl font-cormorant mb-4">
-        
+      <h1 className="text-4xl  flex justify-center mb-4">
+        {data.title}
       </h1>
 
+    
+
       {/* Beschreibung */}
-      <p className="text-gray-600 mb-12">
-        
+      <p className="text-black font-light text-lg md:text-xl flex justify-center mb-12 ">
+        {data.description}
       </p>
+
+       {/* Artikelanzahl muss noch dynamisch gemacht werden */}
+        <p className='text-black/75 font-light text-lg md:text-xl flex justify-center mb-12'>
+            20 Artikel
+        </p>
+
+        <br/>
 
       {/* Filter & Sort */}
       <div className="flex gap-4 mb-8">
@@ -103,32 +117,8 @@ export default function SubcategoryPage({ params }: PageProps) {
       </div>
 
       {/* Produkte Grid - später mit echten Daten */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="border p-4">
-          <div className="bg-gray-200 aspect-square mb-4"></div>
-          <h3 className="font-spartan mb-2">Produkt Platzhalter</h3>
-          <p className="text-gray-600">49,99 €</p>
-        </div>
-        
-        <div className="border p-4">
-          <div className="bg-gray-200 aspect-square mb-4"></div>
-          <h3 className="font-spartan mb-2">Produkt Platzhalter</h3>
-          <p className="text-gray-600">59,99 €</p>
-        </div>
-        
-        <div className="border p-4">
-          <div className="bg-gray-200 aspect-square mb-4"></div>
-          <h3 className="font-spartan mb-2">Produkt Platzhalter</h3>
-          <p className="text-gray-600">39,99 €</p>
-        </div>
-        
-        <div className="border p-4">
-          <div className="bg-gray-200 aspect-square mb-4"></div>
-          <h3 className="font-spartan mb-2">Produkt Platzhalter</h3>
-          <p className="text-gray-600">69,99 €</p>
-        </div>
-      </div>
-    </div>
+
+ </div>
   )
 }
 

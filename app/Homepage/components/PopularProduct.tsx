@@ -42,22 +42,17 @@ const products = [
 
 const PopularProduct = () => {
   return (
-    <section id="products" className="max-container">
-      <div className="flex justify-between">
+    <section id="products" className="max-container -mt-3">
+     
         
-        <div className="flex flex-col justify-start gap-5 px-7 mb-4 py-6">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl">Unsere Favoriten</h2>
+        <div className="flex justify-center px-7 items-center mb-2">
+          <hr/>
+          <h2 className="text-xl sm:text-2xl">---------Unsere Favoriten</h2>
+          <hr/>
         </div>
 
-        <div className="hidden md:flex items-center gap-4 px-4 text-gray-700">
-          <button className="text-2xl hover:text-black transition duration-200" aria-label="Zurück">
-            &lt;
-          </button>
-          <button className="text-2xl hover:text-black transition duration-200" aria-label="Weiter">
-            &gt;
-          </button>
-        </div>
-      </div>
+      
+     
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {products.map((product) => (
