@@ -1,5 +1,4 @@
-import PopularProductCard from "./PopularProductCard"
-
+import PopularProductCard from "./PopularProductCard";
 
 const products = [
   {
@@ -42,17 +41,12 @@ const products = [
 
 const PopularProduct = () => {
   return (
-    <section id="products" className="max-container -mt-3">
-     
-        
-        <div className="flex justify-center px-7 items-center mb-2">
-          <hr/>
-          <h2 className="text-xl sm:text-2xl">---------Unsere Favoriten</h2>
-          <hr/>
-        </div>
-
-      
-     
+    <section id="products" className="max-container sm:-mt-3">
+      <div className="flex justify-center items-center gap-4 px-7 mb-8 ">
+        <hr className="flex-1 max-w-20 border-gray-300" />
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-medium whitespace-nowrap">Unsere Favoriten</h2>
+        <hr className="flex-1 max-w-20 border-gray-300" />
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {products.map((product) => (

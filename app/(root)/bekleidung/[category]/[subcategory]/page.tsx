@@ -79,7 +79,7 @@ export default function SubcategoryPage({ params }: PageProps) {
     
 
       {/* Titel */}
-      <h1 className="text-4xl  flex justify-center mb-4">
+      <h1 className="text-4xl flex justify-center mb-4">
         {data.title}
       </h1>
 

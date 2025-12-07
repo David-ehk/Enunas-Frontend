@@ -44,7 +44,7 @@ export default function CategoryPage({ params }: PageProps) {
     <div className="max-w-7xl mx-auto px-4 py-8 bg-white sm:pt-30 pt-20 ">
       {/* Titel */}
       
-      <h1 className="text-4xl  flex justify-center mb-4">
+      <h1 className="text-4xl flex justify-center mb-4">
         {data.title}
       </h1>
       

@@ -12,7 +12,7 @@ function CatalogueDescription() {
                  Bild 
             </div>
             </div>
-            <div className="bg-[#0011A5] p-6 sm:w-7/12  text-white">
+            <div className="bg-[#0011A5] p-6 sm:w-7/12 text-white">
                 <h4 className="flex justify-center text-lg">
                     Beschreibung:
                 </h4>

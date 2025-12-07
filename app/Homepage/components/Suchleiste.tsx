@@ -105,7 +105,7 @@ export function SearchBar({ isOpen, onClose }: SearchBarProps) {
 
         {/* Highlights Section */}
         <div className="px-6 py-8">
-          <h3 className="text-xs tracking-[0.15em] uppercase  mb-6 text-black/80">
+          <h3 className="text-xs tracking-[0.15em] uppercase mb-6 text-black/80">
             HIGHLIGHTS
           </h3>
           

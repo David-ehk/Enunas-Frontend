@@ -18,29 +18,28 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     }
   }, [isOpen])
 
-  //vlt relevant muss ich noch verstehen richtig
-interface MenuItem {
-  title: string
-  href?: string
-  hasSubmenu: boolean
-  color?: string  // <- Optional, weil nicht alle Items Farbe haben
-  submenu?: {
-    showAll: { title: string; href: string }
-    categories: Array<{
-      title: string
-      items: Array<{ title: string; href: string }>
-    }>
+  // vlt relevant muss ich noch verstehen richtig
+  interface MenuItem {
+    title: string
+    href?: string
+    hasSubmenu: boolean
+    color?: string  // <- Optional, weil nicht alle Items Farbe haben
+    submenu?: {
+      showAll: { title: string; href: string }
+      categories: Array<{
+        title: string
+        items: Array<{ title: string; href: string }>
+      }>
+    }
   }
-}
 
   const menuItems: MenuItem[] = [
-    { title: 'Neu', href: '/neu', hasSubmenu: false},
-    { title: 'Trendy', href: '/trendy', hasSubmenu: false},
-    { title: 'Catalogue', href: '/catalogue', hasSubmenu: false ,color: "#DAD4CB"},
+    { title: 'Neu', href: '/neu', hasSubmenu: false },
+    { title: 'Trendy', href: '/trendy', hasSubmenu: false },
+    { title: 'Catalogue', href: '/catalogue', hasSubmenu: false, color: "#DAD4CB" },
     {
       title: 'Bekleidung',
       hasSubmenu: true,
-      
       submenu: {
         showAll: { title: 'Siehe Alle Bekleidung', href: '/bekleidung' },
         categories: [
@@ -69,7 +68,6 @@ interface MenuItem {
     {
       title: 'Women',
       hasSubmenu: true,
-      
       submenu: {
         showAll: { title: 'Siehe Alle Women', href: '/women' },
         categories: [
@@ -122,10 +120,9 @@ interface MenuItem {
         ]
       }
     },
-    { title: 'Marken', href: '/marken', hasSubmenu: false},
-    
-    { title: 'Drops', href: '/drop', hasSubmenu: false,color: "#000000"},
-    { title: 'Sale', href: '/sale', hasSubmenu: false,color: "#DE0000"}
+    { title: 'Marken', href: '/marken', hasSubmenu: false },
+    { title: 'Drops', href: '/drop', hasSubmenu: false, color: "#000000" },
+    { title: 'Sale', href: '/sale', hasSubmenu: false, color: "#DE0000" }
   ]
 
   const handleCategoryClick = (item: any) => {
@@ -148,34 +145,39 @@ interface MenuItem {
   return (
     <>
       {/* Overlay */}
-      <div 
+      <div
         className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-all duration-500
                     ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       />
 
       {/* Main Sidebar */}
-      <aside 
-        className={`fixed top-0 left-0 h-full w-full  sm:w-96 bg-[#370E4D] text-white z-50
+      <aside
+        className={`fixed top-0 left-0 h-full w-full sm:w-96 bg-[#370E4D] text-white z-50
                     transform transition-all duration-500 ease-out
                     ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Header */}
-        <div className="flex items-center px-8 py-4 border-b border-white/10 ">
-          <button 
+        <div className="flex items-center px-8 py-4 border-b border-white/10">
+          <button
             onClick={onClose}
-            className="w-10 h-10 flex items-center justify-center hover:bg-white/5  rounded-full transition-all duration-300 group"
+            className="w-10 h-10 flex items-center justify-center hover:bg-white/5 rounded-full transition-all duration-300 group"
           >
-            <svg className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" 
-                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
-                    d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
-           
           </button>
-           <p className=" text-xl tracking-wider">Schließen</p>
-          
-          
+          <p className="text-xl tracking-wider">Schließen</p>
         </div>
 
         {/* Navigation */}
@@ -189,24 +191,33 @@ interface MenuItem {
                 >
                   <div className="flex items-center justify-between py-4 border-b border-white/5
                                hover:border-white/20 transition-all duration-300">
-                    <span className="font-spartan text-sm tracking-[0.2em] uppercase 
+                    <span className="font-spartan text-sm tracking-[0.2em] uppercase
                                    group-hover:tracking-[0.3em] transition-all duration-300">
                       {item.title}
                     </span>
                     {item.hasSubmenu && (
-                      <svg className="w-5 h-5 opacity-50 group-hover:opacity-100 group-hover:translate-x-1
-                                    transition-all duration-300" 
-                           fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
-                              d="M9 5l7 7-7 7" />
+                      <svg
+                        className="w-5 h-5 opacity-50 group-hover:opacity-100 group-hover:translate-x-1
+                                    transition-all duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M9 5l7 7-7 7"
+                        />
                       </svg>
                     )}
-                   </div>
-                    {item.color && (
-                 
-                     <div className="text-color absolute left-0 bottom-0 w-full h-[1px] transition-all duration-30 group-hover:opacity-100 opacity-60" style={{ backgroundColor: item.color }} /> 
-                    )}
-                  
+                  </div>
+                  {item.color && (
+                    <div
+                      className="text-color absolute left-0 bottom-0 w-full h-[1px] transition-all duration-300 group-hover:opacity-100 opacity-60"
+                      style={{ backgroundColor: item.color }}
+                    />
+                  )}
                 </button>
               </li>
             ))}
@@ -214,7 +225,7 @@ interface MenuItem {
         </nav>
 
         {/* Footer */}
-        <div className="absolute bottom-0 w-full px-8 py-6 border-t border-white/10 ">
+        <div className="absolute bottom-0 w-full px-8 py-6 border-t border-white/10">
           <button className="w-full py-3 px-4 border border-white/20 rounded text-xs
                            tracking-widest uppercase hover:bg-white/5 transition-all duration-300
                            flex items-center justify-between">
@@ -225,28 +236,33 @@ interface MenuItem {
 
       {/* Submenu Sidebar mit Accordion */}
       {activeSubmenu && (
-        <aside 
+        <aside
           className={`fixed top-0 h-full left-0 w-full sm:left-96 sm:w-96 bg-[#F5F5F0] text-black z-50
                       transition-all duration-500 ease-out
-                     ${isOpen ? 'translate-x-0 ' : 'translate-x-full '}`}
+                     ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
         >
           {/* Submenu Header */}
-           <div className="sm:hidden flex items-center px-8 py-4 border-b border-white/10 bg-[#370E4D]">
-          <button 
-            onClick={onClose}
-            className="w-10 h-10 flex items-center justify-center hover:bg-white/5  rounded-full transition-all duration-300 group"
-          >
-            <svg className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" 
-                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
-                    d="M6 18L18 6M6 6l12 12" />
-            </svg>
-           
-          </button>
-           <p className=" text-xl tracking-wider">Schließen</p>
-          
-          
-        </div>
+          <div className="sm:hidden flex items-center px-8 py-4 border-b border-white/10 bg-[#370E4D]">
+            <button
+              onClick={onClose}
+              className="w-10 h-10 flex items-center justify-center hover:bg-white/5 rounded-full transition-all duration-300 group"
+            >
+              <svg
+                className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <p className="text-xl tracking-wider">Schließen</p>
+          </div>
 
           <div className="flex items-center justify-center px-6 py-8 border-b border-white/10 text-[#370E4D]">
             <button 
@@ -265,9 +281,10 @@ interface MenuItem {
           {/* Submenu Content */}
           <nav className="h-[calc(100%-100px)] overflow-y-auto px-6 py-6">
             {/* "Siehe Alle" Link */}
-            <a href={menuItems.find((item: any) => item.title === activeSubmenu)?.submenu?.showAll.href}
+            <a
+              href={menuItems.find((item: any) => item.title === activeSubmenu)?.submenu?.showAll.href}
               onClick={handleLinkClick}
-              className="block py-4 px-5 mb-4 bg-white/5 hover:bg-white/10 rounded  transition-all duration-300 border-l-2 border-white/50 hover:text-[#370E4D]"
+              className="block py-4 px-5 mb-4 bg-white/5 hover:bg-white/10 rounded transition-all duration-300 border-l-2 border-white/50 hover:text-[#370E4D]"
             >
               <span className="font-spartan text-sm tracking-wide uppercase">
                 {menuItems.find((item: any) => item.title === activeSubmenu)?.submenu?.showAll.title}
@@ -287,7 +304,7 @@ interface MenuItem {
                     >
                       <div className="flex items-center justify-between py-3 px-4
                                    hover:bg-white/5 rounded transition-all duration-300">
-                        <span className=" text-sm tracking-wide uppercase">
+                        <span className="text-sm tracking-wide uppercase">
                           {category.title}
                         </span>
                         <svg
@@ -297,8 +314,12 @@ interface MenuItem {
                           stroke="currentColor"
                           viewBox="0 0 24 24"
                         >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
-                                d="M19 9l-7 7-7-7" />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M19 9l-7 7-7-7"
+                          />
                         </svg>
                       </div>
                     </button>

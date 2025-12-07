@@ -41,7 +41,7 @@ const PopularProductCard = ({imgURL,Brandname, name,colour, colourname, price, h
           </div>
 
           {/* Produktname in eleganter Serif Italic */}
-          <h3 className="text-base font-serif  leading-relaxed ">
+          <h3 className="text-base font-serif leading-relaxed">
             {name}
           </h3>
 

@@ -46,14 +46,14 @@ export default function KategorieAuswahl() {
   const currentImage = kategorie.find(a => a.id === activeKategorie)?.image
 
   return (
-    <section className="w-full  px-8 sm:px-16 sm:py-8 ">
+    <section className="w-full px-8 sm:px-16 sm:py-8">
       <div className=" max-w-7xl mx-auto max-sm:hidden">
         <div className="grid grid-cols-2 gap-12 items-center">
           
           {/* Linke Seite - Liste */}
           <div className="space-y-6">
             {/*"<- zu allen Kategorien" hinzufügen noch  */}
-            <p className="text-sm  tracking-widest text-gray-600">
+            <p className="text-sm tracking-widest text-gray-600">
               Catalogue
             </p>
             

@@ -1,43 +1,40 @@
-import { Hero, CatalogueAuswahl , Subscribe, PopularProduct } from "../Homepage/components"
-import Geschlecht from "../Homepage/components/Geschlecht"
-import BannerBild from "../Homepage/components/BannerBild"
-import NewProducts from "../Homepage/components/NewProducts"
-import LogoSlider from "../Homepage/components/LogoSlider"
-import CategorySection from "../Homepage/components/CategorySection"
+import { Hero, CatalogueAuswahl, Subscribe, PopularProduct } from "../Homepage/components";
+import Geschlecht from "../Homepage/components/Geschlecht";
+import BannerBild from "../Homepage/components/BannerBild";
+import NewProducts from "../Homepage/components/NewProducts";
+import LogoSlider from "../Homepage/components/LogoSlider";
+import CategorySection from "../Homepage/components/CategorySection";
 
 export default function Home() {
   return (
-
-   <main>
-      <section >
+    <main>
+      <section>
         <Hero />
       </section>
       <section className="py-5">
-        <CatalogueAuswahl  />
+        <CatalogueAuswahl />
       </section>
-      <section >
-        <Geschlecht/>
+      <section>
+        <Geschlecht />
       </section>
       <section className="sm:px-3 px-5 sm:py-6 py-3">
         <PopularProduct />
       </section>
-      <section >
+      <section>
         <BannerBild />
       </section>
-      <section className="sm:px-3 px-8 sm:py-6 py-3" >
+      <section className="sm:px-3 px-8 sm:py-6 py-3">
         <NewProducts />
       </section>
-       <section >
+      <section>
         <CategorySection />
       </section>
-      <section >
+      <section>
         <LogoSlider />
       </section>
       <section className="sm:px-16 px-8 sm:py-6 py-3 w-full">
         <Subscribe />
       </section>
     </main>
-
-
-  )
+  );
 }
