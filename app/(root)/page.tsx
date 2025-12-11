@@ -4,6 +4,42 @@ import BannerBild from "../Homepage/components/BannerBild";
 import NewProducts from "../Homepage/components/NewProducts";
 import LogoSlider from "../Homepage/components/LogoSlider";
 import CategorySection from "../Homepage/components/CategorySection";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Enunas - Premium Fashion & Streetwear Online kaufen",
+  description: "Entdecke exklusive Mode von Top-Marken. Sneaker, Streetwear und Designer-Pieces für deinen individuellen Style.",
+  // Keywords (weniger wichtig für SEO, aber kann helfen)
+  keywords: ['fashion', 'streetwear', 'sneaker', 'designer mode', 'online shop'],
+  
+  // Open Graph (für Social Media Shares)
+  openGraph: {
+    title: "Enunas - Premium Fashion & Streetwear",
+    description: "Entdecke exklusive Mode von Top-Marken",
+    url: 'https://enunas.com',
+    siteName: 'Enunas',
+    images: [
+      {
+        url: 'https://enunas.com/og-image.jpg',  // Dein Vorschaubild
+        width: 1200,
+        height: 630,
+      }
+    ],
+    locale: 'de_DE',
+    type: 'website',
+  },
+  
+  // Weitere wichtige Meta-Tags
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+
+}
 
 export default function Home() {
   return (
@@ -38,3 +74,6 @@ export default function Home() {
     </main>
   );
 }
+
+
+

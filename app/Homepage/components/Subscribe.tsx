@@ -20,7 +20,7 @@ const Subscribe = () => {
       className="w-full px-4 py-3 border border-gray-300 mb-3 focus:outline-none focus:border-black"
     />
 
-    <button className="relative w-full py-4 px-6  tracking-widest text-white bg-[#370E4D] overflow-hidden group transition-colors duration-600">
+ <button className="relative w-full py-4 px-6  tracking-widest text-white bg-[#370E4D] overflow-hidden group transition-colors duration-600">
   
   {/* Obere Linie - zentriert verkürzen */}
   <span className="absolute left-1/2 -translate-x-1/2 top-[10%] w-full h-[1px] bg-white transition-all duration-500 ease-out group-hover:w-[75%]"></span>
@@ -49,18 +49,18 @@ const Subscribe = () => {
         </div>
     </div>
 
-      {/* Seo Text */}
+      {/* Seo Text C4A47C/f9dc84  */}
       <div className="py-6 sm:py-8 px-6 sm:px-12 text-lg md:text-xl">
 
-        <p className="text-center">
+        <h4 className="text-center">
           <span className="text-[#370E4D] font-bold">Enunas </span> ist die  Anlaufstelle für neue, innovative Designer im Bereich Luxus- und
   Streetwear. Wir verbinden aufstrebende Kreative mit einer Community, die mehr
   sucht als nur Kleidung – Menschen, die Ausdruck, Identität und Kultur in ihren
   Outfits tragen wollen. Als kuratierter <strong>Marktplatz</strong> und kreatives Movement bietet 
   <span className="text-[#370E4D] font-bold"> Enunas </span> exklusive Pieces, künstlerisches Storytelling und eine Plattform für 
   Designer, die die Zukunft von Mode prägen.  <span className="text-[#370E4D] font-bold">Enunas </span> ist nicht nur ein Shop, 
-  sondern ein Ort für Stil, <span className="text-[#C8D4F6]"> Seele </span> und <span className="text-[#f9dc84]">Vision </span>.
-        </p>
+  sondern ein Ort für Stil, <span className="text-[#A4B7ED]"> Seele </span> und <span className="text-[#C4A47C]">Vision </span>.
+        </h4>
       </div>
     </section>
   )
