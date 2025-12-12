@@ -1,23 +1,15 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Sidebar from '../../../Homepage/components/Sidebar'
 import { SearchBar } from '../../../Homepage/components/Suchleiste'
 import Link from 'next/link'
 
 const DropNavbar = () => {
-  const [scrolled, setScrolled] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchOpen, setSearch] = useState(false)
 
-  // Scrolleffekt transparenz
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+
 
   {/* Icons */}
   const HamburgerIconSvg = (props: React.SVGProps<SVGSVGElement>) => (
@@ -58,9 +50,7 @@ const DropNavbar = () => {
 
 
   return (
-    <header className={`sm:px-10 px-4 py-2 fixed z-50 w-full transition-all duration-300 ${
-      scrolled ? 'bg-black shadow-sm' : 'bg-transparent border-b-white/20 border-b-1'
-    }`}>
+    <header className="sm:px-10 px-4 py-2 fixed z-50 w-full bg-black text-white border-b-white/20 border-b-1">
       <nav className="flex justify-between items-center max-w-screen xl:mx-auto z-50">
         {/* Hamburger / Suche - Linke Hälfte */}
         <div className="w-1/4 flex gap-3 md:gap-8">
