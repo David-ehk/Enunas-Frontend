@@ -1,5 +1,8 @@
 import Navbar from "../Homepage/components/navbar";
 import Footer from "../Homepage/components/footer";
+import { Metadata } from "next";
+
+
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
@@ -12,3 +15,5 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </main>
   );
 }
+
+
