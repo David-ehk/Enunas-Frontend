@@ -1,11 +1,100 @@
-import React from 'react'
+import React, { useState } from 'react';
+import { Color } from '@/lib/color'; // Import nur vom Type
 
-//Add a change to the SKU number if change product color changes
-
-function ColorSelector() {
-  return (
-    <div>ColorSelector</div>
-  )
+interface ColorSelectorProps {
+  colors: Color[];
+  maxVisible?: number;
+  onColorSelect?: (color: Color) => void;
 }
 
-export default ColorSelector
+const ColorSelector: React.FC<ColorSelectorProps> = ({ 
+  colors, 
+  maxVisible = 3,
+  onColorSelect 
+}) => {
+  // State for the selected color
+  const [selectedColor, setSelectedColor] = useState<Color | null>(colors[0] || null);
+  // State for showing all colors
+  const [showAll, setShowAll] = useState(false);
+
+  // Early return if no colors
+  if (!colors || colors.length === 0) {
+    return null;
+  }
+
+  // Colors to display based on showAll state
+  const visibleColors = showAll ? colors : colors.slice(0, maxVisible);
+  // Remaining count of colors to show
+  const remainingCount = colors.length - maxVisible;
+
+  // Function to handle color hover
+  const handleColorHover = (color: Color) => {
+    setSelectedColor(color);
+    onColorSelect?.(color);
+  };
+
+  return (
+    <div className="w-full max-w-md">
+      <div className="mb-4">
+        <span className="text-sm tracking-wider uppercase">
+          {selectedColor?.name || 'Farbe wählen'}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-2">
+        {visibleColors.map((color) => (
+          <button
+            key={color.id}
+            onMouseEnter={() => handleColorHover(color)}
+            className={`
+              relative w-5 h-5 rounded-sm border transition-all
+              ${selectedColor?.id === color.id 
+                ? 'border-black ' 
+                : 'border-gray-200 hover:border-gray-400'
+              }
+            `}
+          >
+            <div 
+              className="w-full h-full rounded-full"
+              style={{ backgroundColor: color.hex }}
+            />
+          </button>
+        ))}
+
+        {!showAll && remainingCount > 0 && (
+          <button
+            onClick={() => setShowAll(true)}
+            className="text-sm hover:underline"
+          >
+            + {remainingCount}
+          </button>
+        )}
+      </div>
+
+      {showAll && (
+        <div className="mt-4 grid grid-cols-4 gap-3">
+          {colors.map((color) => (
+            <button
+              key={color.id}
+              onClick={() => handleColorHover(color)}
+              className={`
+                aspect-square rounded-sm border-2
+                ${selectedColor?.id === color.id 
+                  ? 'border-black' 
+                  : 'border-gray-200'
+                }
+              `}
+            >
+              <div 
+                className="w-full h-full rounded-sm"
+                style={{ backgroundColor: color.hex }}
+              />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ColorSelector;
