@@ -1,7 +1,7 @@
 import React from 'react'
 import ProductDetails from './components/ProductDetails'
 import RelatedProducts from './components/RelatedProducts'
-import { getProductBySlug, slugifyProductName } from '@/lib/mockProducts'
+import { getProductBySlug, getAllProducts, slugifyProductName } from '@/lib/mockProducts'
 import { notFound } from 'next/navigation'
 
 interface ProductPageProps {
@@ -21,8 +21,11 @@ async function ProductPage({ params }: ProductPageProps) {
   // Falls nicht gefunden, versuche Slug aus dem Namen zu generieren und zu matchen
   if (!product) {
     // Fallback: Suche nach Produkt, dessen generierter Slug übereinstimmt
-    const allProducts = (await import('@/lib/mockProducts')).getAllProducts()
-    product = allProducts.find(p => slugifyProductName(p.name) === slug)
+    const allProducts = getAllProducts()
+    product = allProducts.find(p => {
+      const generatedSlug = slugifyProductName(p.name)
+      return generatedSlug === slug || p.slug === slug
+    })
   }
 
   // Wenn immer noch kein Produkt gefunden, 404 anzeigen

@@ -8,32 +8,18 @@ import AddToCart from './AddToCart'
 import { Product } from '@/lib/product'
 import { ProductColor } from '@/lib/product'
 import { Color } from '@/lib/color'
+import Link from 'next/link'
+import {Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 
 interface ProductDetailsProps {
   product: Product;
 }
 
 function ProductDetails({ product }: ProductDetailsProps) {
-  const [selectedColor, setSelectedColor] = useState<ProductColor | null>(
-    product.colors[0] || null
-  )
-  const [selectedSize, setSelectedSize] = useState<string | null>(null)
-
   const formattedPrice = new Intl.NumberFormat('de-DE', {
     style: 'currency',
     currency: product.currency,
   }).format(product.price)
-
-  const handleColorSelect = (color: Color) => {
-    // Convert Color to ProductColor
-    const productColor: ProductColor = {
-      id: color.id,
-      name: color.name,
-      hex: color.hex,
-      slug: color.id, // Use id as slug if not available
-    }
-    setSelectedColor(productColor)
-  }
 
   // Convert ProductColor[] to Color[] for ColorSelector
   const colorsForSelector: Color[] = product.colors.map((pc) => ({
@@ -42,13 +28,9 @@ function ProductDetails({ product }: ProductDetailsProps) {
     hex: pc.hex,
   }))
 
-  const handleSizeSelect = (size: string) => {
-    setSelectedSize(size)
-  }
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="px-4 pt-20">
+      <div className="grid grid-cols-1 lg:grid-cols-2 ">
         {/* Bilder-Galerie */}
         <div>
           <ImageGallery images={product.images} productName={product.name} />
@@ -65,37 +47,54 @@ function ProductDetails({ product }: ProductDetailsProps) {
           
           {/* Marke & Name */}
           <div>
-            <h1 className="text-3xl font-bold">{product.name}</h1>
-            <p className="text-gray-600">{product.brand}</p>
+            <Link href="/">
+             <p className="text-gray-600 flex justify-center hover:text-[#000000]">{product.brand}</p>
+            </Link>
+            <h1 className="text-3xl flex justify-center">{product.name}</h1>
           </div>
           
           {/* Preis */}
-          <div className="text-2xl font-bold">
+          <div className="text-2xl gap-2 flex justify-center">
             {formattedPrice}
-            <span className="text-sm text-gray-500 block">
+            <span className="text-sm text-gray-500 flex items-center">
               inkl. MwSt. zzgl. Versand
             </span>
           </div>
           
           {/* Farbauswahl */}
+          <div className="flex justify-center">
           {product.colors.length > 0 && (
             <ColorSelector
               colors={colorsForSelector}
-              onColorSelect={handleColorSelect}
+              
             />
           )}
-          
+          </div>
+
           {/* Größenauswahl */}
+          <div className="flex justify-center">
           {product.sizes.length > 0 && (
             <SizeSelector
               sizes={product.sizes}
-              selected={selectedSize}
-              onSizeSelect={handleSizeSelect}
-            />
+            >
+              {(selectedSize) => (
+                <>
+                  {/* Warenkorb-Button */}
+                  <div className="flex justify-center mt-4">
+                    <AddToCart selectedSize={selectedSize} />
+                  </div>
+                </>
+              )}
+            </SizeSelector>
           )}
+          </div>
           
-          {/* Warenkorb-Button */}
-          <AddToCart selectedSize={selectedSize} />
+          {/* Fallback Warenkorb-Button wenn keine Größen vorhanden */}
+          {product.sizes.length === 0 && (
+            <div className="flex justify-center">
+              <AddToCart selectedSize={null} />
+            </div>
+          )}
           
           {/* Produktdetails */}
           <div className="border-t pt-6 space-y-4">
@@ -103,22 +102,24 @@ function ProductDetails({ product }: ProductDetailsProps) {
               <h3 className="font-semibold">Produktnummer:</h3>
               <p>{product.sku}</p>
             </div>
-            
-            <div>
-              <h3 className="font-semibold">Beschreibung:</h3>
-              <p className="text-gray-700">{product.description}</p>
-            </div>
-          </div>
-          
-          {/* Versand & Rückgabe */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-semibold mb-2">Versand & Rückgabe</h3>
-            <ul className="text-sm space-y-1">
-              <li>✓ Kostenloser Versand ab 50€</li>
-              <li>✓ 30 Tage Rückgaberecht</li>
-              <li>✓ Sichere Zahlung</li>
-            </ul>
-          </div>
+         </div>
+         <div>
+           <Accordion type="single" collapsible>
+             <AccordionItem value="details">
+                <AccordionTrigger>Produktdetails</AccordionTrigger>
+                  <AccordionContent>
+                     Produktnummer, Material, Pflegehinweise etc.
+                   </AccordionContent>
+              </AccordionItem>
+
+                <AccordionItem value="shipping">
+                  <AccordionTrigger>Versand & Rückgabe</AccordionTrigger>
+                     <AccordionContent>
+                        Versand in 2–4 Werktagen. Rückgabe innerhalb 14 Tagen.
+                     </AccordionContent>
+                </AccordionItem>
+           </Accordion>
+         </div>
         </div>
       </div>
     </div>

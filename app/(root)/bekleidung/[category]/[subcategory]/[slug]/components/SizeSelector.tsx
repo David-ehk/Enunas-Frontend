@@ -4,36 +4,31 @@ import React, { useState } from 'react'
 
 interface SizeSelectorProps {
   sizes: string[];
-  selected?: string | null;
-  onSizeSelect?: (size: string) => void;
+  onSizeSelect?: (size: string | null) => void;
 }
 
-function SizeSelector({ sizes, selected, onSizeSelect }: SizeSelectorProps) {
-  const [selectedSize, setSelectedSize] = useState<string | null>(selected || null)
+function SizeSelector({ sizes, onSizeSelect }: SizeSelectorProps) {
+  const [selectedSize, setSelectedSize] = useState<string | null>(null)
 
   const handleSizeClick = (size: string) => {
-    setSelectedSize(size)
-    onSizeSelect?.(size)
+    const newSize = selectedSize === size ? null : size
+    setSelectedSize(newSize)
+    onSizeSelect?.(newSize)
   }
 
   return (
     <div className="w-full">
-      <div className="mb-4">
-        <span className="text-sm tracking-wider uppercase">
-          Größe {selectedSize && `: ${selectedSize}`}
-        </span>
-      </div>
-
+      <h3 className="text-sm font-medium mb-3">Größe auswählen</h3>
       <div className="flex flex-wrap gap-2">
         {sizes.map((size) => (
           <button
             key={size}
             onClick={() => handleSizeClick(size)}
             className={`
-              px-4 py-2 border-2 transition-all
+              min-w-[60px] px-4 py-2 border transition-all
               ${selectedSize === size
                 ? 'border-black bg-black text-white'
-                : 'border-gray-200 hover:border-gray-400 bg-white text-black'
+                : 'border-gray-300 hover:border-black text-black'
               }
             `}
           >
@@ -41,6 +36,12 @@ function SizeSelector({ sizes, selected, onSizeSelect }: SizeSelectorProps) {
           </button>
         ))}
       </div>
+      
+      {selectedSize && (
+        <p className="text-sm text-gray-600 mt-2">
+          Ausgewählt: <span className="font-semibold">{selectedSize}</span>
+        </p>
+      )}
     </div>
   )
 }

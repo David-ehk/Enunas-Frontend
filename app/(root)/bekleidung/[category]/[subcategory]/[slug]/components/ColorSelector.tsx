@@ -12,8 +12,10 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({
   maxVisible = 3,
   onColorSelect 
 }) => {
-  // State for the selected color
-  const [selectedColor, setSelectedColor] = useState<Color | null>(colors[0] || null);
+  // State of the color
+  const [selectedColor] = useState<Color | null>(colors[0] || null);
+
+  const [hoveredColor, setHoveredColor] = useState<Color | null>(null)
   // State for showing all colors
   const [showAll, setShowAll] = useState(false);
 
@@ -29,15 +31,15 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({
 
   // Function to handle color hover
   const handleColorHover = (color: Color) => {
-    setSelectedColor(color);
+    setHoveredColor(color);
     onColorSelect?.(color);
   };
 
   return (
-    <div className="w-full max-w-md">
+    <div >
       <div className="mb-4">
         <span className="text-sm tracking-wider uppercase">
-          {selectedColor?.name || 'Farbe wählen'}
+           {hoveredColor? hoveredColor.name: selectedColor ? selectedColor.name: 'Farbe wählen'}
         </span>
       </div>
 
