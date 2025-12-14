@@ -36,7 +36,16 @@ async function ProductPage({ params }: ProductPageProps) {
   return (
     <div className="min-h-screen">
       <ProductDetails product={product} />
-      <div className="container mx-auto px-4 py-8">
+      <div className="px-8 py-8">
+         {/* Breadcrumb */}
+         <nav className="text-sm text-gray-500">
+            <a href="/" className="hover:text-black">Home</a>
+            {' / '}
+            <a href="/bekleidung" className="hover:text-black">Bekleidung</a>
+            {' / '}
+            <span className="font-light text-gray-500 hover:text-black">{product.name}</span>
+          </nav>
+          <br/>
         <RelatedProducts />
       </div>
     </div>

@@ -49,7 +49,7 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({
             key={color.id}
             onMouseEnter={() => handleColorHover(color)}
             className={`
-              relative w-5 h-5 rounded-sm border transition-all
+              relative w-5 h-5 border transition-all
               ${selectedColor?.id === color.id 
                 ? 'border-black ' 
                 : 'border-gray-200 hover:border-gray-400'
@@ -57,7 +57,7 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({
             `}
           >
             <div 
-              className="w-full h-full rounded-full"
+              className="w-full h-full "
               style={{ backgroundColor: color.hex }}
             />
           </button>

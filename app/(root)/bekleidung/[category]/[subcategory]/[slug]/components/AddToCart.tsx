@@ -4,17 +4,15 @@ import React from 'react'
 
 interface AddToCartProps {
   selectedSize?: string | null;
-  disabled?: boolean;
 }
 
-function AddToCart({ selectedSize = null, disabled }: AddToCartProps) {
+function AddToCart({ selectedSize = null }: AddToCartProps) {
   const hasSizeSelected = selectedSize !== null
-  const isDisabled = disabled !== undefined ? disabled : !hasSizeSelected
 
   return (
     <button 
       className="relative w-full py-4 px-6 tracking-widest text-white bg-[#370E4D] overflow-hidden group transition-colors duration-600 disabled:opacity-50 disabled:cursor-not-allowed"
-      disabled={isDisabled}
+      
     >
       {/* Obere Linie - zentriert verkürzen */}
       <span className="absolute left-1/2 -translate-x-1/2 top-[10%] w-full h-[1px] bg-white transition-all duration-500 ease-out group-hover:w-[75%]"></span>

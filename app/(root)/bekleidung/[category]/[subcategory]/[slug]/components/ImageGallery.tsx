@@ -50,13 +50,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
       {/* Thumbnail Navigation - Links */}
       <div className="flex flex-col items-center gap-2">
         {/* Scroll Up Button */}
-        <button
-          onClick={() => scrollThumbnails('up')}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          aria-label="Nach oben scrollen"
-        >
-          <ChevronUp className="w-5 h-5" />
-        </button>
+       
 
         {/* Thumbnail Container */}
         <div 
@@ -68,7 +62,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
               key={index}
               onClick={() => handleThumbnailClick(index)}
               className={`
-                relative w-20 h-28 flex-shrink-0 rounded overflow-hidden
+                relative w-20 h-28 flex-shrink-0  overflow-hidden
                 border-2 transition-all
                 ${currentIndex === index 
                   ? 'border-black' 
@@ -88,21 +82,13 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           ))}
         </div>
 
-        {/* Scroll Down Button */}
-        <button
-          onClick={() => scrollThumbnails('down')}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          aria-label="Nach unten scrollen"
-        >
-          <ChevronDown className="w-5 h-5" />
-        </button>
       </div>
 
       {/* Hauptbild - Rechts */}
       <div className="flex-1 relative">
         <div 
           className={`
-            relative bg-gray-50 rounded-lg overflow-hidden
+            relative bg-gray-50  overflow-hidden
             ${isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'}
           `}
           onClick={() => setIsZoomed(!isZoomed)}

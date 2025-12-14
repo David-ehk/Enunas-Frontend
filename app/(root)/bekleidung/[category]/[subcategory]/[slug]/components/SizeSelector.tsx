@@ -17,8 +17,7 @@ function SizeSelector({ sizes, onSizeSelect }: SizeSelectorProps) {
   }
 
   return (
-    <div className="w-full">
-      <h3 className="text-sm font-medium mb-3">Größe auswählen</h3>
+    <div className="justify-center">
       <div className="flex flex-wrap gap-2">
         {sizes.map((size) => (
           <button
@@ -27,21 +26,15 @@ function SizeSelector({ sizes, onSizeSelect }: SizeSelectorProps) {
             className={`
               min-w-[60px] px-4 py-2 border transition-all
               ${selectedSize === size
-                ? 'border-black bg-black text-white'
-                : 'border-gray-300 hover:border-black text-black'
+                ? 'border-black'
+                : 'border-white hover:border-black/50 text-black'
               }
             `}
           >
-            {size}
+            <h3>{size}</h3>
           </button>
         ))}
       </div>
-      
-      {selectedSize && (
-        <p className="text-sm text-gray-600 mt-2">
-          Ausgewählt: <span className="font-semibold">{selectedSize}</span>
-        </p>
-      )}
     </div>
   )
 }

@@ -17,6 +17,7 @@ export const mockProducts: Product[] = [
       { id: 'white', name: 'White', hex: '#FFFFFF', slug: 'white' },
     ],
     sizes: ['38', '39', '40', '41', '42', '43', '44'],
+    catalogue: ["streerwear", "Experimental"],
     sku: 'NIKE-AIR-5-001',
     images: [
       'https://www.manieredevoir.com/cdn/shop/files/GEN-WD-23-10-2025.jpg?crop=center&height=2095&v=1761206881&width=1920',
@@ -44,6 +45,7 @@ export const mockProducts: Product[] = [
       { id: 'black', name: 'Black', hex: '#000000', slug: 'black' },
     ],
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    catalogue: ["streerwear", "Experimental"],
     sku: 'JORDAN-DENIM-001',
     images: [
       'https://www.viviennewestwood.com/dw/image/v2/BJGV_PRD/on/demandware.static/-/Sites-viviennewestwood-master-catalog/default/dw69896e20/images/2G01000A-J001M-_GREY-MELANGE_001_large.jpeg?q=80',
@@ -71,6 +73,7 @@ export const mockProducts: Product[] = [
       { id: 'grey', name: 'Grey', hex: '#808080', slug: 'grey' },
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    catalogue: ["streerwear", "Experimental"],
     sku: 'MAISON-SHELL-001',
     images: [
       'https://eu.manieredevoir.com/cdn/shop/files/MDV_0030_MDV2_be0fab84-a04c-4251-adc9-1fefaa4175c4.jpg?v=1759502594',
@@ -97,6 +100,7 @@ export const mockProducts: Product[] = [
       { id: 'brown', name: 'Brown', hex: '#8B4513', slug: 'brown' },
     ],
     sizes: ['M', 'L', 'XL'],
+    catalogue: ["streerwear", "Experimental"],
     sku: '6PM-RANDOM-001',
     images: [
       'https://www.viviennewestwood.com/dw/image/v2/BJGV_PRD/on/demandware.static/-/Library-Sites-viviennewestwood-global-content/default/dw8c63789d/images/collections/autumn-winter-25_26/AW2526%20Lookbook/2x3/VW_AW2526_Lookbook_Look_02.jpg?sw=632&sh=948&q=80',
@@ -124,6 +128,7 @@ export const mockProducts: Product[] = [
       { id: 'white', name: 'White', hex: '#FFFFFF', slug: 'white' },
     ],
     sizes: ['39', '40', '41', '42', '43'],
+    catalogue: ["streerwear", "Experimental"],
     sku: 'PUMA-AIR-LONG-001',
     images: [
       'https://www.manieredevoir.com/cdn/shop/files/GEN-WD-23-10-2025.jpg?crop=center&height=2095&v=1761206881&width=1920',
@@ -148,6 +153,7 @@ export const mockProducts: Product[] = [
       { id: 'blue', name: 'Blue', hex: '#0000FF', slug: 'blue' },
     ],
     sizes: ['S', 'M', 'L'],
+    catalogue: ["streerwear", "Experimental"],
     sku: 'ADIDAS-TEST-001',
     images: [
       'https://www.viviennewestwood.com/dw/image/v2/BJGV_PRD/on/demandware.static/-/Sites-viviennewestwood-master-catalog/default/dw69896e20/images/2G01000A-J001M-_GREY-MELANGE_001_large.jpeg?q=80',
@@ -170,6 +176,7 @@ export const mockProducts: Product[] = [
       { id: 'black', name: 'Black', hex: '#000000', slug: 'black' },
     ],
     sizes: ['M', 'L', 'XL'],
+    catalogue: ["streerwear", "Experimental"],
     sku: 'GUCCI-LONG-001',
     images: [
       'https://www.viviennewestwood.com/dw/image/v2/BJGV_PRD/on/demandware.static/-/Library-Sites-viviennewestwood-global-content/default/dw8c63789d/images/collections/autumn-winter-25_26/AW2526%20Lookbook/2x3/VW_AW2526_Lookbook_Look_02.jpg?sw=632&sh=948&q=80',
