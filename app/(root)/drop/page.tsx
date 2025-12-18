@@ -2,7 +2,7 @@ import React from 'react'
 import DropNavbar from './components/navbar'
 import Test from './components/Test'
 
-function page() {
+export default function page() {
   return (
     <main className="min-h-screen bg-black flex flex-col">
       
@@ -13,5 +13,3 @@ function page() {
     </main>
   )
 }
-
-export default page

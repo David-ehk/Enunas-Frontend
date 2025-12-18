@@ -15,7 +15,7 @@ interface ProductDetailsProps {
   product: Product;
 }
 
-function ProductDetails({ product }: ProductDetailsProps) {
+const ProductDetails = ({ product }: ProductDetailsProps) => {
   // State für ausgewählte Größe
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [selectedColor, setSelectedColor] = useState<Color | null>(null)
@@ -81,11 +81,7 @@ function ProductDetails({ product }: ProductDetailsProps) {
           )}
 
           {/* Catalogue */}
-          {product.catalogue.length > 0 && (
-            <div className="flex justify-center">
-              
-            </div>
-          )}
+       
           
           {/* Warenkorb-Button */}
           <div className="flex justify-center">

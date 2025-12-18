@@ -6,10 +6,9 @@ export const metadata: Metadata = {
   description: "Hier findest du die neusten Top-Marken. Luxury, Streetwear und Designer-Streetwear für 18-30 jährige Ideal",
 }
 
-function page() {
+export default function page() {
   return (
     <div>page</div>
   )
 }
 
-export default page

@@ -1,10 +1,12 @@
-import { Hero, CatalogueAuswahl, Subscribe, PopularProduct } from "../Homepage/components";
+import { Hero,  Subscribe, PopularProduct } from "../Homepage/components";
 import Geschlecht from "../Homepage/components/Geschlecht";
 import BannerBild from "../Homepage/components/BannerBild";
 import NewProducts from "../Homepage/components/NewProducts";
 import LogoSlider from "../Homepage/components/LogoSlider";
 import CategorySection from "../Homepage/components/CategorySection";
 import { Metadata } from "next";
+import CatalogueAuswahl from "../Homepage/components/CatalogueAuswahl";
+
 
 export const metadata: Metadata = {
   title: "Enunas - Premium Fashion & Streetwear Online kaufen",

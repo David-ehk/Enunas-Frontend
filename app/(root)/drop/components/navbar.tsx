@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Sidebar from '../../../Homepage/components/Sidebar'
-import { SearchBar } from '../../../Homepage/components/Suchleiste'
+import  SearchBar  from '../../../Homepage/components/Suchleiste'
 import Link from 'next/link'
 
 const DropNavbar = () => {

@@ -14,7 +14,7 @@ const geschlecht = [
   }
 ]
 
-export default function Geschlecht() {
+ const Geschlecht = () => {
   return (
     <div>
       <div className="grid grid-cols-2 gap-0">
@@ -49,3 +49,5 @@ export default function Geschlecht() {
     </div>
   )
 }
+
+export default Geschlecht

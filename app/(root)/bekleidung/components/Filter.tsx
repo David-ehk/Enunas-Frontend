@@ -1,6 +1,6 @@
 import React from 'react'
 
-function Filter() {
+const Filter = () => {
   return (
     <div className="bg-white flex justify-between items-center border-0 border-t-2 border-b-2 border-black my-2 pt-5 px-4">
         {/*Geschlecht auswählen*/}

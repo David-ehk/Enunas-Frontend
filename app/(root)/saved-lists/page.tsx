@@ -6,10 +6,10 @@ export const metadata: Metadata = {
   description: "Füge exklusive Mode von Top-Marken. Sneaker, Streetwear und Designer-Pieces für deinen individuellen Style in deinen Favoriten hinzu.",
 }
 
-function savedlists() {
+export default function savedlists() {
   return (
     <div>savedlists</div>
   )
 }
 
-export default savedlists
+ 

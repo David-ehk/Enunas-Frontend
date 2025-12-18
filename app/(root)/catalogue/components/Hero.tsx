@@ -1,7 +1,7 @@
 import React from 'react'
 
 
-function Catalogue() {
+const Catalogue = () => {
   return (
     <div className=''>
         <div className="pt-25 p-6 w-full"> 

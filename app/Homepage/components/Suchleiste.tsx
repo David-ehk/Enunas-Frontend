@@ -7,7 +7,7 @@ interface SearchBarProps {
   onClose: () => void
 }
 
-export function SearchBar({ isOpen, onClose }: SearchBarProps) {
+const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
   const [searchTerm, setSearchTerm] = useState('')
 
   // Highlights - könnten aus einer API/Datenbank kommen
@@ -149,3 +149,5 @@ export function SearchBar({ isOpen, onClose }: SearchBarProps) {
     </>
   )
 }
+
+export default SearchBar

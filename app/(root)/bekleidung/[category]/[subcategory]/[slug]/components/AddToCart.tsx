@@ -6,7 +6,7 @@ interface AddToCartProps {
   selectedSize?: string | null;
 }
 
-function AddToCart({ selectedSize = null }: AddToCartProps) {
+const AddToCart = ({ selectedSize = null }: AddToCartProps) => {
   const hasSizeSelected = selectedSize !== null
 
   return (

@@ -2,7 +2,7 @@ import  Hero  from '@/app/(root)/catalogue/components/Hero'
 import CatalogueDescription from '@/app/(root)/catalogue/components/CatalogueDescription'
 
 
-function cataloge() {
+export default function cataloge() {
   return (
     <main>
         <section>
@@ -15,5 +15,3 @@ function cataloge() {
     </main>
   )
 }
-
-export default cataloge

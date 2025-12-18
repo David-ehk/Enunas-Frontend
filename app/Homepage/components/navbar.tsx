@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Sidebar from './Sidebar'
-import { SearchBar } from './Suchleiste'
+import  SearchBar  from '../components/Suchleiste'
 import Link from 'next/link'
 
 const Navbar = () => {

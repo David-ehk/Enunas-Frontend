@@ -19,23 +19,17 @@ const categories = [
   }
 ]
 
-export default function CategorySection() {
+const CategorySection = () => {
   return (
 
-    <div >
-
+  <div >
         {/* GRID mit 2 oder 4 Spalten */}
-       <div className="grid grid-cols-2  gap-0">
-        
+     <div className="grid grid-cols-2  gap-0">
          {categories.map((cat, idx) => (
           
            /* RELATIVE Container - Gibt Scroll-Raum */
-           <div 
-              key={idx}
-              className="relative group"
-              style={{ height: '100vh' }}
-            >
-              <Link  href={cat.link}>
+          <div key={idx} className="relative group" style={{ height: '100vh' }}>
+            <Link  href={cat.link}>
 
               {/* STICKY Titel - Bleibt OBEN im Container */}
               <div className="sticky top-0 z-10 p-6 pt-5">
@@ -56,10 +50,11 @@ export default function CategorySection() {
               {/*Dark Overlay*/}
               <div className="absolute inset-0 group-hover:bg-black/25"></div>
            </Link>
+         </div>
+         ))}
       </div>
- ))}
-          </div>
-
     </div>
   )
 }
+
+export default CategorySection
