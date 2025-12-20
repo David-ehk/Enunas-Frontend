@@ -34,30 +34,30 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
   return (
     <div className="px-10 pt-20">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 inset-0">
         {/* Bilder-Galerie */}
         <div>
           <ImageGallery images={product.images} productName={product.name} />
         </div>
         
         {/* Produktinfo */}
-        <div className="space-y-6 pt-10">
+        <div className="space-y-6 pt-15 sm:px-10">
          
           
           {/* Marke & Name */}
           <div className="text-center">
             <Link href="/" className="text-[#370E4D] hover:text-black">
-              {product.brand}
+             <h2 className='text-4xl'> {product.brand}</h2>
             </Link>
-            <h1 className="text-3xl font-light mt-2">{product.name}</h1>
+            <h1 className="text-xl font-light mt-2">{product.name}</h1>
           </div>
           
           {/* Preis */}
           <div className="flex justify-center gap-2 ">
-            <div className="text-2xl font-light">{formattedPrice}</div>
-            <p className="flex text-sm text-gray-500 text-center">
+            <div className="text-base font-light">{formattedPrice}</div>
+            <h2 className="flex text-sm text-gray-500 text-center">
               inkl. MwSt. zzgl. Versand
-            </p>
+            </h2>
           </div>
           
           {/* Farbauswahl */}
