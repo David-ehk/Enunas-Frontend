@@ -33,7 +33,7 @@ function ProductDetails({ product }: ProductDetailsProps) {
   }))
 
   return (
-    <div className="px-10 pt-20">
+    <div className="px-10 pt-16">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Bilder-Galerie */}
         <div>
@@ -41,20 +41,20 @@ function ProductDetails({ product }: ProductDetailsProps) {
         </div>
         
         {/* Produktinfo */}
-        <div className="space-y-6 pt-10">
+        <div className="pt-10 px-3">
          
           
           {/* Marke & Name */}
           <div className="text-center">
             <Link href="/" className="text-[#370E4D] hover:text-black">
-              {product.brand}
+              <h2 className="text-3xl sm:text-4xl"> {product.brand} </h2>
             </Link>
-            <h1 className="text-3xl font-light mt-2">{product.name}</h1>
+            <h2 className="text-base sm:text-lg mt-6">{product.name}</h2>
           </div>
           
           {/* Preis */}
-          <div className="flex justify-center gap-2 ">
-            <div className="text-2xl font-light">{formattedPrice}</div>
+          <div className="flex justify-center gap-2 mt-4">
+            <div className="text-xl font-light">{formattedPrice}</div>
             <p className="flex text-sm text-gray-500 text-center">
               inkl. MwSt. zzgl. Versand
             </p>
@@ -70,16 +70,16 @@ function ProductDetails({ product }: ProductDetailsProps) {
             </div>
           )}
 
-          {/* Catalogue */}
+          {/* Catalogue 
           {product.catalogue.length > 0 && (
             <div className="flex justify-center">
               <CatalogueDescription/>
             </div>
-          )}
+          )} */}
 
           {/* Größenauswahl */}
           {product.sizes.length > 0 && (
-            <div className="flex justify-center">
+            <div className="flex justify-center mt-6">
               <SizeSelector
                 sizes={product.sizes}
                 onSizeSelect={(size) => setSelectedSize(size)}
@@ -88,7 +88,7 @@ function ProductDetails({ product }: ProductDetailsProps) {
           )}
           
           {/* Warenkorb-Button */}
-          <div className="flex justify-center">
+          <div className="flex justify-center mt-4">
             <AddToCart 
               selectedSize={selectedSize}
             />

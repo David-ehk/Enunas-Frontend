@@ -31,7 +31,7 @@ function SizeSelector({ sizes, onSizeSelect }: SizeSelectorProps) {
               }
             `}
           >
-            <h3>{size}</h3>
+            <h3 className="text-xl">{size}</h3>
           </button>
         ))}
       </div>
