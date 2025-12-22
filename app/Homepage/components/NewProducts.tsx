@@ -40,7 +40,7 @@ const products = [{
   }
 ];
 
- const NewProducts = () => {
+export default function NewProducts() {
   return (
     <section className="">
       <div className="flex justify-center gap-4 items-center px-7 mb-4 ">
@@ -65,5 +65,3 @@ const products = [{
     </section>
   );
 }
-
-export default NewProducts

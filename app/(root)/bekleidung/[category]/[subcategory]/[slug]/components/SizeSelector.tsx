@@ -7,7 +7,7 @@ interface SizeSelectorProps {
   onSizeSelect?: (size: string | null) => void;
 }
 
-const SizeSelector = ({ sizes, onSizeSelect }: SizeSelectorProps) => {
+function SizeSelector({ sizes, onSizeSelect }: SizeSelectorProps) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
 
   const handleSizeClick = (size: string) => {

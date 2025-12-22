@@ -6,7 +6,7 @@ interface AddToCartProps {
   selectedSize?: string | null;
 }
 
-const AddToCart = ({ selectedSize = null }: AddToCartProps) => {
+function AddToCart({ selectedSize = null }: AddToCartProps) {
   const hasSizeSelected = selectedSize !== null
 
   return (
@@ -18,7 +18,7 @@ const AddToCart = ({ selectedSize = null }: AddToCartProps) => {
       <span className="absolute left-1/2 -translate-x-1/2 top-[10%] w-full h-[1px] bg-white transition-all duration-500 ease-out group-hover:w-[75%]"></span>
       
       {/* Text - conditional based on size selection */}
-      <h3 className="relative z-10 text-xl">
+      <h3 className="relative z-10">
         {hasSizeSelected ? "Zum Warenkorp hinzufügen" : "Wählen sie eine Größe aus"}
       </h3>
       

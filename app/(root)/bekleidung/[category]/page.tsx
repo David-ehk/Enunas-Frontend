@@ -50,11 +50,11 @@ export default function CategoryPage({ params }: PageProps) {
       
       
       {/* Beschreibung */}
-      <p className="text-black font-light text-lg md:text-xl flex justify-center mb-12 ">
+      <p className="text-black font-light text-sm sm:text-lg flex justify-center mb-12 ">
         {data.description}
       </p>
        {/* Artikelanzahl muss noch dynamisch gemacht werden */}
-        <p className='text-black/75 font-light text-lg md:text-xl flex justify-center mb-12'>
+        <p className='text-black/75 font-light text-sm sm:text-lg flex justify-center mb-12'>
             20 Artikel
         </p>
 

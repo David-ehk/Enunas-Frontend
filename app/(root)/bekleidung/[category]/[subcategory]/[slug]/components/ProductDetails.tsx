@@ -9,13 +9,13 @@ import { Product } from '@/lib/product'
 import { Color } from '@/lib/color'
 import Link from 'next/link'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
-import CatalogueDescription from '@/app/(root)/bekleidung/[category]/[subcategory]/[slug]/components/CatalogueDescription'
+import CatalogueDescription from '@/app/(root)/catalogue/components/CatalogueDescription'
 
 interface ProductDetailsProps {
   product: Product;
 }
 
-const ProductDetails = ({ product }: ProductDetailsProps) => {
+function ProductDetails({ product }: ProductDetailsProps) {
   // State für ausgewählte Größe
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [selectedColor, setSelectedColor] = useState<Color | null>(null)
@@ -34,30 +34,30 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
   return (
     <div className="px-10 pt-20">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 inset-0">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Bilder-Galerie */}
         <div>
           <ImageGallery images={product.images} productName={product.name} />
         </div>
         
         {/* Produktinfo */}
-        <div className="space-y-6 pt-15 sm:px-10">
+        <div className="space-y-6 pt-10">
          
           
           {/* Marke & Name */}
           <div className="text-center">
             <Link href="/" className="text-[#370E4D] hover:text-black">
-             <h2 className='text-4xl'> {product.brand}</h2>
+              {product.brand}
             </Link>
-            <h1 className="text-xl font-light mt-2">{product.name}</h1>
+            <h1 className="text-3xl font-light mt-2">{product.name}</h1>
           </div>
           
           {/* Preis */}
           <div className="flex justify-center gap-2 ">
-            <div className="text-base font-light">{formattedPrice}</div>
-            <h2 className="flex text-sm text-gray-500 text-center">
+            <div className="text-2xl font-light">{formattedPrice}</div>
+            <p className="flex text-sm text-gray-500 text-center">
               inkl. MwSt. zzgl. Versand
-            </h2>
+            </p>
           </div>
           
           {/* Farbauswahl */}
@@ -70,6 +70,13 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
             </div>
           )}
 
+          {/* Catalogue */}
+          {product.catalogue.length > 0 && (
+            <div className="flex justify-center">
+              <CatalogueDescription/>
+            </div>
+          )}
+
           {/* Größenauswahl */}
           {product.sizes.length > 0 && (
             <div className="flex justify-center">
@@ -79,9 +86,6 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
               />
             </div>
           )}
-
-          {/* Catalogue */}
-       
           
           {/* Warenkorb-Button */}
           <div className="flex justify-center">
