@@ -2,7 +2,7 @@ import { footerLinks } from "../../constants"
 
 const Footer = () => {
   return (
-    <footer className=" text-white py-3">
+    <footer className="bg-[#370E4D] w-full sm:px-16 px-8 sm:pt-24 pt-12 pb-8 text-white py-3">
       <div className="max-container">
         {/* Hauptinhalt - 3 Spalten + Newsletter */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-12 pb-8 ">
@@ -16,17 +16,17 @@ const Footer = () => {
               <ul className="space-y-2">
                 {section.links.map((link) => (
                  <li key={link.name} className="group">
-              <a 
+                   <a 
                  href={link.link}
                  className="text-white/80 text-sm font-light hover:text-white transition-colors relative inline-block pb-1"
                  >
-    {link.name}
-    {/* Animated Underline */}
-    <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-white 
+                {link.name}
+                 {/* Animated Underline */}
+                 <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-white 
                      group-hover:w-full transition-all duration-500 ease-out">
-    </span>
-  </a>
-</li>
+                 </span>
+              </a>
+              </li>
                 ))}
               </ul>
             </div>

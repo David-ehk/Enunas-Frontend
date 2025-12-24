@@ -4,32 +4,28 @@ const CartFooter = () => {
   return (
     <div className="bg-black text-white py-8 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8">
-        {/* Umtausch und Rückgaben */}
+        {/* Lieferung und Rückgabe */}
         <div>
           <h2 className="text-lg font-semibold mb-3 uppercase tracking-wide">
-            UMTAUSCH UND RÜCKGABEN
+            LIEFERUNG UND RÜCKGABE
           </h2>
           <p className="text-sm text-gray-300 leading-relaxed">
-            Liefer- und Rückversand | Für alle Bestellungen, die zwischen dem 25. 
-            November und dem 2. Dezember aufgegeben werden, wird die Rückgabefrist 
-            bis zum 31. Januar 2026 verlängert.
+            Bei deiner Bestellung fallen keine Zollgebühren an zu dem Fallen keine Liefergebühren an. 
+            Rückgaben fallen mit einem 30 Tage Rückgaberecht an
           </p>
         </div>
 
-        {/* Können wir Ihnen behilflich sein */}
+        {/* Können wir dir behilflich sein */}
         <div>
           <h2 className="text-lg font-semibold mb-3">
-            Können wir Ihnen behilflich sein?
+            Können wir dir behilflich sein
           </h2>
           <p className="text-sm text-gray-300 mb-2">
-            Unser Kundenservice ist von Montag bis Samstag von 9:30 bis 19:00 Uhr erreichbar
+            Unser Kundenservice ist von Montag bis Samstag von 9.30 bis 19 Uhr erreichbar
           </p>
-          <p className="text-sm text-gray-300 mb-3">
-            Rufen Sie uns an: <span className="underline">+49 30 30 80 64 09</span>
+          <p className="text-sm text-gray-300">
+            Schreibe uns eine Email an: <span className="font-bold">kundenservice@enunas.com</span>
           </p>
-          <a href="#" className="text-sm underline hover:text-gray-400 transition-colors">
-            Barrierefreiheit
-          </a>
         </div>
 
         {/* Zahlungsarten */}
@@ -53,15 +49,21 @@ const CartFooter = () => {
             </div>
             <div className="flex items-center gap-2">
               <div className="bg-white rounded px-2 py-1">
-                <span className="text-blue-600 font-bold text-xs">AMEX</span>
-              </div>
-              <span className="text-sm text-gray-300">American Express</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="bg-white rounded px-2 py-1">
                 <span className="text-blue-600 font-bold text-xs">PayPal</span>
               </div>
               <span className="text-sm text-gray-300">PayPal</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="bg-white rounded px-2 py-1">
+                <span className="text-blue-600 font-bold text-xs">APAY</span>
+              </div>
+              <span className="text-sm text-gray-300">ApplePay</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="bg-pink-100 rounded px-2 py-1">
+                <span className="text-pink-600 font-bold text-xs">klarna</span>
+              </div>
+              <span className="text-sm text-gray-300">Klarna</span>
             </div>
           </div>
         </div>

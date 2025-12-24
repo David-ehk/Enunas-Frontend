@@ -6,6 +6,8 @@ import LogoSlider from "../Homepage/components/LogoSlider";
 import CategorySection from "../Homepage/components/CategorySection";
 import { Metadata } from "next";
 import CatalogueAuswahl from "../Homepage/components/CatalogueAuswahl";
+import Footer from "../Homepage/components/footer";
+import Navbar from "../Homepage/components/navbar";
 
 
 export const metadata: Metadata = {
@@ -47,6 +49,9 @@ export default function Home() {
   return (
     <main>
       <section>
+        <Navbar/>
+      </section>
+      <section>
         <Hero />
       </section>
       <section className="py-5">
@@ -73,6 +78,9 @@ export default function Home() {
       <section className="sm:px-16 px-8 sm:py-6 py-3 w-full">
         <Subscribe />
       </section>
+       <section className="bg-[#370E4D] w-full sm:px-16 px-8 sm:pt-24 pt-12 pb-8">
+                <Footer />
+              </section>
     </main>
   );
 }
