@@ -189,8 +189,8 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                   onClick={() => handleCategoryClick(item)} 
                   className="w-full group relative"
                 >
-                  <div className="flex items-center justify-between py-4 border-b border-white/5
-                               hover:border-white/20 transition-all duration-300">
+                  <div className="flex items-center justify-between py-4 
+                              ">
                     <span className="font-spartan text-sm tracking-[0.2em] uppercase
                                    group-hover:tracking-[0.3em] transition-all duration-300">
                       {item.title}
@@ -284,7 +284,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             <a
               href={menuItems.find((item: any) => item.title === activeSubmenu)?.submenu?.showAll.href}
               onClick={handleLinkClick}
-              className="block py-4 px-5 mb-4 bg-white/5 hover:bg-white/10 rounded transition-all duration-300 border-l-2 border-white/50 hover:text-[#370E4D]"
+              className="block py-4 px-5 mb-4 transition-all duration-300 hover:translate-x-1"
             >
               <span className="font-spartan text-sm tracking-wide uppercase">
                 {menuItems.find((item: any) => item.title === activeSubmenu)?.submenu?.showAll.title}
@@ -336,7 +336,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                               href={item.href}
                               onClick={handleLinkClick}
                               className={`block py-2 px-4 text-sm rounded transition-all duration-300
-                                       hover:bg-white/5 border-l-2 border-transparent hover:border-white/30
+                                       hover:bg-white/5 border-l-2 border-transparent hover:border-white/30 hover:translate-x-1 
                                        ${item.title.includes('Siehe Alle') ? 'text-[#370E4D] italic' : ''}`}
                             >
                               {item.title}

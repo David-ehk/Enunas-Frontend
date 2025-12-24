@@ -59,7 +59,7 @@ const Subscribe = () => {
   Outfits tragen wollen. Als kuratierter <strong>Marktplatz</strong> und kreatives Movement bietet 
   <span className="text-[#370E4D] font-bold"> Enunas </span> exklusive Pieces, künstlerisches Storytelling und eine Plattform für 
   Designer, die die Zukunft von Mode prägen.  <span className="text-[#370E4D] font-bold">Enunas </span> ist nicht nur ein Shop, 
-  sondern ein Ort für Stil, <span className="text-[#A4B7ED]"> Seele </span> und <span className="text-[#C4A47C]">Vision </span>.
+  sondern ein Ort für Stil, <span className="text-[#A4B7ED]"> Seele </span> und <span className="text-[#C4A47C]">Vision</span>.
         </h4>
       </div>
     </section>
