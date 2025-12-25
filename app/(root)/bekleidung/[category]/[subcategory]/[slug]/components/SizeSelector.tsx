@@ -1,18 +1,16 @@
 "use client"
 
-import React, { useState } from 'react'
+import React from 'react'
 
 interface SizeSelectorProps {
   sizes: string[];
+  selectedSize?: string | null; // ← Neue Prop: Empfängt die ausgewählte Größe
   onSizeSelect?: (size: string | null) => void;
 }
 
-function SizeSelector({ sizes, onSizeSelect }: SizeSelectorProps) {
-  const [selectedSize, setSelectedSize] = useState<string | null>(null)
-
+function SizeSelector({ sizes, selectedSize = null, onSizeSelect }: SizeSelectorProps) {
   const handleSizeClick = (size: string) => {
     const newSize = selectedSize === size ? null : size
-    setSelectedSize(newSize)
     onSizeSelect?.(newSize)
   }
 

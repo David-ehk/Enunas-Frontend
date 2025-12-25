@@ -11,7 +11,7 @@ const Catalogue = () => {
             </div>
 
             <div className="flex justify-between">
-                <h2 className="text-7xl ">Catalogue</h2>
+                <h2 className="sm:text-7xl text-4xl ">Catalogue</h2>
                 <div className="">
                     <p className="font-bold text-2xl">NEW Drop ist angekommen</p>
                     <h4 className="text-lg">

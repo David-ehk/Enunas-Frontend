@@ -1,14 +1,13 @@
 
-import { ToastProvider } from "../context/ToastContext";
 
 
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <main>
-            <ToastProvider>
+            
               {children}
-             </ToastProvider>
+             
       
     </main>
   );

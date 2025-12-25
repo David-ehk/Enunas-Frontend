@@ -1,16 +1,16 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import ImageGallery from './ImageGallery'
 import ColorSelector from './ColorSelector'
 import SizeSelector from './SizeSelector'
 import AddToCart from '../components/AddToCart'
-import CartSidebar from '@/app/(root)/cart/components/CartSidebar' // ← Import hinzufügen
+import CartSidebar from '@/app/(root)/cart/components/CartSidebar'
 import { Product } from '@/lib/product'
 import { Color } from '@/lib/color'
 import Link from 'next/link'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
-import CatalogueDescription from '@/app/(root)/catalogue/components/CatalogueDescription'
+import { X } from 'lucide-react'
 
 interface ProductDetailsProps {
   product: Product;
@@ -19,7 +19,10 @@ interface ProductDetailsProps {
 function ProductDetails({ product }: ProductDetailsProps) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [selectedColor, setSelectedColor] = useState<Color | null>(null)
-  const [isCartOpen, setIsCartOpen] = useState(false) // ← Neu hinzufügen
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const [showFloatingButton, setShowFloatingButton] = useState(false)
+  const [showSizeModal, setShowSizeModal] = useState(false)
+  const staticButtonRef = useRef<HTMLDivElement>(null)
 
   const formattedPrice = new Intl.NumberFormat('de-DE', {
     style: 'currency',
@@ -32,6 +35,37 @@ function ProductDetails({ product }: ProductDetailsProps) {
     hex: pc.hex,
   }))
 
+  // Scroll-Erkennung für fliegenden Button
+  useEffect(() => {
+    const handleScroll = () => {
+      if (staticButtonRef.current) {
+        const rect = staticButtonRef.current.getBoundingClientRect()
+        // Fliegender Button erscheint nur wenn statischer Button nicht mehr sichtbar ist
+        setShowFloatingButton(rect.bottom < 0)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    handleScroll() // Initial check
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const handleFloatingButtonClick = () => {
+    if (!selectedSize) {
+      // Größenauswahl-Modal öffnen
+      setShowSizeModal(true)
+    } else {
+      // Direkt zum Warenkorb hinzufügen
+      setIsCartOpen(true)
+    }
+  }
+
+  const handleSizeSelectFromModal = (size: string) => {
+    setSelectedSize(size)
+    setShowSizeModal(false)
+    setIsCartOpen(true)
+  }
+
   return (
     <>
       <div className="px-10 pt-16">
@@ -42,7 +76,7 @@ function ProductDetails({ product }: ProductDetailsProps) {
           </div>
           
           {/* Produktinfo */}
-          <div className="pt-10 px-3">
+          <div className="pt-10 px-15 sm:px-20">
             {/* Marke & Name */}
             <div className="text-center">
               <Link href="/" className="text-[#370E4D] hover:text-black">
@@ -71,19 +105,20 @@ function ProductDetails({ product }: ProductDetailsProps) {
 
             {/* Größenauswahl */}
             {product.sizes.length > 0 && (
-              <div className="flex justify-center mt-6">
-                <SizeSelector
-                  sizes={product.sizes}
-                  onSizeSelect={(size) => setSelectedSize(size)}
-                />
-              </div>
+             <div className="flex justify-center mt-6">
+                 <SizeSelector
+                    sizes={product.sizes}
+                    selectedSize={selectedSize}  // ← Diese Zeile hinzufügen
+                   onSizeSelect={(size) => setSelectedSize(size)}
+                   />
+            </div>
             )}
             
-            {/* Warenkorb-Button */}
-            <div className="flex justify-center my-4">
+            {/* Warenkorb-Button mit Referenz */}
+            <div ref={staticButtonRef} className="flex justify-center my-4">
               <AddToCart 
                 selectedSize={selectedSize}
-                onCartOpen={() => setIsCartOpen(true)} // ← Hier hinzufügen
+                onCartOpen={() => setIsCartOpen(true)}
               />
             </div>
             
@@ -126,7 +161,79 @@ function ProductDetails({ product }: ProductDetailsProps) {
         </div>
       </div>
 
-      {/* Cart Sidebar - außerhalb des main grid */}
+      {/* Fliegender Warenkorb Button */}
+      <div
+        className={`fixed bottom-6 left-0 right-0 px-6 transition-all duration-500 z-50 ${
+          showFloatingButton
+            ? 'translate-y-0 opacity-100'
+            : 'translate-y-20 opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="max-w-4xl mx-auto backdrop-blur-xl bg-white/95 border border-gray-200 rounded-sm shadow-2xl p-4">
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <h4 className="font-semibold text-black ">{product.name}</h4>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-sm text-gray-600">{formattedPrice}</p>
+                {selectedSize && (
+                  <span className="text-xs text-gray-500">Größe: {selectedSize}</span>
+                )}
+               
+                  <span className="text-xs text-gray-500"> color</span>
+              
+              </div>
+            </div>
+            
+            <button
+              onClick={handleFloatingButtonClick}
+              className="px-8 py-3 bg-[#370E4D] text-white rounded-sm  hover:bg-[#2a0a3a] transition-all whitespace-nowrap"
+            >
+             <h3 className="text-base sm:text-lg"> {selectedSize ? 'In den Warenkorb' : 'Größe wählen'} </h3>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Größenauswahl Modal */}
+      {showSizeModal && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+          onClick={() => setShowSizeModal(false)}
+        >
+          <div 
+            className="bg-white rounded-sm shadow-2xl max-w-md w-full p-6 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowSizeModal(false)}
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100  transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            <h3 className="text-2xl text-black mb-2">
+              Größe auswählen
+            </h3>
+            <p className=" font-light text-gray-600 mb-6">
+              Bitte wähle eine Größe für: {product.name}
+            </p>
+            
+            <div className="grid grid-cols-2 gap-3">
+              {product.sizes.map((size) => (
+                <button
+                  key={size}
+                  onClick={() => handleSizeSelectFromModal(size)}
+                  className="py-4 px-6 border-2 border-gray-300 hover:border-[#370E4D] hover:bg-gray-50 font-medium transition-all text-center"
+                >
+                 {size} 
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cart Sidebar */}
       <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)}/>
     </>
   )

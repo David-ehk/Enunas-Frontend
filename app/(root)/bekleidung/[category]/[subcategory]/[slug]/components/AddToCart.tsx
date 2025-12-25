@@ -1,28 +1,20 @@
 "use client"
 
 import React from 'react'
-import { useToast } from '@/app/context/ToastContext'
 
 interface AddToCartProps {
   selectedSize?: string | null;
-  onCartOpen: () => void; // ← Neue Prop
+  onCartOpen: () => void;
 }
 
 function AddToCart({ selectedSize = null, onCartOpen }: AddToCartProps) {
   const hasSizeSelected = selectedSize !== null
-  const { showToast } = useToast()
 
   const handleAddToCart = () => {
-    if (!hasSizeSelected) {
-      showToast('Bitte wählen Sie eine Größe aus', 'error')
-      return
+    if (hasSizeSelected) {
+      // Sidebar öffnen
+      onCartOpen()
     }
-    
-    // Add to cart logic hier
-    showToast('Zum Warenkorb hinzugefügt')
-    
-    // Sidebar öffnen
-    onCartOpen()
   }
 
   return (
