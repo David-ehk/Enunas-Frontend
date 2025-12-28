@@ -68,7 +68,7 @@ function ProductDetails({ product }: ProductDetailsProps) {
 
   return (
     <>
-      <div className="px-10 pt-16">
+      <div className=" pt-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Bilder-Galerie */}
           <div>
@@ -76,17 +76,17 @@ function ProductDetails({ product }: ProductDetailsProps) {
           </div>
           
           {/* Produktinfo */}
-          <div className="pt-10 px-15 sm:px-20">
+          <div className="pt-10 px-15 sm:px-20 ">
             {/* Marke & Name */}
             <div className="text-center">
               <Link href="/" className="text-[#370E4D] hover:text-black">
-                <h2 className="text-3xl sm:text-4xl"> {product.brand} </h2>
+                <h2 className="text-3xl sm:text-4xl space-y-10"> {product.brand} </h2>
               </Link>
               <h2 className="text-lg sm:text-xl mt-6">{product.name}</h2>
             </div>
             
             {/* Preis */}
-            <div className="flex justify-center gap-2 mt-4">
+            <div className="flex justify-center gap-2 my-4 mb-6">
               <div className="text-lg font-light">{formattedPrice}</div>
               <p className="flex text-sm text-gray-500 text-center">
                 inkl. MwSt. zzgl. Versand
@@ -95,7 +95,7 @@ function ProductDetails({ product }: ProductDetailsProps) {
             
             {/* Farbauswahl */}
             {product.colors.length > 0 && (
-              <div className="flex justify-center">
+              <div className="flex justify-center ">
                 <ColorSelector
                   colors={colorsForSelector}
                   onColorSelect={(color) => setSelectedColor(color)}
@@ -105,7 +105,7 @@ function ProductDetails({ product }: ProductDetailsProps) {
 
             {/* Größenauswahl */}
             {product.sizes.length > 0 && (
-             <div className="flex justify-center mt-6">
+             <div className="flex justify-center mt-6 space-y-10">
                  <SizeSelector
                     sizes={product.sizes}
                     selectedSize={selectedSize}  // ← Diese Zeile hinzufügen
