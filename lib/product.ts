@@ -9,6 +9,7 @@ export interface Product {
   currency: string;
   colors: ProductColor[];
   sizes: string[];
+  catalogue: string[];
   sku: string;
   images: string[];
   category: string[];

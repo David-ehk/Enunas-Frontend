@@ -11,6 +11,7 @@ import { Color } from '@/lib/color'
 import Link from 'next/link'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 import { X } from 'lucide-react'
+import StyleCatalogue from './StyleCatalogue'
 
 interface ProductDetailsProps {
   product: Product;
@@ -113,6 +114,11 @@ function ProductDetails({ product }: ProductDetailsProps) {
                    />
             </div>
             )}
+
+            {/*Catalogue/Style der Kleidung*/}
+            <div className="space-y-10 my-6">
+              <StyleCatalogue catalogue={product.catalogue}/>
+             </div> 
             
             {/* Warenkorb-Button mit Referenz */}
             <div ref={staticButtonRef} className="flex justify-center my-4">

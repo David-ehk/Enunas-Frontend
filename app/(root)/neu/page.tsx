@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import React from 'react'
+import HeroNew from './components/HeroNew'
 
 export const metadata: Metadata = {
   title: "Enunas - Premium Fashion & Streetwear",
@@ -8,7 +8,15 @@ export const metadata: Metadata = {
 
 export default function page() {
   return (
-    <div>page</div>
+    <main>
+        <section>
+          <HeroNew/>
+        </section>
+
+        <section>
+        </section>
+
+    </main>
   )
 }
 

@@ -1,10 +1,12 @@
 import Link from "next/link"
 
+// Bug href ist falsch muss zum nächsten produkt weirter zeigen
+
 const PopularProductCard = ({imgURL,Brandname, name,colour, colourname, price, href}) => {
 
   return (
  <div className="flex flex-1 flex-col w-full group">
-      <Link href={href} className="block">
+      <a href={href} className="block">
         {/* Bild Container mit Favorite Icon */}
         <div className="relative w-full aspect-[4/5] mb-2 overflow-hidden">
           <img 
@@ -37,7 +39,6 @@ const PopularProductCard = ({imgURL,Brandname, name,colour, colourname, price, h
                  </p>
               </div>
             
-            
           </div>
 
           {/* Produktname in eleganter Serif Italic */}
@@ -47,7 +48,7 @@ const PopularProductCard = ({imgURL,Brandname, name,colour, colourname, price, h
 
           {/* Preis - prominent */}
           <p className="text-sm font-light text-gray-900 mt-1">
-            €{price}
+            {price}
           </p>
 
           {/* Farboptionen - klein und dezent am Ende */}
@@ -65,7 +66,7 @@ const PopularProductCard = ({imgURL,Brandname, name,colour, colourname, price, h
           </div>
           
         </div>
-      </Link>
+      </a>
     </div> 
   )
 }

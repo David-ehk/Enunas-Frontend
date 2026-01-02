@@ -218,7 +218,7 @@ export default function CartSidebar({ isOpen, onClose }: SidebarProps) {
           <div className="pt-5 border-t border-gray-200">
             <div className="mb-2">
               <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: '78%' }}></div>
+                <div className="h-full bg-[#370E4D] rounded-full transition-all" style={{ width: '78%' }}></div>
               </div>
             </div>
             <p className="text-xs text-gray-600">
