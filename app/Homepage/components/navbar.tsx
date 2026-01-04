@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react'
 import Sidebar from './Sidebar'
 import  SearchBar  from '../components/Suchleiste'
 import Link from 'next/link'
+import { useCart } from '@/app/context/CartContext'
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchOpen, setSearch] = useState(false)
+  const { openCart } = useCart()
 
   // Scrolleffekt transparenz
   useEffect(() => {
@@ -125,7 +127,8 @@ const Navbar = () => {
 
           {/* Muss dynamisch sein damit die Zahl inkrementiert */}
           <div>
-            <button className="relative cursor-pointer">
+            <button className="relative cursor-pointer"
+            onClick={openCart}>
               <CartIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]"/>
               <span className={ICON_BADGE_CLASSES}>0</span>
             </button>

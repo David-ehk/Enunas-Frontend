@@ -5,13 +5,14 @@ import ImageGallery from './ImageGallery'
 import ColorSelector from './ColorSelector'
 import SizeSelector from './SizeSelector'
 import AddToCart from '../components/AddToCart'
-import CartSidebar from '@/app/(root)/cart/components/CartSidebar'
+// ❌ ENTFERNT: import CartSidebar from '@/app/(root)/cart/components/CartSidebar'
 import { Product } from '@/lib/product'
 import { Color } from '@/lib/color'
 import Link from 'next/link'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 import { X } from 'lucide-react'
 import StyleCatalogue from './StyleCatalogue'
+import { useCart } from '@/app/context/CartContext'
 
 interface ProductDetailsProps {
   product: Product;
@@ -20,10 +21,13 @@ interface ProductDetailsProps {
 function ProductDetails({ product }: ProductDetailsProps) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [selectedColor, setSelectedColor] = useState<Color | null>(null)
-  const [isCartOpen, setIsCartOpen] = useState(false)
+  // ❌ ENTFERNT: const [isCartOpen, setIsCartOpen] = useState(false)
   const [showFloatingButton, setShowFloatingButton] = useState(false)
   const [showSizeModal, setShowSizeModal] = useState(false)
   const staticButtonRef = useRef<HTMLDivElement>(null)
+
+  // ✅ Context Hook verwenden
+  const { openCart } = useCart()
 
   const formattedPrice = new Intl.NumberFormat('de-DE', {
     style: 'currency',
@@ -41,13 +45,12 @@ function ProductDetails({ product }: ProductDetailsProps) {
     const handleScroll = () => {
       if (staticButtonRef.current) {
         const rect = staticButtonRef.current.getBoundingClientRect()
-        // Fliegender Button erscheint nur wenn statischer Button nicht mehr sichtbar ist
         setShowFloatingButton(rect.bottom < 0)
       }
     }
 
     window.addEventListener('scroll', handleScroll)
-    handleScroll() // Initial check
+    handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -56,20 +59,24 @@ function ProductDetails({ product }: ProductDetailsProps) {
       // Größenauswahl-Modal öffnen
       setShowSizeModal(true)
     } else {
-      // Direkt zum Warenkorb hinzufügen
-      setIsCartOpen(true)
+      // ✅ Context verwenden statt localem State
+      // Hier würdest du das Produkt zum Cart hinzufügen
+      // addToCart(product, selectedSize, selectedColor)
+      openCart()
     }
   }
 
   const handleSizeSelectFromModal = (size: string) => {
     setSelectedSize(size)
     setShowSizeModal(false)
-    setIsCartOpen(true)
+    // ✅ Context verwenden
+    // addToCart(product, size, selectedColor)
+    openCart()
   }
 
   return (
     <>
-      <div className=" pt-16">
+      <div className="pt-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Bilder-Galerie */}
           <div>
@@ -77,11 +84,11 @@ function ProductDetails({ product }: ProductDetailsProps) {
           </div>
           
           {/* Produktinfo */}
-          <div className="pt-10 px-15 sm:px-20 ">
+          <div className="pt-10 px-15 sm:px-20">
             {/* Marke & Name */}
             <div className="text-center">
               <Link href="/" className="text-[#370E4D] hover:text-black">
-                <h2 className="text-3xl sm:text-4xl space-y-10"> {product.brand} </h2>
+                <h2 className="text-3xl sm:text-4xl space-y-10">{product.brand}</h2>
               </Link>
               <h2 className="text-lg sm:text-xl mt-6">{product.name}</h2>
             </div>
@@ -96,7 +103,7 @@ function ProductDetails({ product }: ProductDetailsProps) {
             
             {/* Farbauswahl */}
             {product.colors.length > 0 && (
-              <div className="flex justify-center ">
+              <div className="flex justify-center">
                 <ColorSelector
                   colors={colorsForSelector}
                   onColorSelect={(color) => setSelectedColor(color)}
@@ -106,26 +113,23 @@ function ProductDetails({ product }: ProductDetailsProps) {
 
             {/* Größenauswahl */}
             {product.sizes.length > 0 && (
-             <div className="flex justify-center mt-6 space-y-10">
-                 <SizeSelector
-                    sizes={product.sizes}
-                    selectedSize={selectedSize}  // ← Diese Zeile hinzufügen
-                   onSizeSelect={(size) => setSelectedSize(size)}
-                   />
-            </div>
+              <div className="flex justify-center mt-6 space-y-10">
+                <SizeSelector
+                  sizes={product.sizes}
+                  selectedSize={selectedSize}
+                  onSizeSelect={(size) => setSelectedSize(size)}
+                />
+              </div>
             )}
 
-            {/*Catalogue/Style der Kleidung*/}
+            {/* Catalogue/Style der Kleidung */}
             <div className="space-y-10 my-6">
               <StyleCatalogue catalogue={product.catalogue}/>
-             </div> 
+            </div> 
             
             {/* Warenkorb-Button mit Referenz */}
             <div ref={staticButtonRef} className="flex justify-center my-4">
-              <AddToCart 
-                selectedSize={selectedSize}
-                onCartOpen={() => setIsCartOpen(true)}
-              />
+              <AddToCart selectedSize={selectedSize} />
             </div>
             
             {/* Produktdetails */}
@@ -178,23 +182,23 @@ function ProductDetails({ product }: ProductDetailsProps) {
         <div className="max-w-4xl mx-auto backdrop-blur-xl bg-white/95 border border-gray-200 rounded-sm shadow-2xl p-4">
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <h4 className="font-semibold text-black ">{product.name}</h4>
+              <h4 className="font-semibold text-black">{product.name}</h4>
               <div className="flex items-center gap-2 mt-1">
                 <p className="text-sm text-gray-600">{formattedPrice}</p>
                 {selectedSize && (
                   <span className="text-xs text-gray-500">Größe: {selectedSize}</span>
                 )}
-               
-                  <span className="text-xs text-gray-500"> color</span>
-              
+                <span className="text-xs text-gray-500">color</span>
               </div>
             </div>
             
             <button
               onClick={handleFloatingButtonClick}
-              className="px-8 py-3 bg-[#370E4D] text-white rounded-sm  hover:bg-[#2a0a3a] transition-all whitespace-nowrap"
+              className="px-8 py-3 bg-[#370E4D] text-white rounded-sm hover:bg-[#2a0a3a] transition-all whitespace-nowrap"
             >
-             <h3 className="text-base sm:text-lg"> {selectedSize ? 'In den Warenkorb' : 'Größe wählen'} </h3>
+              <h3 className="text-base sm:text-lg">
+                {selectedSize ? 'In den Warenkorb' : 'Größe wählen'}
+              </h3>
             </button>
           </div>
         </div>
@@ -212,7 +216,7 @@ function ProductDetails({ product }: ProductDetailsProps) {
           >
             <button
               onClick={() => setShowSizeModal(false)}
-              className="absolute top-4 right-4 p-2 hover:bg-gray-100  transition-colors"
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -220,7 +224,7 @@ function ProductDetails({ product }: ProductDetailsProps) {
             <h3 className="text-2xl text-black mb-2">
               Größe auswählen
             </h3>
-            <p className=" font-light text-gray-600 mb-6">
+            <p className="font-light text-gray-600 mb-6">
               Bitte wähle eine Größe für: {product.name}
             </p>
             
@@ -231,7 +235,7 @@ function ProductDetails({ product }: ProductDetailsProps) {
                   onClick={() => handleSizeSelectFromModal(size)}
                   className="py-4 px-6 border-2 border-gray-300 hover:border-[#370E4D] hover:bg-gray-50 font-medium transition-all text-center"
                 >
-                 {size} 
+                  {size}
                 </button>
               ))}
             </div>
@@ -239,8 +243,7 @@ function ProductDetails({ product }: ProductDetailsProps) {
         </div>
       )}
 
-      {/* Cart Sidebar */}
-      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)}/>
+      {/* ❌ ENTFERNT: CartSidebar wird jetzt im MinTimeWrapper gerendert */}
     </>
   )
 }

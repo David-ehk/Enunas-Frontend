@@ -1,19 +1,23 @@
 "use client"
 
 import React from 'react'
+import { useCart } from '@/app/context/CartContext'
 
 interface AddToCartProps {
   selectedSize?: string | null;
-  onCartOpen: () => void;
 }
 
-function AddToCart({ selectedSize = null, onCartOpen }: AddToCartProps) {
+function AddToCart({ selectedSize = null }: AddToCartProps) {
+  const { openCart } = useCart() // Context Hook verwenden
   const hasSizeSelected = selectedSize !== null
 
   const handleAddToCart = () => {
     if (hasSizeSelected) {
-      // Sidebar öffnen
-      onCartOpen()
+      // Hier würdest du normalerweise das Produkt zum Cart hinzufügen
+      // z.B. addToCart(product, selectedSize)
+      
+      // Dann Cart Sidebar öffnen
+      openCart()
     }
   }
 
