@@ -123,7 +123,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de">
-      <body className={`${LeagueSpartan.variable} ${CormorantGaramond.variable}`}>
+      <body className={`${LeagueSpartan.variable} ${CormorantGaramond.variable} overflow-x-hidden w-full`}>
         {children}
       </body>
     </html>
