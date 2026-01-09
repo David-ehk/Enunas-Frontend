@@ -124,7 +124,9 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body className={`${LeagueSpartan.variable} ${CormorantGaramond.variable} overflow-x-hidden w-full`}>
+        <div  className="w-full max-w-full overflow-hidden">
         {children}
+        </div>
       </body>
     </html>
   );

@@ -5,7 +5,6 @@ import ImageGallery from './ImageGallery'
 import ColorSelector from './ColorSelector'
 import SizeSelector from './SizeSelector'
 import AddToCart from '../components/AddToCart'
-// ❌ ENTFERNT: import CartSidebar from '@/app/(root)/cart/components/CartSidebar'
 import { Product } from '@/lib/product'
 import { Color } from '@/lib/color'
 import Link from 'next/link'
@@ -21,7 +20,6 @@ interface ProductDetailsProps {
 function ProductDetails({ product }: ProductDetailsProps) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [selectedColor, setSelectedColor] = useState<Color | null>(null)
-  // ❌ ENTFERNT: const [isCartOpen, setIsCartOpen] = useState(false)
   const [showFloatingButton, setShowFloatingButton] = useState(false)
   const [showSizeModal, setShowSizeModal] = useState(false)
   const staticButtonRef = useRef<HTMLDivElement>(null)
