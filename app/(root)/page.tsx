@@ -60,13 +60,13 @@ export default function Home() {
       <section>
         <Geschlecht />
       </section>
-      <section className="sm:px-3 px-5 sm:py-6 py-3">
+      <section className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <PopularProduct />
       </section>
       <section>
         <BannerBild />
       </section>
-      <section className="sm:px-3 px-8 sm:py-6 py-3">
+      <section className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <NewProducts />
       </section>
       <section>
@@ -75,12 +75,12 @@ export default function Home() {
       <section>
         <LogoSlider />
       </section>
-      <section className="sm:px-16 px-8 sm:py-6 py-3 w-full">
+      <section className="px-4 sm:px-8 lg:px-16 py-6 sm:py-8 w-full">
         <Subscribe />
       </section>
-       <section className="bg-[#370E4D] w-full sm:px-16 px-8 sm:pt-24 pt-12 pb-8">
-                <Footer />
-              </section>
+      <section className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+        <Footer />
+      </section>
     </main>
   );
 }

@@ -2,8 +2,8 @@
 // constants/index.ts
 export const facebook = "/assets/icons/facebook.svg";
 export const twitter = "/assets/icons/twitter.svg";
-export const instagram = "/assets/icons/facebook.svg";
-export const shieldTick = "/assets/icons/shieldTrick.svg";
+export const instagram = "/assets/icons/instagram.svg";
+export const shieldTick = "/assets/icons/shieldTick.svg";
 export const support = "/assets/icons/support.svg";
 export const truckFast = "/assets/icons/truckFast.svg";
 
@@ -66,32 +66,30 @@ export const footerLinks = [
     {
         title: "Über uns",
         links: [
-            { name: "About us", link: "/" },
-            { name: "Marken ", link: "/" },
-            { name: "Clothing Brands", link: "/" },
-            { name: "Karriere", link: "/" },
-          
+            { name: "Über uns", link: "/about us" },
+            { name: "Marken", link: "/marken" },
+            { name: "Designer", link: "/marken" },
+            { name: "Karriere", link: "/karriere" },
         ],
     },
     {
         title: "Hilfe",
         links: [
-            { name: "FAQs", link: "/" },
-            { name: "Sendungsverfolgung", link: "/" },
-            { name: "Lieferung & Rüksendung", link: "/" },
-            { name: "Kundenservice", link: "/" },
-            
+            { name: "FAQs", link: "/faqs" },
+            { name: "Sendungsverfolgung", link: "/sendungsverfolgung" },
+            { name: "Lieferung & Rücksendung", link: "/lieferung-&-rücksendung" },
+            { name: "Kundenservice", link: "/kundenservice" },
         ],
     },
     {
-        title: "Get in touch",
+        title: "Rechtliches",
         links: [
-            { name: "Impresum", link: "impresum" },
-            { name: "AGBs", link: "agbs" },
-            { name: "Cookie-Richtlinien", link: "/" },
-            { name: "Cookie-Einstellungen", link: "/" },
-            { name: "Nutzungsbedingungen", link: "/" },
-            { name: "Datenschutzerklärung", link: "/" },
+            { name: "Impressum", link: "/Impressum" },
+            { name: "AGBs", link: "/agbs" },
+            { name: "Cookie-Richtlinien", link: "/cookie-richtlinien" },
+            { name: "Cookie-Einstellungen", link: "/cookie-einstellungen" },
+            { name: "Nutzungsbedingungen", link: "/nutzungsbedingungen" },
+            { name: "Datenschutzerklärung", link: "/datenschutzerklärung" },
         ],
     },
 ];

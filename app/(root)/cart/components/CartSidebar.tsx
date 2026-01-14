@@ -1,11 +1,24 @@
-
 'use client'
 import { useState, useEffect } from 'react'
 import { useCart } from '@/app/context/CartContext'
+import Image from 'next/image'
+
+const FREE_SHIPPING_THRESHOLD = 50
 
 export default function CartSidebar() {
-  const { isCartOpen, closeCart } = useCart() // Context Hook verwenden
+  const {
+    isCartOpen,
+    closeCart,
+    cartItems,
+    itemCount,
+    totalPrice,
+    updateQuantity,
+    removeFromCart
+  } = useCart()
   const [activeTab, setActiveTab] = useState<'cart' | 'wishlist'>('cart')
+
+  const amountUntilFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - totalPrice)
+  const freeShippingProgress = Math.min(100, (totalPrice / FREE_SHIPPING_THRESHOLD) * 100)
 
   useEffect(() => {
     if (isCartOpen) {
@@ -74,41 +87,69 @@ export default function CartSidebar() {
         <div className="flex-1 overflow-y-auto px-8 py-6 min-h-0">
           {activeTab === 'cart' ? (
             <>
-              {/* Item 1 */}
-              <div className="mb-6 pb-6 border-b border-gray-200">
-                <div className="flex gap-4">
-                  <div className="w-24 h-32 bg-gray-200 flex-shrink-0"></div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-base font-medium pr-2">
-                        Name des Produktes
-                      </h3>
-                      <button 
-                        className="text-xs underline hover:no-underline text-gray-600 flex-shrink-0"
-                      >
-                        Entfernen
-                      </button>
-                    </div>
-                    
-                    <p className="text-xs text-gray-500 mb-1">Schwarz</p>
-                    <p className="text-xs text-gray-500 mb-3">Größe: S</p>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <button className="w-6 h-6 flex items-center justify-center border border-gray-300 hover:bg-gray-50">
-                          −
-                        </button>
-                        <span className="text-sm w-8 text-center">1</span>
-                        <button className="w-6 h-6 flex items-center justify-center border border-gray-300 hover:bg-gray-50">
-                          +
-                        </button>
+              {cartItems.length === 0 ? (
+                <div className="text-center text-gray-500 py-12">
+                  <p className="text-sm">Ihr Warenkorb ist leer</p>
+                </div>
+              ) : (
+                cartItems.map((item) => (
+                  <div key={item.id} className="mb-6 pb-6 border-b border-gray-200">
+                    <div className="flex gap-4">
+                      <div className="w-24 h-32 bg-gray-200 flex-shrink-0 relative">
+                        {item.image && (
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
                       </div>
-                      <span className="text-sm font-semibold">€120</span>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">{item.brand}</p>
+                            <h3 className="text-base font-medium pr-2">
+                              {item.name}
+                            </h3>
+                          </div>
+                          <button
+                            onClick={() => removeFromCart(item.id)}
+                            className="text-xs underline hover:no-underline text-gray-600 flex-shrink-0"
+                          >
+                            Entfernen
+                          </button>
+                        </div>
+
+                        {item.color && (
+                          <p className="text-xs text-gray-500 mb-1">{item.color.name}</p>
+                        )}
+                        <p className="text-xs text-gray-500 mb-3">Größe: {item.size}</p>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              className="w-6 h-6 flex items-center justify-center border border-gray-300 hover:bg-gray-50"
+                            >
+                              −
+                            </button>
+                            <span className="text-sm w-8 text-center">{item.quantity}</span>
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              className="w-6 h-6 flex items-center justify-center border border-gray-300 hover:bg-gray-50"
+                            >
+                              +
+                            </button>
+                          </div>
+                          <span className="text-sm font-semibold">€{(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
+                ))
+              )}
             </>
           ) : (
             <div className="text-center text-gray-500 py-12">
@@ -120,15 +161,18 @@ export default function CartSidebar() {
         {/* Fixed Footer */}
         <div className="border-t border-gray-200 px-8 py-6 flex-shrink-0 bg-white">
           <div className="flex justify-between items-center mb-4">
-            <span className="text-lg font-light">Insgesamt</span>
-            <span className="text-lg font-light">120 €</span>
+            <span className="text-lg font-light">Insgesamt ({itemCount} Artikel)</span>
+            <span className="text-lg font-light">€{totalPrice.toFixed(2)}</span>
           </div>
-          
-          <button className="w-full bg-[#370E4D] text-white py-4 tracking-wide hover:bg-[#2a0b3b] transition-colors mb-3">
+
+          <button
+            disabled={cartItems.length === 0}
+            className="w-full bg-[#370E4D] text-white py-4 tracking-wide hover:bg-[#2a0b3b] transition-colors mb-3 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <h3 className='text-base'>Sicher Zur Kasse</h3>
           </button>
 
-          <button 
+          <button
             onClick={closeCart}
             className="w-full text-center text-xs underline hover:no-underline text-gray-600 mb-5"
           >
@@ -138,12 +182,21 @@ export default function CartSidebar() {
           <div className="pt-5 border-t border-gray-200">
             <div className="mb-2">
               <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-[#370E4D] rounded-full transition-all" style={{ width: '78%' }}></div>
+                <div
+                  className="h-full bg-[#370E4D] rounded-full transition-all"
+                  style={{ width: `${freeShippingProgress}%` }}
+                />
               </div>
             </div>
-            <p className="text-xs text-gray-600">
-              Noch <span className="font-semibold">€5</span> bis kostenloser Versand
-            </p>
+            {amountUntilFreeShipping > 0 ? (
+              <p className="text-xs text-gray-600">
+                Noch <span className="font-semibold">€{amountUntilFreeShipping.toFixed(2)}</span> bis kostenloser Versand
+              </p>
+            ) : (
+              <p className="text-xs text-green-600 font-semibold">
+                Kostenloser Versand freigeschaltet!
+              </p>
+            )}
           </div>
         </div>
       </div>

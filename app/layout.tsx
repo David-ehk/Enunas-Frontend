@@ -113,7 +113,7 @@ const CormorantGaramond = localFont({
 
 export const metadata: Metadata = {
   title: "Enunas",
-  description: "Dein einzig artiger Martplatz",
+  description: "Dein einzigartiger Marktplatz",
 };
 
 export default function RootLayout({

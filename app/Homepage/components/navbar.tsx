@@ -10,7 +10,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchOpen, setSearch] = useState(false)
-  const { openCart } = useCart()
+  const { openCart, itemCount } = useCart()
 
   // Scrolleffekt transparenz
   useEffect(() => {
@@ -68,7 +68,11 @@ const Navbar = () => {
       <nav className="flex justify-between items-center max-w-screen xl:mx-auto z-50">
         {/* Hamburger / Suche - Linke Hälfte */}
         <div className="w-1/4 flex gap-3 md:gap-8">
-          <button onClick={() => setSidebarOpen(true)}>
+          <button
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Menü öffnen"
+            aria-expanded={sidebarOpen}
+          >
             <HamburgerIconSvg className="w-5 h-5 hover:text-[#370E4D]"/>
           </button>
 
@@ -84,6 +88,7 @@ const Navbar = () => {
             />
             <button
               onClick={() => setSearch(true)}
+              aria-label="Suche öffnen"
               className="flex items-center gap-1.5 border-none bg-transparent cursor-pointer text-black hover:text-[#370E4D] transition duration-200"
             >
               <SearchIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]" />
@@ -105,6 +110,7 @@ const Navbar = () => {
             />
             <button
               onClick={() => setSearch(true)}
+              aria-label="Suche öffnen"
               className="flex items-center gap-1.5 border-none bg-transparent cursor-pointer text-black hover:text-[#370E4D] transition duration-200"
             >
               <SearchIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]" />
@@ -112,25 +118,30 @@ const Navbar = () => {
           </div>
 
           <div>
-            <button className="cursor-pointer">
+            <button className="cursor-pointer" aria-label="Mein Konto">
               <AccountIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]"/>
             </button>
           </div>
 
-          {/* Muss dynamisch sein damit die Zahl inkrementiert */}
           <div>
-            <button className="relative cursor-pointer hidden sm:block">
+            <button
+              className="relative cursor-pointer hidden sm:block"
+              aria-label="Wunschliste"
+            >
               <HeartIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]"/>
-              <span className={ICON_BADGE_CLASSES}>0</span>
             </button>
           </div>
 
-          {/* Muss dynamisch sein damit die Zahl inkrementiert */}
           <div>
-            <button className="relative cursor-pointer"
-            onClick={openCart}>
+            <button
+              className="relative cursor-pointer"
+              onClick={openCart}
+              aria-label={`Warenkorb mit ${itemCount} Artikeln`}
+            >
               <CartIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]"/>
-              <span className={ICON_BADGE_CLASSES}>0</span>
+              {itemCount > 0 && (
+                <span className={ICON_BADGE_CLASSES}>{itemCount > 99 ? '99+' : itemCount}</span>
+              )}
             </button>
           </div>
         </div>
