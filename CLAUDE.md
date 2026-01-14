@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Tech Stack
+
+**Frontend:** Next.js 15 (App Router) with TypeScript and Tailwind CSS v4
+**Backend:** Spring Boot (Java)
+**Database:** PostgreSQL
+**Payment:** Mollie
+
 ## Commands
 
 ```bash
@@ -41,5 +48,15 @@ Dynamic product pages follow: `/bekleidung/[category]/[subcategory]/[slug]`
 - Mobile detection via `hooks/use-mobile.ts` with 768px breakpoint
 
 ### Backend Integration
-Frontend connects to a Spring Boot backend with PostgreSQL. Payment processing uses Mollie.
-API integration is planned in `lib/api.ts`.
+The Next.js frontend connects to a Spring Boot (Java) REST API with PostgreSQL database.
+Payment processing is handled via Mollie integration.
+
+API calls are organized in `lib/api/`:
+- `index.ts` - Shared fetch wrapper, error handling, auth headers
+- `products.ts` - Product catalog, search, filters
+- `cart.ts` - Cart operations (server-side sync)
+- `orders.ts` - Order creation, history, tracking
+- `auth.ts` - Login, register, password reset
+- `payments.ts` - Mollie payment integration
+
+Set `NEXT_PUBLIC_API_URL` env variable for the backend URL (defaults to `http://localhost:8080/api`).
