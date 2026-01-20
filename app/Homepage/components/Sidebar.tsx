@@ -146,16 +146,18 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     <>
       {/* Overlay */}
       <div
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-all duration-500
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm transition-all duration-500
                     ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        style={{ zIndex: 9998 }}
         onClick={onClose}
       />
 
       {/* Main Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-full sm:w-96 bg-[#370E4D] text-white z-50
+        className={`fixed top-0 left-0 w-full sm:w-96 text-white
                     transform transition-all duration-500 ease-out
                     ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ backgroundColor: '#370E4D', zIndex: 9999, height: '100vh', minHeight: '100vh' }}
       >
         {/* Header */}
         <div className="flex items-center px-8 py-4 border-b border-white/10">
@@ -186,7 +188,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             {menuItems.map((item: any) => (
               <li key={item.title}>
                 <button
-                  onClick={() => handleCategoryClick(item)} 
+                  onClick={() => handleCategoryClick(item)}
                   className="w-full group relative"
                 >
                   <div className="flex items-center justify-between py-4 
@@ -237,9 +239,10 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       {/* Submenu Sidebar mit Accordion */}
       {activeSubmenu && (
         <aside
-          className={`fixed top-0 h-full left-0 w-full sm:left-96 sm:w-96 bg-[#F5F5F0] text-black z-50
+          className={`fixed top-0 left-0 w-full sm:left-96 sm:w-96 text-black
                       transition-all duration-500 ease-out
                      ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+          style={{ backgroundColor: '#F5F5F0', zIndex: 9999, height: '100vh', minHeight: '100vh' }}
         >
           {/* Submenu Header */}
           <div className="sm:hidden flex items-center px-8 py-4 border-b border-white/10 bg-[#370E4D]">
@@ -269,9 +272,9 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
               onClick={() => setActiveSubmenu(null)}
               className="flex items-center gap-3 group"
             >
-              <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" 
+              <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300"
                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                       d="M15 19l-7-7 7-7" />
               </svg>
               <span className="text-3xl">{activeSubmenu}</span>
@@ -336,7 +339,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                               href={item.href}
                               onClick={handleLinkClick}
                               className={`block py-2 px-4 text-sm rounded transition-all duration-300
-                                       hover:bg-white/5 border-l-2 border-transparent hover:border-white/30 hover:translate-x-1 
+                                       hover:bg-white/5 border-l-2 border-transparent hover:border-white/30 hover:translate-x-1
                                        ${item.title.includes('Siehe Alle') ? 'text-[#370E4D] italic' : ''}`}
                             >
                               {item.title}

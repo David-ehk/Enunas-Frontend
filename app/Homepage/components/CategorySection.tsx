@@ -2,6 +2,7 @@ import Link from 'next/link'
 import React from 'react'
 
 const categories = [
+
   {
     title: "Marken",
     image: "https://amq-mcq.dam.kering.com/asset/fed593c2-f470-4c31-ba1d-f785e81a065b/Original-Ecom/WEBSITE-DESKTOP2.jpg",
@@ -16,32 +17,37 @@ const categories = [
 
 const CategorySection = () => {
   return (
-    <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
-        {categories.map((cat, idx) => (
-          <div key={idx} className="relative group h-[70vh] sm:h-screen">
-            <Link href={cat.link}>
-              {/* Titel */}
+
+  <div >
+        {/* GRID mit 2 oder 4 Spalten */}
+     <div className="grid grid-cols-2  gap-0">
+         {categories.map((cat, idx) => (
+
+           /* RELATIVE Container - Gibt Scroll-Raum */
+          <div key={idx} className="relative group" style={{ height: '100vh' }}>
+            <Link  href={cat.link}>
+
+              {/* STICKY Titel - Bleibt OBEN im Container */}
               <div className="sticky top-0 z-10 p-6 pt-5">
-                <h2 className="text-3xl sm:text-4xl md:text-5xl tracking-wider text-white pt-20 z-10">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl tracking-wider text-white pt-20 z-10 transition-all duration-500 group-hover:tracking-[0.08em]">
                   {cat.title.toUpperCase()}
                 </h2>
               </div>
 
-              {/* Bild */}
-              <div className="absolute inset-0 cursor-pointer">
-                <img
+              {/* BILD - Scrollt durch */}
+              <div className="absolute inset-0 group cursor-pointer">
+               <img
                   src={cat.image}
                   alt={cat.title}
-                  className="h-full w-full object-cover"
-                />
+                 className="h-full w-full object-cover"
+                 />
               </div>
 
-              {/* Dark Overlay on hover */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-300" />
-            </Link>
-          </div>
-        ))}
+              {/*Dark Overlay*/}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-500" />
+           </Link>
+         </div>
+         ))}
       </div>
     </div>
   )

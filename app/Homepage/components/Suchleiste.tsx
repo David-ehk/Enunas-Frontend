@@ -22,7 +22,7 @@ const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTerm = e.target.value
     setSearchTerm(newTerm)
-    
+
     // Hier Query ausführen wenn mehr als 2 Zeichen
     if (newTerm.length > 2) {
       // fetch(`/api/search?q=${newTerm}`)
@@ -37,36 +37,38 @@ const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
   return (
     <>
       {/* Overlay */}
-      <div 
-        className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300
+      <div
+        className={`fixed inset-0 bg-black/40 transition-opacity duration-300
                     ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        style={{ zIndex: 9998 }}
         onClick={onClose}
       />
 
       {/* Search Sidebar */}
-      <aside 
-        className={`fixed top-0 right-0 h-full w-full md:w-[500px] bg-[#F5F5F0] z-50
+      <aside
+        className={`fixed top-0 right-0 w-full md:w-[500px]
                     transform transition-transform duration-500 ease-out
                     ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{ backgroundColor: '#F5F5F0', zIndex: 9999, height: '100vh', minHeight: '100vh' }}
       >
         {/* Close Button */}
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center
                    hover:bg-black/5 rounded-full transition-all duration-300"
           aria-label="Suche schließen"
         >
-          <svg 
-            className="w-5 h-5" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={1.5} 
-              d="M6 18L18 6M6 6l12 12" 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M6 18L18 6M6 6l12 12"
             />
           </svg>
         </button>
@@ -87,17 +89,17 @@ const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
                        focus-visible:border-black transition-colors duration-300"
             />
             {/* Search Icon */}
-            <svg 
-              className="absolute right-0 top-1 w-5 h-5 text-black/60" 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              className="absolute right-0 top-1 w-5 h-5 text-black/60"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={1.5} 
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
           </div>
@@ -108,7 +110,7 @@ const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
           <h3 className="text-xs tracking-[0.15em] uppercase mb-6 text-black/80">
             HIGHLIGHTS
           </h3>
-          
+
           <ul className="space-y-3">
             {highlights.map((item, index) => (
               <li key={index}>
@@ -132,15 +134,15 @@ const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
             <h3 className="text-[11px] tracking-[0.15em] uppercase font-medium mb-4 text-black/80">
               SUCHERGEBNISSE
             </h3>
-            
+
             {/* Beispiel-Ergebnisse - später dynamisch */}
             <div className="space-y-4">
               <p className="text-sm text-black/60">
-                {searchTerm.length < 3 
-                  ? 'Geben Sie mindestens 3 Zeichen ein...' 
+                {searchTerm.length < 3
+                  ? 'Geben Sie mindestens 3 Zeichen ein...'
                   : `Suche nach "${searchTerm}"...`}
               </p>
-              
+
               {/* Hier kommen später die echten Suchergebnisse */}
             </div>
           </div>

@@ -8,22 +8,22 @@ const PopularProductCard = ({imgURL,Brandname, name,colour, colourname, price, h
  <div className="flex flex-1 flex-col w-full group">
       <a href={href} className="block">
         {/* Bild Container mit Favorite Icon */}
-        <div className="relative w-full aspect-[4/5] mb-2 overflow-hidden">
-          <img 
-            className="w-full h-full object-cover" 
+        <div className="relative w-full aspect-[4/5] mb-2 overflow-hidden product-image-container">
+          <img
+            className="w-full h-full object-cover product-image"
             src={imgURL}
             alt={name}
           />
-          
+
           {/* Favorite Star Icon - oben rechts braucht ein bessres Icon */}
-          <button className="absolute top-4 right-4 p-2 ">
+          <button className="absolute top-4 right-4 p-2 favorite-btn">
             <span className="text-lg">♡</span>
           </button>
 
         </div>
 
         {/* Text Content mit mehr Weißraum */}
-        <div >
+        <div className="product-info-lift">
           {/* Neu Badge und Brand Name in einer Zeile */}
           <div className=" ">
             {/*isNew && (
