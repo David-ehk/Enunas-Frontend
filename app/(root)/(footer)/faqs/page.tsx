@@ -1,5 +1,5 @@
 import React from 'react'
-import {  AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 
 // Test muss alles noch überarbeitet werden
 
@@ -11,8 +11,8 @@ export default function faqs() {
             <h2> Wie können wir dir heute helfen ?</h2>
         </div>
 
-
-            <AccordionItem value="shipping">
+        <Accordion type="single" collapsible>
+            <AccordionItem value="shipping-1">
                 <AccordionTrigger>Versand & Rückgabe</AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-2 text-sm">
@@ -23,7 +23,7 @@ export default function faqs() {
                 </AccordionContent>
               </AccordionItem>
 
-               <AccordionItem value="shipping">
+               <AccordionItem value="shipping-2">
                 <AccordionTrigger>Versand & Rückgabe</AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-2 text-sm">
@@ -34,7 +34,7 @@ export default function faqs() {
                 </AccordionContent>
               </AccordionItem>
 
-               <AccordionItem value="shipping">
+               <AccordionItem value="shipping-3">
                 <AccordionTrigger>Versand & Rückgabe</AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-2 text-sm">
@@ -46,7 +46,7 @@ export default function faqs() {
               </AccordionItem>
 
 
-               <AccordionItem value="shipping">
+               <AccordionItem value="shipping-4">
                 <AccordionTrigger>Versand & Rückgabe</AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-2 text-sm">
@@ -56,6 +56,7 @@ export default function faqs() {
                   </div>
                 </AccordionContent>
               </AccordionItem>
+        </Accordion>
 
     </div>
   )

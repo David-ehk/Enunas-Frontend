@@ -1,4 +1,5 @@
 import React from 'react'
+import Link from 'next/link'
 import ProductDetails from './components/ProductDetails'
 import RelatedProducts from './components/RelatedProducts'
 import { getProductBySlug, getAllProducts, slugifyProductName } from '@/lib/mockProducts'
@@ -39,9 +40,9 @@ async function ProductPage({ params }: ProductPageProps) {
       <div className="px-8 py-8">
          {/* Breadcrumb */}
          <nav className="text-sm text-gray-500">
-            <a href="/" className="hover:text-black">Home</a>
+            <Link href="/" className="hover:text-black">Home</Link>
             {' / '}
-            <a href="/bekleidung" className="hover:text-black">Bekleidung</a>
+            <Link href="/bekleidung" className="hover:text-black">Bekleidung</Link>
             {' / '}
             <span className="font-light text-gray-500 hover:text-black">{product.name}</span>
           </nav>

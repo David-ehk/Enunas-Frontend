@@ -83,7 +83,7 @@ function ImageGallery({ images, productName }: ImageGalleryProps) {
         {images.map((image, index) => (
           <div
             key={index}
-            ref={(el) => (imageRefs.current[index] = el)}
+            ref={(el) => { imageRefs.current[index] = el }}
             className="w-full h-full snap-center snap-always flex-shrink-0 bg-gray-50"
           >
             <img

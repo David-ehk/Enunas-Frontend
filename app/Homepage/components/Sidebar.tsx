@@ -125,10 +125,10 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     { title: 'Sale', href: '/sale', hasSubmenu: false, color: "#DE0000" }
   ]
 
-  const handleCategoryClick = (item: any) => {
+  const handleCategoryClick = (item: MenuItem) => {
     if (item.hasSubmenu) {
       setActiveSubmenu(item.title)
-    } else {
+    } else if (item.href) {
       window.location.href = item.href
       onClose()
     }
@@ -185,7 +185,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         {/* Navigation */}
         <nav className="h-[calc(100%-120px)] overflow-y-auto px-8 py-8">
           <ul className="space-y-2">
-            {menuItems.map((item: any) => (
+            {menuItems.map((item) => (
               <li key={item.title}>
                 <button
                   onClick={() => handleCategoryClick(item)}
@@ -285,20 +285,20 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           <nav className="h-[calc(100%-100px)] overflow-y-auto px-6 py-6">
             {/* "Siehe Alle" Link */}
             <a
-              href={menuItems.find((item: any) => item.title === activeSubmenu)?.submenu?.showAll.href}
+              href={menuItems.find((item) => item.title === activeSubmenu)?.submenu?.showAll.href}
               onClick={handleLinkClick}
               className="block py-4 px-5 mb-4 transition-all duration-300 hover:translate-x-1"
             >
               <span className="font-spartan text-sm tracking-wide uppercase">
-                {menuItems.find((item: any) => item.title === activeSubmenu)?.submenu?.showAll.title}
+                {menuItems.find((item) => item.title === activeSubmenu)?.submenu?.showAll.title}
               </span>
             </a>
 
             {/* Accordion Categories */}
             <ul className="space-y-2">
               {menuItems
-                .find((item: any) => item.title === activeSubmenu)
-                ?.submenu?.categories?.map((category: any) => (
+                .find((item) => item.title === activeSubmenu)
+                ?.submenu?.categories?.map((category) => (
                   <li key={category.title}>
                     {/* Accordion Button */}
                     <button
@@ -333,7 +333,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                                 ${openAccordion === category.title ? 'max-h-96' : 'max-h-0'}`}
                     >
                       <ul className="pl-4 py-2 space-y-1">
-                        {category.items.map((item: any) => (
+                        {category.items.map((item) => (
                           <li key={item.href}>
                             <Link
                               href={item.href}

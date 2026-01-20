@@ -2,7 +2,17 @@ import Link from "next/link"
 
 // Bug href ist falsch muss zum nächsten produkt weirter zeigen
 
-const PopularProductCard = ({imgURL,Brandname, name,colour, colourname, price, href}) => {
+interface PopularProductCardProps {
+  imgURL: string;
+  Brandname: string;
+  name: string;
+  colour: string;
+  colourname: string;
+  price: string;
+  href: string;
+}
+
+const PopularProductCard = ({imgURL, Brandname, name, colour, colourname, price, href}: PopularProductCardProps) => {
 
   return (
  <div className="flex flex-1 flex-col w-full group">
