@@ -52,7 +52,6 @@ const PopularProductCard = ({
   const displayCategories = categories.length > 0 ? categories : catalogue;
   const [isHovered, setIsHovered] = useState(false);
   const isNew = isNewProduct(createdAt);
-  const hasMultipleVariants = colours.length > 2;
 
   return (
     <div
@@ -130,36 +129,35 @@ const PopularProductCard = ({
               </h3>
 
               {/* Color Swatches */}
-              <div className="flex flex-col items-start">
-                <div className="flex items-center gap-2">
-                  {hasMultipleVariants ? (
-                    /* More than 2 colors: show first + "siehe weitere" */
-                    <>
-                      <div
-                        className="w-5 h-5 border border-gray-200"
-                        style={{ backgroundColor: colours[0].hex }}
-                        aria-label={colours[0].name}
-                      />
-                      <span className="text-xs text-enunas-gray-medium">
-                        + siehe weitere
-                      </span>
-                    </>
-                  ) : (
-                    /* 2 or fewer colors: show all swatches */
-                    <>
-                      {colours.map((colour, index) => (
-                        <div
-                          key={index}
-                          className="w-5 h-5 border border-gray-200"
-                          style={{ backgroundColor: colour.hex }}
-                          aria-label={colour.name}
-                        />
-                      ))}
-                    </>
-                  )}
+              <div className="flex items-start gap-2">
+                {/* First Swatch with centered bar */}
+                <div className="flex flex-col items-center">
+                  <div
+                    className="w-5 h-5 border border-gray-200"
+                    style={{ backgroundColor: colours[0]?.hex }}
+                    aria-label={colours[0]?.name}
+                  />
+                  <div className="h-[1px] w-6 bg-black mt-1" />
                 </div>
-                {/* Black bar under first swatch */}
-                <div className="w-6 h-[1px] bg-black mt-1" />
+
+                {/* Second Swatch (only if exactly 2 colors) */}
+                {colours.length === 2 && (
+                  <div className="flex flex-col items-center">
+                    <div
+                      className="w-5 h-5 border border-gray-200"
+                      style={{ backgroundColor: colours[1].hex }}
+                      aria-label={colours[1].name}
+                    />
+                    <div className="h-[1px] w-6 bg-transparent mt-1" />
+                  </div>
+                )}
+
+                {/* More than 2 colors: show count */}
+                {colours.length > 2 && (
+                  <span className="text-xs text-enunas-gray-medium self-center">
+                    +{colours.length - 1} siehe weitere
+                  </span>
+                )}
               </div>
 
               {/* Price */}
