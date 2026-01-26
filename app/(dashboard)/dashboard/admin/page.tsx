@@ -1,9 +1,5 @@
-import React from 'react'
-
-function page() {
+export default function AdminPage() {
   return (
-    <div>page</div>
+    <div>Admin Dashboard</div>
   )
 }
-
-export default page

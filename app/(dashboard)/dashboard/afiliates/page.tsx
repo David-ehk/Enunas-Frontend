@@ -1,9 +1,5 @@
-import React from 'react'
-
-function page() {
+export default function AffiliatePage() {
   return (
-    <div>page</div>
+    <div>Affiliate Dashboard</div>
   )
 }
-
-export default page

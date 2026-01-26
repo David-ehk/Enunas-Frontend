@@ -26,6 +26,7 @@ interface PopularProductCardProps {
   createdAt: Date | string;
   sizes?: string[];
   categories?: string[];
+  catalogue?: string[]; // alias for categories
 }
 
 const isNewProduct = (createdAt: Date | string): boolean => {
@@ -44,8 +45,11 @@ const PopularProductCard = ({
   colours,
   createdAt,
   sizes = [],
-  categories = []
+  categories = [],
+  catalogue = []
 }: PopularProductCardProps) => {
+  // Use catalogue if categories is empty
+  const displayCategories = categories.length > 0 ? categories : catalogue;
   const [isHovered, setIsHovered] = useState(false);
   const isNew = isNewProduct(createdAt);
   const hasMultipleVariants = colours.length > 2;
@@ -186,9 +190,9 @@ const PopularProductCard = ({
               )}
 
               {/* Category Pills */}
-              {categories.length > 0 && (
+              {displayCategories.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {categories.map((category, index) => {
+                  {displayCategories.map((category, index) => {
                     const colors = STYLE_COLORS[category.toLowerCase()] || { bg: 'bg-gray-400', text: 'text-white' }
                     return (
                       <span

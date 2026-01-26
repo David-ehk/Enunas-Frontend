@@ -18,11 +18,10 @@ function Test() {
       <h2 className="text-white text-4xl md:text-6xl font-light">Comming soon</h2>
       </div>
       <ASCIIText
-      text='hello_world'
-      enableWaves
-      asciiFontSize={14}
-     text="Drops!"
-    />
+        text="Drops!"
+        enableWaves
+        asciiFontSize={14}
+      />
     </div>
   );
 }
