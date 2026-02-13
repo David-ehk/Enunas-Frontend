@@ -35,16 +35,16 @@ export default function CartSidebar() {
     <>
       {/* Overlay */}
       {isCartOpen && (
-        <div 
-          className="fixed inset-0 bg-black/30 z-40 transition-opacity duration-300"
+        <div
+          className="fixed inset-0 bg-black/30 z-[9998] transition-opacity duration-300"
           onClick={closeCart}
         />
       )}
 
       {/* Sidebar */}
-      <div 
+      <div
         className={`
-          fixed top-0 right-0 h-full w-full sm:w-[480px] bg-[#F5F5F0] z-50
+          fixed top-0 right-0 h-full w-full sm:w-[480px] bg-[#F5F5F0] z-[9999]
           transform transition-transform duration-300 ease-in-out
           ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}
           flex flex-col

@@ -122,11 +122,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de">
-      <body className={`${LeagueSpartan.variable} ${CormorantGaramond.variable} overflow-x-hidden w-full`}>
-        <div  className="w-full max-w-full overflow-hidden">
+    <html lang="de" className="overflow-x-clip">
+      <body className={`${LeagueSpartan.variable} ${CormorantGaramond.variable} w-full`}>
         {children}
-        </div>
       </body>
     </html>
   );

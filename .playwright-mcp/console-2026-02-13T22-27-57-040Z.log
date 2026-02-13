@@ -1,0 +1,26 @@
+[    6669ms] [WARNING] Warning: fragment with name ProductTraceability already exists.
+graphql-tag enforces all fragment names across your application to be unique; read more about
+this in the docs: http://dev.apollodata.com/core/fragments.html#unique-names @ https://www.dior.com/couture-catalog-v2-assets/_next/static/chunks/pages/_app-0aab421d049ccc40.js:13
+[    6673ms] [WARNING] Warning: fragment with name ProductVariation already exists.
+graphql-tag enforces all fragment names across your application to be unique; read more about
+this in the docs: http://dev.apollodata.com/core/fragments.html#unique-names @ https://www.dior.com/couture-catalog-v2-assets/_next/static/chunks/pages/_app-0aab421d049ccc40.js:13
+[    6827ms] [WARNING] Warning: fragment with name NavigationCallToAction already exists.
+graphql-tag enforces all fragment names across your application to be unique; read more about
+this in the docs: http://dev.apollodata.com/core/fragments.html#unique-names @ https://www.dior.com/couture-catalog-v2-assets/_next/static/chunks/pages/_app-0aab421d049ccc40.js:13
+[    6840ms] [WARNING] Warning: fragment with name NavigationItem already exists.
+graphql-tag enforces all fragment names across your application to be unique; read more about
+this in the docs: http://dev.apollodata.com/core/fragments.html#unique-names @ https://www.dior.com/couture-catalog-v2-assets/_next/static/chunks/pages/_app-0aab421d049ccc40.js:13
+[    6842ms] [WARNING] Warning: fragment with name Navigation already exists.
+graphql-tag enforces all fragment names across your application to be unique; read more about
+this in the docs: http://dev.apollodata.com/core/fragments.html#unique-names @ https://www.dior.com/couture-catalog-v2-assets/_next/static/chunks/pages/_app-0aab421d049ccc40.js:13
+[    6904ms] [WARNING] Warning: fragment with name applePayPaymentMethodFull already exists.
+graphql-tag enforces all fragment names across your application to be unique; read more about
+this in the docs: http://dev.apollodata.com/core/fragments.html#unique-names @ https://www.dior.com/couture-catalog-v2-assets/_next/static/chunks/pages/_app-0aab421d049ccc40.js:13
+[    6907ms] [WARNING] Warning: fragment with name paymentMethodsFull already exists.
+graphql-tag enforces all fragment names across your application to be unique; read more about
+this in the docs: http://dev.apollodata.com/core/fragments.html#unique-names @ https://www.dior.com/couture-catalog-v2-assets/_next/static/chunks/pages/_app-0aab421d049ccc40.js:13
+[    6909ms] [WARNING] Warning: fragment with name cartPaypalSession already exists.
+graphql-tag enforces all fragment names across your application to be unique; read more about
+this in the docs: http://dev.apollodata.com/core/fragments.html#unique-names @ https://www.dior.com/couture-catalog-v2-assets/_next/static/chunks/pages/_app-0aab421d049ccc40.js:13
+[   15687ms] [WARNING] The resource https://diorama.dam-broadcast.com/pm_11872_1254_1254036-ignxdujew4-whr.jpg was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://www.dior.com/de_de/fashion:0
+[   21860ms] [WARNING] The resource https://diorama.dam-broadcast.com/pm_11872_1254_1254036-ignxdujew4-whr.jpg was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://www.dior.com/de_de/fashion:0

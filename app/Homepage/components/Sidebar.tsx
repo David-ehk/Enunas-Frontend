@@ -1,5 +1,8 @@
+'use client'
+
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 interface SidebarProps {
   isOpen: boolean
@@ -9,12 +12,31 @@ interface SidebarProps {
 const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null)
   const [openAccordion, setOpenAccordion] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  // Mount state for portal (SSR safety)
+  useEffect(() => {
+    setMounted(true)
+    return () => setMounted(false)
+  }, [])
 
   // Submenu schließen wenn Hauptmenü geschlossen wird
   useEffect(() => {
     if (!isOpen) {
       setActiveSubmenu(null)
       setOpenAccordion(null)
+    }
+  }, [isOpen])
+
+  // Lock body scroll when sidebar is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
     }
   }, [isOpen])
 
@@ -142,7 +164,8 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     onClose()
   }
 
-  return (
+  // Sidebar content to be portaled
+  const sidebarContent = (
     <>
       {/* Overlay */}
       <div
@@ -150,6 +173,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                     ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         style={{ zIndex: 9998 }}
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Main Sidebar */}
@@ -158,6 +182,9 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                     transform transition-all duration-500 ease-out
                     ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ backgroundColor: '#370E4D', zIndex: 9999, height: '100vh', minHeight: '100vh' }}
+        aria-label="Navigation menu"
+        role="dialog"
+        aria-modal="true"
       >
         {/* Header */}
         <div className="flex items-center px-8 py-4 border-b border-white/10">
@@ -356,6 +383,12 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       )}
     </>
   )
+
+  // Use portal to render at document body level (escapes header stacking context)
+  // Only render portal after component is mounted (SSR safety)
+  if (!mounted) return null
+
+  return createPortal(sidebarContent, document.body)
 }
 
 export default Sidebar
