@@ -1,4 +1,7 @@
-import { useState } from 'react'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Input } from "@/components/ui/input"
 import Link from 'next/link'
 
@@ -9,6 +12,25 @@ interface SearchBarProps {
 
 const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
   const [searchTerm, setSearchTerm] = useState('')
+  const [mounted, setMounted] = useState(false)
+
+  // Mount state for portal (SSR safety)
+  useEffect(() => {
+    setMounted(true)
+    return () => setMounted(false)
+  }, [])
+
+  // Lock body scroll when search is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
 
   // Highlights - könnten aus einer API/Datenbank kommen
   const highlights = [
@@ -34,14 +56,16 @@ const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
     onClose()
   }
 
-  return (
+  // Search content to be portaled
+  const searchContent = (
     <>
       {/* Overlay */}
       <div
-        className={`fixed inset-0 bg-black/40 transition-opacity duration-300
+        className={`fixed inset-0 bg-black/40 backdrop-blur-sm transition-all duration-300
                     ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         style={{ zIndex: 9998 }}
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Search Sidebar */}
@@ -50,6 +74,9 @@ const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
                     transform transition-transform duration-500 ease-out
                     ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
         style={{ backgroundColor: '#F5F5F0', zIndex: 9999, height: '100vh', minHeight: '100vh' }}
+        aria-label="Search panel"
+        role="dialog"
+        aria-modal="true"
       >
         {/* Close Button */}
         <button
@@ -150,6 +177,12 @@ const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
       </aside>
     </>
   )
+
+  // Use portal to render at document body level (escapes header stacking context)
+  // Only render portal after component is mounted (SSR safety)
+  if (!mounted) return null
+
+  return createPortal(searchContent, document.body)
 }
 
 export default SearchBar
