@@ -73,9 +73,9 @@ export default function DisappearingNavbar() {
       <header
         className={`
           sm:px-10 px-4 py-3 fixed z-50 w-full bg-white
+          border-b border-gray-200
           transition-all duration-500 ease-out
           ${isVisible ? 'translate-y-0' : '-translate-y-full'}
-          ${lastScrollY > 50 ? 'border-b border-gray-100' : ''}
         `}
       >
         <nav className="flex justify-between items-center max-w-[1800px] mx-auto">

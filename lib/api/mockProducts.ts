@@ -255,10 +255,10 @@ export const mockProducts: MockProduct[] = [
 ];
 
 // Helper function to build href
-// URL structure: /bekleidung/[category]/[subcategory]/[slug]
-// Example: /bekleidung/schuhe/sneaker/nike-air-shoes-5
+// URL structure: /bekleidung/[brand]/[slug]
+// Example: /bekleidung/nike/nike-air-shoes-5
 export const buildProductHref = (product: MockProduct): string => {
-  return `/bekleidung/${product.category}/${product.subcategory}/${product.slug}`;
+  return `/bekleidung/${generateSlug(product.brandName)}/${product.slug}`;
 };
 
 // Get popular products (for "Unsere Favoriten" section)

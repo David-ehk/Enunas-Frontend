@@ -7,6 +7,7 @@ interface FilterBarProps {
   articleCount: number
   onGenderChange?: (genders: string[]) => void
   onSortChange?: (sort: string) => void
+  onCategoryReset?: () => void
 }
 
 const SORT_OPTIONS = [
@@ -21,7 +22,8 @@ const BRANDS = ['Nike', 'Adidas', 'Gucci', 'Balenciaga', 'Off-White', 'Moncler',
 export default function FilterBar({
   articleCount,
   onGenderChange,
-  onSortChange
+  onSortChange,
+  onCategoryReset
 }: FilterBarProps) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [activeGenders, setActiveGenders] = useState<string[]>(['damen', 'herren'])
@@ -245,6 +247,7 @@ export default function FilterBar({
                       setActiveGenders(['damen', 'herren'])
                       setSelectedBrands([])
                       onGenderChange?.(['damen', 'herren'])
+                      onCategoryReset?.()
                     }}
                     className="group flex items-center gap-2 text-[11px] text-enunas-gray-medium hover:text-enunas-black transition-colors duration-300"
                     style={{ fontFamily: 'var(--font-league-spartan)' }}

@@ -68,20 +68,20 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           {
             title: 'Tops',
             items: [
-              { title: 'Siehe Alle Tops', href: '/bekleidung/tops' },
-              { title: 'T-Shirts / Oberteile', href: '/bekleidung/tops/tshirts' },
-              { title: 'Sweater', href: '/bekleidung/tops/sweater' },
-              { title: 'Hoodie', href: '/bekleidung/tops/hoodie' },
-              { title: 'Jacke / Puffer', href: '/bekleidung/tops/jacke' }
+              { title: 'Siehe Alle Tops', href: '/bekleidung?category=oberteile' },
+              { title: 'T-Shirts / Oberteile', href: '/bekleidung?category=oberteile&type=tshirts' },
+              { title: 'Sweater', href: '/bekleidung?category=oberteile&type=sweater' },
+              { title: 'Hoodie', href: '/bekleidung?category=oberteile&type=hoodie' },
+              { title: 'Jacke / Puffer', href: '/bekleidung?category=jacken' }
             ]
           },
           {
             title: 'Bottoms',
             items: [
-              { title: 'Siehe Alle Bottoms', href: '/bekleidung/bottoms' },
-              { title: 'Shorts', href: '/bekleidung/bottoms/shorts' },
-              { title: 'Jogging', href: '/bekleidung/bottoms/jogging' },
-              { title: 'Jeans', href: '/bekleidung/bottoms/jeans' }
+              { title: 'Siehe Alle Bottoms', href: '/bekleidung?category=hosen' },
+              { title: 'Shorts', href: '/bekleidung?category=hosen&type=shorts' },
+              { title: 'Jogging', href: '/bekleidung?category=hosen&type=jogging' },
+              { title: 'Jeans', href: '/bekleidung?category=hosen&type=jeans' }
             ]
           }
         ]

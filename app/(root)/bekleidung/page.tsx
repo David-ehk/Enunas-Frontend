@@ -1,150 +1,90 @@
 'use client'
 
-import React, { useState } from 'react'
-import DisappearingNavbar from './components/DisappearingNavbar'
+import React, { Suspense, useState, useMemo, useCallback } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import CategoryNavigation from './components/CategoryNavigation'
 import FilterBar from './components/FilterBar'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 import { generateSlug } from '@/lib/product'
+import { getAllProducts, buildProductHref } from '@/lib/api/mockProducts'
 
-// Temporäre Produktdaten
-const products = [
-  {
-    imgURL: "https://www.manieredevoir.com/cdn/shop/files/GEN-WD-23-10-2025.jpg?crop=center&height=2095&v=1761206881&width=1920",
-    brandName: "Nike",
-    productName: "Nike Air Shoes 5",
-    price: "220€",
-    href: `/bekleidung/bekleidung/schuhe/${generateSlug("nike air shoes 5")}`,
-    colours: [
-      { hex: "#DE0000", name: "Rot" },
-      { hex: "#1A1A1A", name: "Schwarz" }
-    ],
-    createdAt: new Date(),
-    sizes: ["38", "39", "40", "41", "42", "43", "44"],
-    categories: ["Streetwear"],
-    gender: "herren"
-  },
-  {
-    imgURL: "https://www.viviennewestwood.com/dw/image/v2/BJGV_PRD/on/demandware.static/-/Sites-viviennewestwood-master-catalog/default/dw69896e20/images/2G01000A-J001M-_GREY-MELANGE_001_large.jpeg?q=80",
-    brandName: "Jordan",
-    productName: "Worlds End Denim Boxer Jacket",
-    price: "220€",
-    href: `/bekleidung/bekleidung/jacken/${generateSlug("Worlds End Denim Boxer Jacket")}`,
-    colours: [
-      { hex: "#630393", name: "Lila" },
-      { hex: "#1A1A1A", name: "Schwarz" }
-    ],
-    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-    sizes: ["XS", "S", "M", "L", "XL"],
-    categories: ["Experimental"],
-    gender: "damen"
-  },
-  {
-    imgURL: "https://eu.manieredevoir.com/cdn/shop/files/MDV_0030_MDV2_be0fab84-a04c-4251-adc9-1fefaa4175c4.jpg?v=1759502594",
-    brandName: "Maison Guava",
-    productName: "D.D. Shell Hooded-Padded Jacket",
-    price: "220€",
-    href: `/bekleidung/bekleidung/jacken/${generateSlug("D.D. Shell hooded-padded jacket")}`,
-    colours: [
-      { hex: "#FFFFFF", name: "Weiß" }
-    ],
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-    sizes: ["S", "M", "L", "XL", "XXL"],
-    categories: ["Athleisure"],
-    gender: "herren"
-  },
-  {
-    imgURL: "https://www.viviennewestwood.com/dw/image/v2/BJGV_PRD/on/demandware.static/-/Library-Sites-viviennewestwood-global-content/default/dw8c63789d/images/collections/autumn-winter-25_26/AW2526%20Lookbook/2x3/VW_AW2526_Lookbook_Look_02.jpg?sw=632&sh=948&q=80",
-    brandName: "6pm",
-    productName: "Produktbeschreibung Random Blazer",
-    price: "220€",
-    href: `/bekleidung/bekleidung/oberteile/${generateSlug("Produktbeschreibung random blabalba")}`,
-    colours: [
-      { hex: "#0A0A0A", name: "Schwarz" },
-      { hex: "#2D2D2D", name: "Anthrazit" }
-    ],
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    sizes: ["XS", "S", "M", "L"],
-    categories: ["Culture"],
-    gender: "damen"
-  },
-  {
-    imgURL: "https://www.manieredevoir.com/cdn/shop/files/GEN-WD-23-10-2025.jpg?crop=center&height=2095&v=1761206881&width=1920",
-    brandName: "Off-White",
-    productName: "Arrow Logo Hoodie",
-    price: "450€",
-    href: `/bekleidung/oberteile/hoodies/${generateSlug("Arrow Logo Hoodie")}`,
-    colours: [
-      { hex: "#000000", name: "Schwarz" }
-    ],
-    createdAt: new Date(),
-    sizes: ["S", "M", "L", "XL"],
-    categories: ["Streetwear"],
-    gender: "herren"
-  },
-  {
-    imgURL: "https://www.viviennewestwood.com/dw/image/v2/BJGV_PRD/on/demandware.static/-/Sites-viviennewestwood-master-catalog/default/dw69896e20/images/2G01000A-J001M-_GREY-MELANGE_001_large.jpeg?q=80",
-    brandName: "Acne Studios",
-    productName: "Face Logo T-Shirt",
-    price: "180€",
-    href: `/bekleidung/oberteile/t-shirts/${generateSlug("Face Logo T-Shirt")}`,
-    colours: [
-      { hex: "#FFFFFF", name: "Weiß" },
-      { hex: "#FFC0CB", name: "Rosa" }
-    ],
-    createdAt: new Date(),
-    sizes: ["XS", "S", "M", "L"],
-    categories: ["Minimal"],
-    gender: "damen"
-  },
-  {
-    imgURL: "https://eu.manieredevoir.com/cdn/shop/files/MDV_0030_MDV2_be0fab84-a04c-4251-adc9-1fefaa4175c4.jpg?v=1759502594",
-    brandName: "Balenciaga",
-    productName: "Track Sneakers 2.0",
-    price: "895€",
-    href: `/bekleidung/schuhe/${generateSlug("Track Sneakers 2.0")}`,
-    colours: [
-      { hex: "#FFFFFF", name: "Weiß" },
-      { hex: "#000000", name: "Schwarz" }
-    ],
-    createdAt: new Date(),
-    sizes: ["39", "40", "41", "42", "43", "44"],
-    categories: ["Luxury"],
-    gender: "herren"
-  },
-  {
-    imgURL: "https://www.viviennewestwood.com/dw/image/v2/BJGV_PRD/on/demandware.static/-/Library-Sites-viviennewestwood-global-content/default/dw8c63789d/images/collections/autumn-winter-25_26/AW2526%20Lookbook/2x3/VW_AW2526_Lookbook_Look_02.jpg?sw=632&sh=948&q=80",
-    brandName: "Moncler",
-    productName: "Maya Short Down Jacket",
-    price: "1.290€",
-    href: `/bekleidung/oberteile/jacken/${generateSlug("Maya Short Down Jacket")}`,
-    colours: [
-      { hex: "#000000", name: "Schwarz" },
-      { hex: "#1A237E", name: "Navy" }
-    ],
-    createdAt: new Date(),
-    sizes: ["0", "1", "2", "3", "4"],
-    categories: ["Luxury"],
-    gender: "damen"
-  }
-]
+// Products from central source with gender for filtering
+const allMockProducts = getAllProducts()
+const products = allMockProducts.map(p => ({
+  imgURL: p.imgURL,
+  brandName: p.brandName,
+  productName: p.productName,
+  price: p.price,
+  href: buildProductHref(p),
+  colours: p.colours,
+  createdAt: p.createdAt,
+  sizes: p.sizes,
+  categories: p.catalogue,
+  category: p.category,
+  subcategory: p.subcategory,
+  gender: ["1", "3", "5", "7"].includes(p.id) ? "herren" : "damen"
+}))
+
+const CATEGORY_LABELS: Record<string, string> = {
+  oberteile: 'Oberteile',
+  jacken: 'Jacken',
+  hosen: 'Hosen',
+  schuhe: 'Schuhe',
+  accessoires: 'Accessoires',
+}
+
+const TYPE_LABELS: Record<string, string> = {
+  tshirts: 'T-Shirts',
+  hoodie: 'Hoodies',
+  sweater: 'Sweater',
+  hemden: 'Hemden',
+  blazer: 'Blazer',
+  jeans: 'Jeans',
+  jogging: 'Jogger',
+  shorts: 'Shorts',
+  denim: 'Denim',
+  puffer: 'Puffer',
+}
 
 export default function BekleidungPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <BekleidungContent />
+    </Suspense>
+  )
+}
+
+function BekleidungContent() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const [activeGenders, setActiveGenders] = useState<string[]>(['damen', 'herren'])
 
-  // Filter products by gender
-  const filteredProducts = products.filter(product =>
-    activeGenders.includes(product.gender)
-  )
+  const categoryParam = searchParams.get('category') || ''
+  const typeParam = searchParams.get('type') || ''
+
+  // Build page title from params
+  const pageTitle = useMemo(() => {
+    if (typeParam && TYPE_LABELS[typeParam]) return TYPE_LABELS[typeParam]
+    if (categoryParam && CATEGORY_LABELS[categoryParam]) return CATEGORY_LABELS[categoryParam]
+    return 'Bekleidung'
+  }, [categoryParam, typeParam])
+
+  // Filter products by category, type, and gender
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      if (!activeGenders.includes(product.gender)) return false
+      if (categoryParam && product.category !== categoryParam) return false
+      if (typeParam && product.subcategory !== typeParam) return false
+      return true
+    })
+  }, [activeGenders, categoryParam, typeParam])
+
+  const handleCategoryReset = useCallback(() => {
+    router.push('/bekleidung')
+  }, [router])
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Fixed Navbar - z-50 */}
-      <DisappearingNavbar />
-
-      {/* Spacer for fixed Navbar */}
-      <div className="h-14" />
-
       {/* Category Navigation - scrolls with content */}
       <div className="bg-white border-b border-gray-100">
         <CategoryNavigation />
@@ -158,7 +98,7 @@ export default function BekleidungPage() {
             className="text-3xl lg:text-4xl tracking-[0.02em] text-enunas-black font-light"
             style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
           >
-            Bekleidung
+            {pageTitle}
           </h1>
 
           <div className="mt-5">
@@ -176,6 +116,7 @@ export default function BekleidungPage() {
         <FilterBar
           articleCount={filteredProducts.length}
           onGenderChange={setActiveGenders}
+          onCategoryReset={handleCategoryReset}
         />
 
         {/* Product Grid - Generous spacing like McQueen */}

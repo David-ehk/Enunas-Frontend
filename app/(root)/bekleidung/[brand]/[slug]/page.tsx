@@ -7,14 +7,13 @@ import { notFound } from 'next/navigation'
 
 interface ProductPageProps {
   params: Promise<{
-    category: string;
-    subcategory: string;
+    brand: string;
     slug: string;
   }>;
 }
 
 async function ProductPage({ params }: ProductPageProps) {
-  const { category, subcategory, slug } = await params
+  const { brand, slug } = await params
 
   // Versuche Produkt anhand Slug zu finden
   let product = getProductBySlug(slug)
@@ -44,7 +43,9 @@ async function ProductPage({ params }: ProductPageProps) {
             {' / '}
             <Link href="/bekleidung" className="hover:text-black">Bekleidung</Link>
             {' / '}
-            <span className="font-light text-gray-500 hover:text-black">{product.name}</span>
+            <Link href={`/bekleidung/${brand}`} className="hover:text-black">{product.brand}</Link>
+            {' / '}
+            <span className="font-light text-gray-500">{product.name}</span>
           </nav>
           <br/>
         <RelatedProducts />

@@ -196,39 +196,56 @@ main {
 
 }
 
+/* ============================================
+   ENUNAS ANIMATION SYSTEM
+   All keyframes, animation classes, hover effects,
+   and micro-interactions for the Enunas design system.
+   Referenced by CLAUDE.md — do not remove.
+   ============================================ */
+
+/* --- Keyframes --- */
+
+/* Fade In Up: Standard for text blocks, headings, CTAs */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
+/* Fade In Scale: For images, cards, and media elements */
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Fade In: Simple opacity transition for subtle reveals */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* --- Animation Utility Classes --- */
+
+/* Use: Text blocks, headings — animates up from 30px with fade */
 .animate-fade-in-up {
   animation: fadeInUp var(--duration-slower) var(--ease-out-expo) forwards;
   opacity: 0;
 }
 
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
+/* Use: Images, cards — scales from 95% with fade */
 .animate-fade-in-scale {
   animation: fadeInScale var(--duration-slower) var(--ease-out-expo) forwards;
   opacity: 0;
 }
 
-/* Parent Grid */
+/* Use: Subtle reveals — simple opacity fade */
+.animate-fade-in {
+  animation: fadeIn 0.6s var(--ease-out-expo) forwards;
+  opacity: 0;
+}
+
+/* --- Stagger Reveal: For grids and lists ---
+   Wrap items in .stagger-container for sequential reveal.
+   Each child animates with 100ms delay increment. */
 .stagger-container > * {
   opacity: 0;
   animation: fadeInUp var(--duration-slower) var(--ease-out-expo) forwards;
@@ -240,18 +257,16 @@ main {
 .stagger-container > *:nth-child(4) { animation-delay: 300ms; }
 .stagger-container > *:nth-child(5) { animation-delay: 400ms; }
 .stagger-container > *:nth-child(6) { animation-delay: 500ms; }
-/* Weitere nach Bedarf... */
 
-/* Max 20% Offset - subtil halten! */
+/* --- Parallax: Subtle background element movement ---
+   Use with JS: translateY = scrollProgress * 0.2 (max 20%) */
 .parallax-element {
   will-change: transform;
   transition: transform 0.1s linear;
 }
 
-/* Via JavaScript/Framer Motion:
-   translateY = scrollProgress * 0.2 (max 20%)
-*/
-
+/* --- Product Image Hover: 1.05x scale on hover ---
+   Wrap image in .product-image-container, apply .product-image to <Image> */
 .product-image-container {
   overflow: hidden;
 }
@@ -266,6 +281,10 @@ main {
 
 /* ============================================
    SCROLL-TRIGGERED ANIMATION STATES
+   Use with Intersection Observer:
+   - Add .scroll-hidden initially
+   - Switch to .scroll-visible when element enters viewport
+   - Combine with .stagger-delay-N for grid items
    ============================================ */
 .scroll-hidden {
   opacity: 0;
@@ -279,7 +298,7 @@ main {
               transform var(--duration-slower) var(--ease-out-expo);
 }
 
-/* Stagger delays for grid items */
+/* Stagger delays for scroll-triggered grid items */
 .stagger-delay-1 { transition-delay: 0ms; }
 .stagger-delay-2 { transition-delay: 75ms; }
 .stagger-delay-3 { transition-delay: 150ms; }
@@ -288,6 +307,8 @@ main {
 /* ============================================
    PRODUCT CARD ENHANCEMENTS
    ============================================ */
+
+/* Favorite button: scales up on hover */
 .favorite-btn {
   transition: transform var(--duration-normal) var(--ease-out-expo);
 }
@@ -296,6 +317,7 @@ main {
   transform: scale(1.15);
 }
 
+/* Product info lifts up when card is hovered */
 .product-info-lift {
   transition: transform var(--duration-normal) var(--ease-out-expo);
 }
@@ -304,6 +326,45 @@ main {
   transform: translateY(-4px);
 }
 
+/* ============================================
+   BUTTON HOVER: Primary Reveal Effect
+   Use: .btn-primary with a <span> child for z-index layering.
+   Hover reveals white background sliding up from bottom.
+   ============================================ */
+.btn-primary {
+  position: relative;
+  background: var(--color-enunas-purple, #370E4D);
+  color: #FFFFFF;
+  overflow: hidden;
+  transition: color var(--duration-normal) var(--ease-out-quart);
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #FFFFFF;
+  transform: translateY(100%);
+  transition: transform var(--duration-slow) var(--ease-out-expo);
+}
+
+.btn-primary:hover::before {
+  transform: translateY(0);
+}
+
+.btn-primary:hover {
+  color: var(--color-enunas-purple, #370E4D);
+}
+
+.btn-primary span {
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================
+   LINK UNDERLINE ANIMATION
+   Use: .link-animated — underline scales from right to left on hover
+   ============================================ */
 .link-animated {
   position: relative;
 }
@@ -315,7 +376,7 @@ main {
   left: 0;
   width: 100%;
   height: 1px;
-  background: var(--enunas-purple);
+  background: var(--color-enunas-purple, #370E4D);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform var(--duration-normal) var(--ease-out-expo);
@@ -326,6 +387,10 @@ main {
   transform-origin: left;
 }
 
+/* ============================================
+   ACCESSIBILITY: Reduced Motion
+   Disables all animations for users who prefer reduced motion.
+   ============================================ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
