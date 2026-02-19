@@ -15,9 +15,10 @@ import { useCart } from '@/app/context/CartContext'
 
 interface ProductDetailsProps {
   product: Product;
+  brandSlug: string;
 }
 
-function ProductDetails({ product }: ProductDetailsProps) {
+function ProductDetails({ product, brandSlug }: ProductDetailsProps) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [selectedColor, setSelectedColor] = useState<Color | null>(null)
   const [showFloatingButton, setShowFloatingButton] = useState(false)
@@ -74,11 +75,24 @@ function ProductDetails({ product }: ProductDetailsProps) {
 
   return (
     <>
-      <div className="pt-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Bilder-Galerie */}
           <div>
             <ImageGallery images={product.images} productName={product.name} />
+            {/* Breadcrumb — below gallery */}
+            <nav className="px-4 lg:px-6 py-4">
+              <ol className="flex items-center gap-1.5 text-[11px] text-enunas-gray-medium tracking-[0.02em]"
+                  style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                <li><Link href="/" className="hover:text-enunas-black transition-colors duration-200">Home</Link></li>
+                <li className="text-enunas-gray-light">/</li>
+                <li><Link href="/bekleidung" className="hover:text-enunas-black transition-colors duration-200">Bekleidung</Link></li>
+                <li className="text-enunas-gray-light">/</li>
+                <li><Link href={`/bekleidung/${brandSlug}`} className="hover:text-enunas-black transition-colors duration-200">{product.brand}</Link></li>
+                <li className="text-enunas-gray-light">/</li>
+                <li className="text-enunas-gray-dark">{product.name}</li>
+              </ol>
+            </nav>
           </div>
           
           {/* Produktinfo */}
@@ -169,69 +183,100 @@ function ProductDetails({ product }: ProductDetailsProps) {
         </div>
       </div>
 
-      {/* Fliegender Warenkorb Button */}
+      {/* Floating Add-to-Cart Bar — McQueen sharp style */}
       <div
-        className={`fixed bottom-6 left-0 right-0 px-6 transition-all duration-500 z-50 ${
+        className={`fixed bottom-0 left-0 right-0 z-50 transition-transform duration-500 ease-out ${
           showFloatingButton
-            ? 'translate-y-0 opacity-100'
-            : 'translate-y-20 opacity-0 pointer-events-none'
+            ? 'translate-y-0'
+            : 'translate-y-full'
         }`}
       >
-        <div className="max-w-4xl mx-auto backdrop-blur-xl bg-white/95 border border-gray-200 rounded-sm shadow-2xl p-4">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <h4 className="font-semibold text-black">{product.name}</h4>
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-sm text-gray-600">{formattedPrice}</p>
+        <div className="bg-white border-t border-enunas-gray-light">
+          <div className="max-w-[1800px] mx-auto px-6 lg:px-12 py-4 flex items-center gap-6">
+            <div className="flex-1 min-w-0">
+              <p
+                className="text-sm text-enunas-black truncate"
+                style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
+              >
+                {product.name}
+              </p>
+              <div className="flex items-center gap-3 mt-0.5">
+                <span
+                  className="text-xs text-enunas-gray-dark"
+                  style={{ fontFamily: 'var(--font-league-spartan)' }}
+                >
+                  {formattedPrice}
+                </span>
                 {selectedSize && (
-                  <span className="text-xs text-gray-500">Größe: {selectedSize}</span>
+                  <span
+                    className="text-[10px] text-enunas-gray-medium uppercase tracking-[0.1em]"
+                    style={{ fontFamily: 'var(--font-league-spartan)' }}
+                  >
+                    Größe: {selectedSize}
+                  </span>
                 )}
-                <span className="text-xs text-gray-500">color</span>
               </div>
             </div>
-            
+
             <button
               onClick={handleFloatingButtonClick}
-              className="px-8 py-3 bg-[#370E4D] text-white rounded-sm hover:bg-[#2a0a3a] transition-all whitespace-nowrap"
+              className="px-10 py-3.5 bg-[#370E4D] text-white hover:bg-[#4A1566] transition-colors duration-300 whitespace-nowrap"
+              style={{ fontFamily: 'var(--font-league-spartan)' }}
             >
-              <h3 className="text-base sm:text-lg">
+              <span className="text-[11px] tracking-[0.15em] uppercase">
                 {selectedSize ? 'In den Warenkorb' : 'Größe wählen'}
-              </h3>
+              </span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Größenauswahl Modal */}
+      {/* Size Selection Modal — sharp, editorial */}
       {showSizeModal && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+        <div
+          className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center"
           onClick={() => setShowSizeModal(false)}
         >
-          <div 
-            className="bg-white rounded-sm shadow-2xl max-w-md w-full p-6 relative"
+          <div
+            className="bg-white w-full sm:max-w-md relative"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => setShowSizeModal(false)}
-              className="absolute top-4 right-4 p-2 hover:bg-gray-100 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            
-            <h3 className="text-2xl text-black mb-2">
-              Größe auswählen
-            </h3>
-            <p className="font-light text-gray-600 mb-6">
-              Bitte wähle eine Größe für: {product.name}
-            </p>
-            
-            <div className="grid grid-cols-2 gap-3">
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-enunas-gray-light">
+              <h3
+                className="text-xs uppercase tracking-[0.15em] text-enunas-black"
+                style={{ fontFamily: 'var(--font-league-spartan)' }}
+              >
+                Größe auswählen
+              </h3>
+              <button
+                onClick={() => setShowSizeModal(false)}
+                className="p-1 text-enunas-gray-medium hover:text-enunas-black transition-colors duration-200"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Product context */}
+            <div className="px-6 pt-5 pb-3">
+              <p
+                className="text-sm text-enunas-gray-medium"
+                style={{ fontFamily: 'var(--font-league-spartan)' }}
+              >
+                {product.name}
+              </p>
+            </div>
+
+            {/* Size grid */}
+            <div className="px-6 pb-6 grid grid-cols-4 gap-px bg-enunas-gray-light">
               {product.sizes.map((size) => (
                 <button
                   key={size}
                   onClick={() => handleSizeSelectFromModal(size)}
-                  className="py-4 px-6 border-2 border-gray-300 hover:border-[#370E4D] hover:bg-gray-50 font-medium transition-all text-center"
+                  className="py-4 bg-white text-center text-sm text-enunas-black
+                           hover:bg-[#370E4D] hover:text-white
+                           transition-colors duration-200"
+                  style={{ fontFamily: 'var(--font-league-spartan)' }}
                 >
                   {size}
                 </button>
