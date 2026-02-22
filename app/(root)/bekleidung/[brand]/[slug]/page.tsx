@@ -1,7 +1,9 @@
 import React from 'react'
 import ProductDetails from './components/ProductDetails'
 import RelatedProducts from './components/RelatedProducts'
-import { getProductBySlug, getAllProducts, slugifyProductName } from '@/lib/mockProducts'
+import MoreFromBrand from './components/MoreFromBrand'
+import StyleSuggestions from './components/StyleSuggestions'
+import { getProductBySlug, getAllProducts, slugifyProductName, getProductsByBrand } from '@/lib/mockProducts'
 import { notFound } from 'next/navigation'
 
 interface ProductPageProps {
@@ -32,12 +34,26 @@ async function ProductPage({ params }: ProductPageProps) {
     notFound()
   }
 
+  // Collect IDs shown in first two sections to exclude from StyleSuggestions
+  const allProducts = getAllProducts()
+  const relatedIds = allProducts
+    .filter(p => p.id !== product.id && p.category[0] === product.category[0])
+    .slice(0, 4)
+    .map(p => p.id)
+
+  const brandIds = getProductsByBrand(product.brand)
+    .filter(p => p.id !== product.id)
+    .slice(0, 4)
+    .map(p => p.id)
+
+  const excludeIds = [...relatedIds, ...brandIds]
+
   return (
     <div className="min-h-screen">
       <ProductDetails product={product} brandSlug={brand} />
-      <div className="px-8 py-8">
-        <RelatedProducts />
-      </div>
+      <RelatedProducts currentProduct={product} />
+      <MoreFromBrand currentProduct={product} />
+      <StyleSuggestions currentProduct={product} excludeIds={excludeIds} />
     </div>
   )
 }

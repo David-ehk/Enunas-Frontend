@@ -5,7 +5,7 @@ export default function BekleidungLayout({ children }: Readonly<{ children: Reac
   return (
     <>
       <DisappearingNavbar />
-      <div className="h-[73px]" />
+      <div className="h-[58px] sm:h-[73px]" />
       {children}
       <Footer />
     </>

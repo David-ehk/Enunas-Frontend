@@ -1,12 +1,12 @@
-import CartSidebar from '@/app/(root)/cart/components/CartSidebar'
 import { CartProvider } from '@/app/context/CartContext'
+import CartSidebar from './cart/components/CartSidebar';
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <main>
       <CartProvider>
         {children}
-        <CartSidebar />
+        < CartSidebar/>
       </CartProvider>
     </main>
   );

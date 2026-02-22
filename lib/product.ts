@@ -30,6 +30,8 @@ export interface ProductDetails {
   [key: string]: string | undefined;
 }
 
+
+
 // Slug-Generierungsfunktion
 export function generateSlug(text: string): string {
   return text

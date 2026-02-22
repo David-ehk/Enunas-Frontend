@@ -98,7 +98,7 @@ const Navbar = () => {
 
         {/* Logo - Mitte */}
         <Link href="/" className="w-1/2 items-center flex justify-center">
-          <h1 className="text-3xl sm:text-4xl  tracking-wide">Enunas</h1>
+          <h1 className="text-3xl sm:text-4xl tracking-wide">Enunas</h1>
         </Link>
 
         {/* Account, Gefällt mir, Warenkorb - Rechte Hälfte */}

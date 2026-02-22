@@ -13,8 +13,8 @@ const Catalogue = () => {
             <div className="flex justify-between">
                 <h2 className="sm:text-7xl text-4xl ">Catalogue</h2>
                 <div className="">
-                    <p className="font-bold text-2xl">NEW Drop ist angekommen</p>
-                    <h4 className="text-lg">
+                    <p className="font-bold text-xl sm:text-2xl">NEW Drop ist angekommen</p>
+                    <h4 className="smtext-lg">
                      Endecke neue limitierte Kleidung  →
                     </h4>
                     <div className="bg-gray-700"></div>

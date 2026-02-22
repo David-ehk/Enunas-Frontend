@@ -55,3 +55,21 @@ export function getAllProducts(): Product[] {
 export function slugifyProductName(name: string): string {
   return generateSlug(name);
 }
+
+// Helper: Build product href from Product interface
+export function buildProductHrefFromProduct(product: Product): string {
+  return `/bekleidung/${generateSlug(product.brand)}/${product.slug}`;
+}
+
+// Helper: Get products by brand
+export function getProductsByBrand(brand: string): Product[] {
+  return mockProducts.filter(p => p.brand === brand);
+}
+
+// Helper: Get products matching any catalogue tag
+export function getProductsByCatalogue(tags: string[]): Product[] {
+  const tagsLower = tags.map(t => t.toLowerCase());
+  return mockProducts.filter(p =>
+    p.catalogue.some(c => tagsLower.includes(c.toLowerCase()))
+  );
+}

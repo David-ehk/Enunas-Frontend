@@ -1,21 +1,18 @@
 import React from 'react'
 import { Product } from '@/lib/product'
-import { getAllProducts, buildProductHrefFromProduct } from '@/lib/mockProducts'
+import { getProductsByBrand, buildProductHrefFromProduct } from '@/lib/mockProducts'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 
-interface RelatedProductsProps {
+interface MoreFromBrandProps {
   currentProduct: Product;
 }
 
-function RelatedProducts({ currentProduct }: RelatedProductsProps) {
-  const allProducts = getAllProducts()
-  const mainCategory = currentProduct.category[0]
-
-  const related = allProducts
-    .filter(p => p.id !== currentProduct.id && p.category[0] === mainCategory)
+function MoreFromBrand({ currentProduct }: MoreFromBrandProps) {
+  const brandProducts = getProductsByBrand(currentProduct.brand)
+    .filter(p => p.id !== currentProduct.id)
     .slice(0, 4)
 
-  if (related.length === 0) return null
+  if (brandProducts.length === 0) return null
 
   return (
     <section className="border-t border-enunas-gray-light">
@@ -24,10 +21,10 @@ function RelatedProducts({ currentProduct }: RelatedProductsProps) {
           className="font-cormorant text-xl sm:text-2xl text-center text-enunas-black mb-6 font-medium"
           style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
         >
-          Ähnliche Artikel
+          Mehr von {currentProduct.brand}
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-          {related.map(p => (
+          {brandProducts.map(p => (
             <PopularProductCard
               key={p.id}
               imgURL={p.images[0]}
@@ -47,4 +44,4 @@ function RelatedProducts({ currentProduct }: RelatedProductsProps) {
   )
 }
 
-export default RelatedProducts
+export default MoreFromBrand

@@ -1,21 +1,21 @@
 import React from 'react'
 import { Product } from '@/lib/product'
-import { getAllProducts, buildProductHrefFromProduct } from '@/lib/mockProducts'
+import { getProductsByCatalogue, buildProductHrefFromProduct } from '@/lib/mockProducts'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 
-interface RelatedProductsProps {
+interface StyleSuggestionsProps {
   currentProduct: Product;
+  excludeIds: string[];
 }
 
-function RelatedProducts({ currentProduct }: RelatedProductsProps) {
-  const allProducts = getAllProducts()
-  const mainCategory = currentProduct.category[0]
+function StyleSuggestions({ currentProduct, excludeIds }: StyleSuggestionsProps) {
+  const idsToExclude = new Set([currentProduct.id, ...excludeIds])
 
-  const related = allProducts
-    .filter(p => p.id !== currentProduct.id && p.category[0] === mainCategory)
+  const suggestions = getProductsByCatalogue(currentProduct.catalogue)
+    .filter(p => !idsToExclude.has(p.id))
     .slice(0, 4)
 
-  if (related.length === 0) return null
+  if (suggestions.length === 0) return null
 
   return (
     <section className="border-t border-enunas-gray-light">
@@ -24,10 +24,10 @@ function RelatedProducts({ currentProduct }: RelatedProductsProps) {
           className="font-cormorant text-xl sm:text-2xl text-center text-enunas-black mb-6 font-medium"
           style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
         >
-          Ähnliche Artikel
+          Passend zu deinem Stil
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-          {related.map(p => (
+          {suggestions.map(p => (
             <PopularProductCard
               key={p.id}
               imgURL={p.images[0]}
@@ -47,4 +47,4 @@ function RelatedProducts({ currentProduct }: RelatedProductsProps) {
   )
 }
 
-export default RelatedProducts
+export default StyleSuggestions

@@ -3,7 +3,7 @@ import MinTimeWrapper from "@/app/Homepage/components/MinTimeWrapper";
 import Navbar from "@/app/Homepage/components/navbar";
 
 
-export default function CatalogueLayout({
+export default function MarkenLayout({
   children
 }: Readonly<{ children: React.ReactNode }>) {
   return (

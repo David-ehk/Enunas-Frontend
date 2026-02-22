@@ -26,7 +26,11 @@
       "Bash(ls:*)",
       "Bash(npx next build:*)",
       "mcp__chrome-devtools__select_page",
-      "mcp__chrome-devtools__click"
+      "mcp__chrome-devtools__click",
+      "mcp__chrome-devtools__press_key",
+      "mcp__chrome-devtools__new_page",
+      "mcp__chrome-devtools__list_pages",
+      "mcp__chrome-devtools__emulate"
     ]
   }
 }

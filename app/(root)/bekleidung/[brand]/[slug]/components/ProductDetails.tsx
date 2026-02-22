@@ -242,7 +242,7 @@ function ProductDetails({ product, brandSlug }: ProductDetailsProps) {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-enunas-gray-light">
+            <div className="flex items-center justify-between px-8 py-5 border-b border-enunas-gray-light">
               <h3
                 className="text-xs uppercase tracking-[0.15em] text-enunas-black"
                 style={{ fontFamily: 'var(--font-league-spartan)' }}
@@ -258,7 +258,7 @@ function ProductDetails({ product, brandSlug }: ProductDetailsProps) {
             </div>
 
             {/* Product context */}
-            <div className="px-6 pt-5 pb-3">
+            <div className="px-8 pt-6 pb-4">
               <p
                 className="text-sm text-enunas-gray-medium"
                 style={{ fontFamily: 'var(--font-league-spartan)' }}
@@ -267,20 +267,33 @@ function ProductDetails({ product, brandSlug }: ProductDetailsProps) {
               </p>
             </div>
 
-            {/* Size grid */}
-            <div className="px-6 pb-6 grid grid-cols-4 gap-px bg-enunas-gray-light">
-              {product.sizes.map((size) => (
-                <button
-                  key={size}
-                  onClick={() => handleSizeSelectFromModal(size)}
-                  className="py-4 bg-white text-center text-sm text-enunas-black
-                           hover:bg-[#370E4D] hover:text-white
-                           transition-colors duration-200"
-                  style={{ fontFamily: 'var(--font-league-spartan)' }}
-                >
-                  {size}
-                </button>
-              ))}
+            {/* Size grid — flex wrap for natural flow */}
+            <div className="px-8 pb-8">
+              <div className="flex flex-wrap gap-2">
+                {product.sizes.map((size) => {
+                  const cols = product.sizes.length <= 3 ? 3 : 4
+                  return (
+                    <button
+                      key={size}
+                      onClick={() => handleSizeSelectFromModal(size)}
+                      className={`py-3.5 text-center text-sm text-enunas-black
+                               border border-enunas-gray-light
+                               hover:border-[#370E4D] hover:bg-[#370E4D] hover:text-white
+                               transition-all duration-200
+                               ${selectedSize === size
+                                 ? 'border-[#370E4D] bg-[#370E4D] text-white'
+                                 : ''
+                               }`}
+                      style={{
+                        fontFamily: 'var(--font-league-spartan)',
+                        width: `calc((100% - ${(cols - 1) * 8}px) / ${cols})`,
+                      }}
+                    >
+                      {size}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </div>
