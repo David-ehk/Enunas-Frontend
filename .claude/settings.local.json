@@ -30,7 +30,8 @@
       "mcp__chrome-devtools__press_key",
       "mcp__chrome-devtools__new_page",
       "mcp__chrome-devtools__list_pages",
-      "mcp__chrome-devtools__emulate"
+      "mcp__chrome-devtools__emulate",
+      "WebFetch(domain:www.alexandermcqueen.com)"
     ]
   }
 }

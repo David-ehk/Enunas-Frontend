@@ -2,29 +2,29 @@ import React from 'react'
 
 const CartFooter = () => {
   return (
-    <div className="bg-black text-white py-8 px-6">
+    <div className="bg-[#370E4D] text-white py-8 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8">
         {/* Lieferung und Rückgabe */}
         <div>
-          <h2 className="text-lg font-semibold mb-3 uppercase tracking-wide">
-            LIEFERUNG UND RÜCKGABE
+          <h2 className="text-lg font-semibold mb-3  tracking-wide">
+            Lieferung und Rückgabe
           </h2>
           <p className="text-sm text-gray-300 leading-relaxed">
-            Bei deiner Bestellung fallen keine Zollgebühren an zu dem Fallen keine Liefergebühren an. 
-            Rückgaben fallen mit einem 30 Tage Rückgaberecht an
+            Bei deiner Bestellung fallen keine Zollgebühren an. Zudem sind alle Lieferungen kostenlos.
+            Rücksendungen sind innerhalb von 30 Tagen möglich.
           </p>
         </div>
 
         {/* Können wir dir behilflich sein */}
         <div>
           <h2 className="text-lg font-semibold mb-3">
-            Können wir dir behilflich sein
+            Können wir dir helfen?
           </h2>
           <p className="text-sm text-gray-300 mb-2">
-            Unser Kundenservice ist von Montag bis Samstag von 9.30 bis 19 Uhr erreichbar
+            Unser Kundenservice ist von Montag bis Samstag von 9:30 bis 19:00 Uhr erreichbar.
           </p>
           <p className="text-sm text-gray-300">
-            Schreibe uns eine Email an: <span className="font-bold">kundenservice@enunas.com</span>
+            Schreib uns eine E-Mail an: <span className="font-bold">kundenservice@enunas.com</span>
           </p>
         </div>
 
@@ -57,7 +57,7 @@ const CartFooter = () => {
               <div className="bg-white rounded px-2 py-1">
                 <span className="text-blue-600 font-bold text-xs">APAY</span>
               </div>
-              <span className="text-sm text-gray-300">ApplePay</span>
+              <span className="text-sm text-gray-300">Apple Pay</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="bg-pink-100 rounded px-2 py-1">

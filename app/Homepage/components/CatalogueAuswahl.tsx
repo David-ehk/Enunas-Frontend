@@ -54,7 +54,6 @@ export default function KategorieAuswahl() {
   const currentKategorie = kategorie.find(a => a.id === activeKategorie)
   const currentImage = currentKategorie?.image
 
-  // Handle category change with loading state
   const handleCategoryChange = (id: string) => {
     if (id !== activeKategorie) {
       setIsImageLoading(true)
@@ -62,7 +61,6 @@ export default function KategorieAuswahl() {
     }
   }
 
-  // Scroll active category into view on mobile
   useEffect(() => {
     if (scrollContainerRef.current) {
       const activeElement = scrollContainerRef.current.querySelector(`[data-category="${activeKategorie}"]`)
@@ -78,50 +76,49 @@ export default function KategorieAuswahl() {
           MOBILE VERSION - Moncler-inspired hero + thumbnail strip
           Only visible below sm breakpoint
           ═══════════════════════════════════════════════════════════ */}
-      <div className="block sm:hidden bg-enunas-off-white">
+      <div className="block sm:hidden" style={{ background: '#FFFFFF' }}>
         {/* Section label */}
-        <div className="px-6 pt-8 pb-5">
-          <p className="font-league-spartan text-[10px] tracking-[0.3em] uppercase" style={{ color: '#6B6B6B' }}>
+        <div className="px-6 pt-8 pb-4">
+          <p className="font-league-spartan text-[9px] tracking-[0.35em] uppercase" style={{ color: '#9B9B9B' }}>
             Catalogue
           </p>
         </div>
 
-        {/* Hero Image — portrait, no gradient overlay */}
-        <div className="px-6">
-          <div className="relative w-full aspect-[3/4] overflow-hidden bg-white">
-            <img
-              src={currentImage}
-              alt={currentKategorie?.name}
-              className={`
-                w-full h-full object-cover
-                transition-all duration-700 ease-out-expo
-                ${isImageLoading ? 'opacity-0 scale-[1.04]' : 'opacity-100 scale-100'}
-              `}
-              onLoad={() => setIsImageLoading(false)}
-            />
-          </div>
+        {/* Hero Image — full-bleed, no side padding */}
+        <div className="relative w-full aspect-[3/4] overflow-hidden">
+          <img
+            src={currentImage}
+            alt={currentKategorie?.name}
+            className={`
+              w-full h-full object-cover
+              transition-all duration-700 ease-out-expo
+              ${isImageLoading ? 'opacity-0 scale-[1.04]' : 'opacity-100 scale-100'}
+            `}
+            onLoad={() => setIsImageLoading(false)}
+          />
         </div>
 
-        {/* Category name + CTA below the image */}
-        <div className="px-6 pt-5 pb-6">
+        {/* Category name + color accent + CTA */}
+        <div className="px-6 pt-6 pb-5">
+          {/* Category name — centered */}
           <h2
-            className="font-cormorant text-[2.25rem] font-light leading-none tracking-wide text-enunas-black transition-all duration-500 ease-out-expo"
+            className="font-cormorant flex justify-center font-light leading-[0.95] tracking-wide transition-all duration-500 ease-out-expo"
+            style={{ fontSize: 'clamp(2.75rem, 9vw, 3.5rem)', color: '#0A0A0A' }}
           >
             {currentKategorie?.name}
           </h2>
-          <Link
-            href={currentKategorie?.link || '#'}
-            className="inline-block mt-4 font-league-spartan text-[10px] tracking-[0.25em] uppercase no-underline transition-opacity duration-300 hover:opacity-60 active:opacity-40"
-            style={{ color: '#0A0A0A', textDecoration: 'none' }}
-          >
-            Entdecken
-          </Link>
+
+          {/* Accent line — full width of the text block, no overflow */}
+          <div
+            className="h-[1.5px] mt-3 transition-all duration-500 ease-out-expo"
+            style={{ width: '100%', backgroundColor: currentKategorie?.colorHex }}
+          />
         </div>
 
         {/* Thumbnail strip — swipe/scroll, snap, no arrows */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-3 px-6 pb-8 overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden"
+          className="flex gap-2.5 px-6 pb-6 overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -134,22 +131,14 @@ export default function KategorieAuswahl() {
               data-category={kat.id}
               onClick={() => handleCategoryChange(kat.id)}
               className="relative flex-shrink-0 snap-start text-left focus:outline-none"
-              style={{ width: '27vw' }}
+              style={{ width: '28vw' }}
             >
               {/* Thumbnail image */}
               <div
                 className={`
                   relative overflow-hidden aspect-[2/3] transition-all duration-500 ease-out-expo
-                  ${activeKategorie === kat.id
-                    ? 'opacity-100'
-                    : 'opacity-45 hover:opacity-70'
-                  }
+                  ${activeKategorie === kat.id ? 'opacity-100' : 'opacity-35 hover:opacity-60'}
                 `}
-                style={
-                  activeKategorie === kat.id
-                    ? { outline: '1px solid #0A0A0A', outlineOffset: '-1px' }
-                    : undefined
-                }
               >
                 <img
                   src={kat.image}
@@ -158,15 +147,23 @@ export default function KategorieAuswahl() {
                 />
               </div>
 
-              {/* Thumbnail label */}
+              {/* Category color accent — appears only on active thumbnail */}
+              <div
+                className="transition-all duration-500 ease-out-expo"
+                style={{
+                  height: '1.5px',
+                  marginTop: '6px',
+                  backgroundColor: kat.colorHex,
+                  width: activeKategorie === kat.id ? '100%' : '0%',
+                }}
+              />
+
+              {/* Thumbnail label — fixed margin to prevent layout jitter on selection */}
               <p
                 className={`
-                  mt-2 font-league-spartan text-[9px] tracking-[0.18em] uppercase text-center
-                  transition-all duration-300
-                  ${activeKategorie === kat.id
-                    ? 'text-enunas-black'
-                    : 'text-enunas-gray-medium'
-                  }
+                  font-league-spartan text-[10px] tracking-[0.18em] uppercase text-center mt-[6px]
+                  transition-opacity duration-300
+                  ${activeKategorie === kat.id ? 'opacity-100 text-enunas-black' : 'opacity-40 text-enunas-gray-medium'}
                 `}
               >
                 {kat.name}
@@ -185,7 +182,7 @@ export default function KategorieAuswahl() {
 
             {/* Left Side - List */}
             <div className="space-y-6">
-              <p className="text-sm tracking-widest text-gray-600">
+              <p className="font-league-spartan text-sm tracking-[0.2em] uppercase text-enunas-gray-medium">
                 Catalogue
               </p>
 
@@ -196,7 +193,7 @@ export default function KategorieAuswahl() {
                       onMouseEnter={() => handleCategoryChange(Kategorie.id)}
                       onClick={() => handleCategoryChange(Kategorie.id)}
                       className={`
-                        relative group text-left
+                        relative group text-left font-cormorant
                         text-4xl sm:text-5xl lg:text-6xl
                         font-light leading-tight
                         transition-all duration-300
@@ -227,7 +224,7 @@ export default function KategorieAuswahl() {
                   inline-block mt-8
                   px-8 py-3
                   bg-enunas-purple text-white
-                  text-sm tracking-[0.15em] uppercase
+                  font-league-spartan text-sm tracking-[0.15em] uppercase
                   transition-all duration-300 ease-out
                   hover:bg-enunas-purple-light
                 "

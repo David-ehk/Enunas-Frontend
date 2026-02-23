@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useCart } from '@/app/context/CartContext'
 import Image from 'next/image'
+import Link from 'next/link'
 
 const FREE_SHIPPING_THRESHOLD = 50
 
@@ -165,12 +166,22 @@ export default function CartSidebar() {
             <span className="text-lg font-light">€{totalPrice.toFixed(2)}</span>
           </div>
 
-          <button
-            disabled={cartItems.length === 0}
-            className="w-full bg-[#370E4D] text-white py-4 tracking-wide hover:bg-[#2a0b3b] transition-colors mb-3 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <h3 className='text-base'>Sicher Zur Kasse</h3>
-          </button>
+          {cartItems.length === 0 ? (
+            <button
+              disabled
+              className="w-full bg-[#370E4D] text-white py-4 tracking-wide transition-colors mb-3 opacity-50 cursor-not-allowed"
+            >
+              <h3 className='text-base'>Sicher Zur Kasse</h3>
+            </button>
+          ) : (
+            <Link
+              href="/checkout"
+              onClick={closeCart}
+              className="block w-full bg-[#370E4D] text-white py-4 tracking-wide hover:bg-[#2a0b3b] transition-colors mb-3 text-center"
+            >
+              <h3 className='text-base'>Sicher Zur Kasse</h3>
+            </Link>
+          )}
 
           <button
             onClick={closeCart}
