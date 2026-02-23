@@ -5,7 +5,7 @@ interface CheckoutProgressProps {
 }
 
 const steps = [
-  { number: 1, label: 'Versand' },
+  { number: 1, label: 'Kontakt' },
   { number: 2, label: 'Zahlung' },
   { number: 3, label: 'Überprüfen' },
 ]

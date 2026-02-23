@@ -38,7 +38,13 @@ export default function OrderReview({ shippingData, paymentMethod, onBack }: Ord
         </h2>
         <p className="font-league-spartan text-sm text-enunas-gray-medium max-w-sm">
           Wir haben deine Bestellung erhalten und werden sie schnellstmöglich bearbeiten.
-          Du erhältst in Kürze eine Bestätigungsmail.
+          {shippingData.email ? (
+            <> Eine Bestätigungsmail wurde an{' '}
+              <span className="text-enunas-black">{shippingData.email}</span> gesendet.
+            </>
+          ) : (
+            <> Du erhältst in Kürze eine Bestätigungsmail.</>
+          )}
         </p>
       </div>
     )
@@ -102,6 +108,11 @@ export default function OrderReview({ shippingData, paymentMethod, onBack }: Ord
         <h3 className="font-league-spartan text-xs uppercase tracking-[0.15em] text-enunas-gray-medium mb-3">
           Versandadresse
         </h3>
+        {shippingData.email && (
+          <p className="font-league-spartan text-sm text-enunas-black mb-1">
+            {shippingData.email}
+          </p>
+        )}
         <p className="font-league-spartan text-sm text-enunas-black">
           {shippingData.fullName} · {shippingData.address}, {shippingData.plz} {shippingData.city}, {shippingData.country}
         </p>

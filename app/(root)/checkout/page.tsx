@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import CheckoutNavbar from './components/CheckoutNavbar'
@@ -14,6 +14,7 @@ import OrderReview from './components/OrderReview'
 type PaymentMethod = 'paypal' | 'stripe' | 'applepay'
 
 const EMPTY_SHIPPING: ShippingData = {
+  email: '',
   fullName: '',
   address: '',
   plz: '',
@@ -30,6 +31,13 @@ export default function CheckoutPage() {
   const shippingCost = totalPrice >= 50 ? 0 : 4.99
   const finalTotal = totalPrice + shippingCost
 
+  // Guard: if somehow on step 3 without a payment method, fall back to step 2
+  useEffect(() => {
+    if (currentStep === 3 && !paymentMethod) {
+      setCurrentStep(2)
+    }
+  }, [currentStep, paymentMethod])
+
   const handleShippingNext = (data: ShippingData) => {
     setShippingData(data)
     setCurrentStep(2)
@@ -37,6 +45,34 @@ export default function CheckoutPage() {
 
   const handlePaymentNext = () => {
     setCurrentStep(3)
+  }
+
+  if (cartItems.length === 0) {
+    return (
+      <>
+        <CheckoutNavbar />
+        <main className="min-h-screen pt-24 pb-20 px-4 bg-enunas-white flex items-center justify-center">
+          <div className="text-center animate-fade-in-up">
+            <p className="font-league-spartan text-xs uppercase tracking-[0.2em] text-enunas-gray-medium mb-4">
+              Kasse
+            </p>
+            <h1 className="font-cormorant text-3xl text-enunas-black mb-3">
+              Dein Warenkorb ist leer
+            </h1>
+            <p className="font-league-spartan text-sm text-enunas-gray-medium mb-8 max-w-xs mx-auto leading-relaxed">
+              Füge Artikel hinzu, um mit dem Bezahlvorgang fortzufahren.
+            </p>
+            <Link
+              href="/bekleidung"
+              className="inline-block bg-enunas-purple text-white font-league-spartan text-sm tracking-[0.15em] uppercase px-10 py-4 hover:bg-enunas-purple-light transition-colors duration-200 ease-out-expo"
+            >
+              Weiter einkaufen
+            </Link>
+          </div>
+        </main>
+        <CartFooter />
+      </>
+    )
   }
 
   return (
