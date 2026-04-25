@@ -11,7 +11,7 @@ export default function cataloge() {
         <section className=''>
             <CatalogueDescription/>
         </section>
-        
+
     </main>
   )
 }

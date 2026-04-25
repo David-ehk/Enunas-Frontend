@@ -25,8 +25,7 @@ function ProductDetails({ product, brandSlug }: ProductDetailsProps) {
   const [showSizeModal, setShowSizeModal] = useState(false)
   const staticButtonRef = useRef<HTMLDivElement>(null)
 
-  // ✅ Context Hook verwenden
-  const { openCart } = useCart()
+  const { addToCart, openCart } = useCart()
 
   const formattedPrice = new Intl.NumberFormat('de-DE', {
     style: 'currency',
@@ -53,14 +52,24 @@ function ProductDetails({ product, brandSlug }: ProductDetailsProps) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  const buildCartItem = (size: string) => ({
+    productId: product.id,
+    name: product.name,
+    brand: product.brand,
+    price: product.price,
+    currency: product.currency,
+    size,
+    color: selectedColor
+      ? { id: selectedColor.id, name: selectedColor.name, hex: selectedColor.hex }
+      : undefined,
+    image: product.images[0] ?? '',
+  })
+
   const handleFloatingButtonClick = () => {
     if (!selectedSize) {
-      // Größenauswahl-Modal öffnen
       setShowSizeModal(true)
     } else {
-      // ✅ Context verwenden statt localem State
-      // Hier würdest du das Produkt zum Cart hinzufügen
-      // addToCart(product, selectedSize, selectedColor)
+      addToCart(buildCartItem(selectedSize))
       openCart()
     }
   }
@@ -68,8 +77,7 @@ function ProductDetails({ product, brandSlug }: ProductDetailsProps) {
   const handleSizeSelectFromModal = (size: string) => {
     setSelectedSize(size)
     setShowSizeModal(false)
-    // ✅ Context verwenden
-    // addToCart(product, size, selectedColor)
+    addToCart(buildCartItem(size))
     openCart()
   }
 
@@ -141,7 +149,11 @@ function ProductDetails({ product, brandSlug }: ProductDetailsProps) {
             
             {/* Warenkorb-Button mit Referenz */}
             <div ref={staticButtonRef} className="flex justify-center my-4">
-              <AddToCart selectedSize={selectedSize} />
+              <AddToCart
+                selectedSize={selectedSize}
+                product={product}
+                selectedColor={selectedColor}
+              />
             </div>
             
             {/* Produktdetails */}
