@@ -3,8 +3,11 @@ import ProductDetails from './components/ProductDetails'
 import RelatedProducts from './components/RelatedProducts'
 import MoreFromBrand from './components/MoreFromBrand'
 import StyleSuggestions from './components/StyleSuggestions'
-import { getProductBySlug, getAllProducts, slugifyProductName, getProductsByBrand } from '@/lib/mockProducts'
 import { notFound } from 'next/navigation'
+import { productApi, resolveProductWithMeta, apiProductToProduct } from '@/lib/api'
+import { generateSlug } from '@/lib/product'
+import type { Product } from '@/lib/product'
+import type { ApiProduct } from '@/types/api'
 
 interface ProductPageProps {
   params: Promise<{
@@ -13,47 +16,51 @@ interface ProductPageProps {
   }>;
 }
 
+function toProduct(p: ApiProduct): Product {
+  return apiProductToProduct(p, [], [])
+}
+
 async function ProductPage({ params }: ProductPageProps) {
   const { brand, slug } = await params
 
-  // Versuche Produkt anhand Slug zu finden
-  let product = getProductBySlug(slug)
+  const resolved = await resolveProductWithMeta(brand, slug).catch(() => null)
+  if (!resolved) notFound()
 
-  // Falls nicht gefunden, versuche Slug aus dem Namen zu generieren und zu matchen
-  if (!product) {
-    // Fallback: Suche nach Produkt, dessen generierter Slug übereinstimmt
-    const allProducts = getAllProducts()
-    product = allProducts.find(p => {
-      const generatedSlug = slugifyProductName(p.name)
-      return generatedSlug === slug || p.slug === slug
-    })
-  }
+  const { product, defaultListingId } = resolved
+  const mainCategory = product.category[0]
 
-  // Wenn immer noch kein Produkt gefunden, 404 anzeigen
-  if (!product) {
-    notFound()
-  }
+  const [categoryRes, allRes] = await Promise.all([
+    productApi.getByCategory(mainCategory).catch(() => ({ content: [] as ApiProduct[] })),
+    // TODO: Replace size:100 with pagination when backend supports it
+    productApi.list({ size: 100 }).catch(() => ({ content: [] as ApiProduct[] })),
+  ])
 
-  // Collect IDs shown in first two sections to exclude from StyleSuggestions
-  const allProducts = getAllProducts()
-  const relatedIds = allProducts
-    .filter(p => p.id !== product.id && p.category[0] === product.category[0])
-    .slice(0, 4)
-    .map(p => p.id)
-
-  const brandIds = getProductsByBrand(product.brand)
+  const relatedProducts = categoryRes.content
     .filter(p => p.id !== product.id)
-    .slice(0, 4)
-    .map(p => p.id)
+    .map(toProduct)
 
-  const excludeIds = [...relatedIds, ...brandIds]
+  const brandProducts = allRes.content
+    .filter(p => generateSlug(p.brandName) === brand && p.id !== product.id)
+    .map(toProduct)
+
+  const suggestions = allRes.content
+    .filter(p => {
+      const tags = p.catalogue ?? []
+      return tags.some(t => product.catalogue.includes(t))
+    })
+    .map(toProduct)
+
+  const excludeIds = [
+    ...relatedProducts.slice(0, 4).map(p => p.id),
+    ...brandProducts.slice(0, 4).map(p => p.id),
+  ]
 
   return (
     <div className="min-h-screen">
-      <ProductDetails product={product} brandSlug={brand} />
-      <RelatedProducts currentProduct={product} />
-      <MoreFromBrand currentProduct={product} />
-      <StyleSuggestions currentProduct={product} excludeIds={excludeIds} />
+      <ProductDetails product={product} brandSlug={brand} defaultListingId={defaultListingId} />
+      <RelatedProducts currentProduct={product} relatedProducts={relatedProducts} />
+      <MoreFromBrand currentProduct={product} brandProducts={brandProducts} />
+      <StyleSuggestions currentProduct={product} suggestions={suggestions} excludeIds={excludeIds} />
     </div>
   )
 }

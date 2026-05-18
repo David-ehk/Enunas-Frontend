@@ -1,11 +1,15 @@
+import { AuthProvider } from '@/app/context/AuthContext'
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {children}
-    </div>
+    <AuthProvider>
+      <div className="min-h-screen bg-gray-50">
+        {children}
+      </div>
+    </AuthProvider>
   )
 }

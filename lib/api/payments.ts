@@ -1,4 +1,4 @@
-import { apiFetch, getAuthHeaders } from './index';
+import { fetcher } from './fetcher';
 
 export interface MolliePayment {
   id: string;
@@ -31,35 +31,21 @@ export interface CreatePaymentResponse {
   checkoutUrl: string;
 }
 
-export async function createPayment(
-  token: string,
-  data: CreatePaymentRequest
-): Promise<CreatePaymentResponse> {
-  return apiFetch<CreatePaymentResponse>('/payments', {
+export async function createPayment(data: CreatePaymentRequest): Promise<CreatePaymentResponse> {
+  return fetcher<CreatePaymentResponse>('/payments', {
     method: 'POST',
-    headers: getAuthHeaders(token),
     body: JSON.stringify(data),
   });
 }
 
-export async function getPaymentStatus(
-  token: string,
-  paymentId: string
-): Promise<MolliePayment> {
-  return apiFetch<MolliePayment>(`/payments/${paymentId}`, {
-    headers: getAuthHeaders(token),
-  });
+export async function getPaymentStatus(paymentId: string): Promise<MolliePayment> {
+  return fetcher<MolliePayment>(`/payments/${paymentId}`);
 }
 
-export async function getPaymentByOrderId(
-  token: string,
-  orderId: string
-): Promise<MolliePayment> {
-  return apiFetch<MolliePayment>(`/payments/order/${orderId}`, {
-    headers: getAuthHeaders(token),
-  });
+export async function getPaymentByOrderId(orderId: string): Promise<MolliePayment> {
+  return fetcher<MolliePayment>(`/payments/order/${orderId}`);
 }
 
 export async function getAvailablePaymentMethods(): Promise<string[]> {
-  return apiFetch<string[]>('/payments/methods');
+  return fetcher<string[]>('/payments/methods', { auth: false });
 }

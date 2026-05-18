@@ -1,34 +1,15 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
-
-export class ApiError extends Error {
-  constructor(public status: number, message: string) {
-    super(message);
-    this.name = 'ApiError';
-  }
-}
-
-export async function apiFetch<T>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T> {
-  const res = await fetch(`${API_BASE}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-    ...options,
-  });
-
-  if (!res.ok) {
-    const errorMessage = await res.text().catch(() => 'Unknown error');
-    throw new ApiError(res.status, errorMessage);
-  }
-
-  return res.json();
-}
-
-export function getAuthHeaders(token: string): HeadersInit {
-  return {
-    Authorization: `Bearer ${token}`,
-  };
-}
+export { fetcher, setOnUnauthorized, FetchError } from './fetcher';
+export type { FetchOptions } from './fetcher';
+export { getToken, setToken, clearToken, hasToken } from './auth';
+export { authApi } from './modules/authApi';
+export { customerApi } from './modules/customerApi';
+export { productApi } from './modules/productApi';
+export type { ProductSearchParams } from './modules/productApi';
+export { orderApi } from './modules/orderApi';
+export { wardrobeApi } from './modules/wardrobeApi';
+export { brandApi } from './modules/brandApi';
+export { adminApi } from './modules/adminApi';
+export { payoutApi } from './modules/payoutApi';
+export { apiProductToProduct, apiProductToCardShape } from './productAdapter';
+export type { ProductCardShape } from './productAdapter';
+export { resolveProductBySlug, resolveProductWithMeta } from './productResolver';

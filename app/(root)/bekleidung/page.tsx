@@ -1,29 +1,12 @@
 'use client'
 
-import React, { Suspense, useState, useMemo, useCallback } from 'react'
+import React, { Suspense, useState, useEffect, useMemo, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import CategoryNavigation from './components/CategoryNavigation'
 import FilterBar from './components/FilterBar'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
-import { generateSlug } from '@/lib/product'
-import { getAllProducts, buildProductHref } from '@/lib/api/mockProducts'
-
-// Products from central source with gender for filtering
-const allMockProducts = getAllProducts()
-const products = allMockProducts.map(p => ({
-  imgURL: p.imgURL,
-  brandName: p.brandName,
-  productName: p.productName,
-  price: p.price,
-  href: buildProductHref(p),
-  colours: p.colours,
-  createdAt: p.createdAt,
-  sizes: p.sizes,
-  categories: p.catalogue,
-  category: p.category,
-  subcategory: p.subcategory,
-  gender: ["1", "3", "5", "7"].includes(p.id) ? "herren" : "damen"
-}))
+import { productApi, apiProductToCardShape } from '@/lib/api'
+import type { ProductCardShape } from '@/lib/api'
 
 const CATEGORY_LABELS: Record<string, string> = {
   oberteile: 'Oberteile',
@@ -57,27 +40,34 @@ export default function BekleidungPage() {
 function BekleidungContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const [activeGenders, setActiveGenders] = useState<string[]>(['damen', 'herren'])
 
   const categoryParam = searchParams.get('category') || ''
   const typeParam = searchParams.get('type') || ''
 
-  // Build page title from params
+  const [allProducts, setAllProducts] = useState<ProductCardShape[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    const params = categoryParam
+      ? { size: 100, category: categoryParam }
+      : { size: 100 }
+    productApi.list(params)
+      .then(res => setAllProducts(res.content.map(apiProductToCardShape)))
+      .catch(() => setAllProducts([]))
+      .finally(() => setLoading(false))
+  }, [categoryParam])
+
   const pageTitle = useMemo(() => {
     if (typeParam && TYPE_LABELS[typeParam]) return TYPE_LABELS[typeParam]
     if (categoryParam && CATEGORY_LABELS[categoryParam]) return CATEGORY_LABELS[categoryParam]
     return 'Bekleidung'
   }, [categoryParam, typeParam])
 
-  // Filter products by category, type, and gender
   const filteredProducts = useMemo(() => {
-    return products.filter(product => {
-      if (!activeGenders.includes(product.gender)) return false
-      if (categoryParam && product.category !== categoryParam) return false
-      if (typeParam && product.subcategory !== typeParam) return false
-      return true
-    })
-  }, [activeGenders, categoryParam, typeParam])
+    if (!typeParam) return allProducts
+    return allProducts.filter(p => p.subcategory === typeParam)
+  }, [allProducts, typeParam])
 
   const handleCategoryReset = useCallback(() => {
     router.push('/bekleidung')
@@ -115,20 +105,28 @@ function BekleidungContent() {
         {/* Filter Bar - McQueen elegant style */}
         <FilterBar
           articleCount={filteredProducts.length}
-          onGenderChange={setActiveGenders}
+          onGenderChange={() => {}}
           onCategoryReset={handleCategoryReset}
         />
 
         {/* Product Grid - Generous spacing like McQueen */}
         <section className="px-4 lg:px-8 xl:px-12 py-8 lg:py-12">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 lg:gap-6 max-w-[1800px] mx-auto">
-            {filteredProducts.map((product) => (
-              <PopularProductCard key={product.productName + product.gender} {...product} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 lg:gap-6 max-w-[1800px] mx-auto">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="aspect-[3/4] bg-gray-100 animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 lg:gap-6 max-w-[1800px] mx-auto">
+              {filteredProducts.map((product) => (
+                <PopularProductCard key={product.id} {...product} />
+              ))}
+            </div>
+          )}
 
           {/* Load More Button - McQueen refined style */}
-          {filteredProducts.length >= 8 && (
+          {!loading && filteredProducts.length >= 8 && (
             <div className="flex justify-center mt-16 lg:mt-20">
               <button
                 className="group relative px-10 py-4 text-[11px] tracking-[0.15em] uppercase text-enunas-black

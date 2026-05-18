@@ -1,22 +1,10 @@
 'use client'
 
-import React, { Suspense, useMemo } from 'react'
+import React, { Suspense, useState, useEffect, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
-import { getAllProducts, buildProductHref } from '@/lib/api/mockProducts'
-
-const allMockProducts = getAllProducts()
-const products = allMockProducts.map(p => ({
-  imgURL: p.imgURL,
-  brandName: p.brandName,
-  productName: p.productName,
-  price: p.price,
-  href: buildProductHref(p),
-  colours: p.colours,
-  createdAt: p.createdAt,
-  sizes: p.sizes,
-  catalogue: p.catalogue,
-}))
+import { productApi, apiProductToCardShape } from '@/lib/api'
+import type { ProductCardShape } from '@/lib/api'
 
 type CatalogueKey = 'Streetwear' | 'Experimental' | 'Athleisure' | 'Culture' | 'Star'
 
@@ -36,11 +24,9 @@ const CATALOGUE_COLORS: Record<CatalogueKey, string> = {
   Star:         '#000000',
 }
 
-// Normalise URL slug → catalogue key (handles lowercase or exact casing)
 function resolveKey(raw: string): CatalogueKey | null {
   const normalised = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase()
   if (normalised in CATALOGUE_SLOGANS) return normalised as CatalogueKey
-  // Try exact match too (e.g. "Athleisure" already correct)
   if (raw in CATALOGUE_SLOGANS) return raw as CatalogueKey
   return null
 }
@@ -58,10 +44,20 @@ function CatalogueCategoryContent() {
   const raw = Array.isArray(params.catalogue) ? params.catalogue[0] : (params.catalogue ?? '')
   const key = resolveKey(decodeURIComponent(raw))
 
+  const [allProducts, setAllProducts] = useState<ProductCardShape[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    productApi.list({ size: 100 })
+      .then(res => setAllProducts(res.content.map(apiProductToCardShape)))
+      .catch(() => setAllProducts([]))
+      .finally(() => setLoading(false))
+  }, [])
+
   const filteredProducts = useMemo(() => {
     if (!key) return []
-    return products.filter(p => p.catalogue.includes(key))
-  }, [key])
+    return allProducts.filter(p => p.catalogue.includes(key))
+  }, [allProducts, key])
 
   if (!key) {
     return (
@@ -106,17 +102,23 @@ function CatalogueCategoryContent() {
         />
 
         <p className="font-league-spartan text-[10px] uppercase tracking-[0.2em] text-enunas-gray-medium mt-5">
-          {filteredProducts.length} Artikel
+          {loading ? '...' : `${filteredProducts.length} Artikel`}
         </p>
       </div>
 
       {/* ── Product grid ───────────────────────────────────────────────────── */}
       <section className="px-4 lg:px-8 xl:px-12 pb-24">
-        {filteredProducts.length > 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6 max-w-[1800px] mx-auto">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="aspect-[3/4] bg-gray-100 animate-pulse" />
+            ))}
+          </div>
+        ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6 max-w-[1800px] mx-auto">
             {filteredProducts.map(product => (
               <PopularProductCard
-                key={product.productName + product.catalogue.join('-')}
+                key={product.id}
                 {...product}
               />
             ))}

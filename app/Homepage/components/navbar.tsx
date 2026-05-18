@@ -5,12 +5,14 @@ import Sidebar from './Sidebar'
 import  SearchBar  from '../components/Suchleiste'
 import Link from 'next/link'
 import { useCart } from '@/app/context/CartContext'
+import { useAuth } from '@/app/context/AuthContext'
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchOpen, setSearch] = useState(false)
   const { openCart, itemCount } = useCart()
+  const { isAuthenticated } = useAuth()
 
   // Scrolleffekt transparenz
   useEffect(() => {
@@ -117,10 +119,13 @@ const Navbar = () => {
             </button>
           </div>
 
-          <div>
-            <button className="cursor-pointer" aria-label="Mein Konto">
+          <div className="relative">
+            <Link href="/account" aria-label="Mein Konto">
               <AccountIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]"/>
-            </button>
+            </Link>
+            {isAuthenticated && (
+              <span className="absolute top-[-4px] right-[-4px] w-2 h-2 rounded-full bg-enunas-purple" />
+            )}
           </div>
 
           <div>

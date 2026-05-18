@@ -16,9 +16,10 @@ import { useCart } from '@/app/context/CartContext'
 interface ProductDetailsProps {
   product: Product;
   brandSlug: string;
+  defaultListingId?: string;
 }
 
-function ProductDetails({ product, brandSlug }: ProductDetailsProps) {
+function ProductDetails({ product, brandSlug, defaultListingId }: ProductDetailsProps) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [selectedColor, setSelectedColor] = useState<Color | null>(null)
   const [showFloatingButton, setShowFloatingButton] = useState(false)
@@ -63,6 +64,7 @@ function ProductDetails({ product, brandSlug }: ProductDetailsProps) {
       ? { id: selectedColor.id, name: selectedColor.name, hex: selectedColor.hex }
       : undefined,
     image: product.images[0] ?? '',
+    defaultListingId,
   })
 
   const handleFloatingButtonClick = () => {

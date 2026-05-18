@@ -17,6 +17,7 @@ export interface CartItem {
   }
   image: string
   quantity: number
+  defaultListingId?: string
 }
 
 interface CartContextType {

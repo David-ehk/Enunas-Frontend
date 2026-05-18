@@ -1,5 +1,3 @@
-// Token storage utilities — pure functions, no React dependency.
-// TODO: Add httpOnly cookie strategy post-MVP for improved XSS protection.
 const TOKEN_KEY = 'enunas_token';
 
 export function getToken(): string | null {

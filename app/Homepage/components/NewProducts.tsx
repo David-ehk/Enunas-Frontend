@@ -1,12 +1,27 @@
 "use client"
+import { useState, useEffect } from 'react'
 import { useScrollAnimation } from '@/hooks/use-scroll-animation'
 import { cn } from '@/lib/utils'
 import PopularProductCard from './PopularProductCard'
-import { getNewProducts, buildProductHref } from '@/lib/api/mockProducts'
+import { productApi, apiProductToCardShape } from '@/lib/api'
+import type { ProductCardShape } from '@/lib/api'
 
 export default function NewProducts() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 })
-  const products = getNewProducts()
+  const [products, setProducts] = useState<ProductCardShape[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    productApi.list({ size: 8 })
+      .then(res => {
+        const sorted = [...res.content].sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+        setProducts(sorted.map(apiProductToCardShape))
+      })
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false))
+  }, [])
 
   return (
     <section ref={ref as React.RefObject<HTMLElement>}>
@@ -26,28 +41,33 @@ export default function NewProducts() {
 
       {/* Product grid with stagger */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 sm:gap-2">
-        {products.map((product, index) => (
-          <div
-            key={product.id}
-            className={cn(
-              "transition-all duration-700 ease-out",
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-            )}
-            style={{ transitionDelay: isVisible ? `${index * 100}ms` : '0ms' }}
-          >
-            <PopularProductCard
-              imgURL={product.imgURL}
-              brandName={product.brandName}
-              productName={product.productName}
-              price={product.price}
-              href={buildProductHref(product)}
-              colours={product.colours}
-              catalogue={product.catalogue}
-              sizes={product.sizes}
-              createdAt={product.createdAt}
-            />
-          </div>
-        ))}
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="aspect-[3/4] bg-gray-100 animate-pulse" />
+            ))
+          : products.map((product, index) => (
+              <div
+                key={product.id}
+                className={cn(
+                  "transition-all duration-700 ease-out",
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+                )}
+                style={{ transitionDelay: isVisible ? `${index * 100}ms` : '0ms' }}
+              >
+                <PopularProductCard
+                  imgURL={product.imgURL}
+                  brandName={product.brandName}
+                  productName={product.productName}
+                  price={product.price}
+                  href={product.href}
+                  colours={product.colours}
+                  catalogue={product.catalogue}
+                  sizes={product.sizes}
+                  createdAt={product.createdAt}
+                />
+              </div>
+            ))
+        }
       </div>
 
       {/* Button */}

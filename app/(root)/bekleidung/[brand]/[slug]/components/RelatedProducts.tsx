@@ -1,18 +1,16 @@
 import React from 'react'
 import { Product } from '@/lib/product'
-import { getAllProducts, buildProductHrefFromProduct } from '@/lib/mockProducts'
+import { generateSlug } from '@/lib/product'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 
 interface RelatedProductsProps {
   currentProduct: Product;
+  relatedProducts: Product[];
 }
 
-function RelatedProducts({ currentProduct }: RelatedProductsProps) {
-  const allProducts = getAllProducts()
-  const mainCategory = currentProduct.category[0]
-
-  const related = allProducts
-    .filter(p => p.id !== currentProduct.id && p.category[0] === mainCategory)
+function RelatedProducts({ currentProduct, relatedProducts }: RelatedProductsProps) {
+  const related = relatedProducts
+    .filter(p => p.id !== currentProduct.id)
     .slice(0, 4)
 
   if (related.length === 0) return null
@@ -34,7 +32,7 @@ function RelatedProducts({ currentProduct }: RelatedProductsProps) {
               brandName={p.brand}
               productName={p.name}
               price={`${p.price}€`}
-              href={buildProductHrefFromProduct(p)}
+              href={`/bekleidung/${generateSlug(p.brand)}/${p.slug}`}
               colours={p.colors.map(c => ({ hex: c.hex, name: c.name }))}
               createdAt={new Date()}
               sizes={p.sizes}

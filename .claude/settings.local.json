@@ -32,7 +32,9 @@
       "mcp__chrome-devtools__list_pages",
       "mcp__chrome-devtools__emulate",
       "WebFetch(domain:www.alexandermcqueen.com)",
-      "WebFetch(domain:eu.manieredevoir.com)"
+      "WebFetch(domain:eu.manieredevoir.com)",
+      "Bash(Get-ChildItem *)",
+      "Bash(Select-Object Name)"
     ]
   }
 }

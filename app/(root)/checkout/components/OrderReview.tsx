@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useCart } from '@/app/context/CartContext'
 import { Separator } from '@/components/ui/separator'
 import { ShippingData } from './ShippingForm'
+import { orderApi, FetchError } from '@/lib/api'
 
 type PaymentMethod = 'paypal' | 'stripe' | 'applepay'
 
@@ -21,11 +22,53 @@ interface OrderReviewProps {
 }
 
 export default function OrderReview({ shippingData, paymentMethod, onBack }: OrderReviewProps) {
-  const { cartItems, totalPrice } = useCart()
+  const { cartItems, totalPrice, clearCart } = useCart()
   const [success, setSuccess] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const shippingCost = totalPrice >= 50 ? 0 : 4.99
   const finalTotal = totalPrice + shippingCost
+
+  async function handlePlaceOrder() {
+    setError(null)
+    setSubmitting(true)
+    try {
+      const itemsWithListings = cartItems.map(item => ({
+        productId: item.productId,
+        listingId: item.defaultListingId ?? '',
+        quantity: item.quantity,
+        size: item.size,
+        color: item.color
+          ? { id: item.color.id, name: item.color.name, hex: item.color.hex }
+          : undefined,
+      }))
+
+      // Split fullName into first/last
+      const nameParts = shippingData.fullName.trim().split(' ')
+      const firstName = nameParts[0] ?? ''
+      const lastName = nameParts.slice(1).join(' ') || firstName
+
+      await orderApi.create({
+        items: itemsWithListings,
+        shippingAddress: {
+          firstName,
+          lastName,
+          street: shippingData.address,
+          city: shippingData.city,
+          postalCode: shippingData.plz,
+          country: shippingData.country,
+        },
+      })
+
+      clearCart()
+      setSuccess(true)
+    } catch (err) {
+      setError(err instanceof FetchError ? err.message : 'Bestellung konnte nicht aufgegeben werden.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   if (success) {
     return (
@@ -146,20 +189,28 @@ export default function OrderReview({ shippingData, paymentMethod, onBack }: Ord
         </div>
       </section>
 
+      {error && (
+        <p className="font-league-spartan text-xs text-enunas-error mb-4 text-center">
+          {error}
+        </p>
+      )}
+
       <div className="flex flex-col sm:flex-row gap-3">
         <button
           type="button"
           onClick={onBack}
-          className="sm:w-auto px-8 py-4 font-league-spartan text-sm tracking-[0.15em] uppercase text-enunas-purple border border-enunas-purple hover:bg-enunas-purple hover:text-white transition-colors duration-200 ease-out-expo"
+          disabled={submitting}
+          className="sm:w-auto px-8 py-4 font-league-spartan text-sm tracking-[0.15em] uppercase text-enunas-purple border border-enunas-purple hover:bg-enunas-purple hover:text-white transition-colors duration-200 ease-out-expo disabled:opacity-60"
         >
           ← Zurück
         </button>
         <button
           type="button"
-          onClick={() => setSuccess(true)}
-          className="flex-1 py-4 bg-enunas-purple text-white font-league-spartan text-sm tracking-[0.15em] uppercase hover:bg-enunas-purple-light transition-colors duration-200 ease-out-expo"
+          onClick={handlePlaceOrder}
+          disabled={submitting || cartItems.length === 0}
+          className="flex-1 py-4 bg-enunas-purple text-white font-league-spartan text-sm tracking-[0.15em] uppercase hover:bg-enunas-purple-light transition-colors duration-200 ease-out-expo disabled:opacity-60"
         >
-          Bestellung aufgeben
+          {submitting ? 'Wird verarbeitet...' : 'Bestellung aufgeben'}
         </button>
       </div>
     </div>

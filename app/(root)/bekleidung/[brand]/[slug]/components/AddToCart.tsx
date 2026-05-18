@@ -9,9 +9,10 @@ interface AddToCartProps {
   selectedSize?: string | null
   product: Product
   selectedColor: Color | null
+  defaultListingId?: string
 }
 
-function AddToCart({ selectedSize = null, product, selectedColor }: AddToCartProps) {
+function AddToCart({ selectedSize = null, product, selectedColor, defaultListingId }: AddToCartProps) {
   const { addToCart, openCart } = useCart()
   const hasSizeSelected = selectedSize !== null
 
@@ -29,6 +30,7 @@ function AddToCart({ selectedSize = null, product, selectedColor }: AddToCartPro
         ? { id: selectedColor.id, name: selectedColor.name, hex: selectedColor.hex }
         : undefined,
       image: product.images[0] ?? '',
+      defaultListingId,
     })
     openCart()
   }

@@ -1,21 +1,22 @@
 import React from 'react'
 import { Product } from '@/lib/product'
-import { getProductsByCatalogue, buildProductHrefFromProduct } from '@/lib/mockProducts'
+import { generateSlug } from '@/lib/product'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 
 interface StyleSuggestionsProps {
   currentProduct: Product;
+  suggestions: Product[];
   excludeIds: string[];
 }
 
-function StyleSuggestions({ currentProduct, excludeIds }: StyleSuggestionsProps) {
+function StyleSuggestions({ currentProduct, suggestions, excludeIds }: StyleSuggestionsProps) {
   const idsToExclude = new Set([currentProduct.id, ...excludeIds])
 
-  const suggestions = getProductsByCatalogue(currentProduct.catalogue)
+  const filtered = suggestions
     .filter(p => !idsToExclude.has(p.id))
     .slice(0, 4)
 
-  if (suggestions.length === 0) return null
+  if (filtered.length === 0) return null
 
   return (
     <section className="border-t border-enunas-gray-light">
@@ -27,14 +28,14 @@ function StyleSuggestions({ currentProduct, excludeIds }: StyleSuggestionsProps)
           Passend zu deinem Stil
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-          {suggestions.map(p => (
+          {filtered.map(p => (
             <PopularProductCard
               key={p.id}
               imgURL={p.images[0]}
               brandName={p.brand}
               productName={p.name}
               price={`${p.price}€`}
-              href={buildProductHrefFromProduct(p)}
+              href={`/bekleidung/${generateSlug(p.brand)}/${p.slug}`}
               colours={p.colors.map(c => ({ hex: c.hex, name: c.name }))}
               createdAt={new Date()}
               sizes={p.sizes}
