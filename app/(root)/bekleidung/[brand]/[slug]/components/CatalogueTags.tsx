@@ -25,7 +25,7 @@ export default function CatalogueTags({ categories }: CatalogueTagsProps) {
             key={t}
             className={`
               ${bg}
-              w-[150px] px-4 py-2.5
+              w-[150px] px-4 py-1
               font-cormorant text-lg font-normal
               text-center text-white
               border border-enunas-black
