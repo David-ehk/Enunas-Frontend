@@ -1,92 +1,82 @@
-'use client';
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  ReactNode,
-} from 'react';
-import { useRouter } from 'next/navigation';
-import { getToken, clearToken, setOnUnauthorized, customerApi, brandApi } from '@/lib/api';
-import type { ApiUser, ApiCustomer, ApiBrandPartner } from '@/types/api';
+'use client'
 
-interface AuthState {
-  isAuthenticated: boolean;
-  isLoading: boolean;
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import type { ApiUser, ApiCustomer } from '@/types/api'
+import { getToken, clearToken } from '@/lib/api/auth'
+import { fetcher, setOnUnauthorized } from '@/lib/api/fetcher'
+
+interface AuthContextType {
   user: ApiUser | null;
   customer: ApiCustomer | null;
-  brandPartner: ApiBrandPartner | null;
-  token: string | null;
-}
-
-interface AuthContextType extends AuthState {
-  logout: () => void;
+  isAuthenticated: boolean;
+  isLoading: boolean;
   refreshUser: () => Promise<void>;
+  logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const EMPTY_STATE: AuthState = {
-  isAuthenticated: false,
-  isLoading: false,
+const AuthContext = createContext<AuthContextType>({
   user: null,
   customer: null,
-  brandPartner: null,
-  token: null,
-};
+  isAuthenticated: false,
+  isLoading: true,
+  refreshUser: async () => {},
+  logout: () => {},
+});
+
+export function useAuth() {
+  return useContext(AuthContext);
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const router = useRouter();
-  const [state, setState] = useState<AuthState>({ ...EMPTY_STATE, isLoading: true });
+  const [user, setUser] = useState<ApiUser | null>(null);
+  const [customer, setCustomer] = useState<ApiCustomer | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const logout = useCallback(() => {
-    clearToken();
-    setState(EMPTY_STATE);
-    router.push('/account');
-  }, [router]);
-
-  useEffect(() => {
-    setOnUnauthorized(logout);
-  }, [logout]);
-
-  const refreshUser = useCallback(async () => {
-    const token = getToken();
-    if (!token) {
-      setState(EMPTY_STATE);
+  async function refreshUser() {
+    if (!getToken()) {
+      setUser(null);
+      setCustomer(null);
       return;
     }
     try {
-      const user = await customerApi.getMe();
-      let customer: ApiCustomer | null = null;
-      let brandPartner: ApiBrandPartner | null = null;
-
-      if (user.role === 'CUSTOMER') {
-        customer = await customerApi.getCustomerProfile().catch(() => null);
-      } else if (user.role === 'BRAND_PARTNER') {
-        brandPartner = await brandApi.getMe().catch(() => null);
+      const me = await fetcher<ApiUser>('/auth/me');
+      setUser(me);
+      if (me.role === 'CUSTOMER') {
+        const cust = await fetcher<ApiCustomer>('/customers/me').catch(() => null);
+        setCustomer(cust);
       }
-
-      setState({ isAuthenticated: true, isLoading: false, user, customer, brandPartner, token });
     } catch {
-      clearToken();
-      setState(EMPTY_STATE);
+      setUser(null);
+      setCustomer(null);
     }
-  }, []);
+  }
 
   useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
+    setOnUnauthorized(() => {
+      clearToken();
+      setUser(null);
+      setCustomer(null);
+    });
+    refreshUser().finally(() => setIsLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function logout() {
+    clearToken();
+    setUser(null);
+    setCustomer(null);
+  }
 
   return (
-    <AuthContext.Provider value={{ ...state, logout, refreshUser }}>
+    <AuthContext.Provider value={{
+      user,
+      customer,
+      isAuthenticated: user !== null,
+      isLoading,
+      refreshUser,
+      logout,
+    }}>
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
-  return ctx;
 }

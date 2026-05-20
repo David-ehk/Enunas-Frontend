@@ -1,26 +1,28 @@
 import { fetcher } from '../fetcher';
-import type { ApiOrder, CreateOrderRequest } from '../../../types/api';
+import type { ApiOrder } from '@/types/api';
+import type { ShippingAddress } from '../orders';
+
+interface CreateOrderItem {
+  productId: string;
+  quantity: number;
+  size?: string;
+  colorId?: string;
+}
 
 export const orderApi = {
-  async create(data: CreateOrderRequest): Promise<ApiOrder> {
-    return fetcher<ApiOrder>('/orders', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+  async getMy(): Promise<ApiOrder[]> {
+    return fetcher<ApiOrder[]>('/orders');
   },
 
-  async getMy(signal?: AbortSignal): Promise<ApiOrder[]> {
-    return fetcher<ApiOrder[]>('/orders/me', { signal });
+  async getById(orderId: string): Promise<ApiOrder> {
+    return fetcher<ApiOrder>(`/orders/${orderId}`);
   },
 
-  async getById(orderId: string, signal?: AbortSignal): Promise<ApiOrder> {
-    return fetcher<ApiOrder>(`/orders/${orderId}`, { signal });
+  async create(data: { items: CreateOrderItem[]; shippingAddress: ShippingAddress }): Promise<ApiOrder> {
+    return fetcher<ApiOrder>('/orders', { method: 'POST', body: JSON.stringify(data) });
   },
 
-  async requestReturn(orderId: string, reason?: string): Promise<ApiOrder> {
-    return fetcher<ApiOrder>(`/orders/${orderId}/return`, {
-      method: 'POST',
-      body: JSON.stringify({ reason }),
-    });
+  async cancel(orderId: string): Promise<void> {
+    return fetcher<void>(`/orders/${orderId}/cancel`, { method: 'POST' });
   },
 };

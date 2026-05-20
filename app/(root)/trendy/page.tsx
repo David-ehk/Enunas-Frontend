@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function page() {
   return (
-    <main>
+    <div>
         <section>
           <HeroTrendy/>
         </section>
@@ -16,6 +16,6 @@ export default function page() {
         <section>
         </section>
 
-    </main>
+    </div>
   )
 }

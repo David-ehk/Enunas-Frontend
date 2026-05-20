@@ -1,0 +1,2067 @@
+[     131ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    2527ms] [LOG] [Fast Refresh] done in 2501ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    2843ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    3234ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    3705ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    3904ms] [LOG] [Fast Refresh] done in 315ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   58615ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   58991ms] [LOG] [Fast Refresh] done in 351ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   62328ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   62654ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   62953ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   63036ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   63116ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   63203ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   63284ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   63357ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   63439ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   63516ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   63593ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   63669ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   63744ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   63824ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   63902ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   63977ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   64042ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   64122ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   64196ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   64271ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   64354ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   64455ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   64533ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   64612ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   64689ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   64768ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   64843ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   64920ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   64984ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   65061ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   65138ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   65218ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   65296ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   65378ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   65452ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   65533ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   65603ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   65664ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   65726ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   65791ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   65871ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   65944ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   66025ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   66104ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   66176ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   66254ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   66332ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   66393ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   66456ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   66519ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   66598ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   66678ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   66775ms] [ERROR] ./app/(root)/cart/page.tsx:209:14
+Parsing ecmascript source code failed
+  207 |           </div>
+  208 |         </div>
+> 209 |       </main>
+      |              ^
+> 210 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  211 |         <Footer />
+  212 |       </footer>
+  213 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/cart/page.tsx [Client Component Browser]
+    ./app/(root)/cart/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/cart/page.tsx [Client Component SSR]
+    ./app/(root)/cart/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   66890ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   67305ms] [LOG] [Fast Refresh] done in 460ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   67416ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   67535ms] [LOG] [Fast Refresh] done in 230ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   74126ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   74404ms] [LOG] [Fast Refresh] done in 373ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   77518ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   77861ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   77959ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   78047ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   78125ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   78199ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   78275ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   78354ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   78430ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   78508ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   78585ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   78663ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   78742ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   78843ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   78874ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   78957ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   78984ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   79075ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   79091ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   79158ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   79236ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   79313ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   79394ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   79469ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   79553ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   79627ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   79702ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   79783ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   79861ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   79946ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   80026ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   80102ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   80178ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   80259ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   80335ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   80415ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   80501ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   80583ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   80656ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   80732ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   80807ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   80883ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   80946ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   81025ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   81104ms] [ERROR] ./app/(root)/checkout/page.tsx:357:14
+Parsing ecmascript source code failed
+  355 |           </div>
+  356 |         </div>
+> 357 |       </main>
+      |              ^
+> 358 |       <footer className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
+      | ^^^^^^^
+  359 |         <Footer />
+  360 |       </footer>
+  361 |     </>
+
+Expected '</', got 'jsx text'
+
+Import traces:
+  Client Component Browser:
+    ./app/(root)/checkout/page.tsx [Client Component Browser]
+    ./app/(root)/checkout/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/(root)/checkout/page.tsx [Client Component SSR]
+    ./app/(root)/checkout/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   81241ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   81654ms] [LOG] [Fast Refresh] done in 385ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297

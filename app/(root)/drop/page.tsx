@@ -4,13 +4,13 @@ import Test from './components/Test'
 
 function page() {
   return (
-    <main className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-black flex flex-col">
       
       <section className="flex-1">
         <Test />
       </section>
       
-    </main>
+    </div>
   )
 }
 

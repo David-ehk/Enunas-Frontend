@@ -1,0 +1,74 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e82]:
+      - heading "404" [level=1] [ref=e83]
+      - heading "This page could not be found." [level=2] [ref=e85]
+    - generic [ref=e49]:
+      - generic [ref=e50]:
+        - button "✕" [ref=e51]
+        - generic [ref=e52]:
+          - button "Warenkorb" [ref=e53]:
+            - heading "Warenkorb" [level=4] [ref=e54]
+          - button "Wunschliste" [ref=e55]:
+            - heading "Wunschliste" [level=4] [ref=e56]
+      - generic [ref=e57]:
+        - generic [ref=e87]:
+          - img "Worlds End Denim Boxer Jacket" [ref=e89]
+          - generic [ref=e90]:
+            - generic [ref=e91]:
+              - generic [ref=e92]:
+                - paragraph [ref=e93]: Vivienne Westwood
+                - heading "Worlds End Denim Boxer Jacket" [level=3] [ref=e94]
+              - button "Entfernen" [ref=e95]
+            - paragraph [ref=e96]: Lila
+            - paragraph [ref=e97]: "Größe: M"
+            - generic [ref=e98]:
+              - generic [ref=e99]:
+                - button "−" [ref=e100]
+                - generic [ref=e101]: "1"
+                - button "+" [ref=e102]
+              - generic [ref=e103]: €420.00
+        - generic [ref=e105]:
+          - img "D.D. Shell Hooded-Padded Jacket" [ref=e107]
+          - generic [ref=e108]:
+            - generic [ref=e109]:
+              - generic [ref=e110]:
+                - paragraph [ref=e111]: Maison Guava
+                - heading "D.D. Shell Hooded-Padded Jacket" [level=3] [ref=e112]
+              - button "Entfernen" [ref=e113]
+            - paragraph [ref=e114]: Weiß
+            - paragraph [ref=e115]: "Größe: L"
+            - generic [ref=e116]:
+              - generic [ref=e117]:
+                - button "−" [ref=e118]
+                - generic [ref=e119]: "2"
+                - button "+" [ref=e120]
+              - generic [ref=e121]: €640.00
+        - generic [ref=e123]:
+          - img "Oversized Structured Blazer" [ref=e125]
+          - generic [ref=e126]:
+            - generic [ref=e127]:
+              - generic [ref=e128]:
+                - paragraph [ref=e129]: 6pm
+                - heading "Oversized Structured Blazer" [level=3] [ref=e130]
+              - button "Entfernen" [ref=e131]
+            - paragraph [ref=e132]: Schwarz
+            - paragraph [ref=e133]: "Größe: S"
+            - generic [ref=e134]:
+              - generic [ref=e135]:
+                - button "−" [ref=e136]
+                - generic [ref=e137]: "1"
+                - button "+" [ref=e138]
+              - generic [ref=e139]: €180.00
+      - generic [ref=e60]:
+        - generic [ref=e61]:
+          - generic [ref=e62]: Insgesamt (4 Artikel)
+          - generic [ref=e63]: €1240.00
+        - link "Sicher Zur Kasse" [ref=e140] [cursor=pointer]:
+          - /url: /cart
+          - heading "Sicher Zur Kasse" [level=3] [ref=e141]
+        - button "Weiter einkaufen" [ref=e66]
+        - paragraph [ref=e70]: Kostenloser Versand freigeschaltet!
+  - button "Open Next.js Dev Tools" [ref=e77] [cursor=pointer]:
+    - img [ref=e78]
+  - alert [ref=e143]: "404: This page could not be found."

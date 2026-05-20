@@ -1,25 +1,59 @@
 import { fetcher } from '../fetcher';
 import { setToken } from '../auth';
-import type { AuthResponse, LoginRequest, SignupRequest } from '../../../types/api';
+import type { ApiUser } from '@/types/api';
+
+interface LoginRequest { email: string; password: string }
+interface LoginResponse { token: string; refreshToken?: string; user: ApiUser }
+interface SignupRequest {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role: 'CUSTOMER' | 'BRAND_PARTNER';
+}
 
 export const authApi = {
-  async signup(data: SignupRequest): Promise<AuthResponse> {
-    const res = await fetcher<AuthResponse>('/auth/signup', {
+  async login(data: LoginRequest): Promise<LoginResponse> {
+    const res = await fetcher<LoginResponse>('/auth/login', {
       method: 'POST',
-      auth: false,
       body: JSON.stringify(data),
+      auth: false,
     });
     setToken(res.token);
     return res;
   },
 
-  async login(data: LoginRequest): Promise<AuthResponse> {
-    const res = await fetcher<AuthResponse>('/auth/login', {
+  async signup(data: SignupRequest): Promise<LoginResponse> {
+    const res = await fetcher<LoginResponse>('/auth/register', {
       method: 'POST',
-      auth: false,
       body: JSON.stringify(data),
+      auth: false,
     });
     setToken(res.token);
     return res;
+  },
+
+  async logout(): Promise<void> {
+    return fetcher<void>('/auth/logout', { method: 'POST' });
+  },
+
+  async getMe(): Promise<ApiUser> {
+    return fetcher<ApiUser>('/auth/me');
+  },
+
+  async updateProfile(data: { firstName?: string; lastName?: string }): Promise<ApiUser> {
+    return fetcher<ApiUser>('/auth/profile', { method: 'PATCH', body: JSON.stringify(data) });
+  },
+
+  async changePassword(data: { currentPassword: string; newPassword: string }): Promise<void> {
+    return fetcher<void>('/auth/password', { method: 'POST', body: JSON.stringify(data) });
+  },
+
+  async requestPasswordReset(email: string): Promise<void> {
+    return fetcher<void>('/auth/password-reset', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+      auth: false,
+    });
   },
 };

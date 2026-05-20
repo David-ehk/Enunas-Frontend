@@ -1,0 +1,344 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e81]:
+      - navigation [ref=e82]:
+        - button "Menü öffnen" [ref=e84]:
+          - img [ref=e85]
+        - link "Enunas" [ref=e86] [cursor=pointer]:
+          - /url: /
+          - heading "Enunas" [level=1] [ref=e87]
+        - generic [ref=e88]:
+          - button "Suche öffnen" [ref=e90] [cursor=pointer]:
+            - img [ref=e91]
+          - link "Mein Konto" [ref=e94] [cursor=pointer]:
+            - /url: /account
+            - img [ref=e95]
+          - button "Warenkorb mit 4 Artikeln" [ref=e99] [cursor=pointer]:
+            - img [ref=e100]
+            - generic [ref=e103]: "4"
+    - generic [ref=e105]:
+      - generic [ref=e107]:
+        - generic [ref=e108]:
+          - generic [ref=e109]:
+            - generic [ref=e110]:
+              - button "Zu Bild 1 scrollen" [ref=e111]
+              - button "Zu Bild 2 scrollen" [ref=e112]
+              - button "Zu Bild 3 scrollen" [ref=e113]
+            - generic [ref=e114]:
+              - img "Worlds End Denim Boxer Jacket - Ansicht 1" [ref=e116]
+              - img "Worlds End Denim Boxer Jacket - Ansicht 2" [ref=e118]
+              - img "Worlds End Denim Boxer Jacket - Ansicht 3" [ref=e120]
+          - navigation [ref=e121]:
+            - list [ref=e122]:
+              - listitem [ref=e123]:
+                - link "Home" [ref=e124] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e125]: /
+              - listitem [ref=e126]:
+                - link "Bekleidung" [ref=e127] [cursor=pointer]:
+                  - /url: /bekleidung
+              - listitem [ref=e128]: /
+              - listitem [ref=e129]:
+                - link "Vivienne Westwood" [ref=e130] [cursor=pointer]:
+                  - /url: /bekleidung/vivienne-westwood
+              - listitem [ref=e131]: /
+              - listitem [ref=e132]: Worlds End Denim Boxer Jacket
+        - generic [ref=e133]:
+          - generic [ref=e134]:
+            - link "Vivienne Westwood" [ref=e135] [cursor=pointer]:
+              - /url: /
+              - heading "Vivienne Westwood" [level=2] [ref=e136]
+            - heading "Worlds End Denim Boxer Jacket" [level=2] [ref=e137]
+          - generic [ref=e138]:
+            - generic [ref=e139]: 420,00 €
+            - paragraph [ref=e140]: inkl. MwSt. zzgl. Versand
+          - generic [ref=e142]:
+            - generic [ref=e143]: Purple
+            - generic [ref=e144]:
+              - button "Farbe Lila auswählen" [ref=e145]
+              - button "Farbe Schwarz auswählen" [ref=e147]
+              - button "Farbe Off-White auswählen" [ref=e149]
+              - button "+1" [ref=e151]
+          - generic [ref=e154]:
+            - button "XS" [ref=e155]:
+              - heading "XS" [level=3] [ref=e156]
+            - button "S" [ref=e157]:
+              - heading "S" [level=3] [ref=e158]
+            - button "M" [ref=e159]:
+              - heading "M" [level=3] [ref=e160]
+            - button "L" [ref=e161]:
+              - heading "L" [level=3] [ref=e162]
+            - button "XL" [ref=e163]:
+              - heading "XL" [level=3] [ref=e164]
+          - generic [ref=e167]:
+            - heading "Experimental" [level=3] [ref=e169]
+            - heading "Culture" [level=3] [ref=e171]
+          - button "Wählen Sie eine Größe aus" [disabled] [ref=e173]:
+            - heading "Wählen Sie eine Größe aus" [level=3] [ref=e175]
+          - generic [ref=e178]:
+            - heading "Produktdetails" [level=3] [ref=e180]:
+              - button "Produktdetails" [ref=e181]:
+                - text: Produktdetails
+                - img
+            - heading "Versand & Rückgabe" [level=3] [ref=e183]:
+              - button "Versand & Rückgabe" [ref=e184]:
+                - text: Versand & Rückgabe
+                - img
+            - heading "Größentabelle" [level=3] [ref=e186]:
+              - button "Größentabelle" [ref=e187]:
+                - text: Größentabelle
+                - img
+      - generic [ref=e190]:
+        - generic [ref=e191]:
+          - paragraph [ref=e192]: Worlds End Denim Boxer Jacket
+          - generic [ref=e194]: 420,00 €
+        - button "Größe wählen" [ref=e195]
+    - contentinfo [ref=e196]:
+      - generic [ref=e197]:
+        - generic [ref=e198]:
+          - generic [ref=e199]:
+            - paragraph [ref=e200]: Über uns
+            - list [ref=e201]:
+              - listitem [ref=e202]:
+                - link "Über uns" [ref=e203] [cursor=pointer]:
+                  - /url: /about us
+                  - text: Über uns
+              - listitem [ref=e204]:
+                - link "Marken" [ref=e205] [cursor=pointer]:
+                  - /url: /marken
+                  - text: Marken
+              - listitem [ref=e206]:
+                - link "Designer" [ref=e207] [cursor=pointer]:
+                  - /url: /marken
+                  - text: Designer
+              - listitem [ref=e208]:
+                - link "Karriere" [ref=e209] [cursor=pointer]:
+                  - /url: /karriere
+                  - text: Karriere
+          - generic [ref=e210]:
+            - paragraph [ref=e211]: Hilfe
+            - list [ref=e212]:
+              - listitem [ref=e213]:
+                - link "FAQs" [ref=e214] [cursor=pointer]:
+                  - /url: /faqs
+                  - text: FAQs
+              - listitem [ref=e215]:
+                - link "Sendungsverfolgung" [ref=e216] [cursor=pointer]:
+                  - /url: /sendungsverfolgung
+                  - text: Sendungsverfolgung
+              - listitem [ref=e217]:
+                - link "Lieferung & Rücksendung" [ref=e218] [cursor=pointer]:
+                  - /url: /lieferung-&-rücksendung
+                  - text: Lieferung & Rücksendung
+              - listitem [ref=e219]:
+                - link "Kundenservice" [ref=e220] [cursor=pointer]:
+                  - /url: /kundenservice
+                  - text: Kundenservice
+          - generic [ref=e221]:
+            - paragraph [ref=e222]: Rechtliches
+            - list [ref=e223]:
+              - listitem [ref=e224]:
+                - link "Impressum" [ref=e225] [cursor=pointer]:
+                  - /url: /Impressum
+                  - text: Impressum
+              - listitem [ref=e226]:
+                - link "AGBs" [ref=e227] [cursor=pointer]:
+                  - /url: /agbs
+                  - text: AGBs
+              - listitem [ref=e228]:
+                - link "Cookie-Richtlinien" [ref=e229] [cursor=pointer]:
+                  - /url: /cookie-richtlinien
+                  - text: Cookie-Richtlinien
+              - listitem [ref=e230]:
+                - link "Cookie-Einstellungen" [ref=e231] [cursor=pointer]:
+                  - /url: /cookie-einstellungen
+                  - text: Cookie-Einstellungen
+              - listitem [ref=e232]:
+                - link "Nutzungsbedingungen" [ref=e233] [cursor=pointer]:
+                  - /url: /nutzungsbedingungen
+                  - text: Nutzungsbedingungen
+              - listitem [ref=e234]:
+                - link "Datenschutzerklärung" [ref=e235] [cursor=pointer]:
+                  - /url: /datenschutzerklärung
+                  - text: Datenschutzerklärung
+          - generic [ref=e236]:
+            - paragraph [ref=e237]: Zahlungsarten
+            - generic [ref=e238]:
+              - paragraph [ref=e239]: Visa
+              - paragraph [ref=e240]: Mastercard
+              - paragraph [ref=e241]: PayPal
+        - generic [ref=e242]:
+          - link [ref=e243] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e244]
+          - link [ref=e246] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e247]
+          - link [ref=e249] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e250]
+          - link [ref=e253] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e254]
+        - generic [ref=e256]:
+          - paragraph [ref=e257]: © Enunas 2026
+          - generic [ref=e258]: Deutschland € / DE
+    - generic [ref=e49]:
+      - generic [ref=e50]:
+        - button "✕" [ref=e51]
+        - generic [ref=e52]:
+          - button "Warenkorb" [ref=e53]:
+            - heading "Warenkorb" [level=4] [ref=e54]
+          - button "Wunschliste" [ref=e55]:
+            - heading "Wunschliste" [level=4] [ref=e56]
+      - generic [ref=e57]:
+        - generic [ref=e260]:
+          - img "Worlds End Denim Boxer Jacket" [ref=e262]
+          - generic [ref=e263]:
+            - generic [ref=e264]:
+              - generic [ref=e265]:
+                - paragraph [ref=e266]: Vivienne Westwood
+                - heading "Worlds End Denim Boxer Jacket" [level=3] [ref=e267]
+              - button "Entfernen" [ref=e268]
+            - paragraph [ref=e269]: Lila
+            - paragraph [ref=e270]: "Größe: M"
+            - generic [ref=e271]:
+              - generic [ref=e272]:
+                - button "−" [ref=e273]
+                - generic [ref=e274]: "1"
+                - button "+" [ref=e275]
+              - generic [ref=e276]: €420.00
+        - generic [ref=e278]:
+          - img "D.D. Shell Hooded-Padded Jacket" [ref=e280]
+          - generic [ref=e281]:
+            - generic [ref=e282]:
+              - generic [ref=e283]:
+                - paragraph [ref=e284]: Maison Guava
+                - heading "D.D. Shell Hooded-Padded Jacket" [level=3] [ref=e285]
+              - button "Entfernen" [ref=e286]
+            - paragraph [ref=e287]: Weiß
+            - paragraph [ref=e288]: "Größe: L"
+            - generic [ref=e289]:
+              - generic [ref=e290]:
+                - button "−" [ref=e291]
+                - generic [ref=e292]: "2"
+                - button "+" [ref=e293]
+              - generic [ref=e294]: €640.00
+        - generic [ref=e296]:
+          - img "Oversized Structured Blazer" [ref=e298]
+          - generic [ref=e299]:
+            - generic [ref=e300]:
+              - generic [ref=e301]:
+                - paragraph [ref=e302]: 6pm
+                - heading "Oversized Structured Blazer" [level=3] [ref=e303]
+              - button "Entfernen" [ref=e304]
+            - paragraph [ref=e305]: Schwarz
+            - paragraph [ref=e306]: "Größe: S"
+            - generic [ref=e307]:
+              - generic [ref=e308]:
+                - button "−" [ref=e309]
+                - generic [ref=e310]: "1"
+                - button "+" [ref=e311]
+              - generic [ref=e312]: €180.00
+      - generic [ref=e60]:
+        - generic [ref=e61]:
+          - generic [ref=e62]: Insgesamt (4 Artikel)
+          - generic [ref=e63]: €1240.00
+        - link "Sicher Zur Kasse" [ref=e313] [cursor=pointer]:
+          - /url: /cart
+          - heading "Sicher Zur Kasse" [level=3] [ref=e314]
+        - button "Weiter einkaufen" [ref=e66]
+        - paragraph [ref=e70]: Kostenloser Versand freigeschaltet!
+  - button "Open Next.js Dev Tools" [ref=e77] [cursor=pointer]:
+    - img [ref=e78]
+  - alert [ref=e316]
+  - dialog "Navigation menu" [ref=e317]:
+    - generic [ref=e318]:
+      - button [ref=e319]:
+        - img [ref=e320]
+      - paragraph [ref=e322]: Schließen
+    - navigation [ref=e323]:
+      - list [ref=e324]:
+        - listitem [ref=e325]:
+          - button "Neu" [ref=e326]:
+            - generic [ref=e328]: Neu
+        - listitem [ref=e329]:
+          - button "Trendy" [ref=e330]:
+            - generic [ref=e332]: Trendy
+        - listitem [ref=e333]:
+          - button "Catalogue" [ref=e334]:
+            - generic [ref=e336]: Catalogue
+        - listitem [ref=e338]:
+          - button "Bekleidung" [ref=e339]:
+            - generic [ref=e340]:
+              - generic [ref=e341]: Bekleidung
+              - img [ref=e342]
+        - listitem [ref=e344]:
+          - button "Women" [ref=e345]:
+            - generic [ref=e346]:
+              - generic [ref=e347]: Women
+              - img [ref=e348]
+        - listitem [ref=e350]:
+          - button "Men" [ref=e351]:
+            - generic [ref=e352]:
+              - generic [ref=e353]: Men
+              - img [ref=e354]
+        - listitem [ref=e356]:
+          - button "Marken" [ref=e357]:
+            - generic [ref=e359]: Marken
+        - listitem [ref=e360]:
+          - button "Drops" [ref=e361]:
+            - generic [ref=e363]: Drops
+        - listitem [ref=e365]:
+          - button "Sale" [ref=e366]:
+            - generic [ref=e368]: Sale
+    - button "DE / EUR" [ref=e371]:
+      - generic [ref=e372]: DE / EUR
+  - dialog "Search panel" [ref=e373]:
+    - button "Suche schließen" [ref=e374]:
+      - img [ref=e375]
+    - generic [ref=e378]:
+      - textbox "SUCHEN" [ref=e379]
+      - img [ref=e380]
+    - generic [ref=e382]:
+      - heading "HIGHLIGHTS" [level=3] [ref=e383]
+      - list [ref=e384]:
+        - listitem [ref=e385]:
+          - link "GESCHENKE FUER SIE" [ref=e386] [cursor=pointer]:
+            - /url: /geschenke/sie
+        - listitem [ref=e387]:
+          - link "GESCHENKE FUER IHN" [ref=e388] [cursor=pointer]:
+            - /url: /geschenke/ihn
+        - listitem [ref=e389]:
+          - link "Accesoirs" [ref=e390] [cursor=pointer]:
+            - /url: /accesoirs
+        - listitem [ref=e391]:
+          - link "DROPS" [ref=e392] [cursor=pointer]:
+            - /url: /Drops
+        - listitem [ref=e393]:
+          - link "ALLE BEKLEIDUNG" [ref=e394] [cursor=pointer]:
+            - /url: /bekleidung
+  - dialog "Search panel" [ref=e395]:
+    - button "Suche schließen" [ref=e396]:
+      - img [ref=e397]
+    - generic [ref=e400]:
+      - textbox "SUCHEN" [active] [ref=e401]
+      - img [ref=e402]
+    - generic [ref=e404]:
+      - heading "HIGHLIGHTS" [level=3] [ref=e405]
+      - list [ref=e406]:
+        - listitem [ref=e407]:
+          - link "GESCHENKE FUER SIE" [ref=e408] [cursor=pointer]:
+            - /url: /geschenke/sie
+        - listitem [ref=e409]:
+          - link "GESCHENKE FUER IHN" [ref=e410] [cursor=pointer]:
+            - /url: /geschenke/ihn
+        - listitem [ref=e411]:
+          - link "Accesoirs" [ref=e412] [cursor=pointer]:
+            - /url: /accesoirs
+        - listitem [ref=e413]:
+          - link "DROPS" [ref=e414] [cursor=pointer]:
+            - /url: /Drops
+        - listitem [ref=e415]:
+          - link "ALLE BEKLEIDUNG" [ref=e416] [cursor=pointer]:
+            - /url: /bekleidung

@@ -17,8 +17,8 @@ export default function MarkenPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white pt-16">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="min-h-screen bg-white" style={{ paddingTop: '96px' }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl tracking-wide mb-2">
             Marken von A - Z
@@ -27,7 +27,7 @@ export default function MarkenPage() {
 
         <TopDesignerSection brands={topDesigners} />
         <BrandListingsSection brands={allBrands} />
-      </main>
+      </div>
     </div>
   );
 }

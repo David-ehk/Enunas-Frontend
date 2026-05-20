@@ -1,19 +1,12 @@
 import { fetcher } from '../fetcher';
-import type { ApiUser, ApiCustomer } from '../../../types/api';
+import type { ApiCustomer } from '@/types/api';
 
 export const customerApi = {
-  async getMe(signal?: AbortSignal): Promise<ApiUser> {
-    return fetcher<ApiUser>('/users/me', { signal });
+  async getMe(): Promise<ApiCustomer> {
+    return fetcher<ApiCustomer>('/customers/me');
   },
 
-  async getCustomerProfile(signal?: AbortSignal): Promise<ApiCustomer> {
-    return fetcher<ApiCustomer>('/customer/me', { signal });
-  },
-
-  async updateCustomerProfile(data: Partial<ApiCustomer>): Promise<ApiCustomer> {
-    return fetcher<ApiCustomer>('/customer/me', {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    });
+  async updateCustomerProfile(data: { firstName?: string; lastName?: string }): Promise<ApiCustomer> {
+    return fetcher<ApiCustomer>('/auth/profile', { method: 'PATCH', body: JSON.stringify(data) });
   },
 };

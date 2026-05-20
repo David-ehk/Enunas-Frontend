@@ -1,251 +1,349 @@
-"use client"
+'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import ImageGallery from './ImageGallery'
+import BrandLink from './BrandLink'
+import GenderBadge from './GenderBadge'
+import InspirationStory from './InspirationStory'
 import ColorSelector from './ColorSelector'
 import SizeSelector from './SizeSelector'
-import AddToCart from '../components/AddToCart'
-import { Product } from '@/lib/product'
-import { Color } from '@/lib/color'
+import CatalogueTags from './CatalogueTags'
+import SizeGuideRow from './SizeGuideRow'
+import StockIndicator from './StockIndicator'
+import PflegeAccordionContent from './PflegeAccordionContent'
 import Link from 'next/link'
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 import { X } from 'lucide-react'
-import StyleCatalogue from './StyleCatalogue'
+import { Product, findVariant, uniqueColors } from '../types/product'
+import type { Color } from '@/lib/color'
 import { useCart } from '@/app/context/CartContext'
 
 interface ProductDetailsProps {
-  product: Product;
-  brandSlug: string;
-  defaultListingId?: string;
+  product: Product
+  price: number
+  currency: string
+  brandSlug: string
+  productSlug: string
+  colorHexMap: Record<string, string>
+  defaultListingId?: string
 }
 
-function ProductDetails({ product, brandSlug, defaultListingId }: ProductDetailsProps) {
-  const [selectedSize, setSelectedSize] = useState<string | null>(null)
-  const [selectedColor, setSelectedColor] = useState<Color | null>(null)
-  const [showFloatingButton, setShowFloatingButton] = useState(false)
-  const [showSizeModal, setShowSizeModal] = useState(false)
-  const staticButtonRef = useRef<HTMLDivElement>(null)
+export default function ProductDetails({
+  product,
+  price,
+  currency,
+  brandSlug,
+  productSlug,
+  colorHexMap,
+  defaultListingId,
+}: ProductDetailsProps) {
+  const colorList = useMemo(() => uniqueColors(product.variants), [product.variants])
+  const colorsForSelector: Color[] = useMemo(
+    () => colorList.map((name, i) => ({ id: String(i), name, hex: colorHexMap[name] ?? '#999999' })),
+    [colorList, colorHexMap]
+  )
 
+  const [selectedColor, setSelectedColor] = useState<Color | null>(colorsForSelector[0] ?? null)
+  const [selectedSize, setSelectedSize] = useState<string | null>(null)
+  const [copiedSku, setCopiedSku] = useState(false)
+  const [showFloatingBar, setShowFloatingBar] = useState(false)
+  const [showSizeModal, setShowSizeModal] = useState(false)
+  const [openAccordion, setOpenAccordion] = useState<string | null>('details')
+
+  const ctaRef = useRef<HTMLButtonElement>(null)
   const { addToCart, openCart } = useCart()
 
-  const formattedPrice = new Intl.NumberFormat('de-DE', {
-    style: 'currency',
-    currency: product.currency,
-  }).format(product.price)
+  const selectedVariant = findVariant(product.variants, selectedColor?.name ?? null, selectedSize)
+  const isOutOfStock = !!(selectedVariant && selectedVariant.stockQuantity === 0)
 
-  const colorsForSelector: Color[] = product.colors.map((pc) => ({
-    id: pc.id,
-    name: pc.name,
-    hex: pc.hex,
-  }))
+  const formattedPrice = new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(price)
 
-  // Scroll-Erkennung für fliegenden Button
   useEffect(() => {
-    const handleScroll = () => {
-      if (staticButtonRef.current) {
-        const rect = staticButtonRef.current.getBoundingClientRect()
-        setShowFloatingButton(rect.bottom < 0)
-      }
+    const onScroll = () => {
+      if (ctaRef.current) setShowFloatingBar(ctaRef.current.getBoundingClientRect().bottom < 0)
     }
-
-    window.addEventListener('scroll', handleScroll)
-    handleScroll()
-    return () => window.removeEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const buildCartItem = (size: string) => ({
-    productId: product.id,
-    name: product.name,
-    brand: product.brand,
-    price: product.price,
-    currency: product.currency,
-    size,
-    color: selectedColor
-      ? { id: selectedColor.id, name: selectedColor.name, hex: selectedColor.hex }
-      : undefined,
-    image: product.images[0] ?? '',
-    defaultListingId,
-  })
-
-  const handleFloatingButtonClick = () => {
-    if (!selectedSize) {
-      setShowSizeModal(true)
-    } else {
-      addToCart(buildCartItem(selectedSize))
-      openCart()
+  // Reset size when color changes if selected size no longer available for new color
+  const handleColorSelect = (color: Color) => {
+    setSelectedColor(color)
+    if (selectedSize) {
+      const v = findVariant(product.variants, color.name, selectedSize)
+      if (!v || v.stockQuantity === 0) setSelectedSize(null)
     }
   }
 
-  const handleSizeSelectFromModal = (size: string) => {
-    setSelectedSize(size)
-    setShowSizeModal(false)
-    addToCart(buildCartItem(size))
-    openCart()
+  const buildCartItem = (size: string) => ({
+    productId: String(product.id),
+    name: product.name,
+    brand: product.brandName,
+    price,
+    currency,
+    size,
+    color: selectedColor ? { id: selectedColor.id, name: selectedColor.name, hex: selectedColor.hex } : undefined,
+    image: product.images[0] ?? '',
+    defaultListingId,
+    productPath: `/bekleidung/${brandSlug}/${productSlug}`,
+  })
+
+  const handleAddToCart = (size: string) => { addToCart(buildCartItem(size)); openCart() }
+
+  const handleCta = () => {
+    if (isOutOfStock) return
+    if (!selectedSize) { setShowSizeModal(true); return }
+    handleAddToCart(selectedSize)
   }
+
+  const copySku = async () => {
+    const skuToCopy = selectedVariant?.sku ?? ''
+    if (!skuToCopy) return
+    try { await navigator.clipboard.writeText(skuToCopy) } catch { /* noop */ }
+    setCopiedSku(true)
+    setTimeout(() => setCopiedSku(false), 1600)
+  }
+
+  const toggle = (key: string) => setOpenAccordion(prev => (prev === key ? null : key))
+
+  const ctaLabel = isOutOfStock
+    ? 'Ausverkauft'
+    : selectedSize
+    ? 'Zum Warenkorb hinzufügen'
+    : 'Größe wählen'
 
   return (
     <>
-      <div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Bilder-Galerie */}
+      {/* ── PDP grid ───────────────────────────────────── */}
+      <div className="max-w-[1800px] mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2">
+
+          {/* LEFT — Gallery + Breadcrumb */}
           <div>
             <ImageGallery images={product.images} productName={product.name} />
-            {/* Breadcrumb — below gallery */}
-            <nav className="px-4 lg:px-6 py-4">
-              <ol className="flex items-center gap-1.5 text-[11px] text-enunas-gray-medium tracking-[0.02em]"
-                  style={{ fontFamily: 'var(--font-league-spartan)' }}>
+            <nav className="px-8 py-[22px]">
+              <ol
+                className="flex items-center flex-wrap gap-3 text-enunas-gray-medium"
+                style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '13px', letterSpacing: '0.02em' }}
+              >
                 <li><Link href="/" className="hover:text-enunas-black transition-colors duration-200">Home</Link></li>
                 <li className="text-enunas-gray-light">/</li>
                 <li><Link href="/bekleidung" className="hover:text-enunas-black transition-colors duration-200">Bekleidung</Link></li>
                 <li className="text-enunas-gray-light">/</li>
-                <li><Link href={`/bekleidung/${brandSlug}`} className="hover:text-enunas-black transition-colors duration-200">{product.brand}</Link></li>
+                <li><Link href={`/bekleidung/${brandSlug}`} className="hover:text-enunas-black transition-colors duration-200">{product.brandName}</Link></li>
                 <li className="text-enunas-gray-light">/</li>
-                <li className="text-enunas-gray-dark">{product.name}</li>
+                <li className="text-enunas-black font-medium">{product.name}</li>
               </ol>
             </nav>
           </div>
-          
-          {/* Produktinfo */}
-          <div className="pt-10 px-15 sm:px-20">
-            {/* Marke & Name */}
-            <div className="text-center">
-              <Link href="/" className="text-[#370E4D] hover:text-black">
-                <h2 className="text-3xl sm:text-4xl space-y-10">{product.brand}</h2>
-              </Link>
-              <h2 className="text-lg sm:text-xl mt-6">{product.name}</h2>
+
+          {/* RIGHT — Details */}
+          <div
+            className="flex flex-col items-center text-center"
+            style={{ padding: '56px 72px 80px' }}
+          >
+            {/* 1. Brand + Gender */}
+            <div className="flex items-center gap-3.5 mb-3.5">
+              <BrandLink brand={product.brandName} />
+              <GenderBadge gender={product.gender} />
             </div>
-            
-            {/* Preis */}
-            <div className="flex justify-center gap-2 my-4 mb-6">
-              <div className="text-lg font-light">{formattedPrice}</div>
-              <p className="flex text-sm text-gray-500 text-center">
-                inkl. MwSt. zzgl. Versand
+
+            {/* 2. Product name */}
+            <h1
+              className="text-enunas-black mb-1.5"
+              style={{ fontFamily: 'var(--font-cormorant)', fontSize: '38px', fontWeight: 300, lineHeight: 1.1 }}
+            >
+              {product.name}
+            </h1>
+
+            {/* 3. Collection line */}
+            {product.collectionName && (
+              <p
+                className="text-enunas-gray-medium mb-5"
+                style={{ fontFamily: 'var(--font-cormorant)', fontSize: '15px', fontStyle: 'italic' }}
+              >
+                {product.collectionName}
               </p>
+            )}
+
+            {/* 4. Inspiration story */}
+            <InspirationStory text={product.inspirationStory} />
+
+            {/* 5. Price */}
+            <div className="flex items-baseline gap-3 mb-8">
+              <span
+                className="text-enunas-black"
+                style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '22px', fontWeight: 300 }}
+              >
+                {formattedPrice}
+              </span>
+              <span
+                className="text-enunas-gray-medium"
+                style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '12px', letterSpacing: '0.02em' }}
+              >
+                inkl. MwSt. zzgl. Versand
+              </span>
             </div>
-            
-            {/* Farbauswahl */}
-            {product.colors.length > 0 && (
-              <div className="flex justify-center">
+
+            {/* 6. Color + SKU */}
+            {colorsForSelector.length > 0 && (
+              <div className="mb-[14px]">
                 <ColorSelector
                   colors={colorsForSelector}
-                  onColorSelect={(color) => setSelectedColor(color)}
+                  selectedColor={selectedColor}
+                  onColorSelect={handleColorSelect}
+                  sku={selectedVariant?.sku}
                 />
               </div>
             )}
 
-            {/* Größenauswahl */}
-            {product.sizes.length > 0 && (
-              <div className="flex justify-center mt-6 space-y-10">
-                <SizeSelector
-                  sizes={product.sizes}
-                  selectedSize={selectedSize}
-                  onSizeSelect={(size) => setSelectedSize(size)}
-                />
-              </div>
-            )}
+            {/* 7. Size selector (variant-aware) */}
+            <SizeSelector
+              variants={product.variants}
+              selectedColor={selectedColor?.name ?? null}
+              selectedSize={selectedSize}
+              onSizeSelect={setSelectedSize}
+            />
 
-            {/* Catalogue/Style der Kleidung */}
-            <div className="space-y-10 my-6">
-              <StyleCatalogue catalogue={product.catalogue}/>
-            </div> 
-            
-            {/* Warenkorb-Button mit Referenz */}
-            <div ref={staticButtonRef} className="flex justify-center my-4">
-              <AddToCart
-                selectedSize={selectedSize}
-                product={product}
-                selectedColor={selectedColor}
-              />
-            </div>
-            
-            {/* Produktdetails */}
-            <div>
-              <Accordion type="single" collapsible>
-                <AccordionItem value="details">
-                  <AccordionTrigger>Produktdetails</AccordionTrigger>
-                  <AccordionContent>
-                    <div className="space-y-2 text-sm">
-                      <p><strong>Produktnummer:</strong> {product.sku}</p>
-                      <p><strong>Material:</strong> 100% Baumwolle</p>
-                      <p><strong>Pflegehinweise:</strong> Maschinenwäsche 30°C</p>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
+            {/* 8. Catalogue tags */}
+            <CatalogueTags categories={product.catalogueCategory} />
 
-                <AccordionItem value="shipping">
-                  <AccordionTrigger>Versand & Rückgabe</AccordionTrigger>
-                  <AccordionContent>
-                    <div className="space-y-2 text-sm">
-                      <p>• Versand in 2–4 Werktagen</p>
-                      <p>• Kostenloser Versand ab 50€</p>
-                      <p>• Rückgabe innerhalb 14 Tagen</p>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
+            {/* 9. Size guide row */}
+            <SizeGuideRow />
 
-                <AccordionItem value="size-guide">
-                  <AccordionTrigger>Größentabelle</AccordionTrigger>
-                  <AccordionContent>
-                    <div className="text-sm">
-                      <p>XS: 34-36 | S: 36-38 | M: 38-40 | L: 40-42 | XL: 42-44</p>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Floating Add-to-Cart Bar — McQueen sharp style */}
-      <div
-        className={`fixed bottom-0 left-0 right-0 z-50 transition-transform duration-500 ease-out ${
-          showFloatingButton
-            ? 'translate-y-0'
-            : 'translate-y-full'
-        }`}
-      >
-        <div className="bg-white border-t border-enunas-gray-light">
-          <div className="max-w-[1800px] mx-auto px-6 lg:px-12 py-4 flex items-center gap-6">
-            <div className="flex-1 min-w-0">
-              <p
-                className="text-sm text-enunas-black truncate"
-                style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
-              >
-                {product.name}
-              </p>
-              <div className="flex items-center gap-3 mt-0.5">
-                <span
-                  className="text-xs text-enunas-gray-dark"
-                  style={{ fontFamily: 'var(--font-league-spartan)' }}
-                >
-                  {formattedPrice}
-                </span>
-                {selectedSize && (
-                  <span
-                    className="text-[10px] text-enunas-gray-medium uppercase tracking-[0.1em]"
-                    style={{ fontFamily: 'var(--font-league-spartan)' }}
-                  >
-                    Größe: {selectedSize}
-                  </span>
-                )}
-              </div>
-            </div>
-
+            {/* 10. CTA */}
             <button
-              onClick={handleFloatingButtonClick}
-              className="px-10 py-3.5 bg-[#370E4D] text-white hover:bg-[#4A1566] transition-colors duration-300 whitespace-nowrap"
-              style={{ fontFamily: 'var(--font-league-spartan)' }}
+              ref={ctaRef}
+              onClick={handleCta}
+              disabled={isOutOfStock}
+              className="group relative w-full max-w-[460px] overflow-hidden mb-6 disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{
+                padding: '22px 32px',
+                background: '#370E4D',
+                fontFamily: 'var(--font-cormorant)',
+                fontSize: '22px',
+                fontWeight: 400,
+                letterSpacing: '0.04em',
+                border: 'none',
+                color: 'white',
+                cursor: isOutOfStock ? 'not-allowed' : 'pointer',
+                transition: 'background-color 300ms',
+              }}
+              onMouseEnter={e => { if (!isOutOfStock) e.currentTarget.style.backgroundColor = '#4A1566' }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#370E4D' }}
             >
-              <span className="text-[11px] tracking-[0.15em] uppercase">
-                {selectedSize ? 'In den Warenkorb' : 'Größe wählen'}
-              </span>
+              <span className="absolute left-1/2 -translate-x-1/2 top-[10%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[75%]" />
+              <span className="relative z-10">{ctaLabel}</span>
+              <span className="absolute left-1/2 -translate-x-1/2 bottom-[10%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[75%]" />
             </button>
+
+            {/* 11. Stock indicator */}
+            <StockIndicator stockQuantity={selectedVariant?.stockQuantity} />
+
+            {/* 12. Accordions */}
+            <div className="w-full max-w-[480px] text-left mt-4">
+
+              <PdpAccordion
+                id="details"
+                title="Produktdetails"
+                open={openAccordion === 'details'}
+                onToggle={() => toggle('details')}
+              >
+                {product.description && (
+                  <p style={{ fontFamily: 'var(--font-cormorant)', fontSize: '16px', lineHeight: 1.7, color: '#2D2D2D', marginBottom: '16px' }}>
+                    {product.description}
+                  </p>
+                )}
+                <div>
+                  {([
+                    { k: 'Produktnummer',  v: selectedVariant?.sku ?? null,    highlight: true },
+                    { k: 'Farbe',          v: selectedColor?.name ?? null,     highlight: false },
+                    { k: 'Gewicht',        v: selectedVariant ? `${selectedVariant.weightGrams} g` : null, highlight: false },
+                    { k: 'Material',       v: product.material || null,        highlight: false },
+                    { k: 'Geschlecht',     v: product.gender,                  highlight: false },
+                    { k: 'Kollektion',     v: product.collectionName,          highlight: false },
+                  ] as { k: string; v: string | null | undefined; highlight: boolean }[]).map(({ k, v, highlight }) => (
+                    <div
+                      key={k}
+                      className="flex gap-4 py-1.5 border-b border-dashed border-enunas-gray-light last:border-0"
+                      style={{ fontFamily: 'monospace', fontSize: '11px', letterSpacing: '0.04em' }}
+                    >
+                      <span style={{ color: '#6B6B6B', minWidth: '140px' }}>{k}</span>
+                      {v ? (
+                        <span style={{
+                          color: '#0A0A0A',
+                          background: highlight ? 'rgba(55,14,77,0.08)' : 'none',
+                          padding: highlight ? '1px 6px' : '0',
+                          borderRadius: highlight ? '2px' : '0',
+                        }}>
+                          {v}
+                        </span>
+                      ) : (
+                        <span style={{ color: '#6B6B6B', fontStyle: 'italic' }}>—</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </PdpAccordion>
+
+              <PdpAccordion
+                id="shipping"
+                title="Versand & Rückgabe"
+                open={openAccordion === 'shipping'}
+                onToggle={() => toggle('shipping')}
+              >
+                <p style={{ fontFamily: 'var(--font-cormorant)', fontSize: '16px', lineHeight: 1.7, color: '#2D2D2D' }}>
+                  Versand aus {product.originCountry || 'DE'}. {product.returnPeriodDays || 30} Tage Rückgaberecht ab Erhalt der Ware. Versandkostenfrei ab 50 €.
+                </p>
+              </PdpAccordion>
+
+              <PdpAccordion
+                id="care"
+                title="Pflegehinweise"
+                open={openAccordion === 'care'}
+                onToggle={() => toggle('care')}
+                isLast
+              >
+                <PflegeAccordionContent careInstructions={product.careInstructions} />
+              </PdpAccordion>
+
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Size Selection Modal — sharp, editorial */}
+      {/* ── Floating sticky bar ─────────────────────────── */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-enunas-gray-light transition-transform duration-500 ease-out-expo"
+        style={{ transform: showFloatingBar ? 'translateY(0)' : 'translateY(100%)' }}
+      >
+        <div className="max-w-[1800px] mx-auto px-6 lg:px-12 py-4 flex items-center gap-6">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-enunas-black truncate" style={{ fontFamily: 'var(--font-cormorant)' }}>
+              {product.name}
+            </p>
+            <div className="flex items-center gap-3 mt-0.5">
+              <span className="text-xs text-enunas-gray-dark" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                {formattedPrice}
+              </span>
+              {selectedSize && (
+                <span className="text-[10px] text-enunas-gray-medium uppercase tracking-[0.1em]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                  Größe: {selectedSize}
+                </span>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={handleCta}
+            disabled={isOutOfStock}
+            className="px-10 py-3.5 bg-enunas-purple text-white hover:bg-enunas-purple-light transition-colors duration-300 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase' }}
+          >
+            {ctaLabel}
+          </button>
+        </div>
+      </div>
+
+      {/* ── Size selection modal ─────────────────────────── */}
       {showSizeModal && (
         <div
           className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center"
@@ -255,7 +353,6 @@ function ProductDetails({ product, brandSlug, defaultListingId }: ProductDetails
             className="bg-white w-full sm:max-w-md relative"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal header */}
             <div className="flex items-center justify-between px-8 py-5 border-b border-enunas-gray-light">
               <h3
                 className="text-xs uppercase tracking-[0.15em] text-enunas-black"
@@ -270,52 +367,98 @@ function ProductDetails({ product, brandSlug, defaultListingId }: ProductDetails
                 <X className="w-4 h-4" />
               </button>
             </div>
-
-            {/* Product context */}
             <div className="px-8 pt-6 pb-4">
-              <p
-                className="text-sm text-enunas-gray-medium"
-                style={{ fontFamily: 'var(--font-league-spartan)' }}
-              >
+              <p className="text-sm text-enunas-gray-medium" style={{ fontFamily: 'var(--font-league-spartan)' }}>
                 {product.name}
               </p>
             </div>
-
-            {/* Size grid — flex wrap for natural flow */}
             <div className="px-8 pb-8">
               <div className="flex flex-wrap gap-2">
-                {product.sizes.map((size) => {
-                  const cols = product.sizes.length <= 3 ? 3 : 4
-                  return (
-                    <button
-                      key={size}
-                      onClick={() => handleSizeSelectFromModal(size)}
-                      className={`py-3.5 text-center text-sm text-enunas-black
-                               border border-enunas-gray-light
-                               hover:border-[#370E4D] hover:bg-[#370E4D] hover:text-white
-                               transition-all duration-200
-                               ${selectedSize === size
-                                 ? 'border-[#370E4D] bg-[#370E4D] text-white'
-                                 : ''
-                               }`}
-                      style={{
-                        fontFamily: 'var(--font-league-spartan)',
-                        width: `calc((100% - ${(cols - 1) * 8}px) / ${cols})`,
-                      }}
-                    >
-                      {size}
-                    </button>
+                {uniqueColors(product.variants)
+                  .flatMap(color =>
+                    product.variants
+                      .filter(v => v.color === color && v.stockQuantity > 0)
+                      .map(v => v.size)
                   )
-                })}
+                  .filter((s, i, a) => a.indexOf(s) === i)
+                  .map((size) => {
+                    const cols = 4
+                    return (
+                      <button
+                        key={size}
+                        onClick={() => {
+                          setSelectedSize(size)
+                          setShowSizeModal(false)
+                          handleAddToCart(size)
+                        }}
+                        className="py-3.5 text-center text-sm text-enunas-black border border-enunas-gray-light hover:border-enunas-purple hover:bg-enunas-purple hover:text-white transition-all duration-200"
+                        style={{
+                          fontFamily: 'var(--font-league-spartan)',
+                          width: `calc((100% - ${(cols - 1) * 8}px) / ${cols})`,
+                        }}
+                      >
+                        {size}
+                      </button>
+                    )
+                  })}
               </div>
             </div>
           </div>
         </div>
       )}
-
-      {/* ❌ ENTFERNT: CartSidebar wird jetzt im MinTimeWrapper gerendert */}
     </>
   )
 }
 
-export default ProductDetails
+// ── PDP Accordion ─────────────────────────────────────
+function PdpAccordion({
+  id, title, open, onToggle, children, isLast = false,
+}: {
+  id: string
+  title: string
+  open: boolean
+  onToggle: () => void
+  children: React.ReactNode
+  isLast?: boolean
+}) {
+  return (
+    <div className={`border-t border-enunas-gray-light${isLast ? ' border-b' : ''}`}>
+      <button
+        onClick={onToggle}
+        className="w-full flex justify-between items-center bg-transparent border-none py-[22px] text-enunas-black"
+        style={{
+          fontFamily: 'var(--font-league-spartan)',
+          fontSize: '12px',
+          letterSpacing: '0.22em',
+          textTransform: 'uppercase',
+          cursor: 'pointer',
+        }}
+      >
+        {title}
+        <svg
+          style={{
+            width: '14px',
+            height: '14px',
+            flexShrink: 0,
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 200ms',
+          }}
+          viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"
+        >
+          <path d="M3 6l5 5 5-5" />
+        </svg>
+      </button>
+      <div
+        style={{
+          overflow: 'hidden',
+          maxHeight: open ? '600px' : '0',
+          transition: 'max-height 350ms cubic-bezier(0.19, 1, 0.22, 1)',
+        }}
+      >
+        <div style={{ paddingBottom: '24px' }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  )
+}

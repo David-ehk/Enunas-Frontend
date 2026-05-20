@@ -74,7 +74,7 @@ function BekleidungContent() {
   }, [router])
 
   return (
-    <main className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white">
       {/* Category Navigation - scrolls with content */}
       <div className="bg-white border-b border-gray-100">
         <CategoryNavigation />
@@ -145,6 +145,6 @@ function BekleidungContent() {
         {/* Bottom spacing */}
         <div className="h-16 lg:h-24" />
       </div>
-    </main>
+    </div>
   )
 }

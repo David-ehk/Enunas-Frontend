@@ -175,7 +175,7 @@ export default function CartSidebar() {
             </button>
           ) : (
             <Link
-              href="/checkout"
+              href="/cart"
               onClick={closeCart}
               className="block w-full bg-[#370E4D] text-white py-4 tracking-wide hover:bg-[#2a0b3b] transition-colors mb-3 text-center"
             >

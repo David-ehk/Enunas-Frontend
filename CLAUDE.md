@@ -195,7 +195,213 @@ Dynamic product pages: `/bekleidung/[category]/[slug]`
 - Constants centralized in `app/constants/index.ts`
 - Page-specific components in `components/` subdirectories per route
 - Mobile detection via `hooks/use-mobile.ts` (768px breakpoint)
-- API URL: `NEXT_PUBLIC_API_URL` (default: `http://localhost:8080/api`)
+- API URL: `NEXT_PUBLIC_API_URL` (default: `http://localhost:8080/api/v1`)
+
+---
+
+## API Contract
+
+Base URL: `http://localhost:8080/api/v1` (dev) · `https://backend.railway.app/api/v1` (prod)
+
+All protected routes require: `Authorization: Bearer <token>` — handled automatically by `lib/api/fetcher.ts` when `auth: true` (default). Token + role returned by `POST /auth/login`.
+
+---
+
+### Auth (Public)
+
+| Method | Path | Body | Response | Notes |
+|--------|------|------|----------|-------|
+| `POST` | `/auth/signup` | `RegisterUserDto` | `UserResponseDto` | Creates CUSTOMER, immediately enabled |
+| `POST` | `/auth/login` | `LoginUserDto` | `LoginResponseDto` (`token`, `expiresIn`) | JWT, 24 h expiry |
+
+---
+
+### User (Authenticated)
+
+| Method | Path | Response |
+|--------|------|----------|
+| `GET` | `/users/me` | `UserResponseDto` |
+| `GET` | `/users` | `List<UserResponseDto>` — ADMIN only |
+
+---
+
+### Customer (CUSTOMER)
+
+| Method | Path | Body | Response |
+|--------|------|------|----------|
+| `GET` | `/customer/me` | — | `CustomerResponseDto` |
+| `PATCH` | `/customer/me` | `UpdateCustomerProfileDto` | `CustomerResponseDto` |
+
+---
+
+### Brand Partner (mixed auth)
+
+| Method | Path | Auth | Body | Response |
+|--------|------|------|------|----------|
+| `POST` | `/brandpartner/apply` | Public | `RegisterBrandPartnerDto` | `BrandPartnerResponseDto` |
+| `POST` | `/brandpartner/verify` | Public | `VerifyUserDto` | `String` |
+| `POST` | `/brandpartner/resend-verification?email=` | Public | — | `String` |
+| `GET` | `/brandpartner/me` | BRAND_PARTNER | — | `BrandPartnerResponseDto` |
+| `PATCH` | `/brandpartner/me` | BRAND_PARTNER | `UpdateBrandPartnerDto` | `BrandPartnerResponseDto` |
+| `GET` | `/brandpartner/{id}` | Authenticated | — | `BrandPartnerResponseDto` |
+
+---
+
+### Products (CUSTOMER / BRAND_PARTNER)
+
+| Method | Path | Auth | Body | Response |
+|--------|------|------|------|----------|
+| `POST` | `/products/create` | BRAND_PARTNER | `CreateProductDto` | `ProductResponseDto` |
+| `GET` | `/products/{id}` | Both | — | `ProductResponseDto` |
+| `GET` | `/products/sku/{sku}` | Both | — | `ProductResponseDto` |
+| `GET` | `/products?page=&size=20` | Both | — | `Page<ProductResponseDto>` |
+| `GET` | `/products/search?keyword=` | Both | — | `Page<ProductResponseDto>` |
+| `GET` | `/products/category/{category}` | Both | — | `Page<ProductResponseDto>` |
+| `GET` | `/products/my` | BRAND_PARTNER | — | `List<ProductResponseDto>` |
+| `PUT` | `/products/update/{id}` | BRAND_PARTNER | `UpdateProductDto` | `ProductResponseDto` |
+| `DELETE` | `/products/delete/{id}` | BRAND_PARTNER | — | 204 |
+
+---
+
+### Product Listings
+
+| Method | Path | Auth | Body | Response |
+|--------|------|------|------|----------|
+| `POST` | `/products/{productId}/listings` | BRAND_PARTNER | `CreateListingDto` | `ListingResponseDto` |
+| `GET` | `/products/{productId}/listings` | Both | — | `List<ListingResponseDto>` |
+| `GET` | `/listings/{listingId}` | Both | — | `ListingResponseDto` |
+| `GET` | `/listings?region=` | Both | — | `List<ListingResponseDto>` |
+| `PUT` | `/products/{productId}/listings/{listingId}` | BRAND_PARTNER | `UpdateListingDto` | `ListingResponseDto` |
+| `DELETE` | `/products/{productId}/listings/{listingId}` | BRAND_PARTNER | — | 204 |
+
+---
+
+### Product Variants
+
+| Method | Path | Auth | Body | Response |
+|--------|------|------|------|----------|
+| `POST` | `/products/{productId}/variants` | BRAND_PARTNER | `ProductVariantDto` | `ProductVariantResponseDto` |
+| `GET` | `/products/{productId}/variants` | Both | — | `List<ProductVariantResponseDto>` |
+| `PUT` | `/products/{productId}/variants/{variantId}` | BRAND_PARTNER | `UpdateProductVariantDto` | `ProductVariantResponseDto` |
+| `DELETE` | `/products/{productId}/variants/{variantId}` | BRAND_PARTNER | — | 204 |
+
+---
+
+### Product Media
+
+| Method | Path | Auth | Body | Response |
+|--------|------|------|------|----------|
+| `POST` | `/products/{productId}/media/images` | BRAND_PARTNER | `ProductImageDto` | `ProductImageResponseDto` |
+| `GET` | `/products/{productId}/media/images` | Both | — | `List<ProductImageResponseDto>` |
+| `DELETE` | `/products/{productId}/media/images/{imageId}` | BRAND_PARTNER | — | 204 |
+| `POST` | `/products/{productId}/media/videos` | BRAND_PARTNER | `ProductVideoDto` | `ProductVideoResponseDto` |
+| `GET` | `/products/{productId}/media/videos` | Both | — | `List<ProductVideoResponseDto>` |
+| `DELETE` | `/products/{productId}/media/videos/{videoId}` | BRAND_PARTNER | — | 204 |
+
+---
+
+### Customer Orders (CUSTOMER)
+
+| Method | Path | Body | Response |
+|--------|------|------|----------|
+| `POST` | `/orders` | `CreateOrderDto` | `OrderResponseDto` |
+| `GET` | `/orders/me?page=&size=10` | — | `Page<OrderResponseDto>` |
+| `GET` | `/orders/{orderId}` | — | `OrderResponseDto` |
+| `POST` | `/orders/{orderId}/return` | `ReturnRequestDto` | `OrderResponseDto` |
+
+---
+
+### Brand Orders (BRAND_PARTNER)
+
+| Method | Path | Body | Response |
+|--------|------|------|----------|
+| `GET` | `/brand/orders?page=&size=20` | — | `Page<OrderResponseDto>` |
+| `POST` | `/brand/orders/{orderId}/ship` | `ShipmentConfirmationDto` | `OrderResponseDto` |
+| `POST` | `/brand/orders/{orderId}/problem` | `ShippingProblemDto` | `OrderResponseDto` |
+
+---
+
+### Wardrobe (CUSTOMER)
+
+| Method | Path | Body | Response |
+|--------|------|------|----------|
+| `POST` | `/wardrobe` | `AddToWardrobeDto` | `WardrobeItemResponseDto` |
+| `GET` | `/wardrobe` | — | `List<WardrobeItemResponseDto>` |
+| `DELETE` | `/wardrobe/{id}` | — | 204 |
+
+---
+
+### Admin — Brands (ADMIN)
+
+| Method | Path | Body | Response |
+|--------|------|------|----------|
+| `GET` | `/admin/brands?page=&size=50` | — | `Page<BrandPartnerResponseDto>` |
+| `POST` | `/admin/brands/{brandId}/approve` | — | `BrandPartnerResponseDto` |
+| `POST` | `/admin/brands/{brandId}/reject` | — | `BrandPartnerResponseDto` |
+| `POST` | `/admin/brands/{brandId}/suspend` | — | `BrandPartnerResponseDto` |
+| `PATCH` | `/admin/brands/{brandId}/payout-profile` | `SetPayoutProfileDto` | `BrandPartnerResponseDto` |
+
+---
+
+### Admin — Products (ADMIN)
+
+| Method | Path | Body | Response |
+|--------|------|------|----------|
+| `GET` | `/admin/products?page=&size=50` | — | `Page<AdminProductResponseDto>` |
+| `PATCH` | `/admin/products/{productId}` | `UpdateProductDto` | `AdminProductResponseDto` |
+| `DELETE` | `/admin/products/{productId}` | — | 204 |
+| `POST` | `/admin/products/{productId}/approve` | — | `AdminProductResponseDto` |
+| `POST` | `/admin/products/{productId}/reject` | `RejectionDto` | `AdminProductResponseDto` |
+| `POST` | `/admin/products/{productId}/hide` | — | `AdminProductResponseDto` |
+
+---
+
+### Admin — Customers (ADMIN)
+
+| Method | Path | Body | Response |
+|--------|------|------|----------|
+| `GET` | `/admin/customers?page=&size=50` | — | `Page<CustomerResponseDto>` |
+| `GET` | `/admin/customers/{id}` | — | `CustomerResponseDto` |
+| `PATCH` | `/admin/customers/{id}` | `UpdateCustomerProfileDto` | `CustomerResponseDto` |
+
+---
+
+### Admin — Orders (ADMIN)
+
+| Method | Path | Body | Response |
+|--------|------|------|----------|
+| `GET` | `/admin/orders?page=&size=50` | — | `Page<OrderResponseDto>` |
+| `GET` | `/admin/orders/{orderId}` | — | `OrderResponseDto` |
+| `GET` | `/admin/orders/status/{status}` | — | `Page<OrderResponseDto>` |
+| `PATCH` | `/admin/orders/{orderId}/status?status=` | — | `OrderResponseDto` |
+| `POST` | `/admin/orders/{orderId}/cancel` | `CancelOrderDto` | `OrderResponseDto` |
+| `POST` | `/admin/orders/{orderId}/return/approve` | — | `OrderResponseDto` |
+| `POST` | `/admin/orders/{orderId}/return/receive` | — | `OrderResponseDto` |
+| `POST` | `/admin/orders/{orderId}/return/refund?refundAmount=` | — | `OrderResponseDto` |
+
+---
+
+### Admin — Payouts (ADMIN)
+
+| Method | Path | Body | Response |
+|--------|------|------|----------|
+| `POST` | `/admin/payouts/generate` | — | `List<PayoutResponseDto>` |
+| `GET` | `/admin/payouts/dashboard` | — | `PayoutDashboardDto` |
+| `GET` | `/admin/payouts?status=&page=&size=50` | — | `Page<PayoutResponseDto>` |
+| `GET` | `/admin/payouts/{payoutId}` | — | `PayoutResponseDto` |
+| `POST` | `/admin/payouts/{payoutId}/approve` | — | `PayoutResponseDto` |
+| `POST` | `/admin/payouts/{payoutId}/paid` | `MarkAsPaidDto` | `PayoutResponseDto` |
+| `POST` | `/admin/payouts/{payoutId}/cancel` | — | `PayoutResponseDto` |
+
+---
+
+### Admin — Reconciliation (ADMIN)
+
+| Method | Path | Response |
+|--------|------|----------|
+| `GET` | `/admin/reconciliation` | `List<DriftReport>` |
+| `GET` | `/admin/reconciliation/{brandId}` | `DriftReport` |
+| `POST` | `/admin/reconciliation/{brandId}/rebuild` | `DriftReport` |
 
 ---
 

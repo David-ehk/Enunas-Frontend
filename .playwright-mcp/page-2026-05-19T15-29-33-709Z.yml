@@ -1,0 +1,206 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - navigation [ref=e4]:
+        - button "Menü öffnen" [ref=e6]:
+          - img [ref=e7]
+        - link "Enunas" [ref=e8] [cursor=pointer]:
+          - /url: /
+          - heading "Enunas" [level=1] [ref=e9]
+        - generic [ref=e10]:
+          - button "Suche öffnen" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+          - link "Mein Konto" [ref=e16] [cursor=pointer]:
+            - /url: /account
+            - img [ref=e17]
+          - button "Warenkorb mit 0 Artikeln" [ref=e21] [cursor=pointer]:
+            - img [ref=e22]
+    - generic [ref=e26]:
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - generic [ref=e31]:
+              - button "Zu Bild 1 scrollen" [ref=e32]
+              - button "Zu Bild 2 scrollen" [ref=e33]
+              - button "Zu Bild 3 scrollen" [ref=e34]
+            - generic [ref=e35]:
+              - img "Worlds End Denim Boxer Jacket - Ansicht 1" [ref=e37]
+              - img "Worlds End Denim Boxer Jacket - Ansicht 2" [ref=e39]
+              - img "Worlds End Denim Boxer Jacket - Ansicht 3" [ref=e41]
+          - navigation [ref=e42]:
+            - list [ref=e43]:
+              - listitem [ref=e44]:
+                - link "Home" [ref=e45] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e46]: /
+              - listitem [ref=e47]:
+                - link "Bekleidung" [ref=e48] [cursor=pointer]:
+                  - /url: /bekleidung
+              - listitem [ref=e49]: /
+              - listitem [ref=e50]:
+                - link "Vivienne Westwood" [ref=e51] [cursor=pointer]:
+                  - /url: /bekleidung/vivienne-westwood
+              - listitem [ref=e52]: /
+              - listitem [ref=e53]: Worlds End Denim Boxer Jacket
+        - generic [ref=e54]:
+          - generic [ref=e55]:
+            - link "Vivienne Westwood" [ref=e56] [cursor=pointer]:
+              - /url: /
+              - heading "Vivienne Westwood" [level=2] [ref=e57]
+            - heading "Worlds End Denim Boxer Jacket" [level=2] [ref=e58]
+          - generic [ref=e59]:
+            - generic [ref=e60]: 420,00 €
+            - paragraph [ref=e61]: inkl. MwSt. zzgl. Versand
+          - generic [ref=e63]:
+            - generic [ref=e64]: Purple
+            - generic [ref=e65]:
+              - button "Farbe Lila auswählen" [ref=e66]
+              - button "Farbe Schwarz auswählen" [ref=e68]
+              - button "Farbe Off-White auswählen" [ref=e70]
+              - button "+1" [ref=e72]
+          - generic [ref=e75]:
+            - button "XS" [ref=e76]:
+              - heading "XS" [level=3] [ref=e77]
+            - button "S" [ref=e78]:
+              - heading "S" [level=3] [ref=e79]
+            - button "M" [ref=e80]:
+              - heading "M" [level=3] [ref=e81]
+            - button "L" [ref=e82]:
+              - heading "L" [level=3] [ref=e83]
+            - button "XL" [ref=e84]:
+              - heading "XL" [level=3] [ref=e85]
+          - generic [ref=e88]:
+            - heading "Experimental" [level=3] [ref=e90]
+            - heading "Culture" [level=3] [ref=e92]
+          - button "Wählen Sie eine Größe aus" [disabled] [ref=e94]:
+            - heading "Wählen Sie eine Größe aus" [level=3] [ref=e96]
+          - generic [ref=e99]:
+            - heading "Produktdetails" [level=3] [ref=e101]:
+              - button "Produktdetails" [ref=e102]:
+                - text: Produktdetails
+                - img
+            - heading "Versand & Rückgabe" [level=3] [ref=e104]:
+              - button "Versand & Rückgabe" [ref=e105]:
+                - text: Versand & Rückgabe
+                - img
+            - heading "Größentabelle" [level=3] [ref=e107]:
+              - button "Größentabelle" [ref=e108]:
+                - text: Größentabelle
+                - img
+      - generic [ref=e111]:
+        - generic [ref=e112]:
+          - paragraph [ref=e113]: Worlds End Denim Boxer Jacket
+          - generic [ref=e115]: 420,00 €
+        - button "Größe wählen" [ref=e116]
+    - contentinfo [ref=e117]:
+      - generic [ref=e118]:
+        - generic [ref=e119]:
+          - generic [ref=e120]:
+            - paragraph [ref=e121]: Über uns
+            - list [ref=e122]:
+              - listitem [ref=e123]:
+                - link "Über uns" [ref=e124] [cursor=pointer]:
+                  - /url: /about us
+                  - text: Über uns
+              - listitem [ref=e125]:
+                - link "Marken" [ref=e126] [cursor=pointer]:
+                  - /url: /marken
+                  - text: Marken
+              - listitem [ref=e127]:
+                - link "Designer" [ref=e128] [cursor=pointer]:
+                  - /url: /marken
+                  - text: Designer
+              - listitem [ref=e129]:
+                - link "Karriere" [ref=e130] [cursor=pointer]:
+                  - /url: /karriere
+                  - text: Karriere
+          - generic [ref=e131]:
+            - paragraph [ref=e132]: Hilfe
+            - list [ref=e133]:
+              - listitem [ref=e134]:
+                - link "FAQs" [ref=e135] [cursor=pointer]:
+                  - /url: /faqs
+                  - text: FAQs
+              - listitem [ref=e136]:
+                - link "Sendungsverfolgung" [ref=e137] [cursor=pointer]:
+                  - /url: /sendungsverfolgung
+                  - text: Sendungsverfolgung
+              - listitem [ref=e138]:
+                - link "Lieferung & Rücksendung" [ref=e139] [cursor=pointer]:
+                  - /url: /lieferung-&-rücksendung
+                  - text: Lieferung & Rücksendung
+              - listitem [ref=e140]:
+                - link "Kundenservice" [ref=e141] [cursor=pointer]:
+                  - /url: /kundenservice
+                  - text: Kundenservice
+          - generic [ref=e142]:
+            - paragraph [ref=e143]: Rechtliches
+            - list [ref=e144]:
+              - listitem [ref=e145]:
+                - link "Impressum" [ref=e146] [cursor=pointer]:
+                  - /url: /Impressum
+                  - text: Impressum
+              - listitem [ref=e147]:
+                - link "AGBs" [ref=e148] [cursor=pointer]:
+                  - /url: /agbs
+                  - text: AGBs
+              - listitem [ref=e149]:
+                - link "Cookie-Richtlinien" [ref=e150] [cursor=pointer]:
+                  - /url: /cookie-richtlinien
+                  - text: Cookie-Richtlinien
+              - listitem [ref=e151]:
+                - link "Cookie-Einstellungen" [ref=e152] [cursor=pointer]:
+                  - /url: /cookie-einstellungen
+                  - text: Cookie-Einstellungen
+              - listitem [ref=e153]:
+                - link "Nutzungsbedingungen" [ref=e154] [cursor=pointer]:
+                  - /url: /nutzungsbedingungen
+                  - text: Nutzungsbedingungen
+              - listitem [ref=e155]:
+                - link "Datenschutzerklärung" [ref=e156] [cursor=pointer]:
+                  - /url: /datenschutzerklärung
+                  - text: Datenschutzerklärung
+          - generic [ref=e157]:
+            - paragraph [ref=e158]: Zahlungsarten
+            - generic [ref=e159]:
+              - paragraph [ref=e160]: Visa
+              - paragraph [ref=e161]: Mastercard
+              - paragraph [ref=e162]: PayPal
+        - generic [ref=e163]:
+          - link [ref=e164] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e165]
+          - link [ref=e167] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e168]
+          - link [ref=e170] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e171]
+          - link [ref=e174] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e175]
+        - generic [ref=e177]:
+          - paragraph [ref=e178]: © Enunas 2026
+          - generic [ref=e179]: Deutschland € / DE
+    - generic [ref=e180]:
+      - generic [ref=e181]:
+        - button "✕" [ref=e182]
+        - generic [ref=e183]:
+          - button "Warenkorb" [ref=e184]:
+            - heading "Warenkorb" [level=4] [ref=e185]
+          - button "Wunschliste" [ref=e186]:
+            - heading "Wunschliste" [level=4] [ref=e187]
+      - paragraph [ref=e190]: Ihr Warenkorb ist leer
+      - generic [ref=e191]:
+        - generic [ref=e192]:
+          - generic [ref=e193]: Insgesamt (0 Artikel)
+          - generic [ref=e194]: €0.00
+        - button "Sicher Zur Kasse" [disabled] [ref=e195]:
+          - heading "Sicher Zur Kasse" [level=3] [ref=e196]
+        - button "Weiter einkaufen" [ref=e197]
+        - paragraph [ref=e201]:
+          - text: Noch
+          - generic [ref=e202]: €50.00
+          - text: bis kostenloser Versand
+  - button "Open Next.js Dev Tools" [ref=e208] [cursor=pointer]:
+    - img [ref=e209]

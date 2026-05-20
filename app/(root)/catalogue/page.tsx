@@ -4,7 +4,7 @@ import CatalogueDescription from '@/app/(root)/catalogue/components/CatalogueDes
 
 export default function cataloge() {
   return (
-    <main>
+    <div>
         <section>
             <Hero/>
         </section>
@@ -12,6 +12,6 @@ export default function cataloge() {
             <CatalogueDescription/>
         </section>
 
-    </main>
+    </div>
   )
 }

@@ -4,14 +4,14 @@ import CartSidebar from './cart/components/CartSidebar';
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <main>
+    <div>
       <AuthProvider>
         <CartProvider>
           {children}
           <CartSidebar />
         </CartProvider>
       </AuthProvider>
-    </main>
+    </div>
   );
 }
 

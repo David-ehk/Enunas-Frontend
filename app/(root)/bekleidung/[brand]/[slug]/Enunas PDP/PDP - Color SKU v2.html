@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Enunas — PDP · Backend-shaped (v2)</title>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+    <rect width="200" height="200" fill="#F5F5F0"/>
+    <text x="100" y="58" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#0A0A0A" font-style="italic">Enunas</text>
+    <text x="100" y="95" text-anchor="middle" font-family="monospace" font-size="10" letter-spacing="2" fill="#0A0A0A">BLACK · M</text>
+    <rect x="64" y="105" width="1" height="10" fill="#0A0A0A" opacity="0.4"/>
+    <text x="100" y="114" text-anchor="middle" font-family="monospace" font-size="9" letter-spacing="1" fill="#6B6B6B">YJPD7U2K</text>
+    <rect x="50" y="130" width="100" height="40" fill="none" stroke="#370E4D" stroke-width="1" stroke-dasharray="3 2"/>
+    <text x="100" y="153" text-anchor="middle" font-family="monospace" font-size="8" letter-spacing="1" fill="#370E4D">VARIANT SKU</text>
+  </svg>
+</template>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=League+Spartan:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --enunas-black: #0A0A0A;
+    --enunas-gray-dark: #2D2D2D;
+    --enunas-gray-medium: #6B6B6B;
+    --enunas-gray-light: #E8E8E8;
+    --enunas-off-white: #F5F5F0;
+    --enunas-white: #FFFFFF;
+    --enunas-purple: #370E4D;
+    --enunas-purple-light: #4A1566;
+    --culture: #EA9575;
+    --experimental: #6C169C;
+  }
+  html, body { margin: 0; padding: 0; background: var(--enunas-white); }
+  body {
+    font-family: 'League Spartan', sans-serif;
+    color: var(--enunas-black);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; margin: 0; }
+  button { cursor: pointer; font-family: inherit; }
+  a { color: inherit; }
+
+  /* Navbar */
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 40px;
+    border-bottom: 1px solid var(--enunas-gray-light);
+    background: var(--enunas-white);
+  }
+  .nav-left, .nav-right { display: flex; gap: 28px; width: 25%; }
+  .nav-right { justify-content: flex-end; align-items: center; }
+  .nav-icon {
+    background: transparent; border: none; padding: 4px;
+    display: flex; align-items: center; color: var(--enunas-black);
+    position: relative;
+  }
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px; letter-spacing: 0.04em; line-height: 1;
+  }
+  .cart-badge {
+    position: absolute; top: -6px; right: -8px;
+    background: var(--enunas-purple); color: #fff;
+    font-size: 10px; width: 16px; height: 16px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'League Spartan', sans-serif;
+  }
+
+  /* Breadcrumb */
+  .crumbs {
+    padding: 22px 32px 28px;
+    display: flex; gap: 12px;
+    align-items: center; flex-wrap: wrap;
+    font-family: 'League Spartan', sans-serif;
+    font-size: 13px; letter-spacing: 0.02em;
+    color: var(--enunas-gray-medium);
+  }
+  .crumbs a { color: var(--enunas-gray-medium); text-decoration: none; transition: color 200ms; }
+  .crumbs a:hover { color: var(--enunas-black); }
+  .crumbs .sep { color: var(--enunas-gray-light); }
+  .crumbs .here { color: var(--enunas-black); font-weight: 500; }
+
+  /* Main grid */
+  main { max-width: 1800px; margin: 0 auto; }
+  .pdp {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  }
+
+  /* Gallery */
+  .gallery {
+    background: var(--enunas-off-white);
+    padding: 32px;
+    display: flex; align-items: flex-start; justify-content: center;
+    min-height: 760px;
+  }
+  .product-tile {
+    width: 100%; max-width: 640px;
+    aspect-ratio: 3/4; background: #E8E5DC;
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tile-shape {
+    width: 76%; height: 86%;
+    position: relative;
+    background: var(--shape-color, #DEDCD5);
+    clip-path: polygon(
+      24% 0%, 76% 0%, 78% 4%, 92% 14%, 100% 22%,
+      94% 30%, 90% 28%, 90% 100%, 10% 100%, 10% 28%,
+      6% 30%, 0% 22%, 8% 14%, 22% 4%
+    );
+  }
+  .placeholder-tag {
+    position: absolute; top: 16px; left: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--enunas-gray-medium);
+    background: rgba(255,255,255,0.85); padding: 4px 8px;
+  }
+  .placeholder-empty {
+    position: absolute; bottom: 16px; right: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--enunas-gray-medium);
+  }
+  .thumbs {
+    position: absolute; left: 12px; top: 50%;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .thumb { width: 8px; height: 8px; background: rgba(10,10,10,0.25); }
+  .thumb.active { background: var(--enunas-black); }
+
+  /* Details column */
+  .details {
+    padding: 56px 72px 80px;
+    text-align: center;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .brand-row {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 14px;
+  }
+  .brand {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 12px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--enunas-purple); font-weight: 500;
+    margin: 0;
+    /* link styling */
+    display: inline-flex; align-items: center; gap: 10px;
+    text-decoration: none;
+    padding: 8px 2px 9px;
+    border-bottom: 1px solid var(--enunas-purple);
+    cursor: pointer;
+    transition: color 220ms cubic-bezier(0.19,1,0.22,1),
+                border-color 220ms cubic-bezier(0.19,1,0.22,1);
+  }
+  .brand:hover {
+    color: var(--enunas-purple-light);
+    border-bottom-color: var(--enunas-purple-light);
+  }
+  .brand-arrow {
+    width: 11px; height: 11px;
+    transition: transform 240ms cubic-bezier(0.19,1,0.22,1);
+  }
+  .brand:hover .brand-arrow { transform: translateX(3px); }
+  .gender-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--enunas-purple);
+    border: 1px solid var(--enunas-purple);
+    padding: 7px 12px 6px;
+    line-height: 1;
+  }
+  .product-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 38px; font-weight: 300; line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .collection-line {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 15px; color: var(--enunas-gray-medium);
+    margin: 0 0 22px;
+  }
+
+  /* Inspiration story — when present */
+  .inspiration {
+    position: relative;
+    max-width: 360px;
+    padding: 14px 0 14px 18px;
+    margin: 0 0 26px;
+    text-align: left;
+    border-left: 2px solid var(--enunas-purple);
+  }
+  .inspiration-label {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--enunas-purple);
+    display: block; margin-bottom: 6px;
+  }
+  .inspiration-body {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 16px; line-height: 1.45;
+    color: var(--enunas-gray-dark);
+    margin: 0;
+  }
+  .hidden { display: none !important; }
+
+  /* Price */
+  .price-row {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 32px;
+  }
+  .price { font-size: 22px; font-weight: 300; }
+  .vat {
+    font-size: 12px; color: var(--enunas-gray-medium);
+    letter-spacing: 0.02em;
+  }
+
+  /* ★ Color + SKU row */
+  .annotation {
+    position: relative;
+    border: 1px dashed transparent;
+    padding: 16px 22px 8px;
+    margin: -16px -22px 14px;
+    transition: border-color 300ms;
+  }
+  body.show-notes .annotation { border-color: rgba(55,14,77,0.3); }
+  body.show-notes .annotation::after {
+    content: 'CHANGE · SKU from variant';
+    position: absolute; top: -10px; right: 16px;
+    background: var(--enunas-purple); color: #fff;
+    font-family: 'League Spartan', sans-serif;
+    font-size: 9px; letter-spacing: 0.22em;
+    padding: 4px 10px;
+  }
+
+  .color-sku-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 14px; margin-bottom: 14px;
+    position: relative;
+  }
+  .color-name {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--enunas-black);
+    font-weight: 500;
+  }
+  .vbar { display: inline-block; width: 1px; height: 12px; background: rgba(10,10,10,0.28); }
+  .sku-btn {
+    background: transparent; border: none; padding: 4px 2px;
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--enunas-gray-medium);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.06em;
+    transition: color 200ms cubic-bezier(0.19, 1, 0.22, 1);
+    position: relative;
+  }
+  .sku-btn:hover, .sku-btn:focus-visible { color: var(--enunas-black); outline: none; }
+  .sku-btn .sku-text { user-select: all; }
+  .sku-btn .copy-icon { width: 12px; height: 12px; opacity: 0.55; transition: opacity 200ms; }
+  .sku-btn:hover .copy-icon { opacity: 1; }
+  .sku-btn .check-icon { width: 12px; height: 12px; color: var(--enunas-purple); display: none; }
+  .sku-btn.copied .copy-icon { display: none; }
+  .sku-btn.copied .check-icon { display: inline-block; }
+  .sku-btn.copied { color: var(--enunas-black); }
+  .copied-toast {
+    position: absolute; top: -28px; left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: var(--enunas-purple); color: #fff;
+    font-family: 'League Spartan', sans-serif;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    padding: 5px 10px; white-space: nowrap;
+    opacity: 0; pointer-events: none;
+    transition: opacity 200ms, transform 200ms cubic-bezier(0.19,1,0.22,1);
+  }
+  .copied-toast::after {
+    content: ''; position: absolute; left: 50%; bottom: -4px;
+    transform: translateX(-50%);
+    border: 4px solid transparent; border-top-color: var(--enunas-purple);
+    border-bottom: 0;
+  }
+  .sku-btn.copied .copied-toast { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Swatches */
+  .swatches {
+    display: flex; gap: 14px; align-items: center; justify-content: center;
+    margin-bottom: 6px;
+  }
+  .swatch {
+    position: relative;
+    width: 22px; height: 22px; padding: 0;
+    border: 1px solid var(--enunas-gray-light);
+    cursor: pointer;
+  }
+  .swatch.selected::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    bottom: -7px;
+    height: 1px;
+    background: var(--enunas-black);
+  }
+  .swatch-more {
+    background: transparent; border: none;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px; font-weight: 400;
+    color: var(--enunas-black);
+    text-decoration: underline; text-underline-offset: 4px;
+    padding: 0 4px;
+    margin-left: 6px;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+  }
+  .swatch-more:hover { color: var(--enunas-purple); }
+
+  /* Sizes */
+  .sizes-wrap { margin: 26px 0 12px; width: 100%; max-width: 460px; }
+  .sizes-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .sizes-label {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--enunas-gray-medium);
+  }
+  .sizes-guide {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--enunas-black);
+    text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+  }
+  .sizes {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+  }
+  .size-btn {
+    padding: 16px 0; background: #fff; color: var(--enunas-black);
+    border: 1px solid var(--enunas-gray-light);
+    font-size: 13px; letter-spacing: 0.06em;
+    transition: all 200ms; position: relative;
+  }
+  .size-btn:hover:not(.disabled) { border-color: var(--enunas-black); }
+  .size-btn.selected {
+    background: #fff; color: var(--enunas-black);
+    border: 1.5px solid var(--enunas-black);
+  }
+  .size-btn.disabled {
+    color: var(--enunas-gray-medium);
+    background: var(--enunas-off-white);
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+  .stock-line {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--enunas-gray-medium);
+    margin: -16px 0 28px;
+    min-height: 14px;
+    display: inline-flex; align-items: center; gap: 8px;
+    width: 100%; max-width: 460px; justify-content: center;
+  }
+  .stock-line::before {
+    content: '';
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #1F8A5B;
+  }
+  .stock-line.low { color: #B33A1A; }
+  .stock-line.low::before { background: #B33A1A; }
+  .stock-line:empty { display: none; }
+
+  /* Catalogue tags */
+  .tags { display: flex; gap: 14px; justify-content: center; margin: 26px 0 24px; min-height: 28px; }
+  .tag {
+    width: 150px;
+    padding: 10px 16px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px; font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    text-align: center;
+    color: #fff;
+    border: 1px solid #0A0A0A;
+    line-height: 1.2;
+    box-sizing: border-box;
+  }
+  .tag.experimental { background: var(--experimental); }
+  .tag.culture { background: var(--culture); }
+  .tag.streetwear { background: #0011A5; border-radius: 1px; }
+  .tag.athleisure { background: #C01B1B; }
+  .tag.star { background: #0A0A0A; }
+  .tag.ghost {
+    background: transparent;
+    color: rgba(10,10,10,0.4);
+    border: 1px dashed rgba(10,10,10,0.25);
+    padding: 9px 27px;
+    font-style: italic;
+    letter-spacing: 0.02em;
+  }
+
+  /* Size guide / fit advisor row */
+  .size-guide-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    width: 100%; max-width: 460px;
+    margin: 0 0 18px;
+  }
+  .size-guide-row a {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 12px; letter-spacing: 0.08em;
+    color: var(--enunas-black);
+    text-decoration: none;
+    border-bottom: 1px solid var(--enunas-black);
+    padding-bottom: 2px;
+    cursor: pointer;
+    transition: color 200ms, border-color 200ms;
+  }
+  .size-guide-row a:hover {
+    color: var(--enunas-purple);
+    border-bottom-color: var(--enunas-purple);
+  }
+
+  /* CTA — GhostCTA style with double hairline accents */
+  .cta-add {
+    position: relative;
+    width: 100%; max-width: 460px;
+    padding: 22px 32px;
+    background: var(--enunas-purple); color: #fff;
+    border: none;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    margin-bottom: 28px;
+    transition: background 200ms;
+    overflow: hidden;
+  }
+  .cta-add::before, .cta-add::after {
+    content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+    width: calc(100% - 24px); height: 1px;
+    background: rgba(255,255,255,0.7);
+  }
+  .cta-add::before { top: 8px; }
+  .cta-add::after  { bottom: 8px; }
+  .cta-add:hover { background: var(--enunas-purple-light); }
+  .cta-add:disabled { background: var(--enunas-gray-medium); cursor: not-allowed; }
+  .cta-add:disabled::before, .cta-add:disabled::after { background: rgba(255,255,255,0.4); }
+
+  /* Accordions */
+  .accordions { width: 100%; max-width: 480px; text-align: left; }
+  .acc { border-top: 1px solid var(--enunas-gray-light); }
+  .acc:last-child { border-bottom: 1px solid var(--enunas-gray-light); }
+  .acc-head {
+    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    background: transparent; border: none; padding: 22px 0;
+    font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--enunas-black);
+  }
+  .acc-head .chev { width: 14px; height: 14px; transition: transform 200ms; }
+  .acc.open .acc-head .chev { transform: rotate(180deg); }
+  .acc-body { overflow: hidden; max-height: 0; transition: max-height 350ms cubic-bezier(0.19,1,0.22,1); }
+  .acc.open .acc-body { max-height: 600px; }
+  .acc-body-inner {
+    padding: 0 0 24px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px; line-height: 1.7; color: var(--enunas-gray-dark);
+  }
+  .meta { margin-top: 0; }
+  .meta-row {
+    display: flex; gap: 16px; padding: 6px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.04em;
+    border-bottom: 1px dashed var(--enunas-gray-light);
+  }
+  .meta-row:last-child { border-bottom: none; }
+  .meta-row .k { color: var(--enunas-gray-medium); min-width: 140px; }
+  .meta-row .v { color: var(--enunas-black); }
+  .meta-row.null .v { color: var(--enunas-gray-medium); font-style: italic; }
+
+  /* Toolbar */
+  .toolbar {
+    position: fixed; top: 18px; right: 18px; z-index: 100;
+    display: flex; gap: 6px; align-items: stretch;
+    background: rgba(255,255,255,0.96);
+    border: 1px solid var(--enunas-gray-light);
+    padding: 6px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  }
+  .toolbar-group { display: flex; align-items: center; gap: 4px; padding: 0 4px; border-right: 1px solid var(--enunas-gray-light); }
+  .toolbar-group:last-child { border-right: none; }
+  .toolbar-label {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--enunas-gray-medium);
+    padding: 0 4px;
+  }
+  .toolbar button {
+    background: transparent; border: none;
+    padding: 8px 12px;
+    font-family: 'League Spartan', sans-serif;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--enunas-gray-medium);
+  }
+  .toolbar button.active, .toolbar button:hover {
+    background: var(--enunas-purple); color: #fff;
+  }
+
+  /* JSON peek panel */
+  .json-peek {
+    position: fixed; right: 18px; top: 78px; width: 380px;
+    max-height: 70vh; overflow: auto;
+    background: #0A0A0A; color: #DEDCD5;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; line-height: 1.55;
+    padding: 18px 22px;
+    z-index: 99;
+    transform: translateX(420px);
+    transition: transform 300ms cubic-bezier(0.19,1,0.22,1);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  }
+  .json-peek.open { transform: translateX(0); }
+  .json-peek h4 {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin: 0 0 12px; font-weight: 500;
+  }
+  .json-peek pre { margin: 0; white-space: pre; }
+  .json-peek .k { color: #A98EBD; }
+  .json-peek .s { color: #E8C18A; }
+  .json-peek .n { color: #8AB8E8; }
+  .json-peek .nul { color: #6B6B6B; font-style: italic; }
+  .json-peek .highlight { background: rgba(55,14,77,0.4); padding: 1px 4px; border-radius: 2px; }
+
+  /* Tweaks panel */
+  .tweaks-panel {
+    position: fixed; right: 18px; bottom: 18px; width: 320px;
+    background: rgba(255,255,255,0.98);
+    border: 1px solid var(--enunas-gray-light);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    transform: translateY(calc(100% + 32px));
+    transition: transform 320ms cubic-bezier(0.19,1,0.22,1);
+    font-family: 'League Spartan', sans-serif;
+  }
+  .tweaks-panel.open { transform: translateY(0); }
+  .tweaks-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--enunas-gray-light);
+  }
+  .tweaks-title {
+    font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--enunas-black); font-weight: 500;
+  }
+  .tweaks-close {
+    background: transparent; border: none; cursor: pointer;
+    color: var(--enunas-gray-medium);
+    font-size: 18px; line-height: 1; padding: 4px;
+  }
+  .tweaks-close:hover { color: var(--enunas-black); }
+  .tweaks-body { padding: 14px 18px 18px; max-height: 70vh; overflow-y: auto; }
+  .tweak-section {
+    margin-bottom: 16px; padding-bottom: 12px;
+    border-bottom: 1px dashed var(--enunas-gray-light);
+  }
+  .tweak-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .tweak-label {
+    font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--enunas-gray-medium);
+    margin: 0 0 8px; font-weight: 500;
+  }
+  .tweak-seg {
+    display: flex; gap: 4px;
+    background: var(--enunas-off-white);
+    padding: 3px;
+  }
+  .tweak-seg button {
+    flex: 1; background: transparent; border: none;
+    padding: 7px 8px;
+    font-family: inherit;
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--enunas-gray-medium); cursor: pointer;
+    transition: all 180ms;
+  }
+  .tweak-seg button.active {
+    background: #fff; color: var(--enunas-black);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+  .tweak-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer;
+  }
+  .tweak-toggle .label {
+    font-size: 11px; letter-spacing: 0.1em; color: var(--enunas-black);
+    text-transform: none;
+  }
+  .tweak-switch {
+    width: 32px; height: 18px; border-radius: 9px;
+    background: var(--enunas-gray-light);
+    position: relative; transition: background 200ms;
+    flex-shrink: 0;
+  }
+  .tweak-switch::after {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform 200ms;
+  }
+  .tweak-toggle.on .tweak-switch { background: var(--enunas-purple); }
+  .tweak-toggle.on .tweak-switch::after { transform: translateX(14px); }
+  .tweak-swatch-row { display: flex; gap: 8px; }
+  .tweak-swatch {
+    width: 28px; height: 28px; border: 1px solid var(--enunas-gray-light);
+    cursor: pointer; padding: 0;
+  }
+  .tweak-swatch.active {
+    outline: 1px solid var(--enunas-black); outline-offset: 3px;
+  }
+
+  /* Accent color variants */
+  body[data-accent="purple"]  { --enunas-purple: #370E4D; --enunas-purple-light: #4A1566; }
+  body[data-accent="navy"]    { --enunas-purple: #1F2845; --enunas-purple-light: #2C3960; }
+  body[data-accent="ink"]     { --enunas-purple: #0A0A0A; --enunas-purple-light: #2D2D2D; }
+  body[data-accent="crimson"] { --enunas-purple: #6A0F1B; --enunas-purple-light: #8A1B2A; }
+
+  /* CTA style variants */
+  body[data-cta="black"] .cta-add { background: var(--enunas-black); }
+  body[data-cta="black"] .cta-add:hover { background: #1f1f1f; }
+  body[data-cta="outlined"] .cta-add {
+    background: transparent !important;
+    color: var(--enunas-black);
+    box-shadow: inset 0 0 0 1px var(--enunas-black);
+  }
+  body[data-cta="outlined"] .cta-add::before,
+  body[data-cta="outlined"] .cta-add::after { background: rgba(10,10,10,0.5); }
+  body[data-cta="outlined"] .cta-add:hover { background: rgba(10,10,10,0.04) !important; }
+
+  /* Tag style variants */
+  body[data-tags="sans"] .tag {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 7px 16px; font-weight: 500;
+  }
+  body[data-tags="outlined"] .tag {
+    background: transparent !important; color: var(--enunas-black) !important;
+    box-shadow: inset 0 0 0 1px var(--enunas-black);
+  }
+  body[data-tags="outlined"] .tag.experimental { color: var(--experimental) !important; box-shadow: inset 0 0 0 1px var(--experimental); }
+  body[data-tags="outlined"] .tag.culture { color: var(--culture) !important; box-shadow: inset 0 0 0 1px var(--culture); }
+  body[data-tags="outlined"] .tag.streetwear { color: #0011A5 !important; box-shadow: inset 0 0 0 1px #0011A5; }
+  body[data-tags="outlined"] .tag.athleisure { color: #C01B1B !important; box-shadow: inset 0 0 0 1px #C01B1B; }
+
+  /* Stock indicator variants */
+  body[data-stock="text"] .stock-line::before { display: none; }
+  body[data-stock="badge"] .stock-line {
+    background: rgba(31,138,91,0.08);
+    color: #1F8A5B;
+    padding: 6px 16px;
+    width: auto;
+    margin: -16px auto 28px;
+  }
+  body[data-stock="badge"] .stock-line.low {
+    background: rgba(179,58,26,0.08); color: #B33A1A;
+  }
+  body[data-stock="badge"] .stock-line::before { display: none; }
+
+  /* Hide-able sections */
+  body[data-gender="off"] .gender-badge { display: none; }
+  body[data-inspiration="off"] .inspiration { display: none !important; }
+
+  /* Recommendation rows */
+  .recs {
+    padding: 24px 64px 24px;
+    max-width: 1800px; margin: 0 auto;
+  }
+  .rec-row { margin-bottom: 44px; }
+  .rec-row:last-child { margin-bottom: 0; }
+  .row-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 18px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--enunas-gray-light);
+  }
+  .row-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px; font-weight: 300;
+    margin: 0; color: var(--enunas-black);
+    letter-spacing: 0.005em;
+  }
+  .row-title em {
+    font-style: italic; color: var(--enunas-gray-medium);
+  }
+  .row-link {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--enunas-black); text-decoration: none;
+    border-bottom: 1px solid var(--enunas-black);
+    padding-bottom: 2px; cursor: pointer;
+    transition: color 200ms, border-color 200ms;
+  }
+  .row-link:hover { color: var(--enunas-purple); border-bottom-color: var(--enunas-purple); }
+  .row-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .rec-card { cursor: pointer; }
+  .rec-card .rec-image {
+    position: relative;
+    aspect-ratio: 3/4;
+    background: var(--enunas-off-white);
+    margin-bottom: 14px;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 220ms;
+  }
+  .rec-card:hover .rec-image { opacity: 0.85; }
+  .item-silhouette {
+    width: 60%; height: 70%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .item-silhouette svg { width: 100%; height: 100%; display: block; }
+  .rec-card .rec-label {
+    position: absolute; top: 12px; right: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 0.1em;
+    color: var(--enunas-gray-medium);
+    background: rgba(255,255,255,0.85);
+    padding: 3px 7px;
+  }
+
+  /* Vervollständige den Look — Ami Paris-style hero + adaptive grid */
+  #recLook .row-grid {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 16px;
+  }
+  .look-hero {
+    position: relative;
+    aspect-ratio: 3/4;
+    background: var(--enunas-off-white);
+    overflow: hidden;
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .look-hero .rec-label {
+    position: absolute; top: 16px; left: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--enunas-gray-medium);
+    background: rgba(255,255,255,0.85);
+    padding: 4px 9px;
+  }
+  .look-hero-figure {
+    width: 72%; height: 96%;
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .look-hero-figure svg { width: 100%; height: 100%; display: block; }
+
+  .look-grid {
+    display: grid; gap: 12px;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 1fr;
+  }
+  .look-grid[data-count="1"] {
+    grid-template-columns: 1fr;
+  }
+  .look-grid[data-count="2"] {
+    grid-template-columns: 1fr;
+  }
+  .look-card { cursor: pointer; display: flex; flex-direction: column; }
+  .look-card .rec-image {
+    position: relative;
+    aspect-ratio: 1/1;
+    background: var(--enunas-off-white);
+    margin-bottom: 10px;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 220ms;
+    flex: 1;
+  }
+  /* When only 1 or 2 cards on the right, give each card a taller proportion
+     so the right column visually balances the 3:4 hero. */
+  .look-grid[data-count="1"] .look-card .rec-image { aspect-ratio: 3/4; }
+  .look-grid[data-count="2"] .look-card .rec-image { aspect-ratio: 4/3; }
+  .look-card:hover .rec-image { opacity: 0.85; }
+  .look-card .rec-brand { font-size: 9px; }
+  .look-card .rec-name  { font-size: 14px; margin-bottom: 4px; }
+  .look-card .rec-price { font-size: 12px; }
+
+  .rec-brand {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--enunas-gray-medium);
+    margin: 0 0 6px; font-weight: 500;
+  }
+  .rec-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px; font-weight: 300;
+    margin: 0 0 8px;
+    color: var(--enunas-black);
+    line-height: 1.25;
+  }
+  .rec-colors {
+    display: flex; gap: 5px;
+    margin: 0 0 10px;
+  }
+  .rec-swatch {
+    width: 12px; height: 12px;
+    border: 1px solid var(--enunas-gray-light);
+  }
+  .rec-price {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 13px;
+    color: var(--enunas-black);
+    margin: 0; font-weight: 300;
+  }
+
+  /* Footer */
+  footer.cf {
+    background: #000; color: #fff;
+    padding: 56px 80px 40px; margin-top: 80px;
+    font-family: 'League Spartan', sans-serif;
+  }
+  .cf-grid {
+    max-width: 1280px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 80px;
+  }
+  .cf-eyebrow { font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin: 0 0 16px; }
+  .cf-serif { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 300; line-height: 1.45; color: rgba(255,255,255,0.95); margin: 0; }
+  .pay-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .pay-tile { width: 56px; height: 36px; background: #fff; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+
+<!-- Tweaks panel -->
+<aside id="tweaksPanel" class="tweaks-panel" aria-hidden="true">
+  <div class="tweaks-head">
+    <span class="tweaks-title">Tweaks</span>
+    <button class="tweaks-close" id="tweaksClose" aria-label="Tweaks schließen">×</button>
+  </div>
+  <div class="tweaks-body">
+
+    <div class="tweak-section">
+      <p class="tweak-label">Accent Color</p>
+      <div class="tweak-swatch-row" id="tweakAccent">
+        <button class="tweak-swatch active" data-value="purple"  style="background:#370E4D" title="Purple"></button>
+        <button class="tweak-swatch"        data-value="navy"    style="background:#1F2845" title="Navy"></button>
+        <button class="tweak-swatch"        data-value="ink"     style="background:#0A0A0A" title="Ink"></button>
+        <button class="tweak-swatch"        data-value="crimson" style="background:#6A0F1B" title="Crimson"></button>
+      </div>
+    </div>
+
+    <div class="tweak-section">
+      <p class="tweak-label">CTA Style</p>
+      <div class="tweak-seg" id="tweakCta">
+        <button class="active" data-value="accent">Accent</button>
+        <button data-value="black">Black</button>
+        <button data-value="outlined">Outlined</button>
+      </div>
+    </div>
+
+    <div class="tweak-section">
+      <p class="tweak-label">Tag Style</p>
+      <div class="tweak-seg" id="tweakTags">
+        <button class="active" data-value="serif">Serif</button>
+        <button data-value="sans">Sans</button>
+        <button data-value="outlined">Outlined</button>
+      </div>
+    </div>
+
+    <div class="tweak-section">
+      <p class="tweak-label">Stock indicator</p>
+      <div class="tweak-seg" id="tweakStock">
+        <button class="active" data-value="dot">Dot</button>
+        <button data-value="badge">Badge</button>
+        <button data-value="text">Text</button>
+      </div>
+    </div>
+
+    <div class="tweak-section">
+      <p class="tweak-label">Look items</p>
+      <div class="tweak-seg" id="tweakLookCount">
+        <button data-value="1">1</button>
+        <button data-value="2">2</button>
+        <button class="active" data-value="4">4</button>
+      </div>
+    </div>
+
+    <div class="tweak-section">
+      <div class="tweak-toggle on" id="tweakGender" data-key="showGender">
+        <span class="label">Show gender badge</span>
+        <span class="tweak-switch"></span>
+      </div>
+    </div>
+
+    <div class="tweak-section">
+      <div class="tweak-toggle on" id="tweakInspiration" data-key="showInspiration">
+        <span class="label">Show inspiration story</span>
+        <span class="tweak-switch"></span>
+      </div>
+    </div>
+
+    <div class="tweak-section">
+      <div class="tweak-toggle on" id="tweakChangeOutline" data-key="showChangeOutline">
+        <span class="label">Show change annotation</span>
+        <span class="tweak-switch"></span>
+      </div>
+    </div>
+
+  </div>
+</aside>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <div class="toolbar-group">
+    <span class="toolbar-label">Product</span>
+    <button id="prod1" class="active">Drop Hoodie</button>
+    <button id="prod2">Vivienne</button>
+  </div>
+  <div class="toolbar-group">
+    <button id="toggleNotes">Show change</button>
+    <button id="togglePeek">View JSON</button>
+    <button id="toggleTweaks">Tweaks</button>
+  </div>
+</div>
+
+<!-- JSON peek -->
+<aside id="jsonPeek" class="json-peek" aria-hidden="true">
+  <h4>Backend response (live)</h4>
+  <pre id="jsonPeekBody"></pre>
+</aside>
+
+<!-- Navbar -->
+<header class="nav">
+  <div class="nav-left">
+    <button class="nav-icon" aria-label="Menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <button class="nav-icon" aria-label="Search"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8.5" cy="8.5" r="7"/><path d="M19 19l-5.2-5.2" stroke-linecap="round"/></svg></button>
+  </div>
+  <div class="logo">Enunas</div>
+  <div class="nav-right">
+    <button class="nav-icon" aria-label="Account"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16.7 17.5v-1.7a3.3 3.3 0 0 0-3.4-3.3H6.7a3.3 3.3 0 0 0-3.4 3.3v1.7" stroke-linecap="round"/><circle cx="10" cy="5.8" r="3.3"/></svg></button>
+    <button class="nav-icon" aria-label="Cart"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 1.7L2.5 5v11.7A1.7 1.7 0 0 0 4.2 18.3h11.6a1.7 1.7 0 0 0 1.7-1.7V5L15 1.7zM2.5 5h15M13.3 8.3a3.3 3.3 0 0 1-6.6 0"/></svg><span class="cart-badge">1</span></button>
+  </div>
+</header>
+
+<main>
+  <div class="pdp">
+    <!-- Gallery column (image + breadcrumbs) -->
+    <div class="gallery-col">
+      <div class="gallery">
+        <div class="product-tile">
+          <span class="placeholder-tag" id="galleryTag">Produktbild · Ansicht 1</span>
+          <div class="thumbs">
+            <div class="thumb active"></div>
+            <div class="thumb"></div>
+            <div class="thumb"></div>
+          </div>
+          <div class="tile-shape" id="tileShape"></div>
+          <span class="placeholder-empty" id="emptyHint"></span>
+        </div>
+      </div>
+      <!-- Breadcrumb -->
+      <nav class="crumbs">
+        <a href="#">Home</a>
+        <span class="sep">/</span>
+        <a href="#">Bekleidung</a>
+        <span class="sep">/</span>
+        <a href="#" id="crumbBrand">StreetLabel2</a>
+        <span class="sep">/</span>
+        <span class="here" id="crumbName">Drop Hoodie Vol.1</span>
+      </nav>
+    </div>
+
+    <!-- Details -->
+    <div class="details">
+      <div class="brand-row">
+        <a class="brand" id="brand" href="#" data-brand-link>
+          <span id="brandName">StreetLabel2</span>
+        </a>
+        <span class="gender-badge" id="gender">UNISEX</span>
+      </div>
+      <h1 class="product-name" id="name">Drop Hoodie Vol.1</h1>
+      <p class="collection-line" id="collection">Winter 2025 · Released Nov 2025</p>
+
+      <!-- Inspiration story (conditional) -->
+      <div class="inspiration" id="inspiration">
+        <span class="inspiration-label">Inspiration</span>
+        <p class="inspiration-body" id="inspirationBody">Inspired by Berlin nights</p>
+      </div>
+
+      <div class="price-row">
+        <span class="price" id="price">85,00 €</span>
+        <span class="vat">inkl. MwSt. zzgl. Versand</span>
+      </div>
+
+      <!-- Colour + SKU + Swatches -->
+      <div class="annotation">
+        <div class="color-sku-row">
+          <span class="color-name" id="colorName">BLACK</span>
+          <span class="vbar" aria-hidden="true"></span>
+          <button class="sku-btn" id="skuBtn" type="button" title="Produktnummer kopieren">
+            <span class="sku-text" id="skuText">YJPD7U2K</span>
+            <svg class="copy-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="8.5" height="8.5" rx="1"/><path d="M11 5V3.5A1 1 0 0 0 10 2.5H3.5A1 1 0 0 0 2.5 3.5V10A1 1 0 0 0 3.5 11H5"/></svg>
+            <svg class="check-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 6.5 12 13 4.5"/></svg>
+            <span class="copied-toast">Kopiert</span>
+          </button>
+        </div>
+        <div class="swatches" id="swatches"></div>
+      </div>
+
+      <!-- Sizes -->
+      <div class="sizes-wrap">
+        <div class="sizes" id="sizes"></div>
+      </div>
+
+      <!-- Catalogue tags (conditional) -->
+      <div class="tags" id="tags"></div>
+
+      <!-- Size guide + fit advisor -->
+      <div class="size-guide-row">
+        <a href="#" id="sizeGuide">Größentabelle</a>
+        <a href="#" id="fitAdvisor">Passform entdecken</a>
+      </div>
+
+      <button class="cta-add" id="ctaAdd">Zum Warenkorb hinzufügen</button>
+      <p class="stock-line" id="stockLine"></p>
+
+      <!-- Accordions -->
+      <div class="accordions" id="accordions"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Recommendation rows -->
+<section class="recs">
+  <div class="rec-row" id="recLook">
+    <div class="row-head">
+      <h2 class="row-title">Vervollständige den Look</h2>
+      <a href="#" class="row-link" data-rec-link>Alle ansehen →</a>
+    </div>
+    <div class="row-grid"></div>
+  </div>
+
+  <div class="rec-row" id="recBrand">
+    <div class="row-head">
+      <h2 class="row-title">Mehr von <em id="recBrandName">StreetLabel2</em></h2>
+      <a href="#" class="row-link" data-rec-link>Alle ansehen →</a>
+    </div>
+    <div class="row-grid"></div>
+  </div>
+
+  <div class="rec-row" id="recSimilar">
+    <div class="row-head">
+      <h2 class="row-title">Ähnliche Produkte</h2>
+      <a href="#" class="row-link" data-rec-link>Alle ansehen →</a>
+    </div>
+    <div class="row-grid"></div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="cf">
+  <div class="cf-grid">
+    <div>
+      <p class="cf-eyebrow">Lieferung &amp; Rückgabe</p>
+      <p class="cf-serif"><span id="returnText">14 Tage Rückgaberecht</span>. Versand aus <span id="originText">DE</span>.</p>
+    </div>
+    <div>
+      <p class="cf-eyebrow">Kundenservice</p>
+      <p class="cf-serif">Mo–Sa, 9:30 – 19:00 Uhr<br/>
+        <a href="mailto:kundenservice@enunas.com" style="font-style:italic;color:#fff;border-bottom:1px solid rgba(255,255,255,0.4);text-decoration:none;padding-bottom:2px;">kundenservice@enunas.com</a>
+      </p>
+    </div>
+    <div>
+      <p class="cf-eyebrow">Zahlungsarten</p>
+      <div class="pay-row">
+        <span class="pay-tile"><svg viewBox="0 0 48 32" width="48" height="32"><text x="24" y="22" text-anchor="middle" font-family="'League Spartan',sans-serif" font-size="13" font-weight="800" font-style="italic" fill="#1A1F71" letter-spacing="1.2">VISA</text></svg></span>
+        <span class="pay-tile"><svg viewBox="0 0 48 32" width="48" height="32"><circle cx="20" cy="16" r="8" fill="#EB001B"/><circle cx="28" cy="16" r="8" fill="#F79E1B"/><path d="M24 9.6a8 8 0 0 1 0 12.8 8 8 0 0 1 0-12.8Z" fill="#FF5F00"/></svg></span>
+        <span class="pay-tile"><svg viewBox="0 0 48 32" width="48" height="32"><text x="24" y="21" text-anchor="middle" font-family="'League Spartan',sans-serif" font-size="10" font-weight="700" font-style="italic"><tspan fill="#003087">Pay</tspan><tspan fill="#0070BA">Pal</tspan></text></svg></span>
+        <span class="pay-tile"><svg viewBox="0 0 48 32" width="48" height="32"><text x="24" y="21" text-anchor="middle" font-family="'League Spartan',sans-serif" font-size="11" font-weight="700" fill="#0A0A0A" letter-spacing="-0.3">Klarna.</text></svg></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* ============================================================
+     Tweaks — persisted defaults (host can rewrite this JSON).
+     Wrap in EDITMODE markers so the host's __edit_mode_set_keys
+     messages update the file in place.
+  ============================================================ */
+  const TWEAKS = /*EDITMODE-BEGIN*/{
+    "accent": "purple",
+    "cta": "accent",
+    "tags": "serif",
+    "stock": "dot",
+    "lookCount": 4,
+    "showGender": true,
+    "showInspiration": true,
+    "showChangeOutline": true
+  }/*EDITMODE-END*/;
+
+  function applyTweaks(t) {
+    document.body.dataset.accent = t.accent;
+    document.body.dataset.cta    = t.cta;
+    document.body.dataset.tags   = t.tags;
+    document.body.dataset.stock  = t.stock;
+    document.body.dataset.gender      = t.showGender      ? 'on' : 'off';
+    document.body.dataset.inspiration = t.showInspiration ? 'on' : 'off';
+    document.body.classList.toggle('show-notes', !!t.showChangeOutline);
+    // Re-render the look section when the count changes
+    if (typeof renderRecs === 'function') renderRecs();
+    // Mirror to the toolbar toggle so its label stays in sync
+    const tn = document.getElementById('toggleNotes');
+    if (tn) {
+      tn.classList.toggle('active', !!t.showChangeOutline);
+      tn.textContent = t.showChangeOutline ? 'Hide change' : 'Show change';
+    }
+  }
+
+  function setTweak(patch) {
+    Object.assign(TWEAKS, patch);
+    applyTweaks(TWEAKS);
+    // Persist via host
+    try {
+      window.parent.postMessage({ type: '__edit_mode_set_keys', edits: patch }, '*');
+    } catch (_) {}
+  }
+
+  /* Wire segmented controls */
+  function wireSegmented(rootId, key, parse) {
+    const root = document.getElementById(rootId);
+    if (!root) return;
+    root.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      root.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const v = parse ? parse(btn.dataset.value) : btn.dataset.value;
+      setTweak({ [key]: v });
+    });
+  }
+  wireSegmented('tweakAccent',    'accent');
+  wireSegmented('tweakCta',       'cta');
+  wireSegmented('tweakTags',      'tags');
+  wireSegmented('tweakStock',     'stock');
+  wireSegmented('tweakLookCount', 'lookCount', (v) => parseInt(v, 10));
+
+  /* Wire toggle switches */
+  document.querySelectorAll('.tweak-toggle').forEach((tog) => {
+    tog.addEventListener('click', () => {
+      const key = tog.dataset.key;
+      const next = !tog.classList.contains('on');
+      tog.classList.toggle('on', next);
+      setTweak({ [key]: next });
+    });
+  });
+
+  /* Sync initial UI state from defaults */
+  function syncTweakUiFromDefaults() {
+    const segs = { accent: 'tweakAccent', cta: 'tweakCta', tags: 'tweakTags', stock: 'tweakStock', lookCount: 'tweakLookCount' };
+    Object.entries(segs).forEach(([key, id]) => {
+      const root = document.getElementById(id);
+      if (!root) return;
+      root.querySelectorAll('button').forEach(b =>
+        b.classList.toggle('active', b.dataset.value == TWEAKS[key]));
+    });
+    document.querySelectorAll('.tweak-toggle').forEach(tog => {
+      tog.classList.toggle('on', !!TWEAKS[tog.dataset.key]);
+    });
+  }
+
+  /* Panel show/hide + host protocol */
+  const tweaksPanel = document.getElementById('tweaksPanel');
+  const tweaksClose = document.getElementById('tweaksClose');
+
+  function openTweaks() { tweaksPanel.classList.add('open'); tweaksPanel.setAttribute('aria-hidden','false'); }
+  function closeTweaks() {
+    tweaksPanel.classList.remove('open');
+    tweaksPanel.setAttribute('aria-hidden','true');
+    try { window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*'); } catch (_) {}
+  }
+  tweaksClose.addEventListener('click', closeTweaks);
+
+  /* Listen FIRST, then announce — host's activate can land before listener exists otherwise */
+  window.addEventListener('message', (e) => {
+    const d = e.data || {};
+    if (d.type === '__activate_edit_mode')   openTweaks();
+    if (d.type === '__deactivate_edit_mode') closeTweaks();
+  });
+  try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch (_) {}
+
+  /* Brand link — prevent jump in mockup, optional visual confirmation */
+  document.querySelectorAll('[data-brand-link], #sizeGuide, #fitAdvisor, [data-rec-link]').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+    });
+  });
+
+  /* Apply tweaks on boot */
+  syncTweakUiFromDefaults();
+  applyTweaks(TWEAKS);
+
+  /* Toolbar "Tweaks" toggle */
+  document.getElementById('toggleTweaks').addEventListener('click', () => {
+    if (tweaksPanel.classList.contains('open')) closeTweaks();
+    else openTweaks();
+  });
+</script>
+
+<script>
+  /* ============================================================
+     Backend-shaped product data — exact response shape.
+     Two examples to show null vs filled fields.
+  ============================================================ */
+  const PRODUCT_DROP = {
+    brandId: 3,
+    brandName: "StreetLabel2",
+    careInstructions: "Cold wash only",
+    catalogueCategory: null,
+    category: "CLOTHING",
+    collectionName: "Winter 2025",
+    createdAt: "2026-05-13T21:28:40.63069154",
+    creatorEmail: "brand2@test.com",
+    creatorId: 5,
+    description: "Premium cotton hoodie",
+    gender: "UNISEX",
+    id: 1,
+    images: [],
+    inspirationStory: "Inspired by Berlin nights",
+    material: "100% organic cotton",
+    name: "Drop Hoodie Vol.1",
+    originCountry: "DE",
+    price: 8500, /* cents */
+    releaseDate: "2025-11-01",
+    returnPeriodDays: 14,
+    status: "ACTIVE",
+    updatedAt: "2026-05-13T21:28:40.630706111",
+    variants: [
+      { color: "Black", id: 1, size: "M", sku: "YJPD7U2K", stockQuantity: 50, weightGrams: 400 },
+      { color: "Black", id: 2, size: "L", sku: "TY63FERX", stockQuantity: 30, weightGrams: 420 }
+    ],
+    videos: []
+  };
+
+  const PRODUCT_VIVIENNE = {
+    brandId: 7,
+    brandName: "Vivienne Westwood",
+    careInstructions: "Dry clean only",
+    catalogueCategory: ["Experimental", "Culture", "Star"],
+    category: "CLOTHING",
+    collectionName: "Worlds End AW25",
+    createdAt: "2026-04-02T10:15:00",
+    creatorEmail: "vw@test.com",
+    creatorId: 11,
+    description: "Iconisches Denim Boxer Jacket — zeitloses Design mit modernem Twist.",
+    gender: "WOMEN",
+    id: 42,
+    images: [],
+    inspirationStory: "An ode to the 1981 collection — pirate spirit re-cut for the modern wardrobe.",
+    material: "100% Baumwolle, Denim",
+    name: "Worlds End Denim Boxer Jacket",
+    originCountry: "IT",
+    price: 42000,
+    releaseDate: "2025-09-15",
+    returnPeriodDays: 30,
+    status: "ACTIVE",
+    updatedAt: "2026-04-02T10:15:00",
+    variants: [
+      { color: "Purple",    id: 101, size: "XS", sku: "VWW-DBJ-PRP-XS", stockQuantity: 4,  weightGrams: 720 },
+      { color: "Purple",    id: 102, size: "S",  sku: "VWW-DBJ-PRP-S",  stockQuantity: 12, weightGrams: 740 },
+      { color: "Purple",    id: 103, size: "M",  sku: "VWW-DBJ-PRP-M",  stockQuantity: 0,  weightGrams: 760 },
+      { color: "Purple",    id: 104, size: "L",  sku: "VWW-DBJ-PRP-L",  stockQuantity: 6,  weightGrams: 780 },
+      { color: "Black",     id: 105, size: "S",  sku: "VWW-DBJ-BLK-S",  stockQuantity: 9,  weightGrams: 740 },
+      { color: "Black",     id: 106, size: "M",  sku: "VWW-DBJ-BLK-M",  stockQuantity: 14, weightGrams: 760 },
+      { color: "Cream",     id: 107, size: "M",  sku: "VWW-DBJ-CRM-M",  stockQuantity: 3,  weightGrams: 760 },
+      { color: "Navy",      id: 108, size: "M",  sku: "VWW-DBJ-NVY-M",  stockQuantity: 7,  weightGrams: 760 }
+    ],
+    videos: []
+  };
+
+  /* ============================================================
+     Colour name → hex map (front-end concern, not backend)
+  ============================================================ */
+  const COLOR_HEX = {
+    Black:    "#0A0A0A",
+    Purple:   "#370E4D",
+    Cream:    "#E8E5DC",
+    White:    "#F5F5F0",
+    Navy:     "#1F2845",
+    Olive:    "#5A5B36"
+  };
+
+  /* ============================================================
+     State
+  ============================================================ */
+  let state = {
+    product: PRODUCT_DROP,
+    selectedColor: null,
+    selectedSize:  null
+  };
+
+  /* ============================================================
+     Helpers
+  ============================================================ */
+  const fmtPrice = (cents) =>
+    (cents / 100).toFixed(2).replace('.', ',') + ' €';
+
+  const fmtReleaseDate = (iso) => {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('de-DE', { month: 'short', year: 'numeric' });
+  };
+
+  // Deduplicated colours, in source order
+  const uniqueColors = (variants) => {
+    const seen = new Set(); const out = [];
+    for (const v of variants) {
+      if (!seen.has(v.color)) { seen.add(v.color); out.push(v.color); }
+    }
+    return out;
+  };
+
+  // All sizes across variants (for the size grid)
+  const allSizes = (variants) => {
+    const order = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+    const set = new Set(variants.map(v => v.size));
+    return order.filter(s => set.has(s));
+  };
+
+  // Find variant matching (color, size); undefined if none
+  const findVariant = (variants, color, size) =>
+    variants.find(v => v.color === color && v.size === size);
+
+  /* ============================================================
+     Render
+  ============================================================ */
+  function render() {
+    const p = state.product;
+
+    // Header
+    document.getElementById('brandName').textContent = p.brandName.toUpperCase();
+    document.getElementById('crumbBrand').textContent = p.brandName;
+    document.getElementById('crumbName').textContent = p.name;
+    document.getElementById('name').textContent = p.name;
+
+    // Gender badge
+    const gEl = document.getElementById('gender');
+    if (p.gender) { gEl.textContent = p.gender; gEl.classList.remove('hidden'); }
+    else { gEl.classList.add('hidden'); }
+
+    // Collection line — just the collection name now
+    const collEl = document.getElementById('collection');
+    if (p.collectionName) {
+      collEl.textContent = p.collectionName;
+      collEl.classList.remove('hidden');
+    } else {
+      collEl.classList.add('hidden');
+    }
+
+    // Inspiration story — conditional
+    const inspEl = document.getElementById('inspiration');
+    if (p.inspirationStory) {
+      document.getElementById('inspirationBody').textContent = '"' + p.inspirationStory + '"';
+      inspEl.classList.remove('hidden');
+    } else {
+      inspEl.classList.add('hidden');
+    }
+
+    // Price
+    document.getElementById('price').textContent = fmtPrice(p.price);
+
+    // Default selection if missing
+    const colors = uniqueColors(p.variants);
+    if (!state.selectedColor || !colors.includes(state.selectedColor)) {
+      state.selectedColor = colors[0] || null;
+    }
+    // Default size = first available for current color
+    const sizesForColor = p.variants.filter(v => v.color === state.selectedColor).map(v => v.size);
+    if (!state.selectedSize || !sizesForColor.includes(state.selectedSize)) {
+      state.selectedSize = sizesForColor[0] || null;
+    }
+
+    // Swatches — show first 3 visible, overflow as "+N colour(s)" link
+    const swEl = document.getElementById('swatches');
+    swEl.innerHTML = '';
+    const visibleColors = colors.slice(0, 3);
+    const overflowCount = Math.max(0, colors.length - 3);
+    visibleColors.forEach((c) => {
+      const b = document.createElement('button');
+      b.className = 'swatch' + (c === state.selectedColor ? ' selected' : '');
+      b.style.background = COLOR_HEX[c] || '#999';
+      b.setAttribute('aria-label', c);
+      b.dataset.color = c;
+      b.addEventListener('click', () => { state.selectedColor = c; render(); });
+      swEl.appendChild(b);
+    });
+    // If the currently selected color is hidden behind the overflow,
+    // also surface it inline so the underline indicator is still visible.
+    if (state.selectedColor && !visibleColors.includes(state.selectedColor)) {
+      const c = state.selectedColor;
+      const b = document.createElement('button');
+      b.className = 'swatch selected';
+      b.style.background = COLOR_HEX[c] || '#999';
+      b.setAttribute('aria-label', c);
+      b.addEventListener('click', () => { state.selectedColor = c; render(); });
+      swEl.appendChild(b);
+    }
+    if (overflowCount > 0) {
+      const more = document.createElement('button');
+      more.className = 'swatch-more';
+      more.textContent = `+${overflowCount} colour${overflowCount === 1 ? '' : 's'}`;
+      more.addEventListener('click', () => {
+        // cycle through the hidden colors on each tap (simple demo behaviour)
+        const hidden = colors.slice(3);
+        const idx = hidden.indexOf(state.selectedColor);
+        const next = hidden[(idx + 1) % hidden.length];
+        state.selectedColor = next;
+        render();
+      });
+      swEl.appendChild(more);
+    }
+
+    // Sizes (mark variants without stock or non-existent as disabled)
+    const sizes = allSizes(p.variants);
+    const sizesEl = document.getElementById('sizes');
+    sizesEl.innerHTML = '';
+    sizesEl.style.gridTemplateColumns = `repeat(${Math.max(sizes.length, 1)}, 1fr)`;
+    sizes.forEach((s) => {
+      const v = findVariant(p.variants, state.selectedColor, s);
+      const b = document.createElement('button');
+      const isDisabled = !v || v.stockQuantity === 0;
+      b.className = 'size-btn' + (s === state.selectedSize && !isDisabled ? ' selected' : '') + (isDisabled ? ' disabled' : '');
+      b.textContent = s;
+      if (!isDisabled) {
+        b.addEventListener('click', () => { state.selectedSize = s; render(); });
+      }
+      sizesEl.appendChild(b);
+    });
+
+    // Selected variant + SKU + stock line
+    const selV = findVariant(p.variants, state.selectedColor, state.selectedSize);
+    document.getElementById('colorName').textContent = (state.selectedColor || '—').toUpperCase();
+
+    const skuText = document.getElementById('skuText');
+    const skuBtn = document.getElementById('skuBtn');
+    if (selV) {
+      skuText.textContent = selV.sku;
+      skuBtn.setAttribute('aria-label', `Produktnummer ${selV.sku} kopieren`);
+      skuBtn.disabled = false;
+    } else {
+      skuText.textContent = 'Bitte Größe wählen';
+      skuBtn.disabled = true;
+    }
+
+    const stockEl = document.getElementById('stockLine');
+    if (selV) {
+      if (selV.stockQuantity === 0) {
+        stockEl.textContent = 'Ausverkauft';
+        stockEl.classList.add('low');
+      } else if (selV.stockQuantity <= 5) {
+        stockEl.textContent = `Nur noch ${selV.stockQuantity} verfügbar`;
+        stockEl.classList.add('low');
+      } else {
+        stockEl.textContent = 'Auf Lager';
+        stockEl.classList.remove('low');
+      }
+    } else {
+      stockEl.textContent = '';
+      stockEl.classList.remove('low');
+    }
+
+    // Catalogue tags — fall back to sensible defaults with real colours
+    // when the backend hasn't assigned a catalogueCategory yet, since this
+    // field is rarely null in production.
+    const tagsEl = document.getElementById('tags');
+    tagsEl.innerHTML = '';
+    const categories = (Array.isArray(p.catalogueCategory) && p.catalogueCategory.length)
+      ? p.catalogueCategory
+      : ['Streetwear', 'Culture', 'Star']; // fallback when null
+    categories.forEach((t) => {
+      const el = document.createElement('span');
+      el.className = 'tag ' + t.toLowerCase();
+      el.textContent = t;
+      tagsEl.appendChild(el);
+    });
+    tagsEl.classList.remove('hidden');
+
+    // CTA
+    const cta = document.getElementById('ctaAdd');
+    if (!selV || selV.stockQuantity === 0) {
+      cta.disabled = true;
+      cta.textContent = selV ? 'Ausverkauft' : 'Größe wählen';
+    } else {
+      cta.disabled = false;
+      cta.textContent = 'Zum Warenkorb hinzufügen';
+    }
+
+    // Footer text — return period + origin
+    document.getElementById('returnText').textContent = (p.returnPeriodDays || 30) + ' Tage Rückgaberecht';
+    document.getElementById('originText').textContent = p.originCountry || '—';
+
+    // Gallery tile — shape colour follows selected color (very lightly)
+    const tileShape = document.getElementById('tileShape');
+    tileShape.style.setProperty('--shape-color',
+      state.selectedColor === 'Black' ? '#1A1A1A' :
+      state.selectedColor === 'Purple' ? '#3D1554' :
+      state.selectedColor === 'Cream' ? '#DEDCD5' :
+      '#DEDCD5'
+    );
+    document.getElementById('emptyHint').textContent =
+      (p.images && p.images.length) ? '' : 'images: []  · empty';
+
+    // Accordions
+    renderAccordions(p, selV);
+
+    // Recommendation rows
+    renderRecs();
+
+    // JSON peek
+    renderJsonPeek(p, selV);
+  }
+
+  function renderAccordions(p, selV) {
+    const root = document.getElementById('accordions');
+    root.innerHTML = '';
+
+    const rows = [
+      { open: true, title: 'Produktdetails', body: () => `
+        <p>${p.description || '—'}</p>
+        <div class="meta">
+          ${metaRow('Produktnummer (Variante)', selV ? selV.sku : null, true)}
+          ${metaRow('Farbe', state.selectedColor)}
+          ${metaRow('Gewicht', selV ? selV.weightGrams + ' g' : null)}
+          ${metaRow('Material', p.material)}
+          ${metaRow('Geschlecht', p.gender)}
+          ${metaRow('Kollektion', p.collectionName)}
+        </div>` },
+      { open: false, title: 'Versand & Rückgabe', body: () => `
+        Versand aus ${p.originCountry || '—'}. ${p.returnPeriodDays || 30} Tage Rückgaberecht
+        ab Erhalt der Ware. Versandkostenfrei innerhalb Deutschlands.` },
+      { open: false, title: 'Pflegehinweise', body: () => p.careInstructions
+        ? `<p style="font-size:17px;line-height:1.7;color:var(--enunas-black);margin:0 0 12px;">${p.careInstructions}</p>
+           <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--enunas-gray-medium);letter-spacing:0.04em;margin:0;">Hinweise zur richtigen Reinigung und Lagerung sorgen für eine lange Lebensdauer des Produkts.</p>`
+        : `<span style="color:var(--enunas-gray-medium);font-style:italic;">Keine Pflegehinweise hinterlegt — <code style="font-family:'JetBrains Mono',monospace;font-size:12px;">careInstructions: null</code></span>` }
+    ];
+
+    rows.forEach((r, i) => {
+      const acc = document.createElement('div');
+      acc.className = 'acc' + (r.open ? ' open' : '');
+      acc.innerHTML = `
+        <button class="acc-head">${r.title}
+          <svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l5 5 5-5"/></svg>
+        </button>
+        <div class="acc-body"><div class="acc-body-inner">${r.body()}</div></div>`;
+      acc.querySelector('.acc-head').addEventListener('click', () => acc.classList.toggle('open'));
+      root.appendChild(acc);
+    });
+  }
+
+  function metaRow(k, v, highlight = false) {
+    const isNull = v === null || v === undefined || v === '';
+    const cls = 'meta-row' + (isNull ? ' null' : '');
+    const value = isNull ? 'null' : v;
+    const valueMarkup = highlight && !isNull
+      ? `<span class="v" style="background:rgba(55,14,77,0.08);padding:1px 6px;border-radius:2px;">${value}</span>`
+      : `<span class="v">${value}</span>`;
+    return `<div class="${cls}"><span class="k">${k}</span>${valueMarkup}</div>`;
+  }
+
+  /* ============================================================
+     JSON peek panel — pretty-print with current variant highlighted
+  ============================================================ */
+  function renderJsonPeek(p, selV) {
+    const target = document.getElementById('jsonPeekBody');
+    const json = JSON.parse(JSON.stringify(p));
+    const text = JSON.stringify(json, null, 2);
+
+    // Simple syntax highlighting
+    let html = text
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/("(\w+)")(\s*:)/g, '<span class="k">$1</span>$3')
+      .replace(/: (".*?")/g, ': <span class="s">$1</span>')
+      .replace(/: (-?\d+\.?\d*)/g, ': <span class="n">$1</span>')
+      .replace(/: (null)/g, ': <span class="nul">$1</span>');
+
+    // Highlight the currently selected variant by SKU
+    if (selV) {
+      html = html.replace(new RegExp(`("${selV.sku}")`, 'g'), '<span class="highlight">$1</span>');
+    }
+
+    target.innerHTML = html;
+  }
+
+  /* ============================================================
+     Recommendation rows
+  ============================================================ */
+  const SILHOUETTES = {
+    // Editorial outfit figure for "Vervollständige den Look" hero
+    figure: `
+      <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+        <!-- Hair / head -->
+        <path d="M48 4 Q60 0 72 4 Q80 8 80 18 Q80 28 76 32 L72 34 L48 34 L44 32 Q40 28 40 18 Q40 8 48 4 Z" fill="#2D2316"/>
+        <ellipse cx="60" cy="22" rx="11" ry="13" fill="#D4BBA1"/>
+        <path d="M50 14 Q60 6 70 14 Q72 18 72 22 L66 24 L66 18 L54 18 L54 24 L48 22 Q48 18 50 14 Z" fill="#2D2316"/>
+        <!-- Neck -->
+        <rect x="55" y="33" width="10" height="7" fill="#C4A88A"/>
+        <!-- Shirt (oversized) -->
+        <path d="M28 46 Q40 38 50 38 L52 40 L56 42 Q60 44 64 42 L68 40 L70 38 Q80 38 92 46 L88 56 L88 102 L32 102 L32 56 Z" fill="#EDE9DD"/>
+        <!-- Collar accent -->
+        <path d="M50 38 L60 50 L70 38 L66 36 L60 38 L54 36 Z" fill="#A3BCD8"/>
+        <!-- Sleeves -->
+        <path d="M28 46 L18 78 L26 84 L34 56 Z" fill="#EDE9DD"/>
+        <path d="M92 46 L102 78 L94 84 L86 56 Z" fill="#EDE9DD"/>
+        <!-- Pants (wide / cropped) -->
+        <path d="M32 102 L88 102 L86 168 L66 168 L62 124 L58 124 L54 168 L34 168 Z" fill="#9B7B58"/>
+        <!-- Belt detail -->
+        <rect x="32" y="100" width="56" height="4" fill="#3D3024" opacity="0.5"/>
+        <!-- Shoes -->
+        <ellipse cx="42" cy="170" rx="14" ry="5" fill="#3D2418"/>
+        <ellipse cx="78" cy="170" rx="14" ry="5" fill="#3D2418"/>
+      </svg>`,
+    // Per-category item silhouettes (tinted with item.tone via currentColor)
+    top: `
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 30 L34 18 L42 20 L46 26 L54 26 L58 20 L66 18 L78 30 L74 40 L74 82 L26 82 L26 40 Z" fill="currentColor"/>
+        <path d="M46 20 L50 32 L54 20 L52 18 L50 20 L48 18 Z" fill="rgba(255,255,255,0.25)"/>
+      </svg>`,
+    bottom: `
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M28 14 L72 14 L74 30 L72 84 L58 84 L52 50 L48 50 L42 84 L28 84 L26 30 Z" fill="currentColor"/>
+        <line x1="50" y1="14" x2="50" y2="50" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+      </svg>`,
+    shoe: `
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M30 28 L52 26 L54 58 L74 62 L80 68 L80 76 L74 80 L24 80 L18 75 L20 64 L30 60 Z" fill="currentColor"/>
+        <path d="M52 30 L52 56 L58 58" stroke="rgba(255,255,255,0.18)" stroke-width="1" fill="none"/>
+      </svg>`,
+    accessory: `
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect x="12" y="46" width="76" height="8" fill="currentColor"/>
+        <rect x="44" y="42" width="12" height="16" fill="none" stroke="currentColor" stroke-width="2.5"/>
+        <rect x="48" y="46" width="4" height="8" fill="currentColor"/>
+        <circle cx="22" cy="50" r="1.5" fill="rgba(255,255,255,0.25)"/>
+        <circle cx="78" cy="50" r="1.5" fill="rgba(255,255,255,0.25)"/>
+      </svg>`,
+    jacket: `
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 28 L34 18 L46 22 L50 20 L54 22 L66 18 L80 28 L76 38 L76 86 L24 86 L24 38 Z" fill="currentColor"/>
+        <line x1="50" y1="20" x2="50" y2="86" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+        <circle cx="50" cy="38" r="1.2" fill="rgba(255,255,255,0.35)"/>
+        <circle cx="50" cy="52" r="1.2" fill="rgba(255,255,255,0.35)"/>
+        <circle cx="50" cy="66" r="1.2" fill="rgba(255,255,255,0.35)"/>
+      </svg>`,
+    bag: `
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M36 38 Q36 24 50 24 Q64 24 64 38" stroke="currentColor" stroke-width="2.5" fill="none"/>
+        <rect x="22" y="38" width="56" height="44" fill="currentColor"/>
+        <line x1="22" y1="48" x2="78" y2="48" stroke="rgba(255,255,255,0.2)" stroke-width="0.8"/>
+      </svg>`
+  };
+
+  const REC_DATA = {
+    look: [
+      { brand: 'Halden',       name: 'Leather Derby Boot',  price: '€ 940',   tone: '#3a2317', kind: 'shoe',      colors: ['#3a2317', '#0A0A0A'] },
+      { brand: 'Studio Rück',  name: 'Heavy Knit Sweater',  price: '€ 740',   tone: '#8b7355', kind: 'top',       colors: ['#8b7355', '#E8E5DC', '#0A0A0A'] },
+      { brand: 'Côte Sauvage', name: 'Wide-leg Trousers',   price: '€ 520',   tone: '#1F2845', kind: 'bottom',    colors: ['#1F2845', '#3D3024'] },
+      { brand: 'Maison Vela',  name: 'Leather Belt',        price: '€ 320',   tone: '#1a1a1a', kind: 'accessory', colors: ['#1a1a1a', '#3a2317'] }
+    ],
+    similar: [
+      { brand: 'Côte Sauvage', name: 'Cropped Bomber',           price: '€ 1.120', tone: '#1F2845', kind: 'jacket', colors: ['#0011A5', '#0A0A0A'] },
+      { brand: 'Khōri',        name: 'Embroidered Field Jacket', price: '€ 1.640', tone: '#5A5B36', kind: 'jacket', colors: ['#5A5B36', '#0A0A0A'] },
+      { brand: 'Atelier Noir', name: 'Asymmetric Layered Coat',  price: '€ 2.340', tone: '#0A0A0A', kind: 'jacket', colors: ['#0A0A0A', '#3a3a3a'] },
+      { brand: 'Maison Vela',  name: 'Tailored Wool Trench',     price: '€ 1.890', tone: '#3d2a1d', kind: 'jacket', colors: ['#3d2a1d', '#8b7355', '#0A0A0A'] }
+    ]
+  };
+
+  const BRAND_ITEMS = {
+    StreetLabel2: [
+      { name: 'Box Logo Crewneck',       price: '€ 95',  tone: '#0A0A0A', kind: 'top',     colors: ['#0A0A0A', '#E8E5DC'] },
+      { name: 'Drop Sweatpants Vol.1',   price: '€ 120', tone: '#2D2D2D', kind: 'bottom',  colors: ['#2D2D2D', '#8b7355'] },
+      { name: 'Reversible Bomber',       price: '€ 420', tone: '#1F2845', kind: 'jacket',  colors: ['#1F2845', '#0A0A0A'] },
+      { name: 'Wide-fit Carpenter Pant', price: '€ 180', tone: '#8b7355', kind: 'bottom',  colors: ['#8b7355', '#2D2D2D'] }
+    ],
+    'Vivienne Westwood': [
+      { name: 'Orb Logo Tee',          price: '€ 210',   tone: '#3D3024', kind: 'top',    colors: ['#E8E5DC', '#0A0A0A', '#370E4D'] },
+      { name: 'Pirate Boot',           price: '€ 780',   tone: '#3a2317', kind: 'shoe',   colors: ['#3a2317', '#0A0A0A'] },
+      { name: 'Tartan Pleated Skirt',  price: '€ 590',   tone: '#6A0F1B', kind: 'bottom', colors: ['#6A0F1B', '#1F2845'] },
+      { name: 'Yasmine Saddle Bag',    price: '€ 1.140', tone: '#0A0A0A', kind: 'bag',    colors: ['#0A0A0A', '#3a2317'] }
+    ]
+  };
+
+  function renderRecs() {
+    const p = state.product;
+
+    const itemCard = (item, klass = 'rec-card') => {
+      const swatchesHtml = (item.colors || []).slice(0, 4).map((c) =>
+        `<span class="rec-swatch" style="background:${c}"></span>`
+      ).join('');
+      return `
+      <article class="${klass}">
+        <div class="rec-image">
+          <div class="item-silhouette" style="color:${item.tone}">${SILHOUETTES[item.kind] || SILHOUETTES.top}</div>
+        </div>
+        <p class="rec-brand">${item.brand.toUpperCase()}</p>
+        <h3 class="rec-name">${item.name}</h3>
+        ${swatchesHtml ? `<div class="rec-colors">${swatchesHtml}</div>` : ''}
+        <p class="rec-price">${item.price}</p>
+      </article>`;
+    };
+
+    // ── Vervollständige den Look — hero + adaptive 1/2/4 mini cards ──
+    const lookGrid = document.querySelector('#recLook .row-grid');
+    const lookCount = Math.min(REC_DATA.look.length, (TWEAKS && TWEAKS.lookCount) || 4);
+    const items = REC_DATA.look.slice(0, lookCount);
+    const heroHtml = `
+      <div class="look-hero">
+        <span class="rec-label">Outfit · ${lookCount} Stücke</span>
+        <div class="look-hero-figure">${SILHOUETTES.figure}</div>
+      </div>`;
+    const miniCards = items.map((it) => itemCard(it, 'look-card')).join('');
+    lookGrid.innerHTML = heroHtml + `<div class="look-grid" data-count="${lookCount}">${miniCards}</div>`;
+
+    // ── Mehr von der Marke — dynamic brand name + 4 items ───────
+    document.getElementById('recBrandName').textContent = p.brandName;
+    const brandItems = (BRAND_ITEMS[p.brandName] || BRAND_ITEMS.StreetLabel2)
+      .map((it) => ({ ...it, brand: p.brandName }));
+    document.querySelector('#recBrand .row-grid').innerHTML =
+      brandItems.map((it) => itemCard(it)).join('');
+
+    // ── Ähnliche Produkte ───────────────────────────────────────
+    document.querySelector('#recSimilar .row-grid').innerHTML =
+      REC_DATA.similar.map((it) => itemCard(it)).join('');
+  }
+
+  /* ============================================================
+     SKU copy
+  ============================================================ */
+  const skuBtn = document.getElementById('skuBtn');
+  async function copySku() {
+    if (skuBtn.disabled) return;
+    const sku = document.getElementById('skuText').textContent.trim();
+    try { await navigator.clipboard.writeText(sku); }
+    catch {
+      const ta = document.createElement('textarea');
+      ta.value = sku; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch {}
+      document.body.removeChild(ta);
+    }
+    skuBtn.classList.add('copied');
+    clearTimeout(skuBtn._t);
+    skuBtn._t = setTimeout(() => skuBtn.classList.remove('copied'), 1600);
+  }
+  skuBtn.addEventListener('click', copySku);
+
+  /* ============================================================
+     Toolbar
+  ============================================================ */
+  document.getElementById('prod1').addEventListener('click', () => {
+    document.getElementById('prod1').classList.add('active');
+    document.getElementById('prod2').classList.remove('active');
+    state = { product: PRODUCT_DROP, selectedColor: null, selectedSize: null };
+    render();
+  });
+  document.getElementById('prod2').addEventListener('click', () => {
+    document.getElementById('prod2').classList.add('active');
+    document.getElementById('prod1').classList.remove('active');
+    state = { product: PRODUCT_VIVIENNE, selectedColor: null, selectedSize: null };
+    render();
+  });
+
+  const toggleNotes = document.getElementById('toggleNotes');
+  toggleNotes.addEventListener('click', () => {
+    const next = !document.body.classList.contains('show-notes');
+    setTweak({ showChangeOutline: next });
+  });
+
+  const togglePeek = document.getElementById('togglePeek');
+  togglePeek.addEventListener('click', () => {
+    const p = document.getElementById('jsonPeek');
+    p.classList.toggle('open');
+    togglePeek.classList.toggle('active');
+    togglePeek.textContent = p.classList.contains('open') ? 'Hide JSON' : 'View JSON';
+  });
+
+  /* ============================================================
+     Init
+  ============================================================ */
+  document.body.classList.add('show-notes');
+  toggleNotes.classList.add('active');
+  toggleNotes.textContent = 'Hide change';
+  render();</script>
+
+</body>
+</html>

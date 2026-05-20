@@ -1,43 +1,51 @@
-import { productApi } from './modules/productApi';
-import { apiProductToProduct } from './productAdapter';
-import { generateSlug } from '../product';
-import type { Product } from '../product';
+import { fetcher } from './fetcher';
+import type { ApiProduct } from '@/types/api';
+import { mockProducts } from './mockProducts';
 
-export async function resolveProductBySlug(
-  brandSlug: string,
-  productSlug: string
-): Promise<Product | null> {
-  const results = await productApi.search(productSlug, { size: 20 });
-  const match = results.content.find(
-    (p) => generateSlug(p.name) === productSlug && generateSlug(p.brandName) === brandSlug
-  );
-  if (!match) return null;
+export async function resolveProductBySlug(slug: string): Promise<ApiProduct | null> {
+  try {
+    const result = await fetcher<ApiProduct>(`/products/slug/${slug}`, { auth: false });
+    if (result) return result;
+  } catch {
+    // fall through to mock
+  }
 
-  const [images, variants] = await Promise.all([
-    productApi.getImages(match.id).catch(() => []),
-    productApi.getVariants(match.id).catch(() => []),
-  ]);
-
-  return apiProductToProduct(match, images, variants);
+  const mock = mockProducts.find(p => p.slug === slug);
+  if (!mock) return null;
+  return {
+    id: mock.id,
+    name: mock.productName,
+    brandName: mock.brandName,
+    sku: mock.sku ?? `MOCK-${mock.id}`,
+    slug: mock.slug,
+    description: mock.description,
+    price: mock.priceNumber,
+    currency: 'EUR',
+    category: mock.category,
+    subcategory: mock.subcategory,
+    images: mock.images ?? [mock.imgURL],
+    colours: mock.colours.map(c => ({ hex: c.hex, name: c.name })),
+    sizes: mock.sizes,
+    catalogue: mock.catalogue,
+    status: 'APPROVED' as const,
+    createdAt: mock.createdAt.toISOString(),
+    details: mock.details,
+  };
 }
 
-export async function resolveProductWithMeta(
-  brandSlug: string,
-  productSlug: string
-): Promise<{ product: Product; defaultListingId?: string } | null> {
-  const results = await productApi.search(productSlug, { size: 20 });
-  const match = results.content.find(
-    (p) => generateSlug(p.name) === productSlug && generateSlug(p.brandName) === brandSlug
-  );
-  if (!match) return null;
+export interface ProductWithMeta extends ApiProduct {
+  breadcrumb: { label: string; href: string }[];
+}
 
-  const [images, variants] = await Promise.all([
-    productApi.getImages(match.id).catch(() => []),
-    productApi.getVariants(match.id).catch(() => []),
-  ]);
-
+export async function resolveProductWithMeta(slug: string): Promise<ProductWithMeta | null> {
+  const product = await resolveProductBySlug(slug);
+  if (!product) return null;
   return {
-    product: apiProductToProduct(match, images, variants),
-    defaultListingId: match.defaultListingId,
+    ...product,
+    breadcrumb: [
+      { label: 'Bekleidung', href: '/bekleidung' },
+      { label: product.category, href: `/bekleidung?category=${product.category}` },
+      { label: product.name, href: '#' },
+    ],
   };
 }
