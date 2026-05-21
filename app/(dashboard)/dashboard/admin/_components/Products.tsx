@@ -22,6 +22,7 @@ interface EditDraft {
   catalogueCategory: string[]
   status: string
   variantDrafts: AdminApiVariant[]
+  price: number
 }
 
 const CATALOGUE_CATEGORIES = ['Streetwear', 'Cultural', 'Athleisure', 'Experimental', 'Star']
@@ -151,6 +152,7 @@ export default function Products() {
       catalogueCategory: parseCatalogueCategory(p.catalogueCategory, p.catalogue),
       status: p.status ?? '',
       variantDrafts: p.variants ? p.variants.map(v => ({ ...v })) : [],
+      price: p.price ?? 0,
     })
   }
 
@@ -182,6 +184,7 @@ export default function Products() {
         inspirationStory: draft.inspirationStory,
         catalogueCategory: draft.catalogueCategory,
         status: draft.status,
+        price: draft.price,
       })
       for (const v of draft.variantDrafts) {
         try {
@@ -409,11 +412,31 @@ export default function Products() {
                           {/* Form */}
                           <div className="flex-1 space-y-4">
 
-                            {/* Name / Kategorie / Geschlecht / Status */}
-                            <div className="grid grid-cols-4 gap-4">
+                            {/* Name / Preis / Kategorie / Geschlecht / Status */}
+                            <div className="grid grid-cols-5 gap-4">
                               <div>
                                 <FLabel>Name</FLabel>
                                 <FInput value={draft.name} onChange={v => setField('name', v)} />
+                              </div>
+                              <div>
+                                <FLabel>Preis (EUR)</FLabel>
+                                <div className="relative">
+                                  <span
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-[#9B9B9B] select-none"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                  >
+                                    €
+                                  </span>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={draft.price}
+                                    onChange={e => setField('price', parseFloat(e.target.value) || 0)}
+                                    className="w-full text-[12px] border border-[#E8E8E8] bg-white rounded-lg pl-6 pr-3 py-2 focus:outline-none focus:border-[#370E4D]/40 focus:ring-2 focus:ring-[#370E4D]/8 transition-all duration-200"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                  />
+                                </div>
                               </div>
                               <div>
                                 <FLabel>Kategorie</FLabel>

@@ -256,3 +256,23 @@
 [85923037ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ http://localhost:8080/admin/payouts?page=0&size=100:0
 [85923055ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ http://localhost:8080/admin/payouts?page=0&size=100:0
 [85923070ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ http://localhost:8080/admin/payouts/dashboard:0
+[86116992ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[86118492ms] [LOG] [Fast Refresh] done in 1575ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[86121092ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[86121657ms] [LOG] [Fast Refresh] done in 635ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[86125150ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[86125979ms] [LOG] [Fast Refresh] done in 920ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[86129451ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[86130106ms] [LOG] [Fast Refresh] done in 747ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[86137123ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[86137924ms] [LOG] [Fast Refresh] done in 877ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[87450038ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[87451629ms] [LOG] [Fast Refresh] done in 1600ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[87453511ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[87453894ms] [LOG] [Fast Refresh] done in 468ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[87458864ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[87459292ms] [LOG] [Fast Refresh] done in 514ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[87502520ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[87502792ms] [LOG] [Fast Refresh] done in 362ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[87534032ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[87534034ms] [LOG] [Fast Refresh] done in 104ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297

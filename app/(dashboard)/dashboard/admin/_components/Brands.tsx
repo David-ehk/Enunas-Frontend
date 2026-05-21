@@ -78,10 +78,13 @@ export default function Brands() {
 
   const productsByBrand = (brandName: string) => products.filter(p => p.brandName === brandName)
 
+  const isApproved = (status: string) => status === 'APPROVED' || status === 'ACTIVE'
+
   const visible = brands.filter(b => {
     const q = search.toLowerCase()
     const matchSearch = !q || b.brandName.toLowerCase().includes(q) || b.email.toLowerCase().includes(q)
     if (!matchSearch) return false
+    if (filter === 'APPROVED') return isApproved(b.status)
     if (filter !== 'all') return b.status === filter
     return true
   })
@@ -106,7 +109,7 @@ export default function Brands() {
   const FILTERS: { id: Filter; label: string }[] = [
     { id: 'all',       label: 'Alle' },
     { id: 'PENDING',   label: `Ausstehend (${brands.filter(b => b.status === 'PENDING').length})` },
-    { id: 'APPROVED',  label: `Genehmigt (${brands.filter(b => b.status === 'APPROVED').length})` },
+    { id: 'APPROVED',  label: `Genehmigt (${brands.filter(b => isApproved(b.status)).length})` },
     { id: 'REJECTED',  label: `Abgelehnt (${brands.filter(b => b.status === 'REJECTED').length})` },
     { id: 'SUSPENDED', label: `Gesperrt (${brands.filter(b => b.status === 'SUSPENDED').length})` },
   ]
@@ -141,7 +144,7 @@ export default function Brands() {
                     <TableRow>
                       <TD className="font-medium text-[#0A0A0A]">{brand.brandName}</TD>
                       <TD className="text-[#6B6B6B]">{brand.email}</TD>
-                      <TD><StatusBadge status={brand.status} /></TD>
+                      <TD><StatusBadge status={isApproved(brand.status) ? 'APPROVED' : brand.status} /></TD>
                       <TD className="text-[#6B6B6B]">{brandProducts.length}</TD>
                       <TD className="text-[#6B6B6B]">{brand.createdAt ? fmt(brand.createdAt) : '—'}</TD>
                       <TD>
@@ -164,7 +167,7 @@ export default function Brands() {
                               </ActionBtn>
                             </>
                           )}
-                          {(brand.status === 'APPROVED' || brand.status === 'VERIFIED') && (
+                          {(isApproved(brand.status) || brand.status === 'VERIFIED') && (
                             <ActionBtn variant="warning" disabled={acting === brand.id} onClick={() => act(brand.id, 'suspend')}>
                               Sperren
                             </ActionBtn>
@@ -188,7 +191,7 @@ export default function Brands() {
                             </div>
                             <div>
                               <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-1.5">Status</p>
-                              <StatusBadge status={brand.status} />
+                              <StatusBadge status={isApproved(brand.status) ? 'APPROVED' : brand.status} />
                             </div>
                             <div>
                               <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-1.5">Produkte</p>
