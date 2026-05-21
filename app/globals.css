@@ -65,6 +65,18 @@
   --duration-1200: 1200ms;
 }
 
+/* ── Font utilities ───────────────────────────────────────────
+   Defined here so they always take effect regardless of whether
+   Tailwind scans the usage sites.                              */
+@layer utilities {
+  .font-cormorant {
+    font-family: var(--font-Cormorant-Garamond) !important;
+  }
+  .font-league-spartan {
+    font-family: var(--font-league-spartan) !important;
+  }
+}
+
 * {
   box-sizing: border-box;
   

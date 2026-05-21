@@ -1,0 +1,332 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - main [ref=e3]:
+      - navigation [ref=e5]:
+        - button "Menü öffnen" [ref=e7]:
+          - img [ref=e8]
+        - link "Enunas" [ref=e9] [cursor=pointer]:
+          - /url: /
+          - heading "Enunas" [level=1] [ref=e10]
+        - generic [ref=e11]:
+          - button "Suche öffnen" [ref=e13] [cursor=pointer]:
+            - img [ref=e14]
+          - link "Mein Konto" [ref=e17] [cursor=pointer]:
+            - /url: /account
+            - img [ref=e18]
+          - button "Wunschliste" [ref=e22] [cursor=pointer]:
+            - img [ref=e23]
+          - button "Warenkorb mit 4 Artikeln" [ref=e26] [cursor=pointer]:
+            - img [ref=e27]
+            - generic [ref=e30]: "4"
+      - generic [ref=e35]: Scroll
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - paragraph [ref=e43]: Catalogue
+          - list [ref=e44]:
+            - listitem [ref=e45]:
+              - button "Streetwear" [ref=e46]: Streetwear
+            - listitem [ref=e48]:
+              - button "Experimental" [ref=e49]: Experimental
+            - listitem [ref=e50]:
+              - button "Athleisure" [ref=e51]: Athleisure
+            - listitem [ref=e52]:
+              - button "Culture" [ref=e53]: Culture
+            - listitem [ref=e54]:
+              - button "Star" [ref=e55]: Star
+          - link "Streetwear entdecken" [ref=e56] [cursor=pointer]:
+            - /url: /Bekleidung/Streetwear
+        - img "Streetwear" [ref=e58]
+      - generic [ref=e62]:
+        - link "WOMEN Women" [ref=e64] [cursor=pointer]:
+          - /url: /women
+          - heading "WOMEN" [level=2] [ref=e66]
+          - img "Women" [ref=e68]
+        - link "MEN Men" [ref=e71] [cursor=pointer]:
+          - /url: /men
+          - heading "MEN" [level=2] [ref=e73]
+          - img "Men" [ref=e75]
+      - generic [ref=e78]:
+        - generic [ref=e79]:
+          - separator [ref=e80]
+          - paragraph [ref=e81]: Unsere Favoriten
+          - separator [ref=e82]
+        - button "Mehr entdecken" [ref=e89]: Mehr entdecken
+      - generic [ref=e94]:
+        - img "New in" [ref=e95]
+        - generic [ref=e97]:
+          - paragraph [ref=e98]: NEW Experience
+          - heading "Dein Shop dich zu finden" [level=2] [ref=e99]
+      - generic [ref=e101]:
+        - generic [ref=e102]:
+          - separator [ref=e103]
+          - paragraph [ref=e104]: Neue Arrivals
+          - separator [ref=e105]
+        - button "Mehr entdecken" [ref=e112]: Mehr entdecken
+      - generic [ref=e117]:
+        - link "MARKEN Marken" [ref=e119] [cursor=pointer]:
+          - /url: /marken
+          - heading "MARKEN" [level=2] [ref=e121]
+          - img "Marken" [ref=e123]
+        - link "ACCESSOIRES Accessoires" [ref=e126] [cursor=pointer]:
+          - /url: /accessoires
+          - heading "ACCESSOIRES" [level=2] [ref=e128]
+          - img "Accessoires" [ref=e130]
+      - generic [ref=e133]:
+        - generic [ref=e135]:
+          - heading "Newsletter" [level=2] [ref=e136]
+          - heading "Subscribe to the Newsletter and be the first to receive the latest news and secrets from Enunas" [level=4] [ref=e137]
+          - generic [ref=e138]:
+            - textbox "Deine E-Mail Adresse" [ref=e139]
+            - button "ABONNIEREN" [ref=e140]: ABONNIEREN
+        - heading "Enunas ist die Anlaufstelle für neue, innovative Designer im Bereich Luxus- und Streetwear. Wir verbinden aufstrebende Kreative mit einer Community, die mehr sucht als nur Kleidung – Menschen, die Ausdruck, Identität und Kultur in ihren Outfits tragen wollen. Als kuratierter Marktplatz und kreatives Movement bietet Enunas exklusive Pieces, künstlerisches Storytelling und eine Plattform für Designer, die die Zukunft von Mode prägen. Enunas ist nicht nur ein Shop, sondern ein Ort für Stil, Seele und Vision." [level=4] [ref=e146]:
+          - text: Enunas ist die Anlaufstelle für neue, innovative Designer im Bereich Luxus- und Streetwear. Wir verbinden aufstrebende Kreative mit einer Community, die mehr sucht als nur Kleidung – Menschen, die Ausdruck, Identität und Kultur in ihren Outfits tragen wollen. Als kuratierter
+          - strong [ref=e147]: Marktplatz
+          - text: und kreatives Movement bietet Enunas exklusive Pieces, künstlerisches Storytelling und eine Plattform für Designer, die die Zukunft von Mode prägen. Enunas ist nicht nur ein Shop, sondern ein Ort für Stil, Seele und Vision.
+      - generic [ref=e150]:
+        - generic [ref=e151]:
+          - generic [ref=e152]:
+            - paragraph [ref=e153]: Über uns
+            - list [ref=e154]:
+              - listitem [ref=e155]:
+                - link "Über uns" [ref=e156] [cursor=pointer]:
+                  - /url: /about us
+                  - text: Über uns
+              - listitem [ref=e157]:
+                - link "Marken" [ref=e158] [cursor=pointer]:
+                  - /url: /marken
+                  - text: Marken
+              - listitem [ref=e159]:
+                - link "Designer" [ref=e160] [cursor=pointer]:
+                  - /url: /marken
+                  - text: Designer
+              - listitem [ref=e161]:
+                - link "Karriere" [ref=e162] [cursor=pointer]:
+                  - /url: /karriere
+                  - text: Karriere
+          - generic [ref=e163]:
+            - paragraph [ref=e164]: Hilfe
+            - list [ref=e165]:
+              - listitem [ref=e166]:
+                - link "FAQs" [ref=e167] [cursor=pointer]:
+                  - /url: /faqs
+                  - text: FAQs
+              - listitem [ref=e168]:
+                - link "Sendungsverfolgung" [ref=e169] [cursor=pointer]:
+                  - /url: /sendungsverfolgung
+                  - text: Sendungsverfolgung
+              - listitem [ref=e170]:
+                - link "Lieferung & Rücksendung" [ref=e171] [cursor=pointer]:
+                  - /url: /lieferung-&-rücksendung
+                  - text: Lieferung & Rücksendung
+              - listitem [ref=e172]:
+                - link "Kundenservice" [ref=e173] [cursor=pointer]:
+                  - /url: /kundenservice
+                  - text: Kundenservice
+          - generic [ref=e174]:
+            - paragraph [ref=e175]: Rechtliches
+            - list [ref=e176]:
+              - listitem [ref=e177]:
+                - link "Impressum" [ref=e178] [cursor=pointer]:
+                  - /url: /Impressum
+                  - text: Impressum
+              - listitem [ref=e179]:
+                - link "AGBs" [ref=e180] [cursor=pointer]:
+                  - /url: /agbs
+                  - text: AGBs
+              - listitem [ref=e181]:
+                - link "Cookie-Richtlinien" [ref=e182] [cursor=pointer]:
+                  - /url: /cookie-richtlinien
+                  - text: Cookie-Richtlinien
+              - listitem [ref=e183]:
+                - link "Cookie-Einstellungen" [ref=e184] [cursor=pointer]:
+                  - /url: /cookie-einstellungen
+                  - text: Cookie-Einstellungen
+              - listitem [ref=e185]:
+                - link "Nutzungsbedingungen" [ref=e186] [cursor=pointer]:
+                  - /url: /nutzungsbedingungen
+                  - text: Nutzungsbedingungen
+              - listitem [ref=e187]:
+                - link "Datenschutzerklärung" [ref=e188] [cursor=pointer]:
+                  - /url: /datenschutzerklärung
+                  - text: Datenschutzerklärung
+          - generic [ref=e189]:
+            - paragraph [ref=e190]: Zahlungsarten
+            - generic [ref=e191]:
+              - paragraph [ref=e192]: Visa
+              - paragraph [ref=e193]: Mastercard
+              - paragraph [ref=e194]: PayPal
+        - generic [ref=e195]:
+          - link [ref=e196] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e197]
+          - link [ref=e199] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e200]
+          - link [ref=e202] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e203]
+          - link [ref=e206] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e207]
+        - generic [ref=e209]:
+          - paragraph [ref=e210]: © Enunas 2026
+          - generic [ref=e211]: Deutschland € / DE
+    - generic [ref=e212]:
+      - generic [ref=e213]:
+        - button "✕" [ref=e214]
+        - generic [ref=e215]:
+          - button "Warenkorb" [ref=e216]:
+            - heading "Warenkorb" [level=4] [ref=e217]
+          - button "Wunschliste" [ref=e218]:
+            - heading "Wunschliste" [level=4] [ref=e219]
+      - generic [ref=e220]:
+        - generic [ref=e222]:
+          - img "Worlds End Denim Boxer Jacket" [ref=e224]
+          - generic [ref=e225]:
+            - generic [ref=e226]:
+              - generic [ref=e227]:
+                - paragraph [ref=e228]: Vivienne Westwood
+                - heading "Worlds End Denim Boxer Jacket" [level=3] [ref=e229]
+              - button "Entfernen" [ref=e230]
+            - paragraph [ref=e231]: Lila
+            - paragraph [ref=e232]: "Größe: M"
+            - generic [ref=e233]:
+              - generic [ref=e234]:
+                - button "−" [ref=e235]
+                - generic [ref=e236]: "1"
+                - button "+" [ref=e237]
+              - generic [ref=e238]: €420.00
+        - generic [ref=e240]:
+          - img "D.D. Shell Hooded-Padded Jacket" [ref=e242]
+          - generic [ref=e243]:
+            - generic [ref=e244]:
+              - generic [ref=e245]:
+                - paragraph [ref=e246]: Maison Guava
+                - heading "D.D. Shell Hooded-Padded Jacket" [level=3] [ref=e247]
+              - button "Entfernen" [ref=e248]
+            - paragraph [ref=e249]: Weiß
+            - paragraph [ref=e250]: "Größe: L"
+            - generic [ref=e251]:
+              - generic [ref=e252]:
+                - button "−" [ref=e253]
+                - generic [ref=e254]: "2"
+                - button "+" [ref=e255]
+              - generic [ref=e256]: €640.00
+        - generic [ref=e258]:
+          - img "Oversized Structured Blazer" [ref=e260]
+          - generic [ref=e261]:
+            - generic [ref=e262]:
+              - generic [ref=e263]:
+                - paragraph [ref=e264]: 6pm
+                - heading "Oversized Structured Blazer" [level=3] [ref=e265]
+              - button "Entfernen" [ref=e266]
+            - paragraph [ref=e267]: Schwarz
+            - paragraph [ref=e268]: "Größe: S"
+            - generic [ref=e269]:
+              - generic [ref=e270]:
+                - button "−" [ref=e271]
+                - generic [ref=e272]: "1"
+                - button "+" [ref=e273]
+              - generic [ref=e274]: €180.00
+      - generic [ref=e275]:
+        - generic [ref=e276]:
+          - generic [ref=e277]: Insgesamt (4 Artikel)
+          - generic [ref=e278]: €1240.00
+        - link "Sicher Zur Kasse" [ref=e279] [cursor=pointer]:
+          - /url: /cart
+          - heading "Sicher Zur Kasse" [level=3] [ref=e280]
+        - button "Weiter einkaufen" [ref=e281]
+        - paragraph [ref=e286]: Kostenloser Versand freigeschaltet!
+  - button "Open Next.js Dev Tools" [ref=e292] [cursor=pointer]:
+    - img [ref=e293]
+  - alert [ref=e296]
+  - dialog "Navigation menu" [ref=e297]:
+    - generic [ref=e298]:
+      - button [ref=e299]:
+        - img [ref=e300]
+      - paragraph [ref=e302]: Schließen
+    - navigation [ref=e303]:
+      - list [ref=e304]:
+        - listitem [ref=e305]:
+          - button "Neu" [ref=e306]:
+            - generic [ref=e308]: Neu
+        - listitem [ref=e309]:
+          - button "Trendy" [ref=e310]:
+            - generic [ref=e312]: Trendy
+        - listitem [ref=e313]:
+          - button "Catalogue" [ref=e314]:
+            - generic [ref=e316]: Catalogue
+        - listitem [ref=e318]:
+          - button "Bekleidung" [ref=e319]:
+            - generic [ref=e320]:
+              - generic [ref=e321]: Bekleidung
+              - img [ref=e322]
+        - listitem [ref=e324]:
+          - button "Women" [ref=e325]:
+            - generic [ref=e326]:
+              - generic [ref=e327]: Women
+              - img [ref=e328]
+        - listitem [ref=e330]:
+          - button "Men" [ref=e331]:
+            - generic [ref=e332]:
+              - generic [ref=e333]: Men
+              - img [ref=e334]
+        - listitem [ref=e336]:
+          - button "Marken" [ref=e337]:
+            - generic [ref=e339]: Marken
+        - listitem [ref=e340]:
+          - button "Drops" [ref=e341]:
+            - generic [ref=e343]: Drops
+        - listitem [ref=e345]:
+          - button "Sale" [ref=e346]:
+            - generic [ref=e348]: Sale
+    - button "DE / EUR" [ref=e351]:
+      - generic [ref=e352]: DE / EUR
+  - dialog "Search panel" [ref=e353]:
+    - button "Suche schließen" [ref=e354]:
+      - img [ref=e355]
+    - generic [ref=e358]:
+      - textbox "SUCHEN" [ref=e359]
+      - img [ref=e360]
+    - generic [ref=e362]:
+      - heading "HIGHLIGHTS" [level=3] [ref=e363]
+      - list [ref=e364]:
+        - listitem [ref=e365]:
+          - link "GESCHENKE FUER SIE" [ref=e366] [cursor=pointer]:
+            - /url: /geschenke/sie
+        - listitem [ref=e367]:
+          - link "GESCHENKE FUER IHN" [ref=e368] [cursor=pointer]:
+            - /url: /geschenke/ihn
+        - listitem [ref=e369]:
+          - link "Accesoirs" [ref=e370] [cursor=pointer]:
+            - /url: /accesoirs
+        - listitem [ref=e371]:
+          - link "DROPS" [ref=e372] [cursor=pointer]:
+            - /url: /Drops
+        - listitem [ref=e373]:
+          - link "ALLE BEKLEIDUNG" [ref=e374] [cursor=pointer]:
+            - /url: /bekleidung
+  - dialog "Search panel" [ref=e375]:
+    - button "Suche schließen" [ref=e376]:
+      - img [ref=e377]
+    - generic [ref=e380]:
+      - textbox "SUCHEN" [active] [ref=e381]
+      - img [ref=e382]
+    - generic [ref=e384]:
+      - heading "HIGHLIGHTS" [level=3] [ref=e385]
+      - list [ref=e386]:
+        - listitem [ref=e387]:
+          - link "GESCHENKE FUER SIE" [ref=e388] [cursor=pointer]:
+            - /url: /geschenke/sie
+        - listitem [ref=e389]:
+          - link "GESCHENKE FUER IHN" [ref=e390] [cursor=pointer]:
+            - /url: /geschenke/ihn
+        - listitem [ref=e391]:
+          - link "Accesoirs" [ref=e392] [cursor=pointer]:
+            - /url: /accesoirs
+        - listitem [ref=e393]:
+          - link "DROPS" [ref=e394] [cursor=pointer]:
+            - /url: /Drops
+        - listitem [ref=e395]:
+          - link "ALLE BEKLEIDUNG" [ref=e396] [cursor=pointer]:
+            - /url: /bekleidung

@@ -27,8 +27,7 @@ export default function ColorSelector({
 
   const visibleColors = colors.slice(0, maxVisible)
   const remainingCount = Math.max(0, colors.length - maxVisible)
-  // Stable display name — fixed height row prevents layout shift
-  const displayName = hoveredColor?.name || selectedColor?.name || ' '
+  const displayName = hoveredColor?.name || selectedColor?.name || ''
 
   const handleCopySku = async () => {
     if (!sku) return
@@ -42,30 +41,44 @@ export default function ColorSelector({
     setSidebarOpen(false)
   }
 
+  const nameStyle: React.CSSProperties = {
+    fontFamily: 'var(--font-league-spartan)',
+    fontSize: '11px',
+    letterSpacing: '0.25em',
+    textTransform: 'uppercase',
+    fontWeight: 500,
+    whiteSpace: 'nowrap',
+  }
+
   return (
     <>
-      <div>
-        {/* Name + SKU — min-height locks the row so hover never shifts layout */}
-        <div className="flex items-center gap-2.5 mb-3.5" style={{ minHeight: '18px' }}>
-          <span
-            className="text-enunas-black"
-            style={{
-              fontFamily: 'var(--font-league-spartan)',
-              fontSize: '11px',
-              letterSpacing: '0.25em',
-              textTransform: 'uppercase',
-              fontWeight: 500,
-              // Reserve width for the longest expected name so row never shifts
-              display: 'inline-block',
-              minWidth: '80px',
-            }}
-          >
-            {displayName}
-          </span>
+      {/*
+        The container is w-full (inherits max-w-[460px] from ProductDetails wrapper).
+        Both sides of the | are flex-1, so the | sits at the exact horizontal centre.
+        The swatch row uses justify-center, so the middle swatch lands under the |.
+      */}
+      <div className="w-full">
 
-          {sku && (
-            <>
-              <span aria-hidden className="flex-shrink-0 inline-block h-3 w-px bg-enunas-black/25" />
+        {/* ── Name | SKU row ── */}
+        <div className="flex items-center w-full mb-4" style={{ minHeight: '18px' }}>
+
+          {/* Left: colour name — right-aligned, fills half the container */}
+          <div className="flex-1 flex justify-end pr-2.5 min-w-0">
+            <span className="text-enunas-black truncate" style={nameStyle}>
+              {displayName}
+            </span>
+          </div>
+
+          {/* Centre: divider */}
+          <span
+            aria-hidden
+            className="flex-shrink-0 inline-block w-px bg-enunas-black/25"
+            style={{ height: '14px' }}
+          />
+
+          {/* Right: SKU + copy — left-aligned, fills half the container */}
+          <div className="flex-1 flex justify-start pl-2.5 min-w-0">
+            {sku ? (
               <button
                 type="button"
                 onClick={handleCopySku}
@@ -73,19 +86,21 @@ export default function ColorSelector({
                 aria-label={`Produktnummer ${sku} kopieren`}
                 className="group inline-flex items-center gap-1.5 font-mono text-[11px] tracking-[0.08em] text-enunas-gray-medium hover:text-enunas-black transition-colors duration-200 focus:outline-none"
               >
-                <span className="select-all">{sku}</span>
+                <span className="select-all truncate">{sku}</span>
                 {copied ? (
                   <CheckIcon className="h-3 w-3 text-enunas-purple flex-shrink-0" />
                 ) : (
                   <CopyIcon className="h-3 w-3 opacity-55 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                 )}
               </button>
-            </>
-          )}
+            ) : (
+              <span />
+            )}
+          </div>
         </div>
 
-        {/* Swatches — fixed 22×22, selection uses bottom underline (no ring/box-model shift) */}
-        <div className="flex items-center gap-3.5">
+        {/* ── Swatch row — centred so the middle swatch sits under the | ── */}
+        <div className="flex justify-center items-center gap-3.5">
           {visibleColors.map((color) => {
             const isSelected = selectedColor?.id === color.id
             return (
@@ -107,14 +122,10 @@ export default function ColorSelector({
                     border: isSelected ? '1.5px solid #0A0A0A' : '1px solid #E8E8E8',
                   }}
                 />
-                {/* Selection underline — positioned outside the swatch, no layout impact */}
+                {/* Selection underline — outside the swatch, no layout impact */}
                 <span
                   className="absolute left-0 right-0 bg-enunas-black transition-opacity duration-150"
-                  style={{
-                    bottom: '-6px',
-                    height: '1.5px',
-                    opacity: isSelected ? 1 : 0,
-                  }}
+                  style={{ bottom: '-6px', height: '1.5px', opacity: isSelected ? 1 : 0 }}
                 />
               </button>
             )
@@ -127,7 +138,7 @@ export default function ColorSelector({
               aria-label={`${remainingCount} weitere Farben anzeigen`}
               className="flex-shrink-0 hover:text-enunas-purple transition-colors duration-200"
               style={{
-                fontFamily: 'var(--font-cormorant)',
+                fontFamily: 'var(--font-Cormorant-Garamond)',
                 fontSize: '18px',
                 fontWeight: 400,
                 color: '#0A0A0A',
@@ -168,7 +179,6 @@ interface SidebarProps {
 function ColorSidebar({ colors, selectedColor, onColorSelect, open, onClose }: SidebarProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null)
 
-  // Close on Escape
   const handleKey = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') onClose()
   }, [onClose])
@@ -268,7 +278,7 @@ function ColorSidebar({ colors, selectedColor, onColorSelect, open, onClose }: S
                   onMouseLeave={() => setHoveredId(null)}
                   aria-label={`Farbe ${color.name} auswählen`}
                   aria-pressed={isSelected}
-                  className="flex flex-col items-center gap-2 focus:outline-none group"
+                  className="flex flex-col items-center gap-2 focus:outline-none"
                 >
                   <div
                     className="w-full aspect-square transition-all duration-200"

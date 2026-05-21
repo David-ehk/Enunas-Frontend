@@ -38,7 +38,7 @@ export const authApi = {
   },
 
   async getMe(): Promise<ApiUser> {
-    return fetcher<ApiUser>('/auth/me');
+    return fetcher<ApiUser>('/users/me');
   },
 
   async updateProfile(data: { firstName?: string; lastName?: string }): Promise<ApiUser> {

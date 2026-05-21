@@ -39,7 +39,11 @@
       "Bash(Remove-Item *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/account)",
       "Bash(Select-Object FullName)",
-      "PowerShell(Get-ChildItem *)"
+      "PowerShell(Get-ChildItem *)",
+      "mcp__playwright__browser_type",
+      "Bash(npx shadcn@latest add card badge table tabs --yes)",
+      "Bash(npm install *)",
+      "mcp__playwright__browser_fill_form"
     ]
   }
 }

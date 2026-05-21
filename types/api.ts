@@ -97,4 +97,62 @@ export interface AdminBrand {
   brandName: string;
   email: string;
   status: BrandStatus;
+  productsCount?: number;
+  revenue?: number;
+  createdAt?: string;
+}
+
+export interface AdminCustomer {
+  id: string;
+  userId?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  country?: string;
+  createdAt?: string;
+  status?: 'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED' | string;
+}
+
+export interface AdminPayout {
+  id: string;
+  brandId?: string;
+  brandName?: string;
+  amount: number;
+  currency: string;
+  status: 'PENDING' | 'APPROVED' | 'PAID' | 'CANCELLED' | string;
+  createdAt: string;
+  paidAt?: string;
+}
+
+export interface PayoutDashboard {
+  totalPaid?: number;
+  totalPending?: number;
+  totalCancelled?: number;
+}
+
+export interface AdminApiVariant {
+  id: string;
+  color?: string;
+  size?: string;
+  sku?: string;
+  stockQuantity?: number;
+  weightGrams?: number;
+}
+
+export interface AdminApiProduct extends Omit<ApiProduct, 'status'> {
+  status: string;
+  brandId?: string;
+  gender?: string;
+  material?: string;
+  careInstructions?: string;
+  collectionName?: string;
+  originCountry?: string;
+  inspirationStory?: string;
+  catalogueCategory?: string | string[];
+  creatorEmail?: string;
+  creatorId?: string;
+  releaseDate?: string;
+  returnPeriodDays?: number;
+  updatedAt?: string;
+  variants?: AdminApiVariant[];
 }

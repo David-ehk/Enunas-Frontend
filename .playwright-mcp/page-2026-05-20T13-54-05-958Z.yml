@@ -1,0 +1,20 @@
+- generic [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - heading "Enunas" [level=1] [ref=e6]
+      - paragraph [ref=e7]: Portal
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: E-Mail
+        - textbox "E-Mail" [ref=e12]: test@test.com
+      - generic [ref=e13]:
+        - generic [ref=e14]: Passwort
+        - generic [ref=e15]:
+          - textbox "Passwort" [active] [ref=e16]: testpass
+          - button "Passwort anzeigen" [ref=e17]:
+            - img [ref=e18]
+      - paragraph [ref=e34]: E-Mail oder Passwort ist falsch.
+      - button "Einloggen" [ref=e21] [cursor=pointer]: Einloggen
+  - button "Open Next.js Dev Tools" [ref=e29] [cursor=pointer]:
+    - img [ref=e30]
+  - alert [ref=e33]

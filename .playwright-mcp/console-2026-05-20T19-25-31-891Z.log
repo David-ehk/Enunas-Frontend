@@ -1,0 +1,46 @@
+[     237ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[     977ms] [LOG] [Fast Refresh] done in 845ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[    1233ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[    1404ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[    1645ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[    1982ms] [LOG] [Fast Refresh] done in 439ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[    5410ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[    5565ms] [LOG] [Fast Refresh] done in 257ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   18633ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   18808ms] [LOG] [Fast Refresh] done in 276ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   36886ms] TypeError: (c.id || c.userId || "").slice is not a function
+    at http://localhost:3000/_next/static/chunks/_90299099._.js:3413:88
+    at Array.map (<anonymous>)
+    at Customers (http://localhost:3000/_next/static/chunks/_90299099._.js:3407:47)
+    at Object.react_stack_bottom_frame (http://localhost:3000/_next/static/chunks/979b6_next_dist_compiled_react-dom_60bd6cd5._.js:14826:24)
+    at renderWithHooks (http://localhost:3000/_next/static/chunks/979b6_next_dist_compiled_react-dom_60bd6cd5._.js:4651:24)
+    at updateFunctionComponent (http://localhost:3000/_next/static/chunks/979b6_next_dist_compiled_react-dom_60bd6cd5._.js:6112:21)
+    at beginWork (http://localhost:3000/_next/static/chunks/979b6_next_dist_compiled_react-dom_60bd6cd5._.js:6708:24)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/979b6_next_dist_compiled_react-dom_60bd6cd5._.js:965:74)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/979b6_next_dist_compiled_react-dom_60bd6cd5._.js:9562:97)
+    at workLoopSync (http://localhost:3000/_next/static/chunks/979b6_next_dist_compiled_react-dom_60bd6cd5._.js:9456:40)
+    at renderRootSync (http://localhost:3000/_next/static/chunks/979b6_next_dist_compiled_react-dom_60bd6cd5._.js:9440:13)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/979b6_next_dist_compiled_react-dom_60bd6cd5._.js:9105:47)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3000/_next/static/chunks/979b6_next_dist_compiled_react-dom_60bd6cd5._.js:10230:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3000/_next/static/chunks/979b6_next_dist_compiled_5e2c2655._.js:2647:64)
+[   37072ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   37265ms] [LOG] [Fast Refresh] done in 300ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   38937ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   39168ms] [LOG] [Fast Refresh] done in 335ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   46977ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   47143ms] [LOG] [Fast Refresh] done in 268ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   59885ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   60124ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   60146ms] [LOG] [Fast Refresh] done in 342ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   60255ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   60531ms] [LOG] [Fast Refresh] done in 381ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   60667ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   60716ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   70183ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   70433ms] [LOG] [Fast Refresh] done in 350ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   86324ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   86556ms] [LOG] [Fast Refresh] done in 323ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   91903ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   92123ms] [LOG] [Fast Refresh] done in 318ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   96335ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297
+[   96933ms] [LOG] [Fast Refresh] done in 335ms @ http://localhost:3000/_next/static/chunks/979b6_next_dist_2a67324b._.js:2297

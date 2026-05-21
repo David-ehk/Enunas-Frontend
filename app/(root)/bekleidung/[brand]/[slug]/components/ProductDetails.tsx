@@ -53,6 +53,11 @@ export default function ProductDetails({
   const { addToCart, openCart } = useCart()
 
   const selectedVariant = findVariant(product.variants, selectedColor?.name ?? null, selectedSize)
+  // SKU shown as soon as a color is selected — not size-dependent
+  const colorVariant = useMemo(
+    () => product.variants.find(v => v.color === selectedColor?.name),
+    [product.variants, selectedColor]
+  )
   const isOutOfStock = !!(selectedVariant && selectedVariant.stockQuantity === 0)
 
   const formattedPrice = new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(price)
@@ -149,8 +154,8 @@ export default function ProductDetails({
 
             {/* 2. Product name */}
             <h1
-              className="text-enunas-black mb-1.5"
-              style={{ fontFamily: 'var(--font-cormorant)', fontSize: '38px', fontWeight: 300, lineHeight: 1.1 }}
+              className="text-enunas-black mb-8"
+              style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: '38px', fontWeight: 300, lineHeight: 1.1 }}
             >
               {product.name}
             </h1>
@@ -159,7 +164,7 @@ export default function ProductDetails({
             {product.collectionName && (
               <p
                 className="text-enunas-gray-medium mb-5"
-                style={{ fontFamily: 'var(--font-cormorant)', fontSize: '15px', fontStyle: 'italic' }}
+                style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: '15px', fontStyle: 'italic' }}
               >
                 {product.collectionName}
               </p>
@@ -169,7 +174,7 @@ export default function ProductDetails({
             <InspirationStory text={product.inspirationStory} />
 
             {/* 5. Price */}
-            <div className="flex items-baseline gap-3 mb-8">
+            <div className="flex items-baseline gap-3 mb-10">
               <span
                 className="text-enunas-black"
                 style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '22px', fontWeight: 300 }}
@@ -186,12 +191,12 @@ export default function ProductDetails({
 
             {/* 6. Color + SKU */}
             {colorsForSelector.length > 0 && (
-              <div className="mb-[14px]">
+              <div className="w-full max-w-[460px] mb-[14px]">
                 <ColorSelector
                   colors={colorsForSelector}
                   selectedColor={selectedColor}
                   onColorSelect={handleColorSelect}
-                  sku={selectedVariant?.sku}
+                  sku={colorVariant?.sku}
                 />
               </div>
             )}
@@ -219,7 +224,7 @@ export default function ProductDetails({
               style={{
                 padding: '22px 32px',
                 background: '#370E4D',
-                fontFamily: 'var(--font-cormorant)',
+                fontFamily: 'var(--font-Cormorant-Garamond)',
                 fontSize: '22px',
                 fontWeight: 400,
                 letterSpacing: '0.04em',
@@ -249,7 +254,7 @@ export default function ProductDetails({
                 onToggle={() => toggle('details')}
               >
                 {product.description && (
-                  <p style={{ fontFamily: 'var(--font-cormorant)', fontSize: '16px', lineHeight: 1.7, color: '#2D2D2D', marginBottom: '16px' }}>
+                  <p style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: '16px', lineHeight: 1.7, color: '#2D2D2D', marginBottom: '16px' }}>
                     {product.description}
                   </p>
                 )}
@@ -291,7 +296,7 @@ export default function ProductDetails({
                 open={openAccordion === 'shipping'}
                 onToggle={() => toggle('shipping')}
               >
-                <p style={{ fontFamily: 'var(--font-cormorant)', fontSize: '16px', lineHeight: 1.7, color: '#2D2D2D' }}>
+                <p style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: '16px', lineHeight: 1.7, color: '#2D2D2D' }}>
                   Versand aus {product.originCountry || 'DE'}. {product.returnPeriodDays || 30} Tage Rückgaberecht ab Erhalt der Ware. Versandkostenfrei ab 50 €.
                 </p>
               </PdpAccordion>
@@ -318,7 +323,7 @@ export default function ProductDetails({
       >
         <div className="max-w-[1800px] mx-auto px-6 lg:px-12 py-4 flex items-center gap-6">
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-enunas-black truncate" style={{ fontFamily: 'var(--font-cormorant)' }}>
+            <p className="text-sm text-enunas-black truncate" style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}>
               {product.name}
             </p>
             <div className="flex items-center gap-3 mt-0.5">

@@ -8,6 +8,8 @@ interface CompleteTheLookProps {
 }
 
 export default function CompleteTheLook({ items, heroImage, allHref = '#' }: CompleteTheLookProps) {
+  if (!items || items.length === 0) return null
+
   const count = Math.min(items.length, 4) as 1 | 2 | 3 | 4;
   const visible = items.slice(0, count);
 
