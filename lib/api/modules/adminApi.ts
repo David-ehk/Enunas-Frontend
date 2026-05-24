@@ -62,8 +62,11 @@ export const adminApi = {
     async approve(id: string): Promise<void> {
       return fetcher<void>(`/admin/products/${id}/approve`, { method: 'POST' });
     },
-    async reject(id: string): Promise<void> {
-      return fetcher<void>(`/admin/products/${id}/reject`, { method: 'POST' });
+    async reject(id: string, reason?: string): Promise<void> {
+      return fetcher<void>(`/admin/products/${id}/reject`, {
+        method: 'POST',
+        body: reason ? JSON.stringify({ reason }) : undefined,
+      });
     },
     async hide(id: string): Promise<void> {
       return fetcher<void>(`/admin/products/${id}/hide`, { method: 'POST' });

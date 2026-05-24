@@ -96,6 +96,8 @@ export default function Products() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [editing, setEditing]   = useState<string | null>(null)
   const [draft, setDraft]       = useState<EditDraft | null>(null)
+  const [rejectingId, setRejectingId]   = useState<string | null>(null)
+  const [rejectReason, setRejectReason] = useState('')
 
   useEffect(() => {
     adminApi.products.getAll().catch(() => []).then(setProducts).finally(() => setLoading(false))
@@ -112,12 +114,22 @@ export default function Products() {
     return true
   })
 
-  async function act(id: string, action: 'approve' | 'reject' | 'hide') {
+  async function act(id: string, action: 'approve' | 'hide') {
     setActing(id)
     try {
       await adminApi.products[action](id)
-      const nextStatus = action === 'approve' ? 'APPROVED' : 'REJECTED'
+      const nextStatus = action === 'approve' ? 'APPROVED' : 'HIDDEN'
       setProducts(prev => prev.map(p => p.id === id ? { ...p, status: nextStatus } : p))
+    } catch { /* silent */ } finally { setActing(null) }
+  }
+
+  async function rejectProduct(id: string, reason: string) {
+    setActing(id)
+    try {
+      await adminApi.products.reject(id, reason || undefined)
+      setProducts(prev => prev.map(p => p.id === id ? { ...p, status: 'REJECTED' } : p))
+      setRejectingId(null)
+      setRejectReason('')
     } catch { /* silent */ } finally { setActing(null) }
   }
 
@@ -317,13 +329,44 @@ export default function Products() {
                             >
                               <CheckCircle className="w-4 h-4" />
                             </button>
-                            <button
-                              onClick={() => act(p.id, 'reject')} disabled={acting === p.id}
-                              className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 transition-all duration-200 disabled:opacity-40"
-                              title="Ablehnen"
-                            >
-                              <XCircle className="w-4 h-4" />
-                            </button>
+                            {rejectingId !== p.id ? (
+                              <button
+                                onClick={() => { setRejectingId(p.id); setRejectReason('') }}
+                                disabled={acting === p.id}
+                                className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 transition-all duration-200 disabled:opacity-40"
+                                title="Ablehnen"
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </button>
+                            ) : (
+                              <div className="flex items-center gap-1.5">
+                                <input
+                                  autoFocus
+                                  type="text"
+                                  value={rejectReason}
+                                  onChange={e => setRejectReason(e.target.value)}
+                                  onKeyDown={e => e.key === 'Enter' && rejectProduct(p.id, rejectReason)}
+                                  placeholder="Ablehnungsgrund…"
+                                  className="text-[11px] border border-rose-200 bg-white rounded-lg px-2.5 py-1 focus:outline-none focus:border-rose-400 w-40 transition-all duration-200"
+                                  style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                />
+                                <button
+                                  onClick={() => rejectProduct(p.id, rejectReason)}
+                                  disabled={acting === p.id}
+                                  className="h-6 px-2.5 rounded-lg text-[10px] font-medium text-white bg-rose-600 hover:bg-rose-700 transition-all duration-200 disabled:opacity-40"
+                                  style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                >
+                                  OK
+                                </button>
+                                <button
+                                  onClick={() => setRejectingId(null)}
+                                  className="h-6 px-2 rounded-lg text-[11px] text-[#6B6B6B] hover:text-[#0A0A0A] transition-all duration-200"
+                                  style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            )}
                           </>
                         )}
                         {/* Hide */}

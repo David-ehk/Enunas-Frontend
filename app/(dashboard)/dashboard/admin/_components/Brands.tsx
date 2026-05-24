@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { adminApi } from '@/lib/api'
 import type { AdminBrand, AdminApiProduct } from '@/types/api'
-import { SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt } from './shared'
+import { SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
 type Filter = 'all' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED'
@@ -132,6 +132,7 @@ export default function Brands() {
                 <TH>E-Mail</TH>
                 <TH>Status</TH>
                 <TH>Produkte</TH>
+                <TH>Umsatz</TH>
                 <TH>Registriert</TH>
                 <TH>Aktionen</TH>
               </tr>
@@ -146,6 +147,7 @@ export default function Brands() {
                       <TD className="text-[#6B6B6B]">{brand.email}</TD>
                       <TD><StatusBadge status={isApproved(brand.status) ? 'APPROVED' : brand.status} /></TD>
                       <TD className="text-[#6B6B6B]">{brandProducts.length}</TD>
+                      <TD className="font-medium text-[#0A0A0A]">{brand.revenue != null ? fmtEur(brand.revenue) : '—'}</TD>
                       <TD className="text-[#6B6B6B]">{brand.createdAt ? fmt(brand.createdAt) : '—'}</TD>
                       <TD>
                         <div className="flex items-center gap-1.5 flex-wrap">
@@ -183,7 +185,7 @@ export default function Brands() {
 
                     {expanded === brand.id && (
                       <tr className="border-b border-[#F0F0EB]" style={{ background: '#F8F8F5' }}>
-                        <td colSpan={6} className="px-6 py-5">
+                        <td colSpan={7} className="px-6 py-5">
                           <div className="grid grid-cols-3 gap-6 mb-4">
                             <div>
                               <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-1.5">Brand-ID</p>
@@ -226,7 +228,12 @@ export default function Brands() {
                                 <button
                                   onClick={() => {
                                     setEditingPayout(brand.id)
-                                    setPayoutDraft({ iban: '', accountHolder: '', bankName: '', bic: '' })
+                                    setPayoutDraft({
+                                      iban: brand.iban ?? '',
+                                      accountHolder: brand.accountHolder ?? '',
+                                      bankName: brand.bankName ?? '',
+                                      bic: brand.bic ?? '',
+                                    })
                                   }}
                                   className="text-[11px] font-medium hover:underline transition-all duration-200"
                                   style={{ color: '#370E4D', fontFamily: 'var(--font-league-spartan)' }}
@@ -286,6 +293,29 @@ export default function Brands() {
                                   >
                                     {savingPayout ? 'Speichert…' : 'Speichern'}
                                   </button>
+                                </div>
+                              </div>
+                            ) : brand.iban ? (
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}>IBAN</p>
+                                  <p className="font-mono text-[12px] text-[#0A0A0A]">{brand.iban}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}>BIC</p>
+                                  <p className="font-mono text-[12px] text-[#0A0A0A]">{brand.bic || '—'}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}>Kontoinhaber</p>
+                                  <p className="text-[12px] text-[#0A0A0A]">{brand.accountHolder || '—'}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}>Bank</p>
+                                  <p className="text-[12px] text-[#0A0A0A]">{brand.bankName || '—'}</p>
                                 </div>
                               </div>
                             ) : (

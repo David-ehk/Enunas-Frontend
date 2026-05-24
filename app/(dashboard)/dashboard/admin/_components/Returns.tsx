@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { adminApi } from '@/lib/api'
-import type { ApiOrder } from '@/types/api'
+import type { ApiOrder, AdminCustomer } from '@/types/api'
 import { StatCard, SectionCard, StatusBadge, EmptyState, Loader, TH, TD, TableRow, fmt, fmtEur } from './shared'
 import { RotateCcw, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
 
@@ -31,11 +31,20 @@ function ActionBtn({
   )
 }
 
-export default function Returns() {
+export default function Returns({ customers = [] }: { customers?: AdminCustomer[] }) {
   const [orders, setOrders]     = useState<ApiOrder[]>([])
   const [loading, setLoading]   = useState(true)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [acting, setActing]     = useState<string | null>(null)
+  const [refundingId, setRefundingId]   = useState<string | null>(null)
+  const [refundAmount, setRefundAmount] = useState('')
+
+  function getCustomerLabel(userId?: string) {
+    if (!userId) return '—'
+    const c = customers.find(c => c.id === userId || c.userId === userId)
+    if (c) return [c.firstName, c.lastName].filter(Boolean).join(' ') || c.email
+    return String(userId).slice(0, 8)
+  }
 
   useEffect(() => {
     adminApi.orders.getAll().catch(() => [])
@@ -112,7 +121,7 @@ export default function Returns() {
                 <React.Fragment key={order.id}>
                   <TableRow>
                     <TD className="font-mono font-semibold text-[#0A0A0A]">#{String(order.id).slice(0, 8).toUpperCase()}</TD>
-                    <TD className="font-mono text-[11px] text-[#9B9B9B]">{order.userId ? String(order.userId).slice(0, 8) : '—'}</TD>
+                    <TD className="text-[#6B6B6B]">{getCustomerLabel(order.userId)}</TD>
                     <TD className="text-[#6B6B6B]">{fmt(order.createdAt)}</TD>
                     <TD className="font-medium text-[#0A0A0A]">{fmtEur(order.totalAmount)}</TD>
                     <TD><StatusBadge status={order.status} /></TD>
@@ -137,9 +146,40 @@ export default function Returns() {
                           </>
                         )}
                         {order.status === 'RETURN_APPROVED' && (
-                          <ActionBtn variant="purple" disabled={acting === order.id} onClick={() => refund(order.id, order.totalAmount)}>
-                            <RotateCcw className="w-3 h-3" /> Refund ({fmtEur(order.totalAmount)})
-                          </ActionBtn>
+                          refundingId !== order.id ? (
+                            <ActionBtn variant="purple" disabled={acting === order.id} onClick={() => { setRefundingId(order.id); setRefundAmount(String(order.totalAmount)) }}>
+                              <RotateCcw className="w-3 h-3" /> Refund ({fmtEur(order.totalAmount)})
+                            </ActionBtn>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <input
+                                autoFocus
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={refundAmount}
+                                onChange={e => setRefundAmount(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && (refund(order.id, parseFloat(refundAmount) || 0), setRefundingId(null))}
+                                className="text-[11px] border border-[#370E4D]/30 bg-white rounded-lg px-2.5 py-1 focus:outline-none focus:border-[#370E4D]/40 w-28 tabular-nums transition-all duration-200"
+                                style={{ fontFamily: 'var(--font-league-spartan)' }}
+                              />
+                              <button
+                                onClick={() => { refund(order.id, parseFloat(refundAmount) || 0); setRefundingId(null) }}
+                                disabled={acting === order.id}
+                                className="inline-flex items-center h-7 px-3 rounded-lg text-[11px] font-medium text-white transition-all duration-200 disabled:opacity-40"
+                                style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D' }}
+                              >
+                                Bestätigen
+                              </button>
+                              <button
+                                onClick={() => setRefundingId(null)}
+                                className="inline-flex items-center h-7 px-2.5 rounded-lg text-[11px] font-medium text-[#6B6B6B] hover:text-[#0A0A0A] transition-all duration-200"
+                                style={{ fontFamily: 'var(--font-league-spartan)' }}
+                              >
+                                Abbrechen
+                              </button>
+                            </div>
+                          )
                         )}
                       </div>
                     </TD>

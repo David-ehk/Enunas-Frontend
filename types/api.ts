@@ -100,6 +100,10 @@ export interface AdminBrand {
   productsCount?: number;
   revenue?: number;
   createdAt?: string;
+  iban?: string;
+  accountHolder?: string;
+  bankName?: string;
+  bic?: string;
 }
 
 export interface AdminCustomer {

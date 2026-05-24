@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react'
 import { adminApi } from '@/lib/api'
-import type { AdminPayout, PayoutDashboard } from '@/types/api'
+import type { AdminPayout, AdminBrand, PayoutDashboard } from '@/types/api'
 import { StatCard, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, InlineInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
-import { CreditCard, CheckCircle, XCircle, Zap } from 'lucide-react'
+import { CreditCard, CheckCircle, XCircle, Zap, ChevronDown, ChevronUp } from 'lucide-react'
 
 const FILTERS = [
   { id: 'all',       label: 'Alle' },
@@ -40,7 +40,7 @@ function ActionBtn({
   )
 }
 
-export default function Payments() {
+export default function Payments({ brands = [] }: { brands?: AdminBrand[] }) {
   const [payouts, setPayouts]     = useState<AdminPayout[]>([])
   const [dashboard, setDashboard] = useState<PayoutDashboard | null>(null)
   const [loading, setLoading]     = useState(true)
@@ -49,6 +49,8 @@ export default function Payments() {
   const [generating, setGenerating] = useState(false)
   const [refInput, setRefInput]   = useState<string>('')
   const [payingId, setPayingId]   = useState<string | null>(null)
+  const [detailId, setDetailId]   = useState<string | null>(null)
+  const [confirmGenerate, setConfirmGenerate] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -130,15 +132,41 @@ export default function Payments() {
 
       <div className="flex items-center gap-3 flex-wrap">
         <FilterBar options={FILTERS} value={filter} onChange={setFilter} />
-        <button
-          disabled={generating}
-          onClick={generate}
-          className="ml-auto inline-flex items-center gap-1.5 h-8 px-3.5 rounded-xl text-[11px] font-medium border border-[#370E4D]/30 text-[#370E4D] hover:bg-[#370E4D] hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ fontFamily: 'var(--font-league-spartan)' }}
-        >
-          <Zap className="w-3 h-3" />
-          {generating ? 'Generiert…' : 'Payouts generieren'}
-        </button>
+        <div className="ml-auto flex items-center gap-2">
+          {!confirmGenerate ? (
+            <button
+              disabled={generating}
+              onClick={() => setConfirmGenerate(true)}
+              className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-xl text-[11px] font-medium border border-[#370E4D]/30 text-[#370E4D] hover:bg-[#370E4D] hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ fontFamily: 'var(--font-league-spartan)' }}
+            >
+              <Zap className="w-3 h-3" />
+              Payouts generieren
+            </button>
+          ) : (
+            <>
+              <span className="text-[11px] text-amber-700 font-medium"
+                style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                Wirklich generieren?
+              </span>
+              <button
+                disabled={generating}
+                onClick={() => { generate(); setConfirmGenerate(false) }}
+                className="inline-flex items-center h-8 px-3.5 rounded-xl text-[11px] font-medium text-white transition-all duration-200 disabled:opacity-50"
+                style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D' }}
+              >
+                {generating ? 'Generiert…' : 'Ja, generieren'}
+              </button>
+              <button
+                onClick={() => setConfirmGenerate(false)}
+                className="inline-flex items-center h-8 px-3 rounded-xl text-[11px] font-medium text-[#6B6B6B] hover:text-[#0A0A0A] transition-all duration-200"
+                style={{ fontFamily: 'var(--font-league-spartan)' }}
+              >
+                Abbrechen
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       <SectionCard title="Payouts" count={visible.length}>
@@ -169,6 +197,15 @@ export default function Payments() {
                     <TD className="text-[#6B6B6B]">{payout.paidAt ? fmt(payout.paidAt) : '—'}</TD>
                     <TD>
                       <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setDetailId(detailId === payout.id ? null : payout.id)}
+                          className="p-1.5 rounded-lg hover:bg-[#F5F5F0] text-[#9B9B9B] hover:text-[#6B6B6B] transition-all duration-200"
+                          title="Markendetails"
+                        >
+                          {detailId === payout.id
+                            ? <ChevronUp className="w-3.5 h-3.5" />
+                            : <ChevronDown className="w-3.5 h-3.5" />}
+                        </button>
                         {payout.status === 'PENDING' && (
                           <ActionBtn variant="success" disabled={acting === payout.id} onClick={() => approvePayout(payout.id)}>
                             <CheckCircle className="w-3 h-3" /> Genehmigen
@@ -187,6 +224,37 @@ export default function Payments() {
                       </div>
                     </TD>
                   </TableRow>
+
+                  {detailId === payout.id && (() => {
+                    const brand = brands.find(b => b.id === payout.brandId || b.brandName === payout.brandName)
+                    return (
+                      <tr className="border-b border-[#F0F0EB]" style={{ background: '#F8F8F5' }}>
+                        <td colSpan={8} className="px-6 py-4">
+                          <div className="grid grid-cols-4 gap-4">
+                            <div>
+                              <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-1">Marke</p>
+                              <p className="text-[12px] text-[#0A0A0A] font-medium">{payout.brandName || '—'}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-1">E-Mail</p>
+                              <p className="text-[12px] text-[#0A0A0A]">{brand?.email || '—'}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-1">IBAN</p>
+                              <p className="font-mono text-[12px] text-[#0A0A0A]">{brand?.iban || '—'}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-1">Kontoinhaber / BIC</p>
+                              <p className="text-[12px] text-[#0A0A0A]">
+                                {brand?.accountHolder || '—'}
+                                {brand?.bic && <span className="text-[#9B9B9B] ml-2 font-mono">{brand.bic}</span>}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })()}
 
                   {payingId === payout.id && (
                     <tr className="border-b border-[#F0F0EB]" style={{ background: '#EFF6FF' }}>

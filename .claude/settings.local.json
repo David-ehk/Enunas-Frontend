@@ -43,7 +43,11 @@
       "mcp__playwright__browser_type",
       "Bash(npx shadcn@latest add card badge table tabs --yes)",
       "Bash(npm install *)",
-      "mcp__playwright__browser_fill_form"
+      "mcp__playwright__browser_fill_form",
+      "Bash(gh repo *)",
+      "WebFetch(domain:github.com)",
+      "Bash(uipro init *)",
+      "Bash(dir /s /b \"C:\\\\Users\\\\david\\\\OneDrive\\\\Desktop\\\\enunas\\\\.claude\")"
     ]
   }
 }

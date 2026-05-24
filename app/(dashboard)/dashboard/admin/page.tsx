@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/app/context/AuthContext'
 import { adminApi } from '@/lib/api'
-import type { AdminBrand, AdminCustomer, AdminApiProduct, ApiOrder } from '@/types/api'
+import type { AdminBrand, AdminCustomer, AdminApiProduct, ApiOrder, AdminPayout } from '@/types/api'
 import {
   LayoutDashboard, Users, Store, Package,
   ShoppingBag, CreditCard, RotateCcw, BarChart2,
@@ -96,6 +96,7 @@ export default function AdminPage() {
   const [products, setProducts]   = useState<AdminApiProduct[]>([])
   const [orders, setOrders]       = useState<ApiOrder[]>([])
   const [customers, setCustomers] = useState<AdminCustomer[]>([])
+  const [payouts, setPayouts]     = useState<AdminPayout[]>([])
   const [loading, setLoading]     = useState(true)
 
   useEffect(() => {
@@ -106,8 +107,9 @@ export default function AdminPage() {
       adminApi.products.getAll().catch(() => []),
       adminApi.orders.getAll().catch(() => []),
       adminApi.customers.getAll().catch(() => []),
-    ]).then(([b, p, o, c]) => {
-      setBrands(b); setProducts(p); setOrders(o); setCustomers(c)
+      adminApi.payouts.getAll().catch(() => []),
+    ]).then(([b, p, o, c, py]) => {
+      setBrands(b); setProducts(p); setOrders(o); setCustomers(c); setPayouts(py)
     }).finally(() => setLoading(false))
   }, [isLoading, user, router])
 
@@ -131,12 +133,14 @@ export default function AdminPage() {
   const pendingBrands   = brands.filter(b => b.status === 'PENDING').length
   const pendingProducts = products.filter(p => p.status === 'PENDING').length
   const pendingReturns  = orders.filter(o => o.status === 'RETURN_REQUESTED').length
-  const totalAlerts     = pendingBrands + pendingProducts + pendingReturns
+  const pendingPayouts  = payouts.filter(p => p.status === 'PENDING').length
+  const totalAlerts     = pendingBrands + pendingProducts + pendingReturns + pendingPayouts
 
   const BADGES: Partial<Record<Tab, number>> = {
     brands:   pendingBrands,
     products: pendingProducts,
     returns:  pendingReturns,
+    payments: pendingPayouts,
   }
 
   return (
@@ -298,12 +302,12 @@ export default function AdminPage() {
         {/* Content */}
         <div className="p-7 max-w-[1600px]">
           {activeTab === 'overview'  && <Overview orders={orders} brands={brands} products={products} customers={customers} />}
-          {activeTab === 'customers' && <Customers />}
+          {activeTab === 'customers' && <Customers orders={orders} />}
           {activeTab === 'brands'    && <Brands />}
           {activeTab === 'products'  && <Products />}
-          {activeTab === 'orders'    && <Orders />}
-          {activeTab === 'payments'  && <Payments />}
-          {activeTab === 'returns'   && <Returns />}
+          {activeTab === 'orders'    && <Orders customers={customers} />}
+          {activeTab === 'payments'  && <Payments brands={brands} />}
+          {activeTab === 'returns'   && <Returns customers={customers} />}
           {activeTab === 'analytics' && <Analytics />}
           {activeTab === 'content'   && <ComingSoon title="Content Moderation" />}
           {activeTab === 'support'   && <ComingSoon title="Support" />}

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { adminApi } from '@/lib/api'
-import type { ApiOrder } from '@/types/api'
+import type { ApiOrder, AdminCustomer } from '@/types/api'
 import { SectionCard, StatusBadge, EmptyState, Loader, SearchInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
 import { ChevronDown, ChevronUp, RotateCcw, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -47,7 +47,7 @@ function ActionBtn({
   )
 }
 
-export default function Orders() {
+export default function Orders({ customers = [] }: { customers?: AdminCustomer[] }) {
   const [orders, setOrders]     = useState<ApiOrder[]>([])
   const [loading, setLoading]   = useState(true)
   const [filter, setFilter]     = useState<Filter>('all')
@@ -55,6 +55,15 @@ export default function Orders() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [acting, setActing]     = useState<string | null>(null)
   const [statusInput, setStatusInput] = useState('')
+  const [refundingId, setRefundingId]   = useState<string | null>(null)
+  const [refundAmount, setRefundAmount] = useState('')
+
+  function getCustomerLabel(userId?: string) {
+    if (!userId) return '—'
+    const c = customers.find(c => c.id === userId || c.userId === userId)
+    if (c) return [c.firstName, c.lastName].filter(Boolean).join(' ') || c.email
+    return String(userId).slice(0, 8)
+  }
 
   useEffect(() => {
     adminApi.orders.getAll().catch(() => []).then(setOrders).finally(() => setLoading(false))
@@ -146,7 +155,7 @@ export default function Orders() {
                 <React.Fragment key={order.id}>
                   <TableRow>
                     <TD className="font-mono font-semibold text-[#0A0A0A]">#{String(order.id).slice(0, 8).toUpperCase()}</TD>
-                    <TD className="font-mono text-[11px] text-[#9B9B9B]">{order.userId ? String(order.userId).slice(0, 8) : '—'}</TD>
+                    <TD className="text-[#6B6B6B]">{getCustomerLabel(order.userId)}</TD>
                     <TD className="text-[#6B6B6B]">{fmt(order.createdAt)}</TD>
                     <TD className="font-medium text-[#0A0A0A]">{fmtEur(order.totalAmount)}</TD>
                     <TD className="text-[#6B6B6B]">{order.items?.length ?? 0}</TD>
@@ -249,9 +258,40 @@ export default function Orders() {
                               <ActionBtn variant="success" disabled={acting === order.id} onClick={() => approveReturn(order.id)}>
                                 <RotateCcw className="w-3 h-3" /> Rückgabe genehmigen
                               </ActionBtn>
-                              <ActionBtn variant="purple" disabled={acting === order.id} onClick={() => refund(order.id, order.totalAmount)}>
-                                Refund ({fmtEur(order.totalAmount)})
-                              </ActionBtn>
+                              {refundingId !== order.id ? (
+                                <ActionBtn variant="purple" disabled={acting === order.id} onClick={() => { setRefundingId(order.id); setRefundAmount(String(order.totalAmount)) }}>
+                                  Refund ({fmtEur(order.totalAmount)})
+                                </ActionBtn>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    autoFocus
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={refundAmount}
+                                    onChange={e => setRefundAmount(e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && (refund(order.id, parseFloat(refundAmount) || 0), setRefundingId(null))}
+                                    className="text-[11px] border border-[#370E4D]/30 bg-white rounded-lg px-2.5 py-1 focus:outline-none focus:border-[#370E4D]/40 w-28 tabular-nums transition-all duration-200"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                  />
+                                  <button
+                                    onClick={() => { refund(order.id, parseFloat(refundAmount) || 0); setRefundingId(null) }}
+                                    disabled={acting === order.id}
+                                    className="inline-flex items-center h-7 px-3 rounded-lg text-[11px] font-medium text-white transition-all duration-200 disabled:opacity-40"
+                                    style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D' }}
+                                  >
+                                    Bestätigen
+                                  </button>
+                                  <button
+                                    onClick={() => setRefundingId(null)}
+                                    className="inline-flex items-center h-7 px-2.5 rounded-lg text-[11px] font-medium text-[#6B6B6B] hover:text-[#0A0A0A] transition-all duration-200"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                  >
+                                    Abbrechen
+                                  </button>
+                                </div>
+                              )}
                             </>
                           )}
                         </div>

@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { adminApi } from '@/lib/api'
-import type { AdminCustomer } from '@/types/api'
-import { SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt } from './shared'
+import type { AdminCustomer, ApiOrder } from '@/types/api'
+import { SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
 import { UserX, UserCheck, UserMinus, ChevronDown, ChevronUp } from 'lucide-react'
 
 type Filter = 'all' | 'active' | 'suspended' | 'new'
@@ -40,7 +40,7 @@ function ActionBtn({
   )
 }
 
-export default function Customers() {
+export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
   const [customers, setCustomers] = useState<AdminCustomer[]>([])
   const [loading, setLoading]     = useState(true)
   const [filter, setFilter]       = useState<Filter>('all')
@@ -161,8 +161,35 @@ export default function Customers() {
                             <p className="text-[12px] text-[#0A0A0A]">{c.createdAt ? fmt(c.createdAt) : '—'}</p>
                           </div>
                           <div className="col-span-3 pt-3 border-t border-[#EBEBEB]">
-                            <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-1.5">Bestellhistorie / Lifetime Value</p>
-                            <p className="text-[11px] text-[#9B9B9B] italic">Wird über Order-API verknüpft (userId: {c.userId || c.id})</p>
+                            <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-2">Bestellhistorie / Lifetime Value</p>
+                            {(() => {
+                              const cOrders = orders.filter(o => o.userId === (c.id || c.userId) || o.userId === c.userId)
+                              if (cOrders.length === 0) return (
+                                <p className="text-[11px] text-[#9B9B9B]">Noch keine Bestellungen</p>
+                              )
+                              const ltv = cOrders.reduce((s, o) => s + o.totalAmount, 0)
+                              return (
+                                <div className="flex items-center gap-5">
+                                  <div>
+                                    <span className="text-[18px] font-semibold text-[#0A0A0A]"
+                                      style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                                      {cOrders.length}
+                                    </span>
+                                    <span className="text-[11px] text-[#9B9B9B] ml-1.5">
+                                      Bestellung{cOrders.length !== 1 ? 'en' : ''}
+                                    </span>
+                                  </div>
+                                  <div className="w-px h-6 bg-[#E8E8E8]" />
+                                  <div>
+                                    <span className="text-[18px] font-semibold text-[#0A0A0A]"
+                                      style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                                      {fmtEur(ltv)}
+                                    </span>
+                                    <span className="text-[11px] text-[#9B9B9B] ml-1.5">Lifetime Value</span>
+                                  </div>
+                                </div>
+                              )
+                            })()}
                           </div>
                         </div>
                       </td>
