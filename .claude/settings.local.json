@@ -47,7 +47,8 @@
       "Bash(gh repo *)",
       "WebFetch(domain:github.com)",
       "Bash(uipro init *)",
-      "Bash(dir /s /b \"C:\\\\Users\\\\david\\\\OneDrive\\\\Desktop\\\\enunas\\\\.claude\")"
+      "Bash(dir /s /b \"C:\\\\Users\\\\david\\\\OneDrive\\\\Desktop\\\\enunas\\\\.claude\")",
+      "PowerShell(Remove-Item *)"
     ]
   }
 }

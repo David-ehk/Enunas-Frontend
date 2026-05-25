@@ -81,9 +81,9 @@ function FSelect({ value, onChange, options }: { value: string; onChange: (v: st
 }
 
 function parseCatalogueCategory(raw: string | string[] | undefined, fallback: string[] | undefined): string[] {
-  if (Array.isArray(raw)) return raw
-  if (typeof raw === 'string' && raw) return [raw]
-  return fallback ?? []
+  const values = Array.isArray(raw) ? raw : typeof raw === 'string' && raw ? [raw] : fallback ?? []
+  // Normalize API values (e.g. 'STREETWEAR') to the display names used by the chip buttons
+  return values.map(v => CATALOGUE_CATEGORIES.find(c => c.toUpperCase() === v.toUpperCase()) ?? v)
 }
 
 export default function Products() {
@@ -194,7 +194,7 @@ export default function Products() {
         collectionName: draft.collectionName,
         originCountry: draft.originCountry,
         inspirationStory: draft.inspirationStory,
-        catalogueCategory: draft.catalogueCategory,
+        catalogueCategory: draft.catalogueCategory.map(c => c.toUpperCase()),
         status: draft.status,
         price: draft.price,
       })
@@ -203,7 +203,6 @@ export default function Products() {
           await adminApi.products.updateVariant(p.id, v.id, {
             color: v.color,
             size: v.size,
-            sku: v.sku,
             stockQuantity: v.stockQuantity,
             weightGrams: v.weightGrams,
           })
@@ -650,10 +649,10 @@ export default function Products() {
                                   <table className="w-full">
                                     <thead>
                                       <tr style={{ background: '#FAFAF8' }}>
-                                        {['Farbe', 'Größe', 'SKU', 'Bestand', 'Gewicht (g)'].map(h => (
-                                          <th key={h} className="py-2 px-3 text-left text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium"
-                                            style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                                            {h}
+                                        {['Farbe', 'Größe', 'SKU', 'Bestand', 'Gewicht (g)'].map((h, i) => (
+                                          <th key={h} className="py-2 px-3 text-left text-[10px] uppercase tracking-[0.10em] font-medium"
+                                            style={{ fontFamily: 'var(--font-league-spartan)', color: i === 2 ? '#C0C0BC' : '#9B9B9B' }}>
+                                            {h}{i === 2 && ' (auto)'}
                                           </th>
                                         ))}
                                       </tr>
@@ -663,7 +662,7 @@ export default function Products() {
                                         <tr key={v.id} className="border-t border-[#EBEBEB]">
                                           <td className="py-1.5 px-3"><FInput value={v.color ?? ''} onChange={val => setVariantField(idx, 'color', val)} /></td>
                                           <td className="py-1.5 px-3"><FInput value={v.size ?? ''} onChange={val => setVariantField(idx, 'size', val)} /></td>
-                                          <td className="py-1.5 px-3"><FInput value={v.sku ?? ''} onChange={val => setVariantField(idx, 'sku', val)} /></td>
+                                          <td className="py-1.5 px-3 font-mono text-[11px] text-[#9B9B9B]">{v.sku ?? '—'}</td>
                                           <td className="py-1.5 px-3"><FInput value={String(v.stockQuantity ?? '')} onChange={val => setVariantField(idx, 'stockQuantity', Number(val) || 0)} /></td>
                                           <td className="py-1.5 px-3"><FInput value={String(v.weightGrams ?? '')} onChange={val => setVariantField(idx, 'weightGrams', Number(val) || 0)} /></td>
                                         </tr>
