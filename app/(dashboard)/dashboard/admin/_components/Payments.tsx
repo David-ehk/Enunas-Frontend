@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { adminApi } from '@/lib/api'
 import type { AdminPayout, AdminBrand, PayoutDashboard } from '@/types/api'
-import { StatCard, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, InlineInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
+import { PageHeader, KPIGrid, KPICell, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, InlineInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
 import { CreditCard, CheckCircle, XCircle, Zap, ChevronDown, ChevronUp } from 'lucide-react'
 
 const FILTERS = [
@@ -106,29 +106,35 @@ export default function Payments({ brands = [] }: { brands?: AdminBrand[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard accent
+      <PageHeader
+        eyebrow="Finanzen"
+        title="Zahlungen &"
+        italicTitle="Auszahlungen."
+        sub="Payout-Verwaltung · Genehmigungen · Überweisungsbelege"
+      />
+
+      <KPIGrid>
+        <KPICell accent
           label="Ausstehend"
           value={fmtEur(dashboard?.totalPending ?? totalPending)}
           sub={`${payouts.filter(p => p.status === 'PENDING').length} Payouts`}
-          icon={<CreditCard className="w-3 h-3" />}
         />
-        <StatCard
+        <KPICell
           label="Ausgezahlt"
           value={fmtEur(dashboard?.totalPaid ?? totalPaid)}
           sub={`${payouts.filter(p => p.status === 'PAID').length} Payouts`}
         />
-        <StatCard
+        <KPICell
           label="Erfolgsrate"
           value={`${successRate}%`}
           sub="Bezahlt / Gesamt"
         />
-        <StatCard
+        <KPICell
           label="Storniert"
           value={fmtEur(dashboard?.totalCancelled ?? totalCancelled)}
           sub={`${payouts.filter(p => p.status === 'CANCELLED').length} Payouts`}
         />
-      </div>
+      </KPIGrid>
 
       <div className="flex items-center gap-3 flex-wrap">
         <FilterBar options={FILTERS} value={filter} onChange={setFilter} />

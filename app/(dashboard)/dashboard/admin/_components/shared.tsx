@@ -1,6 +1,5 @@
 'use client'
 
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { useState, useEffect, type ReactNode } from 'react'
@@ -30,18 +29,154 @@ export const STATUS_MAP: Record<string, { label: string; cls: string }> = {
   HIGH:              { label: 'Hoch',              cls: 'bg-rose-50 text-rose-700 border-rose-200' },
 }
 
+const STATUS_DOT: Record<string, { color: string; label: string }> = {
+  APPROVED:          { color: '#1A5A3C', label: 'Genehmigt' },
+  VERIFIED:          { color: '#0284C7', label: 'Verifiziert' },
+  ACTIVE:            { color: '#1A5A3C', label: 'Aktiv' },
+  PENDING:           { color: '#7A5C1E', label: 'Ausstehend' },
+  PENDING_REVIEW:    { color: '#7A5C1E', label: 'In Prüfung' },
+  REJECTED:          { color: '#8B1E3F', label: 'Abgelehnt' },
+  SUSPENDED:         { color: '#8B1E3F', label: 'Gesperrt' },
+  DEACTIVATED:       { color: '#9B9B9B', label: 'Deaktiviert' },
+  HIDDEN:            { color: '#9B9B9B', label: 'Versteckt' },
+  FLAGGED:           { color: '#C05C1E', label: 'Markiert' },
+  PAID:              { color: '#1A5A3C', label: 'Bezahlt' },
+  PROCESSING:        { color: '#7A5C1E', label: 'In Bearbeitung' },
+  SHIPPED:           { color: '#370E4D', label: 'Versandt' },
+  DELIVERED:         { color: '#1A5A3C', label: 'Geliefert' },
+  CANCELLED:         { color: '#8B1E3F', label: 'Storniert' },
+  REFUNDED:          { color: '#9B9B9B', label: 'Erstattet' },
+  RETURN_REQUESTED:  { color: '#C05C1E', label: 'Rückgabe bean.' },
+  RETURN_APPROVED:   { color: '#0284C7', label: 'Rückgabe gen.' },
+  FAILED:            { color: '#8B1E3F', label: 'Fehlgeschlagen' },
+  LOW:               { color: '#C05C1E', label: 'Niedrig' },
+  MEDIUM:            { color: '#7A5C1E', label: 'Mittel' },
+  HIGH:              { color: '#8B1E3F', label: 'Hoch' },
+}
+
 export function StatusBadge({ status }: { status: string }) {
-  const { label, cls } = STATUS_MAP[status] ?? { label: status, cls: 'bg-gray-100 text-gray-500 border-gray-200' }
+  const entry = STATUS_DOT[status] ?? { color: '#9B9B9B', label: status }
   return (
-    <Badge
-      variant="outline"
-      className={cn(
-        'text-[10px] uppercase tracking-[0.06em] font-medium whitespace-nowrap rounded-full px-2.5 py-0.5 border transition-all duration-200',
-        cls
-      )}
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+      <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0" style={{ background: entry.color }} />
+      <span
+        className="text-[10px] uppercase tracking-[0.1em] font-medium text-[#2D2D2D]"
+        style={{ fontFamily: 'var(--font-league-spartan)' }}
+      >
+        {entry.label}
+      </span>
+    </span>
+  )
+}
+
+export function PageHeader({
+  eyebrow, title, italicTitle, sub, actions,
+}: {
+  eyebrow?: string
+  title: string
+  italicTitle?: string
+  sub?: string
+  actions?: ReactNode
+}) {
+  return (
+    <header className="flex items-start justify-between mb-7 pb-6" style={{ borderBottom: '1px solid #F0F0EB' }}>
+      <div>
+        {eyebrow && (
+          <p
+            className="text-[10px] uppercase tracking-[0.22em] font-medium mb-2.5"
+            style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}
+          >
+            {eyebrow}
+          </p>
+        )}
+        <h1
+          className="text-[#0A0A0A] leading-none"
+          style={{ fontFamily: 'var(--font-cormorant)', fontSize: 30, fontWeight: 300 }}
+        >
+          {title}
+          {italicTitle && <> <em className="italic">{italicTitle}</em></>}
+        </h1>
+        {sub && (
+          <p
+            className="mt-2"
+            style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 12, color: '#6B6B6B' }}
+          >
+            {sub}
+          </p>
+        )}
+      </div>
+      {actions && <div className="shrink-0 mt-0.5 flex items-center gap-2">{actions}</div>}
+    </header>
+  )
+}
+
+export function KPIGrid({ children }: { children: ReactNode }) {
+  return (
+    <div
+      className="grid grid-cols-2 lg:grid-cols-4 bg-white rounded-xl overflow-hidden"
+      style={{ border: '1px solid #E8E8E8', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
     >
-      {label}
-    </Badge>
+      {children}
+    </div>
+  )
+}
+
+export function KPICell({
+  label, value, unit, sub, accent,
+}: {
+  label: string
+  value: string | number
+  unit?: string
+  sub?: string
+  accent?: boolean
+}) {
+  return (
+    <div
+      className="px-6 py-5"
+      style={{
+        background: accent ? '#370E4D' : '#fff',
+        borderRight: '1px solid #F0F0EB',
+        borderBottom: '1px solid #F0F0EB',
+      }}
+    >
+      <p
+        className="text-[10px] uppercase tracking-[0.18em] font-medium mb-2"
+        style={{
+          fontFamily: 'var(--font-league-spartan)',
+          color: accent ? 'rgba(255,255,255,0.5)' : '#9B9B9B',
+        }}
+      >
+        {label}
+      </p>
+      <p
+        className="leading-none"
+        style={{
+          fontFamily: 'var(--font-cormorant)',
+          fontSize: 26,
+          fontWeight: 300,
+          color: accent ? '#fff' : '#0A0A0A',
+        }}
+      >
+        {value}
+        {unit && (
+          <span style={{ fontSize: 13, marginLeft: 3, color: accent ? 'rgba(255,255,255,0.5)' : '#9B9B9B' }}>
+            {unit}
+          </span>
+        )}
+      </p>
+      {sub && (
+        <p
+          className="mt-1.5"
+          style={{
+            fontFamily: 'var(--font-league-spartan)',
+            fontSize: 11,
+            color: accent ? 'rgba(255,255,255,0.4)' : '#9B9B9B',
+          }}
+        >
+          {sub}
+        </p>
+      )}
+    </div>
   )
 }
 
@@ -135,13 +270,25 @@ export function SectionCard({
 export function EmptyState({ message }: { message: string }) {
   return (
     <div className="py-20 text-center flex flex-col items-center gap-3">
-      <div className="w-10 h-10 rounded-full bg-[#F5F5F0] flex items-center justify-center">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[#C0C0BC]">
-          <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
-          <path d="M6 8h4M8 6v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
+      <div
+        className="w-16 h-16 rounded-xl overflow-hidden flex items-center justify-center"
+        style={{
+          background: 'repeating-linear-gradient(45deg, #F5F5F0, #F5F5F0 4px, #EBEBEA 4px, #EBEBEA 8px)',
+        }}
+      >
+        <span
+          className="font-mono relative z-10"
+          style={{ fontSize: 9, color: '#C0C0BC', textTransform: 'uppercase', letterSpacing: '0.08em' }}
+        >
+          leer
+        </span>
       </div>
-      <p className="text-[12px] text-[#6B6B6B]">{message}</p>
+      <p
+        className="text-[11px] uppercase tracking-[0.1em]"
+        style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}
+      >
+        {message}
+      </p>
     </div>
   )
 }

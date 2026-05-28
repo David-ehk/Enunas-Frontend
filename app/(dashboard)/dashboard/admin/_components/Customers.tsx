@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { adminApi } from '@/lib/api'
 import type { AdminCustomer, ApiOrder } from '@/types/api'
-import { SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
+import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
 import { UserX, UserCheck, UserMinus, ChevronDown, ChevronUp } from 'lucide-react'
 
 type Filter = 'all' | 'active' | 'suspended' | 'new'
@@ -78,6 +78,13 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
 
   return (
     <div className="space-y-5">
+      <PageHeader
+        eyebrow="Verwaltung"
+        title="Kunden"
+        italicTitle="verwaltung."
+        sub={`${customers.filter(c => new Date(c.createdAt ?? '') > new Date(Date.now() - 7 * 86400000)).length} neu (7d) · ${customers.length} Kunden gesamt`}
+      />
+
       <div className="flex items-center gap-3 flex-wrap">
         <FilterBar options={FILTERS} value={filter} onChange={v => setFilter(v as Filter)} />
         <div className="flex-1 min-w-[200px] max-w-xs">

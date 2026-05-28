@@ -48,7 +48,17 @@
       "WebFetch(domain:github.com)",
       "Bash(uipro init *)",
       "Bash(dir /s /b \"C:\\\\Users\\\\david\\\\OneDrive\\\\Desktop\\\\enunas\\\\.claude\")",
-      "PowerShell(Remove-Item *)"
+      "PowerShell(Remove-Item *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\david\\\\OneDrive\\\\Desktop\\\\enunas\\\\app\\\\\\(dashboard\\)\\\\dashboard\" -Recurse | Sort-Object FullName | ForEach-Object { $_.FullName.Replace\\(\"C:\\\\Users\\\\david\\\\OneDrive\\\\Desktop\\\\enunas\\\\\", \"\"\\) })",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Read(//c/Program Files \\(x86\\)/Google/Chrome/Application/**)",
+      "Read(//c/Users/david/AppData/Local/ms-playwright/**)",
+      "Bash(npx playwright *)",
+      "Bash(curl -sf http://localhost:3000)",
+      "Bash(node screenshot-vendor.mjs)",
+      "PowerShell(Test-NetConnection *)",
+      "PowerShell(npm list *)",
+      "Bash(dir \"app\\\\\\(dashboard\\)\\\\dashboard\\\\admin\" /b /s)"
     ]
   }
 }

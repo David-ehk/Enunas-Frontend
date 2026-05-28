@@ -73,6 +73,19 @@ const TITLES: Record<Tab, string> = {
   support:   'Support',
 }
 
+const SUBTITLES: Record<Tab, string> = {
+  overview:  'Plattformüberblick & KPIs',
+  customers: 'Kundenverwaltung',
+  brands:    'Markenverwaltung & Genehmigungen',
+  products:  'Produktkatalog & Freigaben',
+  orders:    'Bestellungsverwaltung',
+  payments:  'Zahlungen & Auszahlungen',
+  returns:   'Rückgaben & Erstattungen',
+  analytics: 'Phase 2',
+  content:   'Phase 2',
+  support:   'Phase 2',
+}
+
 function ComingSoon({ title }: { title: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-32 text-center">
@@ -187,41 +200,46 @@ export default function AdminPage() {
                 {items.map(({ id, label, icon: Icon, phase2 }) => {
                   const isActive = activeTab === id
                   return (
-                    <button
-                      key={id}
-                      onClick={() => setActiveTab(id)}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left group/nav transition-all duration-200"
-                      style={{
-                        fontFamily: 'var(--font-league-spartan)',
-                        fontSize: 12,
-                        letterSpacing: '0.04em',
-                        background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-                        color: isActive ? '#fff' : phase2 ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.55)',
-                        boxShadow: isActive ? 'inset 0 0 0 1px rgba(255,255,255,0.1)' : 'none',
-                        cursor: phase2 ? 'default' : 'pointer',
-                      }}
-                      onMouseEnter={e => {
-                        if (!isActive && !phase2)
-                          e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
-                      }}
-                      onMouseLeave={e => {
-                        if (!isActive)
-                          e.currentTarget.style.background = 'transparent'
-                      }}
-                    >
-                      <Icon className="w-3.5 h-3.5 shrink-0" />
-                      <span className="flex-1 font-medium">{label}</span>
-                      {BADGES[id] ? (
-                        <span className="text-[9px] font-bold bg-amber-400 text-amber-900 rounded-full px-1.5 py-0.5 leading-none">
-                          {BADGES[id]}
-                        </span>
-                      ) : phase2 ? (
-                        <span className="text-[8px] font-medium rounded-md px-1.5 py-0.5 leading-none"
-                          style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.2)' }}>
-                          bald
-                        </span>
-                      ) : null}
-                    </button>
+                    <div key={id} className="relative">
+                      <div
+                        className="absolute inset-y-1 left-0 w-0.5 rounded-r-sm transition-all duration-200"
+                        style={{ background: isActive ? 'rgba(255,255,255,0.55)' : 'transparent' }}
+                      />
+                      <button
+                        onClick={() => setActiveTab(id)}
+                        className="w-full flex items-center gap-2.5 pl-4 pr-3 py-2 rounded-lg text-left transition-all duration-200"
+                        style={{
+                          fontFamily: 'var(--font-league-spartan)',
+                          fontSize: 12,
+                          letterSpacing: '0.04em',
+                          background: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
+                          color: isActive ? '#fff' : phase2 ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.55)',
+                          boxShadow: isActive ? 'inset 0 0 0 1px rgba(255,255,255,0.1)' : 'none',
+                          cursor: phase2 ? 'default' : 'pointer',
+                        }}
+                        onMouseEnter={e => {
+                          if (!isActive && !phase2)
+                            e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+                        }}
+                        onMouseLeave={e => {
+                          if (!isActive)
+                            e.currentTarget.style.background = 'transparent'
+                        }}
+                      >
+                        <Icon className="w-3.5 h-3.5 shrink-0" />
+                        <span className="flex-1 font-medium">{label}</span>
+                        {BADGES[id] ? (
+                          <span className="text-[9px] font-bold bg-amber-400 text-amber-900 rounded-full px-1.5 py-0.5 leading-none">
+                            {BADGES[id]}
+                          </span>
+                        ) : phase2 ? (
+                          <span className="text-[8px] font-medium rounded-md px-1.5 py-0.5 leading-none"
+                            style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.2)' }}>
+                            bald
+                          </span>
+                        ) : null}
+                      </button>
+                    </div>
                   )
                 })}
               </div>
@@ -283,12 +301,20 @@ export default function AdminPage() {
           style={{ borderBottom: '1px solid #EBEBEB', boxShadow: '0 1px 0 #EBEBEB, 0 4px 12px rgba(0,0,0,0.03)' }}
         >
           <div className="flex items-center gap-3">
-            <h2
-              className="text-[#0A0A0A]"
-              style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 13, fontWeight: 600, letterSpacing: '0.03em' }}
-            >
-              {TITLES[activeTab]}
-            </h2>
+            <div>
+              <h2
+                className="text-[#0A0A0A] leading-tight"
+                style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 13, fontWeight: 600, letterSpacing: '0.03em' }}
+              >
+                {TITLES[activeTab]}
+              </h2>
+              <p
+                className="text-[10px] uppercase tracking-[0.1em] mt-0.5"
+                style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}
+              >
+                {SUBTITLES[activeTab]}
+              </p>
+            </div>
           </div>
           {totalAlerts > 0 && (
             <div className="flex items-center gap-2 text-[11px] text-amber-700 bg-amber-50 border border-amber-200/80 px-3.5 py-1.5 rounded-xl font-medium"

@@ -15,7 +15,7 @@ export default function KategorieAuswahl() {
       image: "/assets/images/Test1.WebP",
       color: 'bg-[#0011A5]',
       colorHex: '#0011A5',
-      link: "/Bekleidung/Streetwear"
+      link: "/bekleidung/streetwear"
     },
     {
       id: 'kategorie2',
@@ -23,7 +23,7 @@ export default function KategorieAuswahl() {
       image: "https://cdn.rickowens.eu/products/205600/large/RL02E1719_CTW_09_01.jpg?1757411991",
       color: 'bg-[#6C169C]',
       colorHex: '#6C169C',
-      link: "/Bekleidung/Experimental"
+      link: "/bekleidung/experimental"
     },
     {
       id: 'kategorie3',
@@ -31,7 +31,7 @@ export default function KategorieAuswahl() {
       image: '/assets/images/Test3.WebP',
       color: 'bg-[#C01B1B]',
       colorHex: '#C01B1B',
-      link: "/Bekleidung/Athleisure"
+      link: "/bekleidung/athleisure"
     },
     {
       id: 'kategorie4',
@@ -39,7 +39,7 @@ export default function KategorieAuswahl() {
       image: '/assets/images/Test4.WebP',
       color: 'bg-[#EA9575]',
       colorHex: '#EA9575',
-      link: "/Bekleidung/Cultural"
+      link: "/bekleidung/cultural"
     },
     {
       id: 'kategorie5',
@@ -47,7 +47,7 @@ export default function KategorieAuswahl() {
       image: '/assets/images/Test1.WebP',
       color: 'bg-black',
       colorHex: '#000000',
-      link: "/Bekleidung/Star"
+      link: "/bekleidung/star"
     }
   ]
 

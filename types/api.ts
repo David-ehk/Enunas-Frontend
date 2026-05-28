@@ -160,3 +160,19 @@ export interface AdminApiProduct extends Omit<ApiProduct, 'status'> {
   updatedAt?: string;
   variants?: AdminApiVariant[];
 }
+
+export interface ApiListing {
+  id: string;
+  productId?: string;
+  price: number;
+  currency?: string;
+  region?: string;
+  createdAt: string;
+}
+
+export interface ApiProductImage {
+  id: string;
+  productId?: string;
+  url: string;
+  createdAt?: string;
+}

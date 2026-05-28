@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { adminApi } from '@/lib/api'
 import type { ApiOrder, AdminCustomer } from '@/types/api'
-import { SectionCard, StatusBadge, EmptyState, Loader, SearchInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
+import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, SearchInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
 import { ChevronDown, ChevronUp, RotateCcw, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -111,6 +111,13 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
 
   return (
     <div className="space-y-5">
+      <PageHeader
+        eyebrow="Verwaltung"
+        title="Bestellungen"
+        italicTitle="verwaltung."
+        sub={`${orders.filter(o => o.status === 'RETURN_REQUESTED').length} Rückgaben ausstehend · ${orders.length} Bestellungen gesamt`}
+      />
+
       <div className="flex items-center gap-3 flex-wrap">
         {/* Scrollable pill filters for all 9 statuses */}
         <div className="flex items-center gap-0.5 bg-[#F5F5F0] border border-[#E8E8E8] rounded-xl p-1 overflow-x-auto">

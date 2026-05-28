@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { adminApi } from '@/lib/api'
 import type { AdminBrand, AdminApiProduct, ApiOrder, AdminPayout } from '@/types/api'
-import { SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
+import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
 import { ChevronDown, ChevronUp, X, TrendingUp, ShoppingBag, Package, Banknote } from 'lucide-react'
 
 type Filter = 'all' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED'
@@ -509,6 +509,13 @@ export default function Brands() {
 
   return (
     <div className="space-y-5">
+      <PageHeader
+        eyebrow="Verwaltung"
+        title="Marken"
+        italicTitle="verwaltung."
+        sub={`${brands.filter(b => b.status === 'PENDING').length} ausstehende Genehmigungen · ${brands.length} Marken gesamt`}
+      />
+
       <div className="flex items-center gap-3 flex-wrap">
         <FilterBar options={FILTERS} value={filter} onChange={v => setFilter(v as Filter)} />
         <div className="flex-1 min-w-[200px] max-w-xs">

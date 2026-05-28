@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { adminApi } from '@/lib/api'
 import type { ApiOrder, AdminCustomer } from '@/types/api'
-import { StatCard, SectionCard, StatusBadge, EmptyState, Loader, TH, TD, TableRow, fmt, fmtEur } from './shared'
+import { PageHeader, KPIGrid, KPICell, SectionCard, StatusBadge, EmptyState, Loader, TH, TD, TableRow, fmt, fmtEur } from './shared'
 import { RotateCcw, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
 
 function ActionBtn({
@@ -84,24 +84,35 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-3 gap-3">
-        <StatCard
+      <PageHeader
+        eyebrow="Finanzen"
+        title="Rückgaben &"
+        italicTitle="Erstattungen."
+        sub="Eingehende Rückgabeanfragen · Genehmigungen · Refunds"
+      />
+
+      <KPIGrid>
+        <KPICell accent
           label="Angefragt"
           value={requested.length}
           sub="Warten auf Prüfung"
-          icon={<RotateCcw className="w-3 h-3" />}
         />
-        <StatCard
+        <KPICell
           label="Genehmigt"
           value={approved.length}
           sub="Rückgabe bestätigt"
         />
-        <StatCard
+        <KPICell
           label="Erstattet"
           value={refunded.length}
           sub={fmtEur(refunded.reduce((s, o) => s + o.totalAmount, 0))}
         />
-      </div>
+        <KPICell
+          label="Gesamt"
+          value={orders.length}
+          sub="Alle Vorgänge"
+        />
+      </KPIGrid>
 
       <SectionCard title="Rückgabeanfragen" count={orders.length}>
         {loading ? <Loader /> : orders.length === 0 ? <EmptyState message="Keine Rückgabeanfragen." /> : (

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { PostHogProvider } from "./providers";
 
 const LeagueSpartan = localFont({
   src: [
@@ -124,7 +125,9 @@ export default function RootLayout({
   return (
     <html lang="de" className="overflow-x-clip">
       <body className={`${LeagueSpartan.variable} ${CormorantGaramond.variable} w-full`}>
-        {children}
+        <PostHogProvider>
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   );
