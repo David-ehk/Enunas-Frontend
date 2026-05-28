@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { adminApi } from '@/lib/api'
 import type { AdminBrand, AdminApiProduct, ApiOrder, AdminPayout } from '@/types/api'
-import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
+import { PageHeader, KPIGrid, KPICell, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt, fmtEur, dailyCounts, dailySumByKey, weekDeltaStr } from './shared'
 import { ChevronDown, ChevronUp, X, TrendingUp, ShoppingBag, Package, Banknote } from 'lucide-react'
 
 type Filter = 'all' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED'
@@ -438,6 +438,7 @@ export default function Brands() {
   const [editingPayout, setEditingPayout] = useState<string | null>(null)
   const [payoutDraft, setPayoutDraft] = useState<PayoutDraft>({ iban: '', accountHolder: '', bankName: '', bic: '' })
   const [savingPayout, setSavingPayout] = useState(false)
+  const [payouts, setPayouts]           = useState<AdminPayout[]>([])
 
   // Financial panel
   const [selectedBrand, setSelectedBrand] = useState<AdminBrand | null>(null)
@@ -449,12 +450,48 @@ export default function Brands() {
     Promise.all([
       adminApi.brands.getAll().catch(() => []),
       adminApi.products.getAll().catch(() => []),
-    ]).then(([b, p]) => { setBrands(b); setProducts(p) }).finally(() => setLoading(false))
+      adminApi.payouts.getAll().catch(() => [] as AdminPayout[]),
+    ]).then(([b, p, py]) => { setBrands(b); setProducts(p); setPayouts(py) }).finally(() => setLoading(false))
   }, [])
 
   const productsByBrand = (brandName: string) => products.filter(p => p.brandName === brandName)
 
   const isApproved = (status: string) => status === 'APPROVED' || status === 'ACTIVE'
+
+  const kpiData = useMemo(() => {
+    const now = new Date()
+    const y = now.getFullYear(), m = now.getMonth()
+    const prevY = m === 0 ? y - 1 : y
+    const prevM = m === 0 ? 11 : m - 1
+    const inMonth = (s?: string, ty = y, tm = m) => {
+      if (!s) return false
+      const d = new Date(s); return d.getFullYear() === ty && d.getMonth() === tm
+    }
+
+    const active    = brands.filter(b => isApproved(b.status))
+    const activeCount = active.length
+    const avgProducts = activeCount > 0 ? (products.length / activeCount).toFixed(1) : '0'
+
+    const mtdPayouts  = payouts.filter(p => inMonth(p.createdAt) && (p.status === 'PAID' || p.status === 'APPROVED'))
+    const prevPayouts = payouts.filter(p => inMonth(p.createdAt, prevY, prevM) && (p.status === 'PAID' || p.status === 'APPROVED'))
+    const payoutsMTD  = mtdPayouts.reduce((s, p) => s + p.amount, 0)
+    const payoutsPrev = prevPayouts.reduce((s, p) => s + p.amount, 0)
+
+    const newMTD  = brands.filter(b => inMonth(b.createdAt)).length
+    const newPrev = brands.filter(b => inMonth(b.createdAt, prevY, prevM)).length
+
+    return {
+      activeCount,
+      avgProducts,
+      payoutsMTD,
+      payoutsDelta:   weekDeltaStr(payoutsMTD, payoutsPrev),
+      payoutSpark:    dailySumByKey(payouts.filter(p => p.status === 'PAID' || p.status === 'APPROVED'), 'amount'),
+      pending:        brands.filter(b => b.status === 'PENDING').length,
+      newMTD,
+      newBrandsDelta: weekDeltaStr(newMTD, newPrev),
+      brandSpark:     dailyCounts(brands.filter(b => !!b.createdAt) as { createdAt: string }[]),
+    }
+  }, [brands, products, payouts])
 
   const visible = brands.filter(b => {
     const q = search.toLowerCase()
@@ -515,6 +552,35 @@ export default function Brands() {
         italicTitle="verwaltung."
         sub={`${brands.filter(b => b.status === 'PENDING').length} ausstehende Genehmigungen · ${brands.length} Marken gesamt`}
       />
+
+      <KPIGrid>
+        <KPICell accent
+          label="Ausstehend"
+          value={kpiData.pending}
+          sub="Benötigen Genehmigung"
+        />
+        <KPICell
+          label="Aktive Marken"
+          value={kpiData.activeCount}
+          sub="Genehmigt"
+          delta={kpiData.newBrandsDelta}
+          period="MTD"
+          spark={kpiData.brandSpark}
+        />
+        <KPICell
+          label="Ø Produkte / Marke"
+          value={kpiData.avgProducts}
+          sub={`${products.length} Produkte gesamt`}
+        />
+        <KPICell
+          label="Payouts MTD"
+          value={fmtEur(kpiData.payoutsMTD)}
+          sub="Genehmigt + bezahlt"
+          delta={kpiData.payoutsDelta}
+          period="vs. Vormonat"
+          spark={kpiData.payoutSpark}
+        />
+      </KPIGrid>
 
       <div className="flex items-center gap-3 flex-wrap">
         <FilterBar options={FILTERS} value={filter} onChange={v => setFilter(v as Filter)} />

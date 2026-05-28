@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { adminApi } from '@/lib/api'
 import type { ApiOrder, AdminCustomer } from '@/types/api'
-import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, SearchInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
+import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, SearchInput, SelectFilter, TH, TD, TableRow, fmt, fmtEur } from './shared'
 import { ChevronDown, ChevronUp, RotateCcw, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -57,6 +57,8 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
   const [statusInput, setStatusInput] = useState('')
   const [refundingId, setRefundingId]   = useState<string | null>(null)
   const [refundAmount, setRefundAmount] = useState('')
+  const [amountFilter, setAmountFilter] = useState<string>('all')
+  const [sortBy, setSortBy]             = useState<string>('newest')
 
   function getCustomerLabel(userId?: string) {
     if (!userId) return '—'
@@ -69,13 +71,27 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
     adminApi.orders.getAll().catch(() => []).then(setOrders).finally(() => setLoading(false))
   }, [])
 
-  const visible = orders.filter(o => {
+  const visible = (() => {
     const q = search.toLowerCase()
-    const matchSearch = !q || o.id.toLowerCase().includes(q) || o.userId?.toLowerCase().includes(q)
-    if (!matchSearch) return false
-    if (filter !== 'all') return o.status === filter
-    return true
-  })
+    let arr = orders.filter(o => {
+      const cLabel = getCustomerLabel(o.userId).toLowerCase()
+      const matchSearch = !q || o.id.toLowerCase().includes(q) || o.userId?.toLowerCase().includes(q) || cLabel.includes(q)
+      if (!matchSearch) return false
+      if (filter !== 'all') return o.status === filter
+      return true
+    })
+    if (amountFilter === 'lt50')    arr = arr.filter(o => o.totalAmount < 50)
+    if (amountFilter === '50-100')  arr = arr.filter(o => o.totalAmount >= 50 && o.totalAmount < 100)
+    if (amountFilter === '100-200') arr = arr.filter(o => o.totalAmount >= 100 && o.totalAmount < 200)
+    if (amountFilter === '200-500') arr = arr.filter(o => o.totalAmount >= 200 && o.totalAmount < 500)
+    if (amountFilter === 'gt500')   arr = arr.filter(o => o.totalAmount >= 500)
+    return [...arr].sort((a, b) => {
+      if (sortBy === 'highest') return b.totalAmount - a.totalAmount
+      if (sortBy === 'lowest')  return a.totalAmount - b.totalAmount
+      if (sortBy === 'oldest')  return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    })
+  })()
 
   async function changeStatus(orderId: string, status: string) {
     setActing(orderId)
@@ -137,8 +153,30 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
             </button>
           ))}
         </div>
-        <div className="flex-1 min-w-[200px] max-w-xs">
-          <SearchInput value={search} onChange={setSearch} placeholder="Order-ID suchen…" />
+        <SelectFilter
+          value={amountFilter}
+          onChange={setAmountFilter}
+          options={[
+            { value: 'all',     label: 'Alle Beträge' },
+            { value: 'lt50',    label: '< €50' },
+            { value: '50-100',  label: '€50 – €100' },
+            { value: '100-200', label: '€100 – €200' },
+            { value: '200-500', label: '€200 – €500' },
+            { value: 'gt500',   label: '> €500' },
+          ]}
+        />
+        <SelectFilter
+          value={sortBy}
+          onChange={setSortBy}
+          options={[
+            { value: 'newest',  label: 'Neueste zuerst' },
+            { value: 'oldest',  label: 'Älteste zuerst' },
+            { value: 'highest', label: 'Höchster Betrag' },
+            { value: 'lowest',  label: 'Niedrigster Betrag' },
+          ]}
+        />
+        <div className="flex-1 min-w-[160px] max-w-xs">
+          <SearchInput value={search} onChange={setSearch} placeholder="Order-ID, Kundenname…" />
         </div>
       </div>
 

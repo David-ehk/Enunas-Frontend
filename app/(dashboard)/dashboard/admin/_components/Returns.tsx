@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { adminApi } from '@/lib/api'
 import type { ApiOrder, AdminCustomer } from '@/types/api'
-import { PageHeader, KPIGrid, KPICell, SectionCard, StatusBadge, EmptyState, Loader, TH, TD, TableRow, fmt, fmtEur } from './shared'
+import { PageHeader, KPIGrid, KPICell, SectionCard, StatusBadge, EmptyState, Loader, TH, TD, TableRow, fmt, fmtEur, dailyCounts, dailySumByKey, weekDeltaStr } from './shared'
 import { RotateCcw, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
 
 function ActionBtn({
@@ -58,6 +58,25 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
   const approved  = orders.filter(o => o.status === 'RETURN_APPROVED')
   const refunded  = orders.filter(o => o.status === 'REFUNDED')
 
+  const kpiData = useMemo(() => {
+    const now = Date.now()
+    const w7  = 7 * 86400000
+    const w14 = 14 * 86400000
+    const inW7  = (s: string) => now - new Date(s).getTime() < w7
+    const inW14 = (s: string) => { const t = now - new Date(s).getTime(); return t >= w7 && t < w14 }
+    const req = orders.filter(o => o.status === 'RETURN_REQUESTED')
+    const appr = orders.filter(o => o.status === 'RETURN_APPROVED')
+    const ref  = orders.filter(o => o.status === 'REFUNDED')
+    return {
+      requestedSpark: dailyCounts(req),
+      approvedSpark:  dailyCounts(appr),
+      refundedSpark:  dailySumByKey(ref, 'totalAmount'),
+      allSpark:       dailyCounts(orders),
+      requestedDelta: weekDeltaStr(req.filter(o => inW7(o.createdAt)).length, req.filter(o => inW14(o.createdAt)).length),
+      refundedDelta:  weekDeltaStr(ref.filter(o => inW7(o.createdAt)).length, ref.filter(o => inW14(o.createdAt)).length),
+    }
+  }, [orders])
+
   async function approveReturn(orderId: string) {
     setActing(orderId)
     try {
@@ -96,21 +115,31 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
           label="Angefragt"
           value={requested.length}
           sub="Warten auf Prüfung"
+          delta={kpiData.requestedDelta}
+          period="vs. Vorwoche"
+          spark={kpiData.requestedSpark}
+          inverseTrend
         />
         <KPICell
           label="Genehmigt"
           value={approved.length}
           sub="Rückgabe bestätigt"
+          spark={kpiData.approvedSpark}
         />
         <KPICell
           label="Erstattet"
           value={refunded.length}
           sub={fmtEur(refunded.reduce((s, o) => s + o.totalAmount, 0))}
+          delta={kpiData.refundedDelta}
+          period="vs. Vorwoche"
+          spark={kpiData.refundedSpark}
+          inverseTrend
         />
         <KPICell
           label="Gesamt"
           value={orders.length}
           sub="Alle Vorgänge"
+          spark={kpiData.allSpark}
         />
       </KPIGrid>
 

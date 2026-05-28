@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { adminApi } from '@/lib/api'
 import type { AdminCustomer, ApiOrder } from '@/types/api'
-import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
+import { PageHeader, KPIGrid, KPICell, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt, fmtEur, dailyCounts, weekDeltaStr } from './shared'
 import { UserX, UserCheck, UserMinus, ChevronDown, ChevronUp } from 'lucide-react'
 
 type Filter = 'all' | 'active' | 'suspended' | 'new'
@@ -64,6 +64,50 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
     return true
   })
 
+  const kpiData = useMemo(() => {
+    const now = new Date()
+    const y = now.getFullYear(), m = now.getMonth()
+    const prevY = m === 0 ? y - 1 : y
+    const prevM = m === 0 ? 11 : m - 1
+
+    const inMonth = (s?: string, ty = y, tm = m) => {
+      if (!s) return false
+      const d = new Date(s); return d.getFullYear() === ty && d.getMonth() === tm
+    }
+
+    const newMTD  = customers.filter(c => inMonth(c.createdAt)).length
+    const newPrev = customers.filter(c => inMonth(c.createdAt, prevY, prevM)).length
+
+    // Avg LTV: total revenue per buying customer
+    const revenueMap = new Map<string, number>()
+    orders.forEach(o => { if (o.userId) revenueMap.set(o.userId, (revenueMap.get(o.userId) ?? 0) + o.totalAmount) })
+    const buyingCount = revenueMap.size
+    const totalRev = Array.from(revenueMap.values()).reduce((s, v) => s + v, 0)
+    const avgLTV = buyingCount > 0 ? totalRev / buyingCount : 0
+
+    // 30-day retention: buyers in prev 30d who also bought in latest 30d
+    const ts = Date.now()
+    const d30 = 30 * 86400000
+    const buyersNow  = new Set(orders.filter(o => ts - new Date(o.createdAt).getTime() < d30).map(o => o.userId).filter(Boolean))
+    const buyersPrev = new Set(orders.filter(o => { const t = ts - new Date(o.createdAt).getTime(); return t >= d30 && t < d30 * 2 }).map(o => o.userId).filter(Boolean))
+    const returned   = [...buyersPrev].filter(id => buyersThisSet(id, buyersNow)).length
+    function buyersThisSet(id: string | undefined, set: Set<string | undefined>): boolean { return !!id && set.has(id) }
+    const retentionRate = buyersPrev.size > 0 ? Math.round((returned / buyersPrev.size) * 100) : 0
+
+    const customerSpark = dailyCounts(customers.filter(c => !!c.createdAt) as { createdAt: string }[])
+
+    return {
+      total: customers.length,
+      newMTD,
+      newDelta: weekDeltaStr(newMTD, newPrev),
+      avgLTV,
+      buyingCount,
+      retentionRate,
+      retentionBase: buyersPrev.size,
+      customerSpark,
+    }
+  }, [customers, orders])
+
   async function act(id: string, action: 'suspend' | 'unsuspend' | 'deactivate') {
     setActing(id)
     try {
@@ -84,6 +128,32 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
         italicTitle="verwaltung."
         sub={`${customers.filter(c => new Date(c.createdAt ?? '') > new Date(Date.now() - 7 * 86400000)).length} neu (7d) · ${customers.length} Kunden gesamt`}
       />
+
+      <KPIGrid>
+        <KPICell
+          label="Kunden gesamt"
+          value={kpiData.total}
+          sub={`${customers.filter(c => c.status !== 'SUSPENDED' && c.status !== 'DEACTIVATED').length} aktiv`}
+          spark={kpiData.customerSpark}
+        />
+        <KPICell accent
+          label="Neu (MTD)"
+          value={kpiData.newMTD}
+          sub="Neukunden diesen Monat"
+          delta={kpiData.newDelta}
+          period="vs. Vormonat"
+        />
+        <KPICell
+          label="Ø LTV"
+          value={kpiData.buyingCount > 0 ? `€ ${Math.round(kpiData.avgLTV).toLocaleString('de-DE')}` : '—'}
+          sub={`${kpiData.buyingCount} Käufer mit Bestellungen`}
+        />
+        <KPICell
+          label="30d-Retention"
+          value={kpiData.retentionBase > 0 ? `${kpiData.retentionRate}%` : '—'}
+          sub={kpiData.retentionBase > 0 ? `${kpiData.retentionBase} Käufer im Vormonat` : 'Noch keine Daten'}
+        />
+      </KPIGrid>
 
       <div className="flex items-center gap-3 flex-wrap">
         <FilterBar options={FILTERS} value={filter} onChange={v => setFilter(v as Filter)} />

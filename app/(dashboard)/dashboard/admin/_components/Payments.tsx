@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { adminApi } from '@/lib/api'
 import type { AdminPayout, AdminBrand, PayoutDashboard } from '@/types/api'
-import { PageHeader, KPIGrid, KPICell, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, InlineInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
+import { PageHeader, KPIGrid, KPICell, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, InlineInput, TH, TD, TableRow, fmt, fmtEur, dailyCounts, dailySumByKey, weekDeltaStr } from './shared'
 import { CreditCard, CheckCircle, XCircle, Zap, ChevronDown, ChevronUp } from 'lucide-react'
 
 const FILTERS = [
@@ -70,6 +70,36 @@ export default function Payments({ brands = [] }: { brands?: AdminBrand[] }) {
     ? Math.round((payouts.filter(p => p.status === 'PAID').length / payouts.length) * 100)
     : 0
 
+  const kpiData = useMemo(() => {
+    const now = Date.now()
+    const w7  = 7 * 86400000
+    const w14 = 14 * 86400000
+    const inW7  = (s: string) => now - new Date(s).getTime() < w7
+    const inW14 = (s: string) => { const t = now - new Date(s).getTime(); return t >= w7 && t < w14 }
+    const pending   = payouts.filter(p => p.status === 'PENDING')
+    const paid      = payouts.filter(p => p.status === 'PAID')
+    const cancelled = payouts.filter(p => p.status === 'CANCELLED')
+    const cT = payouts.filter(p => inW7(p.createdAt)).length
+    const cP = paid.filter(p => inW7(p.createdAt)).length
+    const pT = payouts.filter(p => inW14(p.createdAt)).length
+    const pP = paid.filter(p => inW14(p.createdAt)).length
+    const cRate = cT > 0 ? (cP / cT) * 100 : 0
+    const pRate = pT > 0 ? (pP / pT) * 100 : 0
+    const rateDiff = Math.round(cRate - pRate)
+    return {
+      pendingSpark:   dailyCounts(pending),
+      paidSpark:      dailySumByKey(paid, 'amount'),
+      cancelledSpark: dailyCounts(cancelled),
+      pendingDelta:   weekDeltaStr(pending.filter(p => inW7(p.createdAt)).length, pending.filter(p => inW14(p.createdAt)).length),
+      paidDelta:      weekDeltaStr(
+        paid.filter(p => inW7(p.createdAt)).reduce((s, p) => s + p.amount, 0),
+        paid.filter(p => inW14(p.createdAt)).reduce((s, p) => s + p.amount, 0),
+      ),
+      successDelta:   rateDiff === 0 ? '—' : rateDiff > 0 ? `+${rateDiff}pp` : `${rateDiff}pp`,
+      cancelledDelta: weekDeltaStr(cancelled.filter(p => inW7(p.createdAt)).length, cancelled.filter(p => inW14(p.createdAt)).length),
+    }
+  }, [payouts])
+
   async function approvePayout(id: string) {
     setActing(id)
     try {
@@ -118,21 +148,33 @@ export default function Payments({ brands = [] }: { brands?: AdminBrand[] }) {
           label="Ausstehend"
           value={fmtEur(dashboard?.totalPending ?? totalPending)}
           sub={`${payouts.filter(p => p.status === 'PENDING').length} Payouts`}
+          delta={kpiData.pendingDelta}
+          period="vs. Vorwoche"
+          spark={kpiData.pendingSpark}
         />
         <KPICell
           label="Ausgezahlt"
           value={fmtEur(dashboard?.totalPaid ?? totalPaid)}
           sub={`${payouts.filter(p => p.status === 'PAID').length} Payouts`}
+          delta={kpiData.paidDelta}
+          period="vs. Vorwoche"
+          spark={kpiData.paidSpark}
         />
         <KPICell
           label="Erfolgsrate"
           value={`${successRate}%`}
           sub="Bezahlt / Gesamt"
+          delta={kpiData.successDelta}
+          period="vs. Vorwoche"
         />
         <KPICell
           label="Storniert"
           value={fmtEur(dashboard?.totalCancelled ?? totalCancelled)}
           sub={`${payouts.filter(p => p.status === 'CANCELLED').length} Payouts`}
+          delta={kpiData.cancelledDelta}
+          period="vs. Vorwoche"
+          spark={kpiData.cancelledSpark}
+          inverseTrend
         />
       </KPIGrid>
 

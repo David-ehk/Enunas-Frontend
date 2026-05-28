@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { adminApi } from '@/lib/api'
 import type { AdminApiProduct, AdminApiVariant } from '@/types/api'
-import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt, fmtEur } from './shared'
+import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, SelectFilter, TH, TD, TableRow, fmt, fmtEur } from './shared'
 import { Eye, EyeOff, Trash2, CheckCircle, XCircle, Flag, Pencil, Ban, RotateCcw } from 'lucide-react'
 
 type Filter = 'all' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'DEACTIVATED'
@@ -98,6 +98,9 @@ export default function Products() {
   const [draft, setDraft]       = useState<EditDraft | null>(null)
   const [rejectingId, setRejectingId]   = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
+  const [brandFilter, setBrandFilter]   = useState<string>('all')
+  const [catFilter, setCatFilter]       = useState<string>('all')
+  const [sortBy, setSortBy]             = useState<string>('newest')
 
   useEffect(() => {
     adminApi.products.getAll().catch(() => []).then(setProducts).finally(() => setLoading(false))
@@ -105,14 +108,32 @@ export default function Products() {
 
   const pending = products.filter(p => p.status === 'PENDING').length
 
-  const visible = products.filter(p => {
+  const uniqueBrands = useMemo(() =>
+    [...new Set(products.map(p => p.brandName))].filter(Boolean).sort()
+  , [products])
+
+  const visible = useMemo(() => {
     const q = search.toLowerCase()
-    const matchSearch = !q || p.name.toLowerCase().includes(q) || p.brandName.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)
-    if (!matchSearch) return false
-    if (queue === 'moderation') return p.status === 'PENDING'
-    if (filter !== 'all') return p.status === filter
-    return true
-  })
+    const result = products.filter(p => {
+      const matchSearch = !q || p.name.toLowerCase().includes(q) || p.brandName.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)
+      if (!matchSearch) return false
+      if (queue === 'moderation') return p.status === 'PENDING'
+      if (filter !== 'all' && p.status !== filter) return false
+      if (brandFilter !== 'all' && p.brandName !== brandFilter) return false
+      if (catFilter !== 'all') {
+        const cats = parseCatalogueCategory(p.catalogueCategory, p.catalogue)
+        if (!cats.map(c => c.toUpperCase()).includes(catFilter.toUpperCase())) return false
+      }
+      return true
+    })
+    return [...result].sort((a, b) => {
+      if (sortBy === 'oldest')     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      if (sortBy === 'price_desc') return (b.price ?? 0) - (a.price ?? 0)
+      if (sortBy === 'price_asc')  return (a.price ?? 0) - (b.price ?? 0)
+      if (sortBy === 'name')       return a.name.localeCompare(b.name, 'de')
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    })
+  }, [products, search, filter, queue, brandFilter, catFilter, sortBy])
 
   async function act(id: string, action: 'approve' | 'hide') {
     setActing(id)
@@ -274,7 +295,34 @@ export default function Products() {
           <FilterBar options={STATUS_FILTERS} value={filter} onChange={v => setFilter(v as Filter)} />
         )}
 
-        <div className="flex-1 min-w-[200px] max-w-xs">
+        <SelectFilter
+          value={brandFilter}
+          onChange={setBrandFilter}
+          options={[
+            { value: 'all', label: 'Alle Marken' },
+            ...uniqueBrands.map(b => ({ value: b, label: b })),
+          ]}
+        />
+        <SelectFilter
+          value={catFilter}
+          onChange={setCatFilter}
+          options={[
+            { value: 'all', label: 'Alle Kategorien' },
+            ...CATALOGUE_CATEGORIES.map(c => ({ value: c, label: c })),
+          ]}
+        />
+        <SelectFilter
+          value={sortBy}
+          onChange={setSortBy}
+          options={[
+            { value: 'newest',     label: 'Neueste zuerst' },
+            { value: 'oldest',     label: 'Älteste zuerst' },
+            { value: 'price_desc', label: 'Preis ↓' },
+            { value: 'price_asc',  label: 'Preis ↑' },
+            { value: 'name',       label: 'Name A–Z' },
+          ]}
+        />
+        <div className="flex-1 min-w-[160px] max-w-xs">
           <SearchInput value={search} onChange={setSearch} placeholder="Produkt, Marke oder SKU…" />
         </div>
       </div>

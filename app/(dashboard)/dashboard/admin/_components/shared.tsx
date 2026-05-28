@@ -121,60 +121,150 @@ export function KPIGrid({ children }: { children: ReactNode }) {
   )
 }
 
+export function Sparkline({
+  data, tone = 'neutral', onDark = false, height = 24,
+}: {
+  data: number[]
+  tone?: 'up' | 'down' | 'neutral'
+  onDark?: boolean
+  height?: number
+}) {
+  if (!data || data.length < 2) return null
+  const W = 100
+  const H = height
+  const min = Math.min(...data)
+  const max = Math.max(...data)
+  const range = max - min || 1
+  const step = W / (data.length - 1)
+  const pts = data
+    .map((v, i) => `${(i * step).toFixed(1)},${(H - 2 - ((v - min) / range) * (H - 4)).toFixed(1)}`)
+    .join(' ')
+  const stroke = onDark
+    ? 'rgba(255,255,255,0.5)'
+    : tone === 'up' ? '#166534' : tone === 'down' ? '#9B1239' : '#9B9B9B'
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={height}
+      preserveAspectRatio="none" style={{ display: 'block', overflow: 'visible' }}>
+      <polyline points={pts} fill="none" stroke={stroke}
+        strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function TrendIndicator({
+  delta, period, inverse = false, onDark = false,
+}: {
+  delta: string
+  period?: string
+  inverse?: boolean
+  onDark?: boolean
+}) {
+  const raw: 'up' | 'down' | 'neutral' =
+    delta.startsWith('+') ? 'up' : delta.startsWith('-') ? 'down' : 'neutral'
+  const eff = inverse
+    ? (raw === 'up' ? 'down' : raw === 'down' ? 'up' : 'neutral')
+    : raw
+  const arrow = raw === 'up' ? '▲' : raw === 'down' ? '▼' : '—'
+  const color = onDark
+    ? (eff === 'up' ? 'rgba(134,239,172,0.9)' : eff === 'down' ? 'rgba(252,165,165,0.85)' : 'rgba(255,255,255,0.4)')
+    : (eff === 'up' ? '#166534' : eff === 'down' ? '#9B1239' : '#6B6B6B')
+  const bg = onDark
+    ? 'rgba(255,255,255,0.09)'
+    : eff === 'up' ? 'rgba(22,101,52,0.07)' : eff === 'down' ? 'rgba(155,18,57,0.07)' : 'rgba(107,107,107,0.06)'
+  return (
+    <span className="inline-flex items-center gap-1.5" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md" style={{ background: bg }}>
+        <span style={{ fontSize: 7, color, lineHeight: 1 }}>{arrow}</span>
+        <span className="font-semibold tabular-nums" style={{ fontSize: 10, color, letterSpacing: '0.01em' }}>
+          {delta}
+        </span>
+      </span>
+      {period && (
+        <span style={{ fontSize: 10, color: onDark ? 'rgba(255,255,255,0.35)' : '#9B9B9B' }}>
+          {period}
+        </span>
+      )}
+    </span>
+  )
+}
+
 export function KPICell({
   label, value, unit, sub, accent,
+  delta, period, spark, inverseTrend,
 }: {
   label: string
   value: string | number
   unit?: string
   sub?: string
   accent?: boolean
+  delta?: string
+  period?: string
+  spark?: number[]
+  inverseTrend?: boolean
 }) {
+  const rawTone: 'up' | 'down' | 'neutral' = delta
+    ? (delta.startsWith('+') ? 'up' : delta.startsWith('-') ? 'down' : 'neutral')
+    : 'neutral'
+  const sparkTone = inverseTrend
+    ? (rawTone === 'up' ? 'down' : rawTone === 'down' ? 'up' : 'neutral')
+    : rawTone
+  const showDelta = !!delta && delta !== '—'
+
   return (
     <div
-      className="px-6 py-5"
+      className={cn(
+        'group/kpi relative px-6 py-5 cursor-default select-none transition-colors duration-150',
+        !accent && 'bg-white hover:bg-[#FAFAF8]',
+      )}
       style={{
-        background: accent ? '#370E4D' : '#fff',
+        background: accent ? '#370E4D' : undefined,
         borderRight: '1px solid #F0F0EB',
         borderBottom: '1px solid #F0F0EB',
       }}
     >
       <p
-        className="text-[10px] uppercase tracking-[0.18em] font-medium mb-2"
-        style={{
-          fontFamily: 'var(--font-league-spartan)',
-          color: accent ? 'rgba(255,255,255,0.5)' : '#9B9B9B',
-        }}
+        className="text-[10px] uppercase tracking-[0.18em] font-medium mb-2.5"
+        style={{ fontFamily: 'var(--font-league-spartan)', color: accent ? 'rgba(255,255,255,0.45)' : '#9B9B9B' }}
       >
         {label}
       </p>
+
       <p
         className="leading-none"
-        style={{
-          fontFamily: 'var(--font-cormorant)',
-          fontSize: 26,
-          fontWeight: 300,
-          color: accent ? '#fff' : '#0A0A0A',
-        }}
+        style={{ fontFamily: 'var(--font-cormorant)', fontSize: 28, fontWeight: 300, color: accent ? '#fff' : '#0A0A0A', letterSpacing: '-0.01em' }}
       >
         {value}
         {unit && (
-          <span style={{ fontSize: 13, marginLeft: 3, color: accent ? 'rgba(255,255,255,0.5)' : '#9B9B9B' }}>
+          <span style={{ fontSize: 13, marginLeft: 3, fontFamily: 'var(--font-league-spartan)', color: accent ? 'rgba(255,255,255,0.45)' : '#9B9B9B' }}>
             {unit}
           </span>
         )}
       </p>
-      {sub && (
-        <p
-          className="mt-1.5"
-          style={{
-            fontFamily: 'var(--font-league-spartan)',
-            fontSize: 11,
-            color: accent ? 'rgba(255,255,255,0.4)' : '#9B9B9B',
-          }}
-        >
+
+      {showDelta && (
+        <div className="mt-2">
+          <TrendIndicator delta={delta!} period={period} inverse={inverseTrend} onDark={accent} />
+        </div>
+      )}
+
+      {sub && !showDelta && (
+        <p className="mt-1.5 leading-snug"
+          style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, color: accent ? 'rgba(255,255,255,0.4)' : '#9B9B9B' }}>
           {sub}
         </p>
+      )}
+
+      {sub && showDelta && (
+        <p className="mt-1 leading-snug"
+          style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 10, color: accent ? 'rgba(255,255,255,0.3)' : '#ADADAD' }}>
+          {sub}
+        </p>
+      )}
+
+      {spark && spark.length >= 2 && (
+        <div className="mt-3.5 opacity-50 group-hover/kpi:opacity-80 transition-opacity duration-300">
+          <Sparkline data={spark} tone={accent ? 'neutral' : sparkTone} onDark={accent} />
+        </div>
       )}
     </div>
   )
@@ -409,6 +499,37 @@ export function MetricBadge({
   )
 }
 
+export function SelectFilter({
+  value, onChange, options,
+}: {
+  value: string
+  onChange: (v: string) => void
+  options: { value: string; label: string }[]
+}) {
+  return (
+    <div className="relative flex-shrink-0">
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="h-8 pl-3 pr-7 text-[11px] border border-[#E8E8E8] bg-white rounded-xl focus:outline-none focus:border-[#370E4D]/40 transition-all duration-200 appearance-none cursor-pointer"
+        style={{
+          fontFamily: 'var(--font-league-spartan)',
+          letterSpacing: '0.03em',
+          color: value === 'all' ? '#9B9B9B' : '#0A0A0A',
+        }}
+      >
+        {options.map(o => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+      <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 pointer-events-none text-[#9B9B9B]"
+        viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M2 3.5l3 3 3-3" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </div>
+  )
+}
+
 export function FilterBar({
   options, value, onChange,
 }: {
@@ -495,4 +616,36 @@ export function fmt(date: string) {
 export function fmtEur(n: number | undefined | null) {
   const num = Number(n ?? 0)
   return `€ ${num.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+export function dailyCounts(items: { createdAt: string }[], days = 7): number[] {
+  const now = Date.now()
+  const buckets = Array<number>(days).fill(0)
+  items.forEach(item => {
+    const d = Math.floor((now - new Date(item.createdAt).getTime()) / 86400000)
+    if (d >= 0 && d < days) buckets[days - 1 - d]++
+  })
+  return buckets
+}
+
+export function dailySumByKey<T extends { createdAt: string }>(
+  items: T[], key: keyof T, days = 7,
+): number[] {
+  const now = Date.now()
+  const buckets = Array<number>(days).fill(0)
+  items.forEach(item => {
+    const d = Math.floor((now - new Date(item.createdAt).getTime()) / 86400000)
+    if (d >= 0 && d < days) {
+      const raw = item[key]
+      buckets[days - 1 - d] += typeof raw === 'number' ? raw : 0
+    }
+  })
+  return buckets
+}
+
+export function weekDeltaStr(cur: number, prev: number): string {
+  if (cur === 0 && prev === 0) return '—'
+  if (prev === 0) return cur > 0 ? `+${cur}` : '—'
+  const pct = Math.round(((cur - prev) / prev) * 100)
+  return pct >= 0 ? `+${pct}%` : `${pct}%`
 }
