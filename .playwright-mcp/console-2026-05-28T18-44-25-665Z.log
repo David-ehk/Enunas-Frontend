@@ -1,0 +1,34 @@
+[     600ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[     824ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[    1230ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ http://localhost:8080/users/me:0
+[    4203ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[    4776ms] [LOG] [Fast Refresh] done in 678ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[   10660ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[   10680ms] [LOG] [Fast Refresh] done in 127ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  112530ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  112558ms] [LOG] [Fast Refresh] done in 139ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  131125ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  132077ms] [LOG] [Fast Refresh] done in 1034ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  138425ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  139357ms] [LOG] [Fast Refresh] done in 1020ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  145719ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  146494ms] [LOG] [Fast Refresh] done in 866ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  152272ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  153087ms] [LOG] [Fast Refresh] done in 909ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  164590ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  165550ms] [LOG] [Fast Refresh] done in 1063ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  168634ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  169351ms] [LOG] [Fast Refresh] done in 802ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  187121ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  187795ms] [LOG] [Fast Refresh] done in 773ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  203149ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  204005ms] [LOG] [Fast Refresh] done in 950ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  225020ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  225851ms] [LOG] [Fast Refresh] done in 921ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  345251ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  345375ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  345455ms] [LOG] [Fast Refresh] done in 189ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[  533360ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=Jcie2mQB2DWqZLps9H8Wm' failed: Error in connection establishment: net::ERR_NETWORK_IO_SUSPENDED @ http://localhost:3000/_next/static/chunks/079ae_next_dist_client_b2fa6075._.js:10878
+[  535536ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[ 6374442ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[ 6374706ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://eu.i.posthog.com/flags/?v=2&ip=0&_=1780000237531&ver=1.376.3&compression=base64:0

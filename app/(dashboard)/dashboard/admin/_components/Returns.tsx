@@ -107,7 +107,6 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
         eyebrow="Finanzen"
         title="Rückgaben &"
         italicTitle="Erstattungen."
-        sub="Eingehende Rückgabeanfragen · Genehmigungen · Refunds"
       />
 
       <KPIGrid>

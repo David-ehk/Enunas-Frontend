@@ -3,6 +3,7 @@ import ProductDetails from './components/ProductDetails'
 import CompleteTheLook from './components/CompleteTheLook'
 import MoreFromBrand from './components/MoreFromBrand'
 import SimilarProducts from './components/SimilarProducts'
+import CuratedRecommendations from '@/components/CuratedRecommendations'
 import { notFound } from 'next/navigation'
 import { productApi, resolveProductWithMeta } from '@/lib/api'
 import { generateSlug } from '@/lib/product'
@@ -124,6 +125,7 @@ async function ProductPage({ params }: ProductPageProps) {
       <CompleteTheLook items={relatedItems} />
       <MoreFromBrand brand={product.brandName} items={brandItems} />
       <SimilarProducts items={similarItems} />
+      <CuratedRecommendations excludeId={resolved.id} />
     </div>
   )
 }

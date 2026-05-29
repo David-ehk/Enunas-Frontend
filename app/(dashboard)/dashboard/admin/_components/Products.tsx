@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
-import { adminApi } from '@/lib/api'
-import type { AdminApiProduct, AdminApiVariant } from '@/types/api'
+import { adminApi, brandApi } from '@/lib/api'
+import type { AdminApiProduct, AdminApiVariant, ApiOrder, ApiProductImage } from '@/types/api'
 import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, SelectFilter, TH, TD, TableRow, fmt, fmtEur } from './shared'
-import { Eye, EyeOff, Trash2, CheckCircle, XCircle, Flag, Pencil, Ban, RotateCcw } from 'lucide-react'
+import { Eye, EyeOff, Trash2, CheckCircle, XCircle, Flag, Pencil, Ban, RotateCcw, ImagePlus, X, Link2 } from 'lucide-react'
 
 type Filter = 'all' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'DEACTIVATED'
 type Queue  = 'all' | 'moderation'
@@ -86,7 +86,125 @@ function parseCatalogueCategory(raw: string | string[] | undefined, fallback: st
   return values.map(v => CATALOGUE_CATEGORIES.find(c => c.toUpperCase() === v.toUpperCase()) ?? v)
 }
 
-export default function Products() {
+// ─── MediaEditor ────────────────────────────────────────────────────────────
+function MediaEditor({ productId }: { productId: string }) {
+  const [images, setImages]   = useState<ApiProductImage[]>([])
+  const [loadingImgs, setLoadingImgs] = useState(true)
+  const [urlInput, setUrl]    = useState('')
+  const [adding, setAdding]   = useState(false)
+  const [deleting, setDeleting] = useState<string | null>(null)
+  const [dragOver, setDragOver] = useState(false)
+
+  useEffect(() => {
+    brandApi.images.list(productId)
+      .then(setImages).catch(() => setImages([]))
+      .finally(() => setLoadingImgs(false))
+  }, [productId])
+
+  async function addUrl(url: string) {
+    const trimmed = url.trim()
+    if (!trimmed) return
+    setAdding(true)
+    try {
+      const created = await brandApi.images.add(productId, trimmed)
+      setImages(prev => [...prev, created])
+      setUrl('')
+    } catch { /* silent */ } finally { setAdding(false) }
+  }
+
+  async function removeImage(id: string) {
+    setDeleting(id)
+    try {
+      await brandApi.images.delete(productId, id)
+      setImages(prev => prev.filter(i => i.id !== id))
+    } catch { /* silent */ } finally { setDeleting(null) }
+  }
+
+  function onDrop(e: React.DragEvent) {
+    e.preventDefault()
+    setDragOver(false)
+    const uri = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain')
+    if (uri && (uri.startsWith('http://') || uri.startsWith('https://'))) {
+      addUrl(uri)
+    }
+  }
+
+  return (
+    <div className="shrink-0 flex flex-col gap-2.5" style={{ width: 190 }}>
+      <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium"
+        style={{ fontFamily: 'var(--font-league-spartan)' }}>
+        Bilder & Videos
+      </p>
+
+      {/* existing images */}
+      {loadingImgs
+        ? <div className="h-16 flex items-center justify-center"><div className="w-4 h-4 rounded-full border-2 border-[#E8E8E8] border-t-[#370E4D] animate-spin" /></div>
+        : images.length > 0
+          ? (
+            <div className="grid grid-cols-2 gap-1.5">
+              {images.map(img => (
+                <div key={img.id} className="relative group rounded-lg overflow-hidden bg-[#F0F0EB]" style={{ aspectRatio: '3/4' }}>
+                  <img src={img.url} alt="" className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => removeImage(img.id)}
+                    disabled={deleting === img.id}
+                    className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 disabled:opacity-40"
+                    style={{ background: 'rgba(0,0,0,0.65)' }}
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )
+          : <p className="text-[10px] text-[#C0C0BC]" style={{ fontFamily: 'var(--font-league-spartan)' }}>Keine Bilder</p>
+      }
+
+      {/* drop zone */}
+      <div
+        onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={onDrop}
+        className="rounded-lg p-3 text-center transition-all duration-150"
+        style={{
+          border: `1.5px dashed ${dragOver ? '#370E4D' : '#D4D4CE'}`,
+          background: dragOver ? 'rgba(55,14,77,0.05)' : '#FAFAF8',
+        }}
+      >
+        <ImagePlus className="w-4 h-4 mx-auto mb-1" style={{ color: dragOver ? '#370E4D' : '#CDCDCD' }} />
+        <p className="text-[9px] leading-snug" style={{ fontFamily: 'var(--font-league-spartan)', color: dragOver ? '#370E4D' : '#9B9B9B' }}>
+          Bild-URL aus Browser hierher ziehen
+        </p>
+      </div>
+
+      {/* URL input */}
+      <div className="flex gap-1">
+        <div className="relative flex-1">
+          <Link2 className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[#C0C0BC]" />
+          <input
+            type="text"
+            value={urlInput}
+            onChange={e => setUrl(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addUrl(urlInput)}
+            placeholder="https://…"
+            className="w-full text-[11px] border border-[#E8E8E8] bg-white rounded-lg pl-6 pr-2 py-1.5 focus:outline-none focus:border-[#370E4D]/40 transition-all placeholder:text-[#D0D0CC]"
+            style={{ fontFamily: 'var(--font-league-spartan)' }}
+          />
+        </div>
+        <button
+          onClick={() => addUrl(urlInput)}
+          disabled={adding || !urlInput.trim()}
+          className="h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white disabled:opacity-40 transition-all duration-150"
+          style={{ background: '#370E4D', fontFamily: 'var(--font-league-spartan)' }}
+        >
+          {adding ? '…' : '+'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
   const [products, setProducts] = useState<AdminApiProduct[]>([])
   const [loading, setLoading]   = useState(true)
   const [filter, setFilter]     = useState<Filter>('all')
@@ -112,6 +230,21 @@ export default function Products() {
     [...new Set(products.map(p => p.brandName))].filter(Boolean).sort()
   , [products])
 
+  const salesMap = useMemo(() => {
+    const m = new Map<string, { count: number; revenue: number }>()
+    for (const order of orders) {
+      for (const item of (order.items ?? [])) {
+        if (!item.productId) continue
+        const prev = m.get(item.productId) ?? { count: 0, revenue: 0 }
+        m.set(item.productId, {
+          count:   prev.count   + (item.quantity ?? 1),
+          revenue: prev.revenue + (item.price ?? 0) * (item.quantity ?? 1),
+        })
+      }
+    }
+    return m
+  }, [orders])
+
   const visible = useMemo(() => {
     const q = search.toLowerCase()
     const result = products.filter(p => {
@@ -131,6 +264,7 @@ export default function Products() {
       if (sortBy === 'price_desc') return (b.price ?? 0) - (a.price ?? 0)
       if (sortBy === 'price_asc')  return (a.price ?? 0) - (b.price ?? 0)
       if (sortBy === 'name')       return a.name.localeCompare(b.name, 'de')
+      if (sortBy === 'sales_desc') return (salesMap.get(b.id)?.count ?? 0) - (salesMap.get(a.id)?.count ?? 0)
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     })
   }, [products, search, filter, queue, brandFilter, catFilter, sortBy])
@@ -252,7 +386,6 @@ export default function Products() {
         eyebrow="Verwaltung"
         title="Produkt"
         italicTitle="katalog."
-        sub={`${pending} ausstehende Freigaben · ${products.length} Produkte gesamt`}
       />
 
       <div className="flex items-center gap-3 flex-wrap">
@@ -320,6 +453,7 @@ export default function Products() {
             { value: 'price_desc', label: 'Preis ↓' },
             { value: 'price_asc',  label: 'Preis ↑' },
             { value: 'name',       label: 'Name A–Z' },
+            { value: 'sales_desc', label: 'Meistverkauft' },
           ]}
         />
         <div className="flex-1 min-w-[160px] max-w-xs">
@@ -338,6 +472,7 @@ export default function Products() {
                 <TH>Preis</TH>
                 <TH>Kategorie</TH>
                 <TH>Status</TH>
+                <TH>Verkäufe</TH>
                 <TH>Erstellt</TH>
                 <TH>Aktionen</TH>
               </tr>
@@ -359,6 +494,17 @@ export default function Products() {
                     <TD className="font-medium text-[#0A0A0A]">{fmtEur(p.price)}</TD>
                     <TD className="text-[#6B6B6B] capitalize">{p.category}</TD>
                     <TD><StatusBadge status={p.status} /></TD>
+                    <TD>
+                      {(() => {
+                        const s = salesMap.get(p.id)
+                        return s ? (
+                          <div style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                            <span className="text-[12px] font-medium text-[#0A0A0A]">{s.count}×</span>
+                            <span className="text-[11px] text-[#6B6B6B] ml-1">{fmtEur(s.revenue)}</span>
+                          </div>
+                        ) : <span className="text-[11px] text-[#C0C0BC]">—</span>
+                      })()}
+                    </TD>
                     <TD className="text-[#6B6B6B]">{fmt(p.createdAt)}</TD>
                     <TD>
                       <div className="flex items-center gap-1">
@@ -486,25 +632,11 @@ export default function Products() {
 
                   {editing === p.id && draft && (
                     <tr className="border-b border-[#F0F0EB]" style={{ background: '#F8F8F5' }}>
-                      <td colSpan={8} className="px-6 py-6">
+                      <td colSpan={9} className="px-6 py-6">
                         <div className="flex gap-6">
 
-                          {/* Product image portrait */}
-                          {p.images?.[0] && (
-                            <div className="shrink-0 flex flex-col items-center gap-2">
-                              <img
-                                src={p.images[0]}
-                                alt={p.name}
-                                className="rounded-xl object-cover bg-[#F0F0EB] shadow-[0_2px_12px_rgba(0,0,0,0.08)]"
-                                style={{ width: 108, aspectRatio: '3/4' }}
-                              />
-                              {p.images.length > 1 && (
-                                <p className="text-[10px] text-[#9B9B9B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                                  +{p.images.length - 1} weitere
-                                </p>
-                              )}
-                            </div>
-                          )}
+                          {/* Media editor */}
+                          <MediaEditor productId={p.id} />
 
                           {/* Form */}
                           <div className="flex-1 space-y-4">

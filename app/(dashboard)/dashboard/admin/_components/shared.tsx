@@ -70,16 +70,17 @@ export function StatusBadge({ status }: { status: string }) {
 }
 
 export function PageHeader({
-  eyebrow, title, italicTitle, sub, actions,
+  eyebrow, title, italicTitle, sub, actions, noBorder,
 }: {
   eyebrow?: string
   title: string
   italicTitle?: string
   sub?: string
   actions?: ReactNode
+  noBorder?: boolean
 }) {
   return (
-    <header className="flex items-start justify-between mb-7 pb-6" style={{ borderBottom: '1px solid #F0F0EB' }}>
+    <header className="flex items-start justify-between mb-5 pb-5" style={{ borderBottom: noBorder ? 'none' : '1px solid #F0F0EB' }}>
       <div>
         {eyebrow && (
           <p

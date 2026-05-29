@@ -140,7 +140,6 @@ export default function Payments({ brands = [] }: { brands?: AdminBrand[] }) {
         eyebrow="Finanzen"
         title="Zahlungen &"
         italicTitle="Auszahlungen."
-        sub="Payout-Verwaltung · Genehmigungen · Überweisungsbelege"
       />
 
       <KPIGrid>

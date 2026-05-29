@@ -1,0 +1,25 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - heading "Enunas" [level=3] [ref=e5]
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - button "✕" [ref=e8]
+        - generic [ref=e9]:
+          - button "Warenkorb" [ref=e10]:
+            - heading "Warenkorb" [level=4] [ref=e11]
+          - button "Wunschliste" [ref=e12]:
+            - heading "Wunschliste" [level=4] [ref=e13]
+      - paragraph [ref=e16]: Ihr Warenkorb ist leer
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - generic [ref=e19]: Insgesamt (0 Artikel)
+          - generic [ref=e20]: €0.00
+        - button "Sicher Zur Kasse" [disabled] [ref=e21]:
+          - heading "Sicher Zur Kasse" [level=3] [ref=e22]
+        - button "Weiter einkaufen" [ref=e23]
+        - paragraph [ref=e27]:
+          - text: Noch
+          - generic [ref=e28]: €50.00
+          - text: bis kostenloser Versand
+  - button "Open Next.js Dev Tools" [ref=e34] [cursor=pointer]:
+    - img [ref=e35]

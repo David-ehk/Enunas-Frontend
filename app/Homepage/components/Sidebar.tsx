@@ -1,394 +1,815 @@
 'use client'
 
-import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import type { StaticImageData } from 'next/image'
+import imgTrendy from './design_handoff_nav/mega_navigation/img/TRENDY.jpg'
+import imgNewin  from './design_handoff_nav/mega_navigation/img/NEWIN.jpg'
+import imgTest1  from './design_handoff_nav/mega_navigation/img/Test1.jpg'
+import imgTest3  from './design_handoff_nav/mega_navigation/img/Test3.jpg'
+import imgTest4  from './design_handoff_nav/mega_navigation/img/Test4.jpg'
 
+/* ─── Types ─────────────────────────────────────────────────── */
+interface TileData  { video?: boolean; kicker: string; name: string; img: StaticImageData }
+interface SubLink   { label: string; href?: string; deep?: boolean }
+interface Highlight { label: string; href?: string }
+interface Category  {
+  key: string; label: string; title: string; kicker: string; tone?: 'sale'
+  route: string; sub: SubLink[]; highlights: Highlight[]; tiles: TileData[]
+}
+
+/* ─── Nav data (ported from design_handoff_nav/nav-data.jsx) ── */
+const CATEGORIES: Category[] = [
+  {
+    key: 'neu', label: 'Neu', title: 'Neu', kicker: 'Diese Woche · 48 Stücke', route: '/neu',
+    sub: [
+      { label: 'Alle Neuheiten', href: '/neu' },
+      { label: 'Damen',         href: '/neu', deep: true },
+      { label: 'Herren',        href: '/neu', deep: true },
+      { label: 'Schuhe',        href: '/neu' },
+      { label: 'Taschen',       href: '/neu' },
+      { label: 'Accessoires',   href: '/neu' },
+    ],
+    highlights: [
+      { label: 'Herbstkollektion 2026' },
+      { label: 'Die Drop-Liste' },
+      { label: 'Wieder verfügbar' },
+    ],
+    tiles: [
+      { video: true, kicker: 'Kampagne',   name: 'Herbst 2026',        img: imgTrendy },
+      { kicker: 'Streetwear', name: 'Worlds End Denim',   img: imgNewin  },
+      { kicker: 'Neu',        name: 'Drop Hoodie Vol.1',  img: imgTest1  },
+      { kicker: 'Schuhe',     name: 'Neue Sneaker',       img: imgTest3  },
+    ],
+  },
+  {
+    key: 'trendy', label: 'Trendy', title: 'Trendy', kicker: 'Was gerade läuft', route: '/trendy',
+    sub: [
+      { label: 'Bestseller',           href: '/trendy' },
+      { label: 'Meistgesehen',         href: '/trendy' },
+      { label: "Editor's Picks",       href: '/trendy' },
+      { label: 'Im Trend: Schuhe',     href: '/trendy', deep: true },
+      { label: 'Im Trend: Taschen',    href: '/trendy', deep: true },
+    ],
+    highlights: [
+      { label: 'Das Berlin-Set' },
+      { label: 'Quiet Luxury' },
+      { label: 'Statement-Taschen' },
+    ],
+    tiles: [
+      { video: true, kicker: 'Im Trend',    name: 'Die Berlin-Uniform', img: imgNewin  },
+      { kicker: 'Bestseller',  name: 'Volume Tee',          img: imgTest1  },
+      { kicker: "Editor's Pick", name: 'Atelier Overcoat',  img: imgTest4  },
+      { kicker: 'Meistgesehen', name: 'Cashmere Crew',      img: imgTest3  },
+    ],
+  },
+  {
+    key: 'catalogue', label: 'Catalogue', title: 'Katalog', kicker: '248 Stücke · 42 Marken', route: '/catalogue',
+    sub: [
+      { label: 'Alle Kategorien', href: '/catalogue' },
+      { label: 'Streetwear',      href: '/catalogue', deep: true },
+      { label: 'Experimental',    href: '/catalogue', deep: true },
+      { label: 'Athleisure',      href: '/catalogue', deep: true },
+      { label: 'Culture',         href: '/catalogue', deep: true },
+    ],
+    highlights: [
+      { label: 'Nach Marke' },
+      { label: 'Nach Farbe' },
+      { label: 'Nach Preis' },
+    ],
+    tiles: [
+      { video: true, kicker: 'Der Katalog', name: 'Kuratiert für dich',   img: imgTest4  },
+      { kicker: 'Streetwear', name: 'Drop Hoodie Vol.1',  img: imgTest1  },
+      { kicker: 'Culture',    name: 'Cashmere Crew',       img: imgTrendy },
+      { kicker: 'Athleisure', name: 'Featherweight Puffer',img: imgNewin  },
+    ],
+  },
+  {
+    key: 'bekleidung', label: 'Bekleidung', title: 'Bekleidung', kicker: 'Vom Shirt bis zum Mantel', route: '/bekleidung',
+    sub: [
+      { label: 'Alle Bekleidung', href: '/bekleidung' },
+      { label: 'Tops',            href: '/bekleidung', deep: true },
+      { label: 'Bottoms',         href: '/bekleidung', deep: true },
+      { label: 'Kleider',         href: '/bekleidung' },
+      { label: 'Outerwear',       href: '/bekleidung', deep: true },
+      { label: 'Strick',          href: '/bekleidung' },
+      { label: 'Denim',           href: '/bekleidung' },
+    ],
+    highlights: [
+      { label: 'Die Hosen-Edit' },
+      { label: 'Leichte Jacken' },
+      { label: 'Basics neu gedacht' },
+    ],
+    tiles: [
+      { video: true, kicker: 'Lookbook',  name: 'Schichten für den Herbst', img: imgTest3  },
+      { kicker: 'Denim',    name: 'Worlds End Denim',        img: imgNewin  },
+      { kicker: 'Tops',     name: 'Volume Tee, Charcoal',    img: imgTest1  },
+      { kicker: 'Outerwear',name: 'Atelier Overcoat',        img: imgTest4  },
+    ],
+  },
+  {
+    key: 'women', label: 'Women', title: 'Damen', kicker: 'Damenmode entdecken', route: '/bekleidung',
+    sub: [
+      { label: 'Damenmode entdecken', href: '/bekleidung' },
+      { label: 'Prêt-à-porter',       href: '/bekleidung', deep: true },
+      { label: 'Taschen',             href: '/bekleidung', deep: true },
+      { label: 'Kleinlederwaren',     href: '/bekleidung', deep: true },
+      { label: 'Accessoires',         href: '/bekleidung', deep: true },
+      { label: 'Schmuck',             href: '/bekleidung', deep: true },
+      { label: 'Schuhe',              href: '/bekleidung', deep: true },
+    ],
+    highlights: [
+      { label: 'Herbstkollektion 2026' },
+      { label: 'Die Book Cover Kollektion' },
+      { label: 'Hochzeitsoutfits' },
+    ],
+    tiles: [
+      { video: true, kicker: 'Damen · Kampagne', name: 'Herbst 2026',          img: imgTrendy },
+      { kicker: 'Prêt-à-porter', name: 'Cashmere Crew, Crema', img: imgTest1  },
+      { kicker: 'Schuhe',        name: 'Die Sneaker-Galerie',   img: imgNewin  },
+      { kicker: 'Accessoires',   name: 'Statement-Taschen',     img: imgTest3  },
+    ],
+  },
+  {
+    key: 'men', label: 'Men', title: 'Herren', kicker: 'Herrenmode entdecken', route: '/bekleidung',
+    sub: [
+      { label: 'Herrenmode entdecken', href: '/bekleidung' },
+      { label: 'Prêt-à-porter',        href: '/bekleidung', deep: true },
+      { label: 'Taschen',              href: '/bekleidung', deep: true },
+      { label: 'Schuhe',               href: '/bekleidung', deep: true },
+      { label: 'Accessoires',          href: '/bekleidung', deep: true },
+      { label: 'Grooming',             href: '/bekleidung' },
+    ],
+    highlights: [
+      { label: 'Tailoring' },
+      { label: 'Die Sneaker-Galerie' },
+      { label: 'Workwear' },
+    ],
+    tiles: [
+      { video: true, kicker: 'Herren · Kampagne', name: 'Nach Sonnenuntergang', img: imgNewin  },
+      { kicker: 'Tailoring',     name: 'Atelier Overcoat',  img: imgTest4  },
+      { kicker: 'Prêt-à-porter', name: 'Drop Hoodie Vol.1', img: imgTest1  },
+      { kicker: 'Schuhe',        name: 'Neue Sneaker',       img: imgTest3  },
+    ],
+  },
+  {
+    key: 'marken', label: 'Marken', title: 'Marken', kicker: '42 Ateliers · kuratiert', route: '/marken',
+    sub: [
+      { label: 'Alle Marken',    href: '/marken' },
+      { label: "World's End",    href: '/marken', deep: true },
+      { label: 'Volt Atelier',   href: '/marken', deep: true },
+      { label: 'Marin Studio',   href: '/marken', deep: true },
+      { label: 'Kashmir & Co.', href: '/marken', deep: true },
+      { label: 'Hexen Berlin',   href: '/marken', deep: true },
+      { label: 'Frantz',         href: '/marken', deep: true },
+    ],
+    highlights: [
+      { label: 'Neu auf Enunas' },
+      { label: 'Nur bei uns' },
+      { label: 'Atelier-Geschichten' },
+    ],
+    tiles: [
+      { video: true, kicker: 'Atelier',    name: "World's End, Kreuzberg", img: imgTest4  },
+      { kicker: 'Neu',        name: 'Volt Atelier',           img: imgNewin  },
+      { kicker: 'Nur bei uns',name: 'Marin Studio',           img: imgTrendy },
+      { kicker: 'Kollektion', name: 'Kashmir & Co.',          img: imgTest1  },
+    ],
+  },
+  {
+    key: 'drops', label: 'Drops', title: 'Drops', kicker: 'Limitiert · auf die Sekunde', route: '/drop',
+    sub: [
+      { label: 'Live jetzt',            href: '/drop' },
+      { label: 'Kommende Drops',        href: '/drop' },
+      { label: 'Vergangene Drops',      href: '/drop' },
+      { label: 'Erinnerung aktivieren', href: '/drop' },
+    ],
+    highlights: [
+      { label: 'Drop Vol.1' },
+      { label: 'Worlds End × Enunas' },
+      { label: 'Der Countdown' },
+    ],
+    tiles: [
+      { video: true, kicker: 'Live · endet in 02:14:08', name: 'Drop Vol.1',            img: imgTest1  },
+      { kicker: 'Kommend',   name: 'Worlds End × Enunas', img: imgNewin  },
+      { kicker: 'Vergangen', name: 'Easter Capsule',       img: imgTest3  },
+      { kicker: 'Bald',      name: 'Winter-Drop',          img: imgTest4  },
+    ],
+  },
+  {
+    key: 'sale', label: 'Sale', title: 'Sale', kicker: 'Bis −50% · nur kurze Zeit', route: '/bekleidung',
+    tone: 'sale',
+    sub: [
+      { label: 'Alle Reduzierungen', href: '/bekleidung' },
+      { label: 'Damen Sale',         href: '/bekleidung', deep: true },
+      { label: 'Herren Sale',        href: '/bekleidung', deep: true },
+      { label: 'Schuhe Sale',        href: '/bekleidung' },
+      { label: 'Letzte Chance',      href: '/bekleidung' },
+    ],
+    highlights: [
+      { label: 'Bis −50%' },
+      { label: 'Nur kurze Zeit' },
+      { label: 'Letzte Größen' },
+    ],
+    tiles: [
+      { video: true, kicker: 'Sale',          name: 'Bis zu 50% reduziert', img: imgTest3  },
+      { kicker: 'Damen',        name: 'Cashmere Crew',         img: imgTest1  },
+      { kicker: 'Letzte Chance',name: 'Featherweight Puffer',  img: imgNewin  },
+      { kicker: 'Herren',       name: 'Walker Trouser',        img: imgTest4  },
+    ],
+  },
+]
+
+/* ─── Inline icons ───────────────────────────────────────────── */
+function IClose() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+      <path d="m6 6 12 12M18 6 6 18" />
+    </svg>
+  )
+}
+function IChevR() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m9 6 6 6-6 6" />
+    </svg>
+  )
+}
+function IArrow() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 12h15M13 6l6 6-6 6" />
+    </svg>
+  )
+}
+function ISearch() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="10.5" cy="10.5" r="7" />
+      <path d="m21 21-4.5-4.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+function IPause() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+      <rect x="6" y="5" width="4" height="14" /><rect x="14" y="5" width="4" height="14" />
+    </svg>
+  )
+}
+function IPlay() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M7 5l12 7-12 7V5Z" />
+    </svg>
+  )
+}
+
+/* ─── Tile components ────────────────────────────────────────── */
+function VideoTile({ tile }: { tile: TileData }) {
+  const [paused, setPaused] = useState(false)
+  return (
+    <div className="mn-tile mn-is-video" data-paused={paused ? 'true' : 'false'}>
+      <div className="mn-tile-media mn-kb">
+        <img src={tile.img.src} alt={tile.name} />
+      </div>
+      <div className="mn-video-tag">
+        <span className="mn-rec" />
+        {paused ? 'Pausiert' : 'Video'}
+      </div>
+      <button
+        className="mn-video-ctl"
+        onClick={(e) => { e.stopPropagation(); setPaused(p => !p) }}
+        aria-label={paused ? 'Abspielen' : 'Pausieren'}
+      >
+        {paused ? <IPlay /> : <IPause />}
+      </button>
+      <div className="mn-tile-cap">
+        <div className="mn-kicker">{tile.kicker}</div>
+        <span className="mn-name">{tile.name}</span>
+      </div>
+    </div>
+  )
+}
+
+function Tile({ tile }: { tile: TileData }) {
+  if (tile.video) return <VideoTile tile={tile} />
+  return (
+    <div className="mn-tile">
+      <div className="mn-tile-media">
+        <img src={tile.img.src} alt={tile.name} />
+      </div>
+      <div className="mn-tile-cap">
+        <div className="mn-kicker">{tile.kicker}</div>
+        <span className="mn-name">{tile.name}</span>
+      </div>
+    </div>
+  )
+}
+
+/* ─── CSS ────────────────────────────────────────────────────── */
+const MEGA_CSS = `
+.mn-mega {
+  --mn-ease:    cubic-bezier(0.16, 1, 0.3, 1);
+  --mn-ease-q:  cubic-bezier(0.25, 1, 0.5, 1);
+  --mn-serif:   'Cormorant Garamond', Garamond, Georgia, serif;
+  --mn-sans:    'League Spartan', system-ui, sans-serif;
+  --mn-rail-bg:     #0A0A0A;
+  --mn-rail-fg:     #EFEDE7;
+  --mn-rail-muted:  rgba(255,255,255,0.42);
+  --mn-rail-hair:   rgba(255,255,255,0.12);
+  --mn-rail-accent: color-mix(in oklab, #370E4D 52%, #ffffff);
+  --mn-pane-bg:     #F5F5F0;
+  --mn-pane-fg:     #0A0A0A;
+  --mn-pane-muted:  #6B6B6B;
+  --mn-pane-hair:   #E2E2DC;
+  --mn-pane-accent: #370E4D;
+  --mn-tile-fallback: #DBD9D2;
+}
+
+/* Scrim */
+.mn-scrim {
+  position: fixed; inset: 0; z-index: 9998;
+  background: rgba(10,8,14,0.34);
+  opacity: 0; pointer-events: none;
+  transition: opacity 600ms cubic-bezier(0.16,1,0.3,1);
+}
+.mn-scrim.mn-open { opacity: 1; pointer-events: auto; }
+
+/* Panel shell */
+.mn-mega {
+  position: fixed; top: 0; left: 0; z-index: 9999;
+  height: 100vh; width: min(1320px, 94vw);
+  display: grid; grid-template-columns: 312px 360px 1fr;
+  transform: translateX(-101%);
+  transition: transform 760ms cubic-bezier(0.16,1,0.3,1);
+  box-shadow: 0 0 90px rgba(0,0,0,0.22);
+  background: var(--mn-pane-bg);
+  font-family: var(--mn-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.mn-mega[data-open="true"] { transform: translateX(0); }
+
+/* ── Column 1 · ink rail ── */
+.mn-rail {
+  display: flex; flex-direction: column;
+  background: var(--mn-rail-bg); color: var(--mn-rail-fg);
+}
+.mn-rail-head {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 88px; padding: 0 30px; flex-shrink: 0;
+  border-bottom: 1px solid var(--mn-rail-hair);
+}
+.mn-mark {
+  font-family: var(--mn-serif); font-size: 30px;
+  letter-spacing: 0.03em; line-height: 1;
+}
+.mn-rail-close {
+  background: none; border: 0; padding: 8px; margin: -8px; cursor: pointer;
+  display: flex; align-items: center; gap: 9px;
+  font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase;
+  color: var(--mn-rail-muted); font-family: var(--mn-sans);
+  transition: color 240ms cubic-bezier(0.25,1,0.5,1);
+}
+.mn-rail-close:hover { color: var(--mn-rail-fg); }
+
+.mn-rail-nav {
+  display: flex; flex-direction: column;
+  padding: 14px 0; flex: 1; overflow-y: auto;
+}
+.mn-rail-link {
+  position: relative; background: none; border: 0; text-align: left;
+  padding: 0 30px; height: 52px; cursor: pointer;
+  display: grid; grid-template-columns: 34px 1fr 14px;
+  align-items: center; gap: 4px;
+  color: var(--mn-rail-fg); font-family: var(--mn-sans);
+  transition: color 280ms cubic-bezier(0.25,1,0.5,1);
+}
+.mn-idx {
+  font-size: 10px; letter-spacing: 0.1em; font-variant-numeric: tabular-nums;
+  color: var(--mn-rail-muted); font-weight: 400;
+  transition: color 280ms cubic-bezier(0.25,1,0.5,1);
+}
+.mn-rl-label {
+  font-size: 14px; letter-spacing: 0.26em; text-transform: uppercase; font-weight: 400;
+  transition: transform 420ms cubic-bezier(0.16,1,0.3,1),
+              letter-spacing 420ms cubic-bezier(0.16,1,0.3,1);
+}
+.mn-chev-r {
+  opacity: 0; transform: translateX(-6px); display: flex;
+  color: var(--mn-rail-accent);
+  transition: opacity 300ms cubic-bezier(0.16,1,0.3,1),
+              transform 300ms cubic-bezier(0.16,1,0.3,1);
+}
+/* tick bar at far left */
+.mn-rail-link::before {
+  content: ''; position: absolute; left: 0; top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 3px; height: 26px; background: var(--mn-rail-accent);
+  transition: transform 360ms cubic-bezier(0.16,1,0.3,1);
+}
+/* hairline underline draws in */
+.mn-rail-link::after {
+  content: ''; position: absolute; left: 30px; right: 30px; bottom: 9px; height: 1px;
+  background: var(--mn-rail-accent); transform: scaleX(0); transform-origin: left; opacity: 0;
+  transition: transform 460ms cubic-bezier(0.16,1,0.3,1),
+              opacity 280ms cubic-bezier(0.25,1,0.5,1);
+}
+.mn-rail-link:hover .mn-rl-label { letter-spacing: 0.3em; transform: translateX(2px); }
+.mn-rail-link[aria-current="true"] .mn-idx   { color: var(--mn-rail-accent); }
+.mn-rail-link[aria-current="true"] .mn-rl-label { transform: translateX(2px); }
+.mn-rail-link[aria-current="true"] .mn-chev-r { opacity: 1; transform: translateX(0); }
+.mn-rail-link[aria-current="true"]::after  { transform: scaleX(1); opacity: 1; }
+.mn-rail-link[aria-current="true"]::before { transform: translateY(-50%) scaleY(1); }
+/* Sale tone */
+.mn-rail-link[data-tone="sale"] .mn-rl-label {
+  color: color-mix(in oklab, #C0476A 70%, var(--mn-rail-fg));
+}
+.mn-rail-link[data-tone="sale"]::before,
+.mn-rail-link[data-tone="sale"]::after { background: #C0476A; }
+.mn-rail-link[data-tone="sale"][aria-current="true"] .mn-idx { color: #C0476A; }
+
+.mn-rail-foot {
+  padding: 22px 30px 26px; flex-shrink: 0;
+  border-top: 1px solid var(--mn-rail-hair);
+  display: flex; flex-direction: column; gap: 14px;
+}
+.mn-foot-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.mn-rail-foot a {
+  font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--mn-rail-muted); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 9px;
+  font-family: var(--mn-sans);
+  transition: color 240ms cubic-bezier(0.25,1,0.5,1);
+}
+.mn-rail-foot a:hover { color: var(--mn-rail-fg); }
+.mn-locale {
+  color: var(--mn-rail-fg) !important;
+  border: 1px solid var(--mn-rail-hair);
+  padding: 8px 12px;
+}
+.mn-locale:hover { border-color: var(--mn-rail-accent) !important; }
+
+/* ── Column 2 · cream sub-nav ── */
+.mn-sub {
+  background: var(--mn-pane-bg); color: var(--mn-pane-fg);
+  border-right: 1px solid var(--mn-pane-hair);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.mn-sub-search {
+  display: flex; align-items: center; gap: 11px;
+  height: 88px; padding: 0 36px; flex-shrink: 0;
+  border-bottom: 1px solid var(--mn-pane-hair);
+  color: var(--mn-pane-muted);
+}
+.mn-sub-search svg { flex: none; }
+.mn-sub-search input {
+  border: 0; outline: 0; background: none; flex: 1;
+  font-family: var(--mn-sans); font-size: 11px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--mn-pane-fg);
+}
+.mn-sub-search input::placeholder { color: var(--mn-pane-muted); letter-spacing: 0.22em; }
+
+.mn-sub-body { padding: 30px 36px 26px; overflow-y: auto; flex: 1; }
+.mn-fade-enter { animation: mn-fadeUp 560ms cubic-bezier(0.16,1,0.3,1) both; }
+@keyframes mn-fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.mn-sub-head { margin-bottom: 22px; }
+.mn-sub-kicker {
+  font-size: 9.5px; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--mn-pane-muted); margin-bottom: 10px;
+}
+.mn-sub-title {
+  font-family: var(--mn-serif); font-weight: 300; font-style: italic;
+  font-size: 40px; line-height: 0.98; letter-spacing: -0.01em; color: var(--mn-pane-fg);
+}
+.mn-sub-all {
+  display: inline-flex; align-items: center; gap: 9px; cursor: pointer;
+  font-size: 10.5px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--mn-pane-accent); text-decoration: none;
+  padding: 14px 0 16px; border: 0; background: none;
+  font-family: var(--mn-sans);
+}
+.mn-ar { transition: transform 360ms cubic-bezier(0.16,1,0.3,1); display: flex; }
+.mn-sub-all:hover .mn-ar { transform: translateX(6px); }
+
+.mn-sub-list {
+  display: flex; flex-direction: column;
+  border-top: 1px solid var(--mn-pane-hair);
+}
+.mn-sub-item {
+  background: none; border: 0; text-align: left; cursor: pointer;
+  padding: 13px 0; border-bottom: 1px solid var(--mn-pane-hair);
+  font-size: 14px; letter-spacing: 0.05em; color: var(--mn-pane-fg);
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--mn-sans);
+  transition: color 240ms cubic-bezier(0.25,1,0.5,1),
+              padding-left 360ms cubic-bezier(0.16,1,0.3,1);
+}
+.mn-sub-item:hover { color: var(--mn-pane-accent); padding-left: 8px; }
+.mn-sub-item .mn-sub-chev {
+  color: var(--mn-pane-muted); display: flex;
+  transition: transform 300ms cubic-bezier(0.16,1,0.3,1), color 240ms;
+}
+.mn-sub-item:hover .mn-sub-chev { color: var(--mn-pane-accent); transform: translateX(3px); }
+
+.mn-sub-section { margin-top: 30px; }
+.mn-sub-section-label {
+  font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--mn-pane-muted); margin-bottom: 16px;
+}
+.mn-sub-highlights { display: flex; flex-direction: column; gap: 12px; }
+.mn-sub-highlight {
+  background: none; border: 0; text-align: left; padding: 0; cursor: pointer;
+  font-family: var(--mn-serif); font-style: italic; font-weight: 300; font-size: 19px;
+  color: var(--mn-pane-fg); width: fit-content; line-height: 1.1;
+  transition: color 240ms cubic-bezier(0.25,1,0.5,1);
+}
+.mn-sub-highlight::after {
+  content: ''; display: block; height: 1px; background: var(--mn-pane-accent);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 380ms cubic-bezier(0.16,1,0.3,1); margin-top: 3px;
+}
+.mn-sub-highlight:hover { color: var(--mn-pane-accent); }
+.mn-sub-highlight:hover::after { transform: scaleX(1); }
+
+/* ── Column 3 · editorial ── */
+.mn-editorial {
+  position: relative; background: var(--mn-pane-bg);
+  padding: 30px; min-width: 0; overflow: hidden;
+}
+/* registration corner ticks */
+.mn-editorial::before, .mn-editorial::after {
+  content: ''; position: absolute; width: 14px; height: 14px;
+  z-index: 4; pointer-events: none;
+  border: 0 solid var(--mn-pane-muted); opacity: 0.5;
+}
+.mn-editorial::before { top: 18px; right: 18px; border-top-width: 1px; border-right-width: 1px; }
+.mn-editorial::after  { bottom: 18px; left: 18px; border-bottom-width: 1px; border-left-width: 1px; }
+
+.mn-tiles {
+  height: 100%; display: grid; gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+/* Tile entrance animation — always runs on mount/remount */
+.mn-tile {
+  position: relative; overflow: hidden;
+  background: var(--mn-tile-fallback); cursor: pointer;
+  opacity: 0; transform: translateY(22px);
+  animation: mn-tileIn 820ms cubic-bezier(0.16,1,0.3,1) forwards;
+}
+.mn-tile:nth-child(1) { animation-delay: 120ms; }
+.mn-tile:nth-child(2) { animation-delay: 200ms; }
+.mn-tile:nth-child(3) { animation-delay: 280ms; }
+.mn-tile:nth-child(4) { animation-delay: 360ms; }
+@keyframes mn-tileIn { to { opacity: 1; transform: translateY(0); } }
+
+.mn-tile-media { position: absolute; inset: 0; }
+.mn-tile-media img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 1300ms cubic-bezier(0.16,1,0.3,1);
+}
+.mn-tile:hover .mn-tile-media img { transform: scale(1.06); }
+.mn-tile::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg,
+    rgba(10,10,10,0) 42%,
+    rgba(10,10,10,0.05) 60%,
+    rgba(10,10,10,0.50) 100%);
+}
+.mn-tile-cap {
+  position: absolute; left: 22px; bottom: 22px; right: 22px;
+  z-index: 2; color: #fff;
+}
+.mn-kicker {
+  font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
+  opacity: 0.92; margin-bottom: 8px;
+}
+.mn-name {
+  font-family: var(--mn-serif); font-weight: 300; font-size: 25px;
+  line-height: 1.04; display: inline-block; position: relative;
+}
+.mn-name::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -3px;
+  height: 1px; background: #fff; transform: scaleX(0); transform-origin: left;
+  transition: transform 460ms cubic-bezier(0.16,1,0.3,1);
+}
+.mn-tile:hover .mn-name::after { transform: scaleX(1); }
+
+/* Ken Burns */
+.mn-kb { width: 100%; height: 100%; }
+.mn-kb img {
+  animation: mn-kenburns 24s cubic-bezier(0.25,1,0.5,1) infinite alternate;
+  transform-origin: 60% 40%;
+}
+.mn-tile[data-paused="true"] .mn-kb img { animation-play-state: paused; }
+@keyframes mn-kenburns {
+  0%   { transform: scale(1.0)  translate(0,0); }
+  100% { transform: scale(1.15) translate(-2.5%,-2%); }
+}
+
+/* Video controls */
+.mn-video-ctl {
+  position: absolute; left: 22px; bottom: 22px; z-index: 3;
+  width: 38px; height: 38px; cursor: pointer;
+  background: rgba(255,255,255,0.14); backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.5); border-radius: 0;
+  display: grid; place-items: center; color: #fff;
+  transition: background 280ms cubic-bezier(0.25,1,0.5,1);
+}
+.mn-video-ctl:hover { background: rgba(255,255,255,0.3); }
+.mn-video-tag {
+  position: absolute; right: 18px; top: 18px; z-index: 3;
+  font-size: 8.5px; letter-spacing: 0.28em; text-transform: uppercase;
+  color: #fff; display: flex; align-items: center; gap: 7px; opacity: 0.92;
+  font-family: var(--mn-sans);
+}
+.mn-rec {
+  width: 6px; height: 6px; border-radius: 9999px;
+  background: #fff; flex-shrink: 0;
+}
+.mn-tile[data-paused="true"] .mn-video-tag .mn-rec { background: rgba(255,255,255,0.4); }
+.mn-is-video .mn-tile-cap { left: 72px; }
+
+/* Responsive */
+@media (max-width: 980px) {
+  .mn-mega { grid-template-columns: 240px 1fr; width: 100vw; }
+  .mn-editorial { display: none; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .mn-mega      { transition-duration: 1ms !important; }
+  .mn-scrim     { transition-duration: 1ms !important; }
+  .mn-tile      { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .mn-fade-enter { animation: none !important; }
+  .mn-kb img    { animation: none !important; }
+}
+`
+
+/* ─── Component ──────────────────────────────────────────────── */
 interface SidebarProps {
   isOpen: boolean
   onClose: () => void
 }
 
-const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
-  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null)
-  const [openAccordion, setOpenAccordion] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
+function pad(n: number) { return String(n).padStart(2, '0') }
 
-  // Mount state for portal (SSR safety)
-  useEffect(() => {
-    setMounted(true)
-    return () => setMounted(false)
-  }, [])
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const [mounted,   setMounted]   = useState(false)
+  const [activeKey, setActiveKey] = useState('women')
+  const [tileKey,   setTileKey]   = useState(0)
+  const closeRef = useRef<HTMLButtonElement>(null)
 
-  // Submenu schließen wenn Hauptmenü geschlossen wird
-  useEffect(() => {
-    if (!isOpen) {
-      setActiveSubmenu(null)
-      setOpenAccordion(null)
-    }
-  }, [isOpen])
+  useEffect(() => { setMounted(true) }, [])
 
-  // Lock body scroll when sidebar is open
+  // Re-trigger tile stagger on open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-    return () => {
-      document.body.style.overflow = 'unset'
+      setTileKey(k => k + 1)
+      setTimeout(() => closeRef.current?.focus(), 80)
     }
   }, [isOpen])
 
-  // vlt relevant muss ich noch verstehen richtig
-  interface MenuItem {
-    title: string
-    href?: string
-    hasSubmenu: boolean
-    color?: string  // <- Optional, weil nicht alle Items Farbe haben
-    submenu?: {
-      showAll: { title: string; href: string }
-      categories: Array<{
-        title: string
-        items: Array<{ title: string; href: string }>
-      }>
-    }
+  // Body scroll lock
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [isOpen])
+
+  // Escape key
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && isOpen) onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [isOpen, onClose])
+
+  const handleSetActive = (key: string) => {
+    setActiveKey(key)
+    setTileKey(k => k + 1)
   }
 
-  const menuItems: MenuItem[] = [
-    { title: 'Neu', href: '/neu', hasSubmenu: false },
-    { title: 'Trendy', href: '/trendy', hasSubmenu: false },
-    { title: 'Catalogue', href: '/catalogue', hasSubmenu: false, color: "#DAD4CB" },
-    {
-      title: 'Bekleidung',
-      hasSubmenu: true,
-      submenu: {
-        showAll: { title: 'Siehe Alle Bekleidung', href: '/bekleidung' },
-        categories: [
-          {
-            title: 'Tops',
-            items: [
-              { title: 'Siehe Alle Tops', href: '/bekleidung?category=oberteile' },
-              { title: 'T-Shirts / Oberteile', href: '/bekleidung?category=oberteile&type=tshirts' },
-              { title: 'Sweater', href: '/bekleidung?category=oberteile&type=sweater' },
-              { title: 'Hoodie', href: '/bekleidung?category=oberteile&type=hoodie' },
-              { title: 'Jacke / Puffer', href: '/bekleidung?category=jacken' }
-            ]
-          },
-          {
-            title: 'Bottoms',
-            items: [
-              { title: 'Siehe Alle Bottoms', href: '/bekleidung?category=hosen' },
-              { title: 'Shorts', href: '/bekleidung?category=hosen&type=shorts' },
-              { title: 'Jogging', href: '/bekleidung?category=hosen&type=jogging' },
-              { title: 'Jeans', href: '/bekleidung?category=hosen&type=jeans' }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      title: 'Women',
-      hasSubmenu: true,
-      submenu: {
-        showAll: { title: 'Siehe Alle Women', href: '/women' },
-        categories: [
-          {
-            title: 'Tops',
-            items: [
-              { title: 'Siehe Alle Tops', href: '/women/tops' },
-              { title: 'Blusen', href: '/women/tops/blusen' },
-              { title: 'T-Shirts', href: '/women/tops/tshirts' },
-              { title: 'Sweater', href: '/women/tops/sweater' }
-            ]
-          },
-          {
-            title: 'Bottoms',
-            items: [
-              { title: 'Siehe Alle Bottoms', href: '/women/bottoms' },
-              { title: 'Röcke', href: '/women/bottoms/roecke' },
-              { title: 'Hosen', href: '/women/bottoms/hosen' },
-              { title: 'Jeans', href: '/women/bottoms/jeans' }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      title: 'Men',
-      hasSubmenu: true,
-      submenu: {
-        showAll: { title: 'Siehe Alle Men', href: '/men' },
-        categories: [
-          {
-            title: 'Tops',
-            items: [
-              { title: 'Siehe Alle Tops', href: '/men/tops' },
-              { title: 'Hemden', href: '/men/tops/hemden' },
-              { title: 'T-Shirts', href: '/men/tops/tshirts' },
-              { title: 'Sweater', href: '/men/tops/sweater' },
-              { title: 'Hoodie', href: '/men/tops/hoodie' }
-            ]
-          },
-          {
-            title: 'Bottoms',
-            items: [
-              { title: 'Siehe Alle Bottoms', href: '/men/bottoms' },
-              { title: 'Shorts', href: '/men/bottoms/shorts' },
-              { title: 'Hosen', href: '/men/bottoms/hosen' },
-              { title: 'Jeans', href: '/men/bottoms/jeans' }
-            ]
-          }
-        ]
-      }
-    },
-    { title: 'Marken', href: '/marken', hasSubmenu: false },
-    { title: 'Drops', href: '/drop', hasSubmenu: false, color: "#000000" },
-    { title: 'Sale', href: '/sale', hasSubmenu: false, color: "#DE0000" }
-  ]
+  if (!mounted) return null
 
-  const handleCategoryClick = (item: MenuItem) => {
-    if (item.hasSubmenu) {
-      setActiveSubmenu(item.title)
-    } else if (item.href) {
-      window.location.href = item.href
-      onClose()
-    }
-  }
+  const active = CATEGORIES.find(c => c.key === activeKey) ?? CATEGORIES[0]
 
-  const toggleAccordion = (title: string) => {
-    setOpenAccordion(openAccordion === title ? null : title)
-  }
-
-  const handleLinkClick = () => {
-    onClose()
-  }
-
-  // Sidebar content to be portaled
-  const sidebarContent = (
+  const nav = (
     <>
-      {/* Overlay */}
+      {/* Scrim */}
       <div
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm transition-all duration-500
-                    ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        style={{ zIndex: 9998 }}
+        className={`mn-scrim${isOpen ? ' mn-open' : ''}`}
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Main Sidebar */}
-      <aside
-        className={`fixed top-0 left-0 w-full sm:w-96 text-white
-                    transform transition-all duration-500 ease-out
-                    ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
-        style={{ backgroundColor: '#370E4D', zIndex: 9999, height: '100vh', minHeight: '100vh' }}
-        aria-label="Navigation menu"
+      {/* Mega panel */}
+      <nav
+        className="mn-mega"
+        data-open={isOpen ? 'true' : 'false'}
+        aria-label="Hauptnavigation"
         role="dialog"
         aria-modal="true"
       >
-        {/* Header */}
-        <div className="flex items-center px-8 py-4 border-b border-white/10">
-          <button
-            onClick={onClose}
-            className="w-10 h-10 flex items-center justify-center hover:bg-white/5 rounded-full transition-all duration-300 group"
-          >
-            <svg
-              className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-          <p className="text-xl tracking-wider">Schließen</p>
-        </div>
+        {/* ── Column 1 · ink rail ── */}
+        <div className="mn-rail">
+          <div className="mn-rail-head">
+            <span className="mn-mark">Enunas</span>
+            <button ref={closeRef} className="mn-rail-close" onClick={onClose}>
+              <IClose /> Schließen
+            </button>
+          </div>
 
-        {/* Navigation */}
-        <nav className="h-[calc(100%-120px)] overflow-y-auto px-8 py-8">
-          <ul className="space-y-2">
-            {menuItems.map((item) => (
-              <li key={item.title}>
-                <button
-                  onClick={() => handleCategoryClick(item)}
-                  className="w-full group relative"
-                >
-                  <div className="flex items-center justify-between py-4 
-                              ">
-                    <span className="font-spartan text-sm tracking-[0.2em] uppercase
-                                   group-hover:tracking-[0.3em] transition-all duration-300">
-                      {item.title}
-                    </span>
-                    {item.hasSubmenu && (
-                      <svg
-                        className="w-5 h-5 opacity-50 group-hover:opacity-100 group-hover:translate-x-1
-                                    transition-all duration-300"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                  {item.color && (
-                    <div
-                      className="text-color absolute left-0 bottom-0 w-full h-[1px] transition-all duration-300 group-hover:opacity-100 opacity-60"
-                      style={{ backgroundColor: item.color }}
-                    />
-                  )}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        {/* Footer */}
-        <div className="absolute bottom-0 w-full px-8 py-6 border-t border-white/10">
-          <button className="w-full py-3 px-4 border border-white/20 rounded text-xs
-                           tracking-widest uppercase hover:bg-white/5 transition-all duration-300
-                           flex items-center justify-between">
-            <span>DE / EUR</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Submenu Sidebar mit Accordion */}
-      {activeSubmenu && (
-        <aside
-          className={`fixed top-0 left-0 w-full sm:left-96 sm:w-96 text-black
-                      transition-all duration-500 ease-out
-                     ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
-          style={{ backgroundColor: '#F5F5F0', zIndex: 9999, height: '100vh', minHeight: '100vh' }}
-        >
-          {/* Submenu Header */}
-          <div className="sm:hidden flex items-center px-8 py-4 border-b border-white/10 bg-[#370E4D]">
-            <button
-              onClick={onClose}
-              className="w-10 h-10 flex items-center justify-center hover:bg-white/5 rounded-full transition-all duration-300 group"
-            >
-              <svg
-                className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <div className="mn-rail-nav">
+            {CATEGORIES.map((c, i) => (
+              <button
+                key={c.key}
+                className="mn-rail-link"
+                data-tone={c.tone}
+                aria-current={activeKey === c.key ? 'true' : 'false'}
+                onMouseEnter={() => handleSetActive(c.key)}
+                onFocus={() => handleSetActive(c.key)}
+                onClick={() => handleSetActive(c.key)}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-            <p className="text-xl tracking-wider">Schließen</p>
+                <span className="mn-idx">{pad(i + 1)}</span>
+                <span className="mn-rl-label">{c.label}</span>
+                <span className="mn-chev-r"><IChevR /></span>
+              </button>
+            ))}
           </div>
 
-          <div className="flex items-center justify-center px-6 py-8 border-b border-white/10 text-[#370E4D]">
-            <button 
-              onClick={() => setActiveSubmenu(null)}
-              className="flex items-center gap-3 group"
-            >
-              <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300"
-                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                      d="M15 19l-7-7 7-7" />
-              </svg>
-              <span className="text-3xl">{activeSubmenu}</span>
-            </button>
+          <div className="mn-rail-foot">
+            <div className="mn-foot-row">
+              <a href="#">Anmelden</a>
+              <a href="#">Hilfe &amp; Kontakt</a>
+            </div>
+            <a className="mn-locale" href="#">DE / EUR</a>
+          </div>
+        </div>
+
+        {/* ── Column 2 · cream sub-nav ── */}
+        <div className="mn-sub">
+          <div className="mn-sub-search">
+            <ISearch />
+            <input placeholder="Suchen" aria-label="Suchen" />
           </div>
 
-          {/* Submenu Content */}
-          <nav className="h-[calc(100%-100px)] overflow-y-auto px-6 py-6">
-            {/* "Siehe Alle" Link */}
-            <a
-              href={menuItems.find((item) => item.title === activeSubmenu)?.submenu?.showAll.href}
-              onClick={handleLinkClick}
-              className="block py-4 px-5 mb-4 transition-all duration-300 hover:translate-x-1"
-            >
-              <span className="font-spartan text-sm tracking-wide uppercase">
-                {menuItems.find((item) => item.title === activeSubmenu)?.submenu?.showAll.title}
-              </span>
-            </a>
+          <div className="mn-sub-body" key={`sub-${activeKey}`}>
+            <div className="mn-fade-enter">
+              <div className="mn-sub-head">
+                <div className="mn-sub-kicker">{active.kicker}</div>
+                <div className="mn-sub-title">{active.title}</div>
+              </div>
 
-            {/* Accordion Categories */}
-            <ul className="space-y-2">
-              {menuItems
-                .find((item) => item.title === activeSubmenu)
-                ?.submenu?.categories?.map((category) => (
-                  <li key={category.title}>
-                    {/* Accordion Button */}
-                    <button
-                      onClick={() => toggleAccordion(category.title)}
-                      className="w-full group"
-                    >
-                      <div className="flex items-center justify-between py-3 px-4
-                                   hover:bg-white/5 rounded transition-all duration-300">
-                        <span className="text-sm tracking-wide uppercase">
-                          {category.title}
-                        </span>
-                        <svg
-                          className={`w-4 h-4 transition-transform duration-300
-                                    ${openAccordion === category.title ? 'rotate-180' : ''}`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      </div>
-                    </button>
+              <a className="mn-sub-all" href={active.route}>
+                Alle ansehen <span className="mn-ar"><IArrow /></span>
+              </a>
 
-                    {/* Accordion Content */}
-                    <div
-                      className={`overflow-hidden transition-all duration-300
-                                ${openAccordion === category.title ? 'max-h-96' : 'max-h-0'}`}
-                    >
-                      <ul className="pl-4 py-2 space-y-1">
-                        {category.items.map((item) => (
-                          <li key={item.href}>
-                            <Link
-                              href={item.href}
-                              onClick={handleLinkClick}
-                              className={`block py-2 px-4 text-sm rounded transition-all duration-300
-                                       hover:bg-white/5 border-l-2 border-transparent hover:border-white/30 hover:translate-x-1
-                                       ${item.title.includes('Siehe Alle') ? 'text-[#370E4D] italic' : ''}`}
-                            >
-                              {item.title}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </li>
+              <div className="mn-sub-list">
+                {active.sub.map((s, i) => (
+                  <button
+                    key={i}
+                    className="mn-sub-item"
+                    onClick={() => s.href && (window.location.href = s.href)}
+                  >
+                    {s.label}
+                    {s.deep && <span className="mn-sub-chev"><IChevR /></span>}
+                  </button>
                 ))}
-            </ul>
-          </nav>
-        </aside>
-      )}
+              </div>
+
+              <div className="mn-sub-section">
+                <div className="mn-sub-section-label">Highlights</div>
+                <div className="mn-sub-highlights">
+                  {active.highlights.map((h, i) => (
+                    <button key={i} className="mn-sub-highlight">{h.label}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Column 3 · editorial ── */}
+        <div className="mn-editorial">
+          <div className="mn-tiles" key={tileKey}>
+            {active.tiles.map((tile, i) => (
+              <Tile tile={tile} key={`${active.key}-${i}`} />
+            ))}
+          </div>
+        </div>
+      </nav>
     </>
   )
 
-  // Use portal to render at document body level (escapes header stacking context)
-  // Only render portal after component is mounted (SSR safety)
-  if (!mounted) return null
-
-  return createPortal(sidebarContent, document.body)
+  return (
+    <>
+      <style>{MEGA_CSS}</style>
+      {createPortal(nav, document.body)}
+    </>
+  )
 }
-
-export default Sidebar

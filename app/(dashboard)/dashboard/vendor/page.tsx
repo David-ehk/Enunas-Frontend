@@ -5,20 +5,28 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/app/context/AuthContext'
 import { brandApi } from '@/lib/api/modules/brandApi'
 import type { ApiBrandPartner } from '@/types/api'
-import { LayoutDashboard, Package, Truck, Settings2, LogOut } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingBag, BarChart2, RotateCcw, CreditCard, Megaphone, Settings2, LogOut } from 'lucide-react'
 import { StatusBadge } from '../admin/_components/shared'
 import Overview from './_components/Overview'
 import Products from './_components/Products'
 import Fulfillment from './_components/Fulfillment'
 import SettingsTab from './_components/Settings'
+import Analytics from './_components/Analytics'
+import VendorReturns from './_components/VendorReturns'
+import Payouts from './_components/Payouts'
+import Marketing from './_components/Marketing'
 
-type Tab = 'overview' | 'products' | 'fulfillment' | 'settings'
+type Tab = 'overview' | 'orders' | 'products' | 'analytics' | 'returns' | 'payouts' | 'marketing' | 'settings'
 
 const NAV: { id: Tab; label: string; icon: React.ElementType }[] = [
-  { id: 'overview',    label: 'Übersicht',     icon: LayoutDashboard },
-  { id: 'products',   label: 'Produkte',       icon: Package },
-  { id: 'fulfillment', label: 'Fulfillment',   icon: Truck },
-  { id: 'settings',   label: 'Einstellungen',  icon: Settings2 },
+  { id: 'overview',   label: 'Übersicht',     icon: LayoutDashboard },
+  { id: 'orders',     label: 'Bestellungen',  icon: ShoppingBag },
+  { id: 'products',   label: 'Produkte',      icon: Package },
+  { id: 'analytics',  label: 'Analytics',     icon: BarChart2 },
+  { id: 'returns',    label: 'Retouren',      icon: RotateCcw },
+  { id: 'payouts',    label: 'Auszahlungen',  icon: CreditCard },
+  { id: 'marketing',  label: 'Marketing',     icon: Megaphone },
+  { id: 'settings',   label: 'Einstellungen', icon: Settings2 },
 ]
 
 export default function VendorPage() {
@@ -60,7 +68,7 @@ export default function VendorPage() {
           </div>
         )}
 
-        <nav className="flex-1 px-3 py-5 space-y-0.5">
+        <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
           {NAV.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -99,9 +107,13 @@ export default function VendorPage() {
           </h2>
         </div>
         <div className="p-8 space-y-6">
-          {tab === 'overview'    && <Overview    onNavigate={(t) => setTab(t as Tab)} />}
+          {tab === 'overview'   && <Overview    onNavigate={(t) => setTab(t as Tab)} />}
+          {tab === 'orders'     && <Fulfillment />}
           {tab === 'products'   && <Products />}
-          {tab === 'fulfillment' && <Fulfillment />}
+          {tab === 'analytics'  && <Analytics />}
+          {tab === 'returns'    && <VendorReturns />}
+          {tab === 'payouts'    && <Payouts />}
+          {tab === 'marketing'  && <Marketing />}
           {tab === 'settings'   && <SettingsTab brand={brand} onUpdate={setBrand} />}
         </div>
       </main>

@@ -550,7 +550,6 @@ export default function Brands() {
         eyebrow="Verwaltung"
         title="Marken"
         italicTitle="verwaltung."
-        sub={`${brands.filter(b => b.status === 'PENDING').length} ausstehende Genehmigungen · ${brands.length} Marken gesamt`}
       />
 
       <KPIGrid>

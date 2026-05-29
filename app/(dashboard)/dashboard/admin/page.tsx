@@ -8,22 +8,23 @@ import type { AdminBrand, AdminCustomer, AdminApiProduct, ApiOrder, AdminPayout 
 import {
   LayoutDashboard, Users, Store, Package,
   ShoppingBag, CreditCard, RotateCcw, BarChart2,
-  ShieldAlert, MessageSquare, LogOut, AlertCircle,
+  ShieldAlert, MessageSquare, LogOut, AlertCircle, Sparkles,
 } from 'lucide-react'
 
-import Overview   from './_components/Overview'
-import Customers  from './_components/Customers'
-import Brands     from './_components/Brands'
-import Products   from './_components/Products'
-import Orders     from './_components/Orders'
-import Payments   from './_components/Payments'
-import Returns    from './_components/Returns'
-import Analytics  from './_components/Analytics'
+import Overview    from './_components/Overview'
+import Customers   from './_components/Customers'
+import Brands      from './_components/Brands'
+import Products    from './_components/Products'
+import Orders      from './_components/Orders'
+import Payments    from './_components/Payments'
+import Returns     from './_components/Returns'
+import Analytics   from './_components/Analytics'
+import Storefront  from './_components/Storefront'
 
 type Tab =
   | 'overview' | 'customers' | 'brands' | 'products'
   | 'orders'   | 'payments'  | 'returns'
-  | 'analytics'| 'content'   | 'support'
+  | 'analytics'| 'content'   | 'support' | 'storefront'
 
 interface NavItem { id: Tab; label: string; icon: React.ElementType; phase2?: boolean }
 
@@ -37,10 +38,11 @@ const NAV_SECTIONS: { group: string; items: NavItem[] }[] = [
   {
     group: 'Verwaltung',
     items: [
-      { id: 'customers',  label: 'Kunden',         icon: Users },
-      { id: 'brands',     label: 'Marken',         icon: Store },
-      { id: 'products',   label: 'Produkte',       icon: Package },
-      { id: 'orders',     label: 'Bestellungen',   icon: ShoppingBag },
+      { id: 'customers',   label: 'Kunden',         icon: Users },
+      { id: 'brands',      label: 'Marken',         icon: Store },
+      { id: 'products',    label: 'Produkte',       icon: Package },
+      { id: 'orders',      label: 'Bestellungen',   icon: ShoppingBag },
+      { id: 'storefront',  label: 'Schaufenster',   icon: Sparkles },
     ],
   },
   {
@@ -61,29 +63,31 @@ const NAV_SECTIONS: { group: string; items: NavItem[] }[] = [
 ]
 
 const TITLES: Record<Tab, string> = {
-  overview:  'Übersicht',
-  customers: 'Kunden',
-  brands:    'Marken',
-  products:  'Produkte',
-  orders:    'Bestellungen',
-  payments:  'Zahlungen',
-  returns:   'Rückgaben',
-  analytics: 'Analytics',
-  content:   'Content Moderation',
-  support:   'Support',
+  overview:    'Übersicht',
+  customers:   'Kunden',
+  brands:      'Marken',
+  products:    'Produkte',
+  orders:      'Bestellungen',
+  payments:    'Zahlungen',
+  returns:     'Rückgaben',
+  analytics:   'Analytics',
+  content:     'Content Moderation',
+  support:     'Support',
+  storefront:  'Schaufenster',
 }
 
 const SUBTITLES: Record<Tab, string> = {
-  overview:  'Plattformüberblick & KPIs',
-  customers: 'Kundenverwaltung',
-  brands:    'Markenverwaltung & Genehmigungen',
-  products:  'Produktkatalog & Freigaben',
-  orders:    'Bestellungsverwaltung',
-  payments:  'Zahlungen & Auszahlungen',
-  returns:   'Rückgaben & Erstattungen',
-  analytics: 'Phase 2',
-  content:   'Phase 2',
-  support:   'Phase 2',
+  overview:    'Plattformüberblick & KPIs',
+  customers:   'Kundenverwaltung',
+  brands:      'Markenverwaltung & Genehmigungen',
+  products:    'Produktkatalog & Freigaben',
+  orders:      'Bestellungsverwaltung',
+  payments:    'Zahlungen & Auszahlungen',
+  returns:     'Rückgaben & Erstattungen',
+  analytics:   'Phase 2',
+  content:     'Phase 2',
+  support:     'Phase 2',
+  storefront:  'Sortiment kuratieren — Trendy, Drops & Empfehlungen',
 }
 
 function ComingSoon({ title }: { title: string }) {
@@ -330,13 +334,14 @@ export default function AdminPage() {
           {activeTab === 'overview'  && <Overview orders={orders} brands={brands} products={products} customers={customers} />}
           {activeTab === 'customers' && <Customers orders={orders} />}
           {activeTab === 'brands'    && <Brands />}
-          {activeTab === 'products'  && <Products />}
+          {activeTab === 'products'  && <Products orders={orders} />}
           {activeTab === 'orders'    && <Orders customers={customers} />}
           {activeTab === 'payments'  && <Payments brands={brands} />}
           {activeTab === 'returns'   && <Returns customers={customers} />}
-          {activeTab === 'analytics' && <Analytics />}
-          {activeTab === 'content'   && <ComingSoon title="Content Moderation" />}
-          {activeTab === 'support'   && <ComingSoon title="Support" />}
+          {activeTab === 'analytics'   && <Analytics />}
+          {activeTab === 'storefront'  && <Storefront products={products} />}
+          {activeTab === 'content'     && <ComingSoon title="Content Moderation" />}
+          {activeTab === 'support'     && <ComingSoon title="Support" />}
         </div>
       </main>
     </div>

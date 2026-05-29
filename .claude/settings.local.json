@@ -58,7 +58,16 @@
       "Bash(node screenshot-vendor.mjs)",
       "PowerShell(Test-NetConnection *)",
       "PowerShell(npm list *)",
-      "Bash(dir \"app\\\\\\(dashboard\\)\\\\dashboard\\\\admin\" /b /s)"
+      "Bash(dir \"app\\\\\\(dashboard\\)\\\\dashboard\\\\admin\" /b /s)",
+      "Bash(Start-Sleep -Seconds 4)",
+      "Bash(Get-Content \"C:\\\\Users\\\\david\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-david-OneDrive-Desktop-enunas\\\\409f5f27-9ed1-4fb6-bd9d-a4c7f8a5e835\\\\tasks\\\\bp0hm0bir.output\" -Tail 5)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const lines=fs.readFileSync\\('app/\\(dashboard\\)/dashboard/vendor/_components/vshared.tsx','utf8'\\).split\\('\\\\n'\\);lines.slice\\(511,518\\).forEach\\(\\(l,i\\)=>console.log\\(i+512,JSON.stringify\\(l\\)\\)\\)\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const lines=fs.readFileSync\\('app/\\(dashboard\\)/dashboard/vendor/_components/vshared.tsx','utf8'\\).split\\('\\\\n'\\);lines.slice\\(511,517\\).forEach\\(\\(l,i\\)=>console.log\\(i+512,JSON.stringify\\(l\\)\\)\\)\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const p='app/\\(dashboard\\)/dashboard/vendor/_components/vshared.tsx';let c=fs.readFileSync\\(p,'utf8'\\);const before=c.includes\\('props?.payload?.label'\\);console.log\\('contains old:',before\\);const idx=c.indexOf\\('props?.payload?.label'\\);console.log\\('at char:',idx,c.slice\\(idx-80,idx+60\\)\\)\")",
+      "Bash(node fix-vshared.js)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const lines=fs.readFileSync\\('app/\\(dashboard\\)/dashboard/vendor/_components/vshared.tsx','utf8'\\).split\\('\\\\n'\\);[513,514,515,549,550,551].forEach\\(i=>console.log\\(i+1,lines[i]\\)\\)\")",
+      "Bash(del *)"
     ]
   }
 }

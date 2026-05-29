@@ -131,7 +131,6 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
         eyebrow="Verwaltung"
         title="Bestellungen"
         italicTitle="verwaltung."
-        sub={`${orders.filter(o => o.status === 'RETURN_REQUESTED').length} Rückgaben ausstehend · ${orders.length} Bestellungen gesamt`}
       />
 
       <div className="flex items-center gap-3 flex-wrap">

@@ -3,16 +3,36 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { adminApi } from '@/lib/api'
 import type { AdminCustomer, ApiOrder } from '@/types/api'
-import { PageHeader, KPIGrid, KPICell, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt, fmtEur, dailyCounts, weekDeltaStr } from './shared'
+import { PageHeader, KPIGrid, KPICell, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, SelectFilter, TH, TD, TableRow, fmt, fmtEur, dailyCounts, weekDeltaStr } from './shared'
 import { UserX, UserCheck, UserMinus, ChevronDown, ChevronUp } from 'lucide-react'
 
-type Filter = 'all' | 'active' | 'suspended' | 'new'
+type Filter      = 'all' | 'active' | 'suspended' | 'new'
+type SpendFilter = 'all' | 'none' | 'low' | 'mid' | 'high' | 'vip'
+type SortBy      = 'newest' | 'oldest' | 'spend_desc' | 'spend_asc' | 'orders_desc' | 'name'
 
 const FILTERS: { id: Filter; label: string }[] = [
   { id: 'all',       label: 'Alle' },
   { id: 'new',       label: 'Neu (7d)' },
   { id: 'active',    label: 'Aktiv' },
   { id: 'suspended', label: 'Gesperrt' },
+]
+
+const SPEND_FILTER_OPTIONS = [
+  { value: 'all',  label: 'Alle Ausgaben' },
+  { value: 'none', label: 'Kein Kauf' },
+  { value: 'low',  label: '< €100' },
+  { value: 'mid',  label: '€100 – €499' },
+  { value: 'high', label: '€500 – €999' },
+  { value: 'vip',  label: 'VIP ≥ €1.000' },
+]
+
+const SORT_OPTIONS = [
+  { value: 'newest',      label: 'Neueste zuerst' },
+  { value: 'oldest',      label: 'Älteste zuerst' },
+  { value: 'spend_desc',  label: 'Meiste Ausgaben ↓' },
+  { value: 'spend_asc',   label: 'Wenigste Ausgaben ↑' },
+  { value: 'orders_desc', label: 'Meiste Bestellungen ↓' },
+  { value: 'name',        label: 'Name A–Z' },
 ]
 
 function ActionBtn({
@@ -43,26 +63,65 @@ function ActionBtn({
 export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
   const [customers, setCustomers] = useState<AdminCustomer[]>([])
   const [loading, setLoading]     = useState(true)
-  const [filter, setFilter]       = useState<Filter>('all')
-  const [search, setSearch]       = useState('')
-  const [expanded, setExpanded]   = useState<string | null>(null)
-  const [acting, setActing]       = useState<string | null>(null)
+  const [filter, setFilter]           = useState<Filter>('all')
+  const [spendFilter, setSpendFilter] = useState<SpendFilter>('all')
+  const [sortBy, setSortBy]           = useState<SortBy>('newest')
+  const [search, setSearch]           = useState('')
+  const [expanded, setExpanded]       = useState<string | null>(null)
+  const [acting, setActing]           = useState<string | null>(null)
 
   useEffect(() => {
     adminApi.customers.getAll().catch(() => []).then(setCustomers).finally(() => setLoading(false))
   }, [])
 
-  const cutoff7d = new Date(Date.now() - 7 * 86400000)
+  const spendMap = useMemo(() => {
+    const m = new Map<string, { total: number; count: number }>()
+    for (const o of orders) {
+      if (!o.userId) continue
+      const prev = m.get(o.userId) ?? { total: 0, count: 0 }
+      m.set(o.userId, { total: prev.total + o.totalAmount, count: prev.count + 1 })
+    }
+    return m
+  }, [orders])
 
-  const visible = customers.filter(c => {
+  function getSpend(c: AdminCustomer) {
+    return spendMap.get(c.id ?? '') ?? spendMap.get(c.userId ?? '') ?? { total: 0, count: 0 }
+  }
+
+  const visible = useMemo(() => {
     const q = search.toLowerCase()
-    const matchSearch = !q || c.email.toLowerCase().includes(q) || c.firstName?.toLowerCase().includes(q) || c.lastName?.toLowerCase().includes(q)
-    if (!matchSearch) return false
-    if (filter === 'active')    return c.status !== 'SUSPENDED' && c.status !== 'DEACTIVATED'
-    if (filter === 'suspended') return c.status === 'SUSPENDED'
-    if (filter === 'new')       return c.createdAt ? new Date(c.createdAt) > cutoff7d : false
-    return true
-  })
+    const cutoff7d = new Date(Date.now() - 7 * 86400000)
+    const filtered = customers.filter(c => {
+      const matchSearch = !q || c.email.toLowerCase().includes(q) || c.firstName?.toLowerCase().includes(q) || c.lastName?.toLowerCase().includes(q)
+      if (!matchSearch) return false
+      if (filter === 'active')    return c.status !== 'SUSPENDED' && c.status !== 'DEACTIVATED'
+      if (filter === 'suspended') return c.status === 'SUSPENDED'
+      if (filter === 'new')       return c.createdAt ? new Date(c.createdAt) > cutoff7d : false
+      const spend = (spendMap.get(c.id ?? '') ?? spendMap.get(c.userId ?? ''))?.total ?? 0
+      if (spendFilter === 'none') return spend === 0
+      if (spendFilter === 'low')  return spend > 0 && spend < 100
+      if (spendFilter === 'mid')  return spend >= 100 && spend < 500
+      if (spendFilter === 'high') return spend >= 500 && spend < 1000
+      if (spendFilter === 'vip')  return spend >= 1000
+      return true
+    })
+    return [...filtered].sort((a, b) => {
+      const sa = (spendMap.get(a.id ?? '') ?? spendMap.get(a.userId ?? ''))?.total ?? 0
+      const sb = (spendMap.get(b.id ?? '') ?? spendMap.get(b.userId ?? ''))?.total ?? 0
+      const oa = (spendMap.get(a.id ?? '') ?? spendMap.get(a.userId ?? ''))?.count ?? 0
+      const ob = (spendMap.get(b.id ?? '') ?? spendMap.get(b.userId ?? ''))?.count ?? 0
+      if (sortBy === 'spend_desc')  return sb - sa
+      if (sortBy === 'spend_asc')   return sa - sb
+      if (sortBy === 'orders_desc') return ob - oa
+      if (sortBy === 'oldest')      return new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime()
+      if (sortBy === 'name') {
+        const na = [a.firstName, a.lastName].filter(Boolean).join(' ')
+        const nb = [b.firstName, b.lastName].filter(Boolean).join(' ')
+        return na.localeCompare(nb, 'de')
+      }
+      return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+    })
+  }, [customers, search, filter, spendFilter, sortBy, spendMap])
 
   const kpiData = useMemo(() => {
     const now = new Date()
@@ -126,7 +185,6 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
         eyebrow="Verwaltung"
         title="Kunden"
         italicTitle="verwaltung."
-        sub={`${customers.filter(c => new Date(c.createdAt ?? '') > new Date(Date.now() - 7 * 86400000)).length} neu (7d) · ${customers.length} Kunden gesamt`}
       />
 
       <KPIGrid>
@@ -156,7 +214,17 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
       </KPIGrid>
 
       <div className="flex items-center gap-3 flex-wrap">
-        <FilterBar options={FILTERS} value={filter} onChange={v => setFilter(v as Filter)} />
+        <FilterBar options={FILTERS} value={filter} onChange={v => { setFilter(v as Filter); setSpendFilter('all') }} />
+        <SelectFilter
+          value={spendFilter}
+          onChange={v => { setSpendFilter(v as SpendFilter); setFilter('all') }}
+          options={SPEND_FILTER_OPTIONS}
+        />
+        <SelectFilter
+          value={sortBy}
+          onChange={v => setSortBy(v as SortBy)}
+          options={SORT_OPTIONS}
+        />
         <div className="flex-1 min-w-[200px] max-w-xs">
           <SearchInput value={search} onChange={setSearch} placeholder="Name oder E-Mail suchen…" />
         </div>
@@ -171,6 +239,7 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
                 <TH>Name</TH>
                 <TH>E-Mail</TH>
                 <TH>Land</TH>
+                <TH>Ausgaben</TH>
                 <TH>Registriert</TH>
                 <TH>Status</TH>
                 <TH>Aktionen</TH>
@@ -188,6 +257,18 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
                     </TD>
                     <TD className="text-[#6B6B6B]">{c.email}</TD>
                     <TD className="text-[#6B6B6B]">{c.country || '—'}</TD>
+                    <TD>
+                      {(() => {
+                        const s = getSpend(c)
+                        if (s.count === 0) return <span className="text-[11px] text-[#C0C0BC]">—</span>
+                        return (
+                          <div style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                            <span className="text-[12px] font-medium text-[#0A0A0A]">{fmtEur(s.total)}</span>
+                            <span className="text-[10px] text-[#9B9B9B] ml-1">{s.count}×</span>
+                          </div>
+                        )
+                      })()}
+                    </TD>
                     <TD className="text-[#6B6B6B]">{c.createdAt ? fmt(c.createdAt) : '—'}</TD>
                     <TD>
                       <StatusBadge status={c.status ?? 'ACTIVE'} />
@@ -223,7 +304,7 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
 
                   {expanded === c.id && (
                     <tr className="border-b border-[#F0F0EB]" style={{ background: '#F8F8F5' }}>
-                      <td colSpan={7} className="px-6 py-5">
+                      <td colSpan={8} className="px-6 py-5">
                         <div className="grid grid-cols-3 gap-6">
                           <div>
                             <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-1.5">Kunden-ID</p>

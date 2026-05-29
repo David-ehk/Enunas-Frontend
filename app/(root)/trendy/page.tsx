@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import HeroTrendy from './components/HeroTrendy'
+import CuratedTrendySection from './components/CuratedSection'
 
 export const metadata: Metadata = {
   title: "Enunas - Premium Fashion & Streetwear",
@@ -9,13 +10,10 @@ export const metadata: Metadata = {
 export default function page() {
   return (
     <div>
-        <section>
-          <HeroTrendy/>
-        </section>
-
-        <section>
-        </section>
-
+      <section>
+        <HeroTrendy />
+      </section>
+      <CuratedTrendySection />
     </div>
   )
 }
