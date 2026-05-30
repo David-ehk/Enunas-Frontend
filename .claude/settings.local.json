@@ -67,7 +67,12 @@
       "Bash(node -e \"const fs=require\\('fs'\\);const p='app/\\(dashboard\\)/dashboard/vendor/_components/vshared.tsx';let c=fs.readFileSync\\(p,'utf8'\\);const before=c.includes\\('props?.payload?.label'\\);console.log\\('contains old:',before\\);const idx=c.indexOf\\('props?.payload?.label'\\);console.log\\('at char:',idx,c.slice\\(idx-80,idx+60\\)\\)\")",
       "Bash(node fix-vshared.js)",
       "Bash(node -e \"const fs=require\\('fs'\\);const lines=fs.readFileSync\\('app/\\(dashboard\\)/dashboard/vendor/_components/vshared.tsx','utf8'\\).split\\('\\\\n'\\);[513,514,515,549,550,551].forEach\\(i=>console.log\\(i+1,lines[i]\\)\\)\")",
-      "Bash(del *)"
+      "Bash(del *)",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_console_messages",
+      "Bash(kill %1)",
+      "Bash(rm -rf .playwright-mcp sb-*.png)",
+      "PowerShell(Get-Process *)"
     ]
   }
 }
