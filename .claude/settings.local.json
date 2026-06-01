@@ -72,7 +72,12 @@
       "mcp__playwright__browser_console_messages",
       "Bash(kill %1)",
       "Bash(rm -rf .playwright-mcp sb-*.png)",
-      "PowerShell(Get-Process *)"
+      "PowerShell(Get-Process *)",
+      "Bash(Start-Sleep -Seconds 5)",
+      "Bash(Get-Content \"C:\\\\Users\\\\david\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-david-OneDrive-Desktop-enunas\\\\6bee8a4a-6d67-4f37-ab65-b93d6f1b984e\\\\tasks\\\\bjavtkmjp.output\" -Tail 10)",
+      "Bash(npx --yes serve . -p 4321)",
+      "Bash(python -m http.server 4321)",
+      "Bash(curl -s http://localhost:4321/Footer.html)"
     ]
   }
 }

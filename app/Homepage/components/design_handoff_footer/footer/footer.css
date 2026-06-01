@@ -1,0 +1,234 @@
+/* ============================================================
+   Enunas Storefront — Footer · v2 "The Colophon"
+   Same language as the Mega Navigation: editorial, sharp corners,
+   1px hairlines, tracked League Spartan, italic Cormorant, one
+   accent. Three surface treatments (purple / ink / cream).
+   ============================================================ */
+
+:root {
+  --cream:    #F5F5F0;
+  --paper:    #FBFBF8;
+  --white:    #FFFFFF;
+  --ink:      #0A0A0A;
+  --gray-m:   #6B6B6B;
+  --hair:     #E2E2DC;
+  --aubergine:#370E4D;
+
+  --accent:   #370E4D;
+
+  --ease:     cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-q:   cubic-bezier(0.25, 1, 0.5, 1);
+  --serif:    'Cormorant Garamond', Garamond, Georgia, serif;
+  --sans:     'League Spartan', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--sans);
+  background: #BFBDB7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+button, a { font-family: inherit; }
+svg { display: block; }
+
+/* spacer so the footer can be seen sitting at the base of a page */
+.page-filler {
+  height: 30vh; min-height: 220px;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 40px;
+  color: rgba(0,0,0,0.32);
+  font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase;
+}
+
+/* ─── Surface theming ─────────────────────────────────────────── */
+.foot {
+  --fg:       #FFFFFF;
+  --muted:    rgba(255,255,255,0.62);
+  --faint:    rgba(255,255,255,0.40);
+  --hair-c:   rgba(255,255,255,0.16);
+  --hair-str: rgba(255,255,255,0.42);
+  --foot-bg:  var(--aubergine);
+  --acc:      color-mix(in oklab, var(--accent) 42%, #ffffff);
+  --tile-bg:  #FFFFFF;
+  --tile-bd:  transparent;
+}
+.foot[data-surface="ink"] {
+  --foot-bg: var(--ink);
+  --acc: color-mix(in oklab, var(--accent) 55%, #ffffff);
+}
+.foot[data-surface="cream"] {
+  --fg:     #0A0A0A;
+  --muted:  #6B6B6B;
+  --faint:  #9A9A93;
+  --hair-c: var(--hair);
+  --hair-str: #C9C9C1;
+  --foot-bg: var(--cream);
+  --acc:    var(--accent);
+  --tile-bg: #FFFFFF;
+  --tile-bd: var(--hair);
+}
+
+/* ─── Shell ───────────────────────────────────────────────────── */
+.foot {
+  position: relative;
+  background: var(--foot-bg); color: var(--fg);
+  padding: 92px 64px 30px;
+  transition: background 600ms var(--ease), color 600ms var(--ease);
+}
+.foot-inner { max-width: 1680px; margin: 0 auto; position: relative; }
+
+/* registration corner ticks — sharp editorial detail */
+.foot-inner::before, .foot-inner::after {
+  content: ""; position: absolute; width: 15px; height: 15px;
+  border: 0 solid var(--faint); opacity: 0.7; pointer-events: none;
+}
+.foot-inner::before { top: -22px; right: 0; border-top-width: 1px; border-right-width: 1px; }
+.foot-inner::after  { bottom: 64px; left: 0; border-bottom-width: 1px; border-left-width: 1px; }
+
+/* ─── Colophon band: wordmark + index ─────────────────────────── */
+.foot-top {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 40px; padding-bottom: 54px;
+  border-bottom: 1px solid var(--hair-c);
+}
+.foot-mark {
+  font-family: var(--serif); font-weight: 300;
+  font-size: 64px; line-height: 0.9; letter-spacing: 0.01em;
+}
+.foot-mark em { font-style: italic; }
+.foot-tagline {
+  text-align: right; max-width: 340px;
+  font-size: 11px; letter-spacing: 0.26em; text-transform: uppercase;
+  color: var(--muted); line-height: 1.9;
+}
+
+/* ─── Column grid ─────────────────────────────────────────────── */
+.foot-cols {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) 1.1fr;
+  gap: 40px;
+  padding: 56px 0 64px;
+}
+.col-head {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-bottom: 26px;
+}
+.col-idx {
+  font-size: 10px; letter-spacing: 0.1em; color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+.col-title {
+  font-size: 12px; letter-spacing: 0.26em; text-transform: uppercase; font-weight: 500;
+  color: var(--fg);
+}
+.col-list { display: flex; flex-direction: column; }
+.col-link {
+  position: relative; display: inline-flex; align-items: center; width: fit-content;
+  padding: 8px 0;
+  font-size: 13.5px; letter-spacing: 0.03em; color: var(--muted);
+  text-decoration: none; background: none; border: 0; text-align: left;
+  transition: color 260ms var(--ease-q);
+}
+.col-link::after {
+  content: ""; position: absolute; left: 0; bottom: 6px; height: 1px; width: 100%;
+  background: var(--acc); transform: scaleX(0); transform-origin: left;
+  transition: transform 420ms var(--ease);
+}
+.col-link:hover { color: var(--fg); }
+.foot[data-surface="cream"] .col-link:hover { color: var(--acc); }
+.col-link:hover::after { transform: scaleX(1); }
+
+/* ─── Payment column ──────────────────────────────────────────── */
+.pay-tiles { display: grid; grid-template-columns: repeat(3, 56px); gap: 8px; }
+.pay-tile {
+  width: 56px; height: 38px;
+  display: grid; place-items: center;
+  background: var(--tile-bg); border: 1px solid var(--tile-bd);
+  transition: transform 320ms var(--ease);
+}
+.pay-tile:hover { transform: translateY(-3px); }
+.pay-note {
+  margin-top: 16px;
+  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--faint);
+  display: flex; align-items: center; gap: 8px;
+}
+.pay-note .lock { display: flex; }
+
+/* ─── Social + newsletter-less utility row ────────────────────── */
+.foot-utility {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 28px; padding: 30px 0;
+  border-top: 1px solid var(--hair-c);
+  border-bottom: 1px solid var(--hair-c);
+}
+.social { display: flex; gap: 10px; }
+.social-btn {
+  width: 42px; height: 42px;
+  display: grid; place-items: center;
+  background: none; border: 1px solid var(--hair-str); color: var(--fg);
+  cursor: pointer;
+  transition: background 280ms var(--ease-q), color 280ms var(--ease-q), border-color 280ms var(--ease-q);
+}
+.social-btn:hover { background: var(--fg); color: var(--foot-bg); border-color: var(--fg); }
+.foot[data-surface="cream"] .social-btn:hover { background: var(--acc); color: #fff; border-color: var(--acc); }
+
+.locale {
+  display: inline-flex; align-items: center; gap: 11px;
+  padding: 13px 18px; border: 1px solid var(--hair-str); color: var(--fg);
+  background: none; cursor: pointer;
+  font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+  transition: border-color 280ms var(--ease-q);
+}
+.locale:hover { border-color: var(--fg); }
+.locale .globe { display: flex; opacity: 0.8; }
+
+/* ─── Legal bar ───────────────────────────────────────────────── */
+.foot-legal {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 24px; padding-top: 26px; flex-wrap: wrap;
+}
+.foot-legal .copy {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
+}
+.foot-legal .copy svg { opacity: 0.8; }
+.foot-legal .to-top {
+  display: inline-flex; align-items: center; gap: 9px;
+  background: none; border: 0; cursor: pointer; padding: 4px 0;
+  font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
+  transition: color 240ms var(--ease-q);
+}
+.foot-legal .to-top svg { transition: transform 320ms var(--ease); }
+.foot-legal .to-top:hover { color: var(--fg); }
+.foot-legal .to-top:hover svg { transform: translateY(-3px); }
+
+/* ─── Reveal (gated on .armed so content is never stuck hidden) ── */
+.foot.armed .reveal-item { opacity: 0; transform: translateY(16px); }
+.foot.armed.in .reveal-item { animation: footIn 760ms var(--ease) forwards; }
+.foot.armed[data-motion="subtle"].in .reveal-item { animation-duration: 460ms; }
+.foot.armed[data-motion="expressive"].in .reveal-item { animation-duration: 1080ms; }
+.foot.armed.in .reveal-item:nth-child(1) { animation-delay: 60ms; }
+.reveal-d1 { animation-delay: 120ms !important; }
+.reveal-d2 { animation-delay: 200ms !important; }
+.reveal-d3 { animation-delay: 280ms !important; }
+.reveal-d4 { animation-delay: 360ms !important; }
+.reveal-d5 { animation-delay: 440ms !important; }
+@keyframes footIn { to { opacity: 1; transform: translateY(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .foot.armed .reveal-item { opacity: 1; transform: none; animation: none !important; }
+}
+
+@media (max-width: 1080px) {
+  .foot-cols { grid-template-columns: repeat(2, 1fr); gap: 44px 32px; }
+  .foot-top { flex-direction: column; align-items: flex-start; gap: 22px; }
+  .foot-tagline { text-align: left; }
+}
+@media (max-width: 620px) {
+  .foot { padding: 64px 28px 28px; }
+  .foot-cols { grid-template-columns: 1fr; }
+  .foot-mark { font-size: 48px; }
+  .foot-utility { flex-direction: column; align-items: flex-start; gap: 22px; }
+}

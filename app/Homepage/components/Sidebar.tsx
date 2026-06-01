@@ -605,7 +605,6 @@ const MEGA_CSS = `
   .mn-rail-link  { height: 56px; padding: 0 24px; }
   .mn-rail-link::after { left: 24px; right: 24px; }
   .mn-rail-foot  { padding: 16px 24px 20px; }
-  .mn-sub-search { height: 64px; padding: 0 24px; }
   .mn-sub-body   { padding: 22px 24px 22px; }
   .mn-sub-title  { font-size: 32px; }
 

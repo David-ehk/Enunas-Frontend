@@ -8,7 +8,7 @@ import type { AdminBrand, AdminCustomer, AdminApiProduct, ApiOrder, AdminPayout 
 import {
   LayoutDashboard, Users, Store, Package,
   ShoppingBag, CreditCard, RotateCcw, BarChart2,
-  ShieldAlert, MessageSquare, LogOut, AlertCircle, Sparkles,
+  ShieldAlert, MessageSquare, LogOut, AlertCircle, Sparkles, Tag,
 } from 'lucide-react'
 
 import Overview    from './_components/Overview'
@@ -20,10 +20,11 @@ import Payments    from './_components/Payments'
 import Returns     from './_components/Returns'
 import Analytics   from './_components/Analytics'
 import Storefront  from './_components/Storefront'
+import Discounts   from './_components/Discounts'
 
 type Tab =
   | 'overview' | 'customers' | 'brands' | 'products'
-  | 'orders'   | 'payments'  | 'returns'
+  | 'orders'   | 'payments'  | 'returns' | 'discounts'
   | 'analytics'| 'content'   | 'support' | 'storefront'
 
 interface NavItem { id: Tab; label: string; icon: React.ElementType; phase2?: boolean }
@@ -50,6 +51,7 @@ const NAV_SECTIONS: { group: string; items: NavItem[] }[] = [
     items: [
       { id: 'payments',   label: 'Zahlungen',      icon: CreditCard },
       { id: 'returns',    label: 'Rückgaben',      icon: RotateCcw },
+      { id: 'discounts',  label: 'Rabattcodes',    icon: Tag },
     ],
   },
   {
@@ -70,6 +72,7 @@ const TITLES: Record<Tab, string> = {
   orders:      'Bestellungen',
   payments:    'Zahlungen',
   returns:     'Rückgaben',
+  discounts:   'Rabattcodes',
   analytics:   'Analytics',
   content:     'Content Moderation',
   support:     'Support',
@@ -84,6 +87,7 @@ const SUBTITLES: Record<Tab, string> = {
   orders:      'Bestellungsverwaltung',
   payments:    'Zahlungen & Auszahlungen',
   returns:     'Rückgaben & Erstattungen',
+  discounts:   'Plattform- & Marken-Rabattcodes',
   analytics:   'Phase 2',
   content:     'Phase 2',
   support:     'Phase 2',
@@ -338,6 +342,7 @@ export default function AdminPage() {
           {activeTab === 'orders'    && <Orders customers={customers} />}
           {activeTab === 'payments'  && <Payments brands={brands} />}
           {activeTab === 'returns'   && <Returns customers={customers} />}
+          {activeTab === 'discounts'   && <Discounts />}
           {activeTab === 'analytics'   && <Analytics />}
           {activeTab === 'storefront'  && <Storefront products={products} />}
           {activeTab === 'content'     && <ComingSoon title="Content Moderation" />}

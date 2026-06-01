@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/app/context/AuthContext'
 import { brandApi } from '@/lib/api/modules/brandApi'
 import type { ApiBrandPartner } from '@/types/api'
-import { LayoutDashboard, Package, ShoppingBag, BarChart2, RotateCcw, CreditCard, Megaphone, Settings2, LogOut } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingBag, BarChart2, RotateCcw, CreditCard, Megaphone, Settings2, LogOut, Tag } from 'lucide-react'
 import { StatusBadge } from '../admin/_components/shared'
 import Overview from './_components/Overview'
 import Products from './_components/Products'
@@ -15,8 +15,9 @@ import Analytics from './_components/Analytics'
 import VendorReturns from './_components/VendorReturns'
 import Payouts from './_components/Payouts'
 import Marketing from './_components/Marketing'
+import Discounts from './_components/Discounts'
 
-type Tab = 'overview' | 'orders' | 'products' | 'analytics' | 'returns' | 'payouts' | 'marketing' | 'settings'
+type Tab = 'overview' | 'orders' | 'products' | 'analytics' | 'returns' | 'payouts' | 'marketing' | 'discounts' | 'settings'
 
 const NAV: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: 'overview',   label: 'Übersicht',     icon: LayoutDashboard },
@@ -26,6 +27,7 @@ const NAV: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: 'returns',    label: 'Retouren',      icon: RotateCcw },
   { id: 'payouts',    label: 'Auszahlungen',  icon: CreditCard },
   { id: 'marketing',  label: 'Marketing',     icon: Megaphone },
+  { id: 'discounts',  label: 'Rabattcodes',   icon: Tag },
   { id: 'settings',   label: 'Einstellungen', icon: Settings2 },
 ]
 
@@ -114,6 +116,7 @@ export default function VendorPage() {
           {tab === 'returns'    && <VendorReturns />}
           {tab === 'payouts'    && <Payouts />}
           {tab === 'marketing'  && <Marketing />}
+          {tab === 'discounts'  && <Discounts />}
           {tab === 'settings'   && <SettingsTab brand={brand} onUpdate={setBrand} />}
         </div>
       </main>

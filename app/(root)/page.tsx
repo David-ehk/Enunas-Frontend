@@ -80,9 +80,7 @@ export default function Home() {
       <section className="px-4 sm:px-8 lg:px-16 py-6 sm:py-8 w-full">
         <Subscribe />
       </section>
-      <section className="bg-[#370E4D] w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
-        <Footer />
-      </section>
+      <Footer />
     </main>
   );
 }

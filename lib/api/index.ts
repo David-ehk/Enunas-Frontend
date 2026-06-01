@@ -10,6 +10,7 @@ export { wardrobeApi } from './modules/wardrobeApi';
 export { brandApi } from './modules/brandApi';
 export { adminApi } from './modules/adminApi';
 export { payoutApi } from './modules/payoutApi';
+export { discountsApi } from './modules/discountsApi';
 export { apiProductToProduct, apiProductToCardShape } from './productAdapter';
 export type { ProductCardShape } from './productAdapter';
 export { resolveProductBySlug, resolveProductWithMeta } from './productResolver';

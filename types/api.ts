@@ -176,3 +176,39 @@ export interface ApiProductImage {
   url: string;
   createdAt?: string;
 }
+
+export type DiscountType = 'ADMIN' | 'BRAND';
+
+export interface DiscountResponse {
+  id: number;
+  code: string;
+  type: DiscountType;
+  percent: number;
+  brandId: number | null;
+  brandName?: string;
+  validFrom: string | null;
+  validUntil: string | null;
+  maxUses: number | null;
+  usedCount: number;
+  active: boolean;
+  createdByUserId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateDiscountRequest {
+  code: string;
+  percent: number;
+  validFrom?: string | null;
+  validUntil?: string | null;
+  maxUses?: number | null;
+  active: boolean;
+}
+
+export interface UpdateDiscountRequest {
+  percent?: number;
+  validFrom?: string | null;
+  validUntil?: string | null;
+  maxUses?: number | null;
+  active?: boolean;
+}
