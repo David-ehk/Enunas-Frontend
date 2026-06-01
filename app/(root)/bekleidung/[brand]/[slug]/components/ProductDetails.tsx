@@ -11,6 +11,7 @@ import CatalogueTags from './CatalogueTags'
 import SizeGuideRow from './SizeGuideRow'
 import StockIndicator from './StockIndicator'
 import PflegeAccordionContent from './PflegeAccordionContent'
+import StickyAddToCart from './StickyAddToCart'
 import Link from 'next/link'
 import { X } from 'lucide-react'
 import { Product, findVariant, uniqueColors } from '../types/product'
@@ -45,7 +46,6 @@ export default function ProductDetails({
   const [selectedColor, setSelectedColor] = useState<Color | null>(colorsForSelector[0] ?? null)
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [copiedSku, setCopiedSku] = useState(false)
-  const [showFloatingBar, setShowFloatingBar] = useState(false)
   const [showSizeModal, setShowSizeModal] = useState(false)
   const [openAccordion, setOpenAccordion] = useState<string | null>('details')
 
@@ -62,13 +62,6 @@ export default function ProductDetails({
 
   const formattedPrice = new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(price)
 
-  useEffect(() => {
-    const onScroll = () => {
-      if (ctaRef.current) setShowFloatingBar(ctaRef.current.getBoundingClientRect().bottom < 0)
-    }
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
 
   // Reset size when color changes if selected size no longer available for new color
   const handleColorSelect = (color: Color) => {
@@ -316,37 +309,16 @@ export default function ProductDetails({
         </div>
       </div>
 
-      {/* ── Floating sticky bar ─────────────────────────── */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-enunas-gray-light transition-transform duration-500 ease-out-expo"
-        style={{ transform: showFloatingBar ? 'translateY(0)' : 'translateY(100%)' }}
-      >
-        <div className="max-w-[1800px] mx-auto px-6 lg:px-12 py-4 flex items-center gap-6">
-          <div className="flex-1 min-w-0">
-            <p className="text-sm text-enunas-black truncate" style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}>
-              {product.name}
-            </p>
-            <div className="flex items-center gap-3 mt-0.5">
-              <span className="text-xs text-enunas-gray-dark" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                {formattedPrice}
-              </span>
-              {selectedSize && (
-                <span className="text-[10px] text-enunas-gray-medium uppercase tracking-[0.1em]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                  Größe: {selectedSize}
-                </span>
-              )}
-            </div>
-          </div>
-          <button
-            onClick={handleCta}
-            disabled={isOutOfStock}
-            className="px-10 py-3.5 bg-enunas-purple text-white hover:bg-enunas-purple-dark transition-colors duration-300 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
-            style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase' }}
-          >
-            {ctaLabel}
-          </button>
-        </div>
-      </div>
+      {/* ── Sticky add-to-cart bar ──────────────────────── */}
+      <StickyAddToCart
+        productName={product.name}
+        formattedPrice={formattedPrice}
+        selectedSize={selectedSize}
+        ctaLabel={ctaLabel}
+        isOutOfStock={isOutOfStock}
+        onCta={handleCta}
+        watchRef={ctaRef}
+      />
 
       {/* ── Size selection modal ─────────────────────────── */}
       {showSizeModal && (
