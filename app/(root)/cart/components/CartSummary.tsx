@@ -62,9 +62,11 @@ export default function CartSummary({ subtotal }: CartSummaryProps) {
 
       <Link
         href="/checkout"
-        className="block w-full text-center px-5 py-5 bg-enunas-purple text-white font-league-spartan text-sm tracking-[0.2em] uppercase hover:bg-enunas-purple-light transition-colors duration-300 ease-out-expo mb-4"
+        className="group relative block w-full overflow-hidden bg-enunas-purple text-white text-center py-5 hover:bg-enunas-purple-dark transition-colors duration-300 ease-out-expo mb-4"
       >
-        Zur Kasse
+        <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
+        <span className="relative z-10 font-cormorant text-[18px] tracking-[0.06em]">Zur Kasse</span>
+        <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
       </Link>
 
       <p className="font-league-spartan text-[10px] tracking-[0.15em] uppercase text-enunas-gray-medium text-center mt-6 mb-3">

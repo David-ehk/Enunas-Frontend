@@ -138,9 +138,11 @@ export default function CheckoutPage() {
             </h1>
             <Link
               href="/bekleidung"
-              className="inline-block bg-enunas-purple text-white px-8 py-4 font-league-spartan text-sm tracking-[0.15em] uppercase hover:bg-enunas-purple-light transition-colors duration-200"
+              className="group relative inline-block overflow-hidden bg-enunas-purple text-white px-8 py-4 hover:bg-enunas-purple-dark transition-colors duration-300 ease-out-expo"
             >
-              Weiter einkaufen
+              <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
+              <span className="relative z-10 font-cormorant text-[18px] tracking-[0.06em]">Weiter einkaufen</span>
+              <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
             </Link>
           </div>
         </div>
@@ -226,9 +228,11 @@ export default function CheckoutPage() {
                           type="button"
                           onClick={handleLogin}
                           disabled={loginLoading}
-                          className="w-full py-3 bg-enunas-purple text-white font-league-spartan text-xs tracking-[0.15em] uppercase hover:bg-enunas-purple-light transition-colors duration-200 disabled:opacity-60"
+                          className="group relative w-full overflow-hidden bg-enunas-purple text-white py-3 hover:bg-enunas-purple-dark transition-colors duration-300 ease-out-expo disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                          {loginLoading ? 'Bitte warten…' : 'Anmelden'}
+                          <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
+                          <span className="relative z-10 font-cormorant text-[18px] tracking-[0.06em]">{loginLoading ? 'Bitte warten…' : 'Anmelden'}</span>
+                          <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
                         </button>
                       </div>
                     )}
@@ -323,9 +327,11 @@ export default function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={loading || !isAuthenticated}
-                  className="w-full py-4 bg-enunas-purple text-white font-league-spartan text-sm tracking-[0.15em] uppercase hover:bg-enunas-purple-light transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="group relative w-full overflow-hidden bg-enunas-purple text-white py-4 hover:bg-enunas-purple-dark transition-colors duration-300 ease-out-expo disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Bitte warten…' : 'Zur Zahlung'}
+                  <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
+                  <span className="relative z-10 font-cormorant text-[18px] tracking-[0.06em]">{loading ? 'Bitte warten…' : 'Zur Zahlung'}</span>
+                  <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
                 </button>
 
                 {!isAuthenticated && (

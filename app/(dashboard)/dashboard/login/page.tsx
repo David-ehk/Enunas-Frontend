@@ -179,7 +179,7 @@ export default function DashboardLoginPage() {
               cursor: loading ? 'not-allowed' : 'pointer',
               transition: 'background-color 300ms',
             }}
-            onMouseEnter={e => { if (!loading) e.currentTarget.style.backgroundColor = '#4A1566' }}
+            onMouseEnter={e => { if (!loading) e.currentTarget.style.backgroundColor = '#250838' }}
             onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#370E4D' }}
           >
             <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />

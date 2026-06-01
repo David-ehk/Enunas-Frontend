@@ -62,7 +62,7 @@ export default function SavedListsPage() {
           </p>
           <Link
             href="/account"
-            className="px-8 py-4 bg-enunas-purple text-white font-league-spartan text-sm tracking-[0.15em] uppercase hover:bg-enunas-purple-light transition-colors duration-200"
+            className="px-8 py-4 bg-enunas-purple text-white font-league-spartan text-sm tracking-[0.15em] uppercase hover:bg-enunas-purple-dark transition-colors duration-200"
           >
             Anmelden
           </Link>

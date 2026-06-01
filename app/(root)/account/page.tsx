@@ -1,23 +1,33 @@
 'use client'
 
-// ============================================================
-// ENUNAS — /account page (Dashboard / Übersicht)
-// Drop into: enunas/app/(root)/account/page.tsx (replaces placeholder)
-// ============================================================
-
+import { useState } from 'react'
 import Navbar from '@/app/Homepage/components/navbar'
 import Footer from '@/app/Homepage/components/footer'
 import { useAuth } from '@/app/context/AuthContext'
-import AccountSidebar from './components/AccountSidebar'
+import AccountSidebar, { type AccountSection } from './components/AccountSidebar'
 import StatCards from './components/StatCards'
 import RecentOrder from './components/RecentOrder'
 import WishlistPreview from './components/WishlistPreview'
+import Bestellungen from './components/Bestellungen'
+import Adressen from './components/Adressen'
+import Zahlungen from './components/Zahlungen'
+import Newsletter from './components/Newsletter'
+import Einstellungen from './components/Einstellungen'
 import { getMockAccountSummary, getMockWishlist } from '@/lib/account'
 
+const SECTION_TITLES: Record<AccountSection, string> = {
+  uebersicht:    'Übersicht',
+  bestellungen:  'Bestellungen',
+  wunschliste:   'Wunschliste',
+  adressen:      'Adressen',
+  zahlungen:     'Zahlungsmethoden',
+  newsletter:    'Newsletter',
+  einstellungen: 'Einstellungen',
+}
+
 export default function AccountPage() {
-  // TODO: Replace mock loaders with real API calls (e.g. SWR/React Query)
-  //   const { data: summary } = useAccountSummary()
-  //   const { data: wishlist } = useWishlist({ limit: 4 })
+  const [activeSection, setActiveSection] = useState<AccountSection>('uebersicht')
+
   const summary = getMockAccountSummary()
   const wishlist = getMockWishlist()
 
@@ -28,14 +38,12 @@ export default function AccountPage() {
     <>
       <Navbar />
 
-      {/* <main> und <header> kollidieren mit globals.css-Resets:
-          main { padding: 0 } schlägt Tailwind-Layers → inline paddingTop
-          header { position: fixed } macht Begrüßungsblock fixed → <div> */}
       <div
         className="min-h-screen bg-white pb-20 px-4 sm:px-8 lg:px-16"
         style={{ paddingTop: '96px' }}
       >
         <div className="max-w-[1280px] mx-auto">
+
           {/* Page header */}
           <div className="mb-10 lg:mb-14">
             <p className="font-league-spartan text-[11px] tracking-[0.35em] uppercase text-enunas-gray-medium mb-3 animate-fade-in">
@@ -55,22 +63,40 @@ export default function AccountPage() {
             </p>
           </div>
 
-          {/* Layout */}
+          {/* Layout: sidebar + content */}
           <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-10 lg:gap-12">
-            <AccountSidebar />
+            <AccountSidebar active={activeSection} onChange={setActiveSection} />
 
             <div>
-              <StatCards stats={summary.stats} />
-              <RecentOrder order={summary.lastOrder} />
-              <WishlistPreview items={wishlist} />
+              {/* Section heading for non-overview sections */}
+              {activeSection !== 'uebersicht' && (
+                <div className="mb-8 pb-6 border-b border-enunas-gray-light md:hidden">
+                  <p className="font-league-spartan text-[11px] tracking-[0.35em] uppercase text-enunas-gray-medium">
+                    {SECTION_TITLES[activeSection]}
+                  </p>
+                </div>
+              )}
+
+              {activeSection === 'uebersicht' && (
+                <>
+                  <StatCards stats={summary.stats} />
+                  <RecentOrder order={summary.lastOrder} />
+                  <WishlistPreview items={wishlist} />
+                </>
+              )}
+
+              {activeSection === 'bestellungen' && <Bestellungen />}
+              {activeSection === 'wunschliste'  && <WishlistPreview items={wishlist} />}
+              {activeSection === 'adressen'     && <Adressen />}
+              {activeSection === 'zahlungen'    && <Zahlungen />}
+              {activeSection === 'newsletter'   && <Newsletter />}
+              {activeSection === 'einstellungen' && <Einstellungen />}
             </div>
           </div>
         </div>
       </div>
 
-      <footer className="bg-enunas-purple w-full px-4 sm:px-8 lg:px-16 pb-8" style={{ paddingTop: '96px' }}>
-        <Footer />
-      </footer>
+      <Footer />
     </>
   )
 }

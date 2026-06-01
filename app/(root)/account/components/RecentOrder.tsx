@@ -12,6 +12,7 @@ import {
   type AccountOrder,
 } from '@/lib/account'
 import { cn } from '@/lib/utils'
+import AccountButton from './AccountButton'
 
 interface RecentOrderProps {
   order: AccountOrder | null;
@@ -45,12 +46,9 @@ function EmptyState() {
       <p className="font-league-spartan text-sm text-enunas-gray-medium mb-6">
         Sobald du eine Bestellung aufgegeben hast, findest du sie hier.
       </p>
-      <Link
-        href="/bekleidung"
-        className="inline-block bg-enunas-purple text-white font-league-spartan text-sm tracking-[0.15em] uppercase px-8 py-4 hover:bg-enunas-purple-light transition-colors duration-300 ease-out-expo"
-      >
+      <AccountButton onClick={() => { window.location.href = '/bekleidung' }}>
         Kollektion entdecken
-      </Link>
+      </AccountButton>
     </div>
   )
 }

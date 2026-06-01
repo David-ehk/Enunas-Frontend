@@ -26,9 +26,11 @@ export default function EmptyCart() {
       </p>
       <Link
         href="/bekleidung"
-        className="inline-block bg-enunas-purple text-white font-league-spartan text-sm tracking-[0.2em] uppercase px-10 py-4 hover:bg-enunas-purple-light transition-colors duration-300 ease-out-expo"
+        className="group relative inline-block overflow-hidden bg-enunas-purple text-white px-10 py-4 hover:bg-enunas-purple-dark transition-colors duration-300 ease-out-expo"
       >
-        Kollektion entdecken
+        <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
+        <span className="relative z-10 font-cormorant text-[18px] tracking-[0.06em]">Kollektion entdecken</span>
+        <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
       </Link>
     </div>
   )

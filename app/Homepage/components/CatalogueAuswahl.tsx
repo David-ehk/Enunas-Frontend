@@ -226,7 +226,7 @@ export default function KategorieAuswahl() {
                   bg-enunas-purple text-white
                   font-league-spartan text-sm tracking-[0.15em] uppercase
                   transition-all duration-300 ease-out
-                  hover:bg-enunas-purple-light
+                  hover:bg-enunas-purple-dark
                 "
               >
                 {currentKategorie?.name} entdecken

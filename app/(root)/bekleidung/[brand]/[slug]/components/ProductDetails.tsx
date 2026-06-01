@@ -233,7 +233,7 @@ export default function ProductDetails({
                 cursor: isOutOfStock ? 'not-allowed' : 'pointer',
                 transition: 'background-color 300ms',
               }}
-              onMouseEnter={e => { if (!isOutOfStock) e.currentTarget.style.backgroundColor = '#4A1566' }}
+              onMouseEnter={e => { if (!isOutOfStock) e.currentTarget.style.backgroundColor = '#250838' }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#370E4D' }}
             >
               <span className="absolute left-1/2 -translate-x-1/2 top-[10%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[75%]" />
@@ -340,7 +340,7 @@ export default function ProductDetails({
           <button
             onClick={handleCta}
             disabled={isOutOfStock}
-            className="px-10 py-3.5 bg-enunas-purple text-white hover:bg-enunas-purple-light transition-colors duration-300 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
+            className="px-10 py-3.5 bg-enunas-purple text-white hover:bg-enunas-purple-dark transition-colors duration-300 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase' }}
           >
             {ctaLabel}
@@ -396,7 +396,7 @@ export default function ProductDetails({
                           setShowSizeModal(false)
                           handleAddToCart(size)
                         }}
-                        className="py-3.5 text-center text-sm text-enunas-black border border-enunas-gray-light hover:border-enunas-purple hover:bg-enunas-purple hover:text-white transition-all duration-200"
+                        className="py-3.5 text-center text-sm text-enunas-black border border-enunas-gray-light hover:border-enunas-purple-dark hover:bg-enunas-purple-dark hover:text-white transition-all duration-200"
                         style={{
                           fontFamily: 'var(--font-league-spartan)',
                           width: `calc((100% - ${(cols - 1) * 8}px) / ${cols})`,
