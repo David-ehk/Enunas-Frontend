@@ -111,9 +111,8 @@ export default function ProductDetails({
 
   return (
     <>
-      {/* ── PDP grid ───────────────────────────────────── */}
-      <div className="max-w-[1800px] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2">
+      {/* ── PDP grid — full-bleed so gallery touches the left edge ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2">
 
           {/* LEFT — Gallery + Breadcrumb */}
           <div>
@@ -135,10 +134,7 @@ export default function ProductDetails({
           </div>
 
           {/* RIGHT — Details */}
-          <div
-            className="flex flex-col items-center text-center"
-            style={{ padding: '56px 72px 80px' }}
-          >
+          <div className="flex flex-col items-center text-center px-6 pt-10 pb-16 sm:px-12 md:px-[72px] md:pt-14 md:pb-20">
             {/* 1. Brand + Gender */}
             <div className="flex items-center gap-3.5 mb-3.5">
               <BrandLink brand={product.brandName} />
@@ -307,7 +303,6 @@ export default function ProductDetails({
             </div>
           </div>
         </div>
-      </div>
 
       {/* ── Sticky add-to-cart bar ──────────────────────── */}
       <StickyAddToCart

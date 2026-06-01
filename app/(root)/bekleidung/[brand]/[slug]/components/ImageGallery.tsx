@@ -60,7 +60,7 @@ function ImageGallery({ images, productName }: ImageGalleryProps) {
   return (
     <div className="relative w-full h-[60vh] md:h-[100vh]">
       {/* Quadrat-Indikator - Unten auf Mobile, Links auf Desktop */}
-      <div className="absolute z-20 bottom-4 left-1/2 -translate-x-1/2 flex flex-row gap-3 sm:bottom-auto md:left-4 sm:top-1/2 sm:-translate-y-1/2 sm:translate-x-0 sm:flex-col">
+      <div className="absolute z-20 bottom-4 left-1/2 -translate-x-1/2 flex flex-row gap-3 md:bottom-auto md:left-4 md:top-1/2 md:-translate-y-1/2 md:translate-x-0 md:flex-col">
         {images.map((_, index) => (
           <button
             key={index}
