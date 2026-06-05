@@ -187,7 +187,7 @@ export default function Discounts() {
       <VKPIGrid cols={4}>
         <VKPI label="Aktive Codes" value={counts.active}  delta={`${counts.total} gesamt`} deltaTone="muted" />
         <VKPI label="Verwendungen" value={counts.used}    delta="Bisher eingelöst"          deltaTone="muted" />
-        <VKPI label="Ø Rabatt"     value={`${counts.avgPct.toFixed(1).replace(/\.0$/, '')}%`} delta={`Limit: ${BRAND_MAX_PERCENT}%`} deltaTone="muted" />
+        <VKPI label="Ø Rabatt"     value={`${(counts.avgPct * 100).toFixed(1).replace(/\.0$/, '')}%`} delta={`Limit: ${BRAND_MAX_PERCENT}%`} deltaTone="muted" />
         <VKPI label="Marken-Limit" value={`${BRAND_MAX_PERCENT}%`} delta="pro Code" deltaTone="muted" />
       </VKPIGrid>
 
@@ -285,7 +285,7 @@ export default function Discounts() {
                   <VTD mono>{d.code}</VTD>
                   <VTD>
                     <span style={{ fontWeight: 600, color: '#0A0A0A' }}>
-                      {d.percent.toFixed(1).replace(/\.0$/, '')}%
+                      {(d.percent * 100).toFixed(1).replace(/\.0$/, '')}%
                     </span>
                   </VTD>
                   <VTD muted>

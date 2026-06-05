@@ -17,7 +17,7 @@ export default function CartPage() {
     return (
       <>
         <CheckoutNavbar />
-        <div className="min-h-screen bg-white pb-20 px-4 sm:px-8 lg:px-16" style={{ paddingTop: '96px' }}>
+        <div className="min-h-screen bg-white pb-20 px-4 sm:px-8 lg:px-16" style={{ paddingTop: '64px' }}>
           <EmptyCart />
         </div>
         <CartFooter />

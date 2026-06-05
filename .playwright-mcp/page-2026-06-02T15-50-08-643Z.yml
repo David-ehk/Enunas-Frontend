@@ -1,0 +1,59 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "Enunas" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - img [ref=e7]
+          - generic [ref=e10]: Sicher einkaufen
+    - generic [ref=e12]:
+      - heading "Ihr Warenkorb ist leer" [level=1] [ref=e13]
+      - link "Weiter einkaufen" [ref=e14] [cursor=pointer]:
+        - /url: /bekleidung
+        - text: Weiter einkaufen
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - paragraph [ref=e21]: Lieferung & Rückgabe
+          - paragraph [ref=e22]: Keine Zollgebühren bei deiner Bestellung. 14 Tage Rückgaberecht — kostenfrei und unkompliziert.
+        - generic [ref=e23]:
+          - paragraph [ref=e24]: Können wir dir behilflich sein?
+          - paragraph [ref=e25]: Unser Kundenservice ist Montag bis Samstag von 9:30 – 19:00 Uhr für dich da.
+          - link "contact@enunas.com" [ref=e26] [cursor=pointer]:
+            - /url: mailto:contact@enunas.com
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - paragraph [ref=e30]: Zahlungsarten
+          - generic [ref=e31]:
+            - img "Visa" [ref=e33]:
+              - generic [ref=e34]: VISA
+            - img "Mastercard" [ref=e36]
+            - img "American Express" [ref=e41]:
+              - generic [ref=e43]: AMERICAN
+              - generic [ref=e44]: EXPRESS
+            - img "PayPal" [ref=e46]:
+              - generic [ref=e47]: PayPal
+            - img "Apple Pay" [ref=e49]:
+              - generic [ref=e51]: Pay
+            - img "Klarna" [ref=e53]:
+              - generic [ref=e54]: Klarna.
+        - generic [ref=e55]:
+          - img [ref=e56]
+          - paragraph [ref=e59]: SSL-verschlüsselt · Käuferschutz
+    - complementary "Warenkorb" [ref=e60]:
+      - generic [ref=e62]:
+        - tablist [ref=e63]:
+          - tab "Warenkorb0" [selected] [ref=e64] [cursor=pointer]
+          - tab "Wunschliste0" [ref=e65] [cursor=pointer]
+        - button "Schließen" [ref=e66] [cursor=pointer]:
+          - img [ref=e67]
+      - generic [ref=e70]:
+        - img [ref=e72]
+        - generic [ref=e75]: Dein Warenkorb ist leer
+        - generic [ref=e76]: Entdecke kuratierte Designer- und Streetwear-Stücke.
+        - button "Weiter einkaufen" [ref=e77] [cursor=pointer]:
+          - text: Weiter einkaufen
+          - img [ref=e79]
+  - button "Open Next.js Dev Tools" [ref=e86] [cursor=pointer]:
+    - img [ref=e87]

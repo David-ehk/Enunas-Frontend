@@ -11,7 +11,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchOpen, setSearch] = useState(false)
-  const { openCart, itemCount } = useCart()
+  const { itemCount } = useCart()
   const { isAuthenticated } = useAuth()
 
   // Scrolleffekt transparenz
@@ -138,16 +138,16 @@ const Navbar = () => {
           </div>
 
           <div>
-            <button
+            <Link
+              href="/cart"
               className="relative cursor-pointer"
-              onClick={openCart}
               aria-label={`Warenkorb mit ${itemCount} Artikeln`}
             >
               <CartIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]"/>
               {itemCount > 0 && (
                 <span className={ICON_BADGE_CLASSES}>{itemCount > 99 ? '99+' : itemCount}</span>
               )}
-            </button>
+            </Link>
           </div>
         </div>
       </nav>

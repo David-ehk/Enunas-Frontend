@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import Sidebar from '@/app/Homepage/components/Sidebar'
 import SearchBar from '@/app/Homepage/components/Suchleiste'
@@ -8,25 +8,11 @@ import { useCart } from '@/app/context/CartContext'
 import { useAuth } from '@/app/context/AuthContext'
 
 export default function DisappearingNavbar() {
-  const [visible, setVisible] = useState(true)
-  const [scrolled, setScrolled] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
-  const lastScrollY = useRef(0)
 
-  const { openCart, itemCount } = useCart()
+  const { itemCount } = useCart()
   const { isAuthenticated } = useAuth()
-
-  useEffect(() => {
-    function handleScroll() {
-      const currentY = window.scrollY
-      setScrolled(currentY > 10)
-      setVisible(currentY < lastScrollY.current || currentY < 60)
-      lastScrollY.current = currentY
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   const HamburgerIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -49,6 +35,12 @@ export default function DisappearingNavbar() {
     </svg>
   )
 
+  const HeartIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <path d="M10.0002 17.5L8.75016 16.3604C4.50016 12.52 1.66683 9.96 1.66683 6.75C1.66683 4.19 3.68349 2.16667 6.2335 2.16667C7.66683 2.16667 9.05016 2.85 10.0002 3.93333C10.9502 2.85 12.3335 2.16667 13.7668 2.16667C16.3168 2.16667 18.3335 4.19 18.3335 6.75C18.3335 9.96 15.5002 12.52 11.2502 16.3696L10.0002 17.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+
   const CartIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path d="M5 1.66667L2.5 5.00001V16.6667C2.5 17.1087 2.67559 17.5326 2.98816 17.8452C3.30072 18.1577 3.72464 18.3333 4.16667 18.3333H15.8333C16.2754 18.3333 16.6993 18.1577 17.0118 17.8452C17.3244 17.5326 17.5 17.1087 17.5 16.6667V5.00001L15 1.66667H5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -60,13 +52,10 @@ export default function DisappearingNavbar() {
   const BADGE = "absolute z-[2] top-[-6px] right-[-8px] bg-enunas-purple text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center"
 
   return (
-    <header
-      className={`sm:px-10 px-4 py-2 fixed z-50 w-full transition-all duration-300 ${
-        scrolled ? 'bg-white shadow-sm' : 'bg-transparent'
-      } ${visible ? 'translate-y-0' : '-translate-y-full'}`}
-      style={{ transitionProperty: 'transform, background-color, box-shadow' }}
-    >
+    <header className="sm:px-10 px-4 py-2 fixed z-50 w-full bg-white shadow-sm">
       <nav className="flex justify-between items-center max-w-screen xl:mx-auto z-50">
+
+        {/* Left — Hamburger + mobile search */}
         <div className="w-1/4 flex gap-3 md:gap-8">
           <button onClick={() => setSidebarOpen(true)} aria-label="Menü öffnen">
             <HamburgerIcon className="w-5 h-5 hover:text-enunas-purple" />
@@ -81,10 +70,12 @@ export default function DisappearingNavbar() {
           </div>
         </div>
 
+        {/* Centre — Wordmark */}
         <Link href="/" className="w-1/2 flex items-center justify-center">
           <h1 className="text-3xl sm:text-4xl tracking-wide">Enunas</h1>
         </Link>
 
+        {/* Right — Search (desktop) / Account / Heart / Cart */}
         <div className="flex gap-3 md:gap-8 mt-3 w-1/4 justify-end">
           <div className="hidden sm:block">
             <SearchBar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
@@ -102,15 +93,20 @@ export default function DisappearingNavbar() {
             )}
           </div>
 
+          <Link href="/saved-lists" aria-label="Wunschliste">
+            <HeartIcon className="w-5 h-5 text-black/80 hover:text-enunas-purple transition-colors duration-200" />
+          </Link>
+
           <div>
-            <button className="relative cursor-pointer" onClick={openCart} aria-label={`Warenkorb mit ${itemCount} Artikeln`}>
+            <Link href="/cart" className="relative" aria-label={`Warenkorb mit ${itemCount} Artikeln`}>
               <CartIcon className="w-5 h-5 text-black/80 hover:text-enunas-purple" />
               {itemCount > 0 && (
                 <span className={BADGE}>{itemCount > 99 ? '99+' : itemCount}</span>
               )}
-            </button>
+            </Link>
           </div>
         </div>
+
       </nav>
     </header>
   )

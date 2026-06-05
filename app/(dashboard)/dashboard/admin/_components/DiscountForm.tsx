@@ -132,7 +132,7 @@ export default function DiscountForm({
     const pct = parseFloat(percent)
     if (isNaN(pct)) errs.percent = 'Prozentsatz erforderlich.'
     else if (pct <= 0) errs.percent = 'Muss größer als 0 sein.'
-    else if (pct > maxPercent) errs.percent = `Maximal ${maxPercent}% erlaubt.`
+    else if (pct > maxPercent / 100) errs.percent = `Maximal ${maxPercent}% erlaubt.`
 
     if (validFrom && validUntil) {
       const f = new Date(validFrom).getTime()
@@ -151,8 +151,9 @@ export default function DiscountForm({
     return Object.keys(errs).length === 0
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent | React.MouseEvent) {
     e.preventDefault()
+    if (submitting) return
     setError(null)
     if (!validate()) return
 
@@ -200,9 +201,13 @@ export default function DiscountForm({
 
   if (!open) return null
 
-  const title = isEdit ? 'Rabatt bearbeiten' : 'Neuen Rabatt erstellen'
+  const title = isEdit
+    ? 'Rabatt bearbeiten'
+    : isAdmin
+      ? 'Admin-Code erstellen'
+      : 'Neuen Rabatt erstellen'
   const subtitle = isAdmin
-    ? `Plattformweit (max. ${maxPercent}%)`
+    ? `Plattformweiter Code · Typ ADMIN (max. ${maxPercent}%)`
     : `Eigener Marken-Rabatt (max. ${maxPercent}%)`
 
   return (
@@ -294,15 +299,19 @@ export default function DiscountForm({
                   type="number"
                   value={percent}
                   onChange={setPercent}
-                  placeholder="10"
-                  step="0.1"
+                  placeholder="0.1"
+                  step="0.01"
                   min={0}
-                  max={maxPercent}
+                  max={maxPercent / 100}
                   disabled={editableFieldsLocked}
                 />
-                {fieldErrors.percent && (
+                {fieldErrors.percent ? (
                   <p className="text-[11px] text-[#8B1E3F] mt-1.5" style={{ fontFamily: 'var(--font-league-spartan)' }}>
                     {fieldErrors.percent}
+                  </p>
+                ) : (
+                  <p className="text-[10px] text-[#9B9B9B] mt-1.5 leading-snug" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                    Kommazahl eingeben — z.&nbsp;B. <strong>0.1</strong> für 10&nbsp;% Rabatt (max.&nbsp;{maxPercent}&nbsp;%).
                   </p>
                 )}
               </div>
@@ -317,9 +326,13 @@ export default function DiscountForm({
                   min={1}
                   disabled={editableFieldsLocked}
                 />
-                {fieldErrors.maxUses && (
+                {fieldErrors.maxUses ? (
                   <p className="text-[11px] text-[#8B1E3F] mt-1.5" style={{ fontFamily: 'var(--font-league-spartan)' }}>
                     {fieldErrors.maxUses}
+                  </p>
+                ) : !maxUses && (
+                  <p className="text-[10px] text-[#7A5C1E] mt-1.5 leading-snug" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                    ⚠ Ohne Limit kann der Code unbegrenzt oft eingelöst werden.
                   </p>
                 )}
               </div>
@@ -413,7 +426,7 @@ export default function DiscountForm({
             </button>
             <button
               onClick={handleSubmit}
-              type="submit"
+              type="button"
               disabled={submitting}
               className="h-9 px-5 rounded-lg text-[11px] font-medium text-white transition-all duration-200 disabled:opacity-40 hover:bg-[#4A1566]"
               style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D', letterSpacing: '0.06em', textTransform: 'uppercase' }}

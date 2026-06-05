@@ -601,7 +601,7 @@ export default function CartSidebar() {
             </div>
             <div className="enu-sum-vat">inkl. MwSt.</div>
 
-            <Link href="/cart" onClick={closeCart} className="enu-checkout">
+            <Link href="/checkout" onClick={closeCart} className="enu-checkout">
               <span className="enu-checkout-line top" />
               <span className="enu-lock"><LockIcon /></span>
               Sicher zur Kasse

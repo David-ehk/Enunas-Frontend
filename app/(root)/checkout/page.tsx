@@ -128,7 +128,7 @@ export default function CheckoutPage() {
     return (
       <>
         <CheckoutNavbar />
-        <div className="min-h-screen pb-20 flex items-center justify-center px-4" style={{ paddingTop: '96px' }}>
+        <div className="min-h-screen pb-20 flex items-center justify-center px-4" style={{ paddingTop: '64px' }}>
           <div className="text-center">
             <h1
               className="text-3xl text-enunas-black font-light mb-4"
@@ -154,7 +154,7 @@ export default function CheckoutPage() {
   return (
     <>
       <CheckoutNavbar />
-      <div className="min-h-screen pb-20 px-4 sm:px-8 lg:px-16 bg-white" style={{ paddingTop: '96px' }}>
+      <div className="min-h-screen pb-20 px-4 sm:px-8 lg:px-16 bg-white" style={{ paddingTop: '64px' }}>
         <div className="max-w-6xl mx-auto">
 
           {/* Breadcrumb + heading */}
@@ -327,10 +327,16 @@ export default function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={loading || !isAuthenticated}
-                  className="group relative w-full overflow-hidden bg-enunas-purple text-white py-4 hover:bg-enunas-purple-dark transition-colors duration-300 ease-out-expo disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="group relative w-full overflow-hidden bg-enunas-purple text-white py-5 hover:bg-enunas-purple-dark transition-colors duration-300 ease-out-expo disabled:opacity-60 disabled:cursor-not-allowed"
                 >
+                  {/* Diagonal shimmer sweep */}
+                  <span
+                    className="absolute top-0 h-full w-[40%] -skew-x-12 left-[-60%] group-hover:left-[120%] transition-[left] duration-700 ease-out-expo pointer-events-none"
+                    style={{ background: 'linear-gradient(100deg, transparent, rgba(255,255,255,0.2), transparent)' }}
+                    aria-hidden
+                  />
                   <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
-                  <span className="relative z-10 font-cormorant text-[18px] tracking-[0.06em]">{loading ? 'Bitte warten…' : 'Zur Zahlung'}</span>
+                  <span className="relative z-10 font-cormorant text-[20px] tracking-[0.06em]">{loading ? 'Bitte warten…' : 'Zur Zahlung'}</span>
                   <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
                 </button>
 
