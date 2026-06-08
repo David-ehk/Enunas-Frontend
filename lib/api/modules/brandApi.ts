@@ -3,6 +3,7 @@ import type { ApiBrandPartner, AdminApiProduct, AdminApiVariant, ApiOrder, ApiLi
 
 export interface CreateProductVariantDto {
   color: string
+  colorFamily: string
   size: string
   stockQuantity: number
   weightGrams: number
@@ -30,10 +31,36 @@ export interface CreateProductDto {
 export type UpdateProductDto = Partial<
   Omit<CreateProductDto, 'variants' | 'gender' | 'productType' | 'category'>
 >
-export type UpdateBrandPartnerDto = { brandName?: string }
+export interface RegisterBrandPartnerDto {
+  email: string
+  password: string
+  brandName: string
+  firstName: string
+  lastName: string
+  legalName: string
+  addressStreet: string
+  addressPostalCode: string
+  addressCity: string
+  addressCountry: string
+  vatId?: string
+  taxNumber?: string
+}
+
+export type UpdateBrandPartnerDto = {
+  brandName?: string
+  legalName?: string
+  addressStreet?: string
+  addressPostalCode?: string
+  addressCity?: string
+  addressCountry?: string
+  vatId?: string
+  taxNumber?: string
+}
 
 export interface CreateListingDto {
   price: number
+  discountPrice?: number
+  priceInputMode: 'GROSS' | 'NET'
   currency?: string
   region?: string
 }
@@ -45,6 +72,14 @@ function unpage<T>(res: Page<T> | T[]): T[] {
 }
 
 export const brandApi = {
+  async apply(dto: RegisterBrandPartnerDto): Promise<ApiBrandPartner> {
+    return fetcher<ApiBrandPartner>('/brandpartner/apply', {
+      method: 'POST',
+      body: JSON.stringify(dto),
+      auth: false,
+    })
+  },
+
   async getMe(): Promise<ApiBrandPartner> {
     return fetcher<ApiBrandPartner>('/brandpartner/me')
   },

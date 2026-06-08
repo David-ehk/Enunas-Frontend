@@ -82,7 +82,16 @@ export interface ApiBrandPartner {
   brandName: string;
   email: string;
   status: BrandStatus;
+  isDomestic: boolean;
   createdAt: string;
+  legalName?: string;
+  addressStreet?: string;
+  addressPostalCode?: string;
+  addressCity?: string;
+  addressCountry?: string;
+  vatId?: string;
+  taxNumber?: string;
+  updatedAt?: string;
 }
 
 export interface BrandOrder {
@@ -104,6 +113,15 @@ export interface AdminBrand {
   accountHolder?: string;
   bankName?: string;
   bic?: string;
+  legalName?: string;
+  addressStreet?: string;
+  addressPostalCode?: string;
+  addressCity?: string;
+  addressCountry?: string;
+  vatId?: string;
+  taxNumber?: string;
+  isDomestic?: boolean;
+  updatedAt?: string;
 }
 
 export interface AdminCustomer {
@@ -161,10 +179,14 @@ export interface AdminApiProduct extends Omit<ApiProduct, 'status'> {
   variants?: AdminApiVariant[];
 }
 
+export type PriceInputMode = 'GROSS' | 'NET';
+
 export interface ApiListing {
   id: string;
   productId?: string;
   price: number;
+  discountPrice?: number;
+  priceInputMode?: PriceInputMode;
   currency?: string;
   region?: string;
   createdAt: string;

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { authApi } from '@/lib/api'
 import { useAuth } from '@/app/context/AuthContext'
@@ -189,6 +190,20 @@ export default function DashboardLoginPage() {
             <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
           </button>
         </form>
+        <div className="mt-6 text-center">
+          <Link
+            href="/dashboard/register"
+            style={{
+              fontFamily: 'var(--font-league-spartan)',
+              fontSize: '11px',
+              color: '#9B9B9B',
+              letterSpacing: '0.06em',
+            }}
+          >
+            Noch kein Konto?{' '}
+            <span style={{ color: '#370E4D', textDecoration: 'underline' }}>Als Brand Partner bewerben</span>
+          </Link>
+        </div>
       </div>
     </div>
   )

@@ -169,7 +169,7 @@ export function VChip({ tone = 'ghost', children }: { tone?: 'ghost' | 'purple' 
     default: { background: '#F5F5F0', color: '#2D2D2D', border: '1px solid #E8E8E8' },
   }
   return (
-    <span style={{ display: 'inline-block', padding: '2px 8px', fontFamily: 'var(--font-league-spartan)', fontSize: 10.5, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: 3, ...s[tone] }}>
+    <span style={{ display: 'inline-block', padding: '2px 8px', fontFamily: 'var(--font-league-spartan)', fontSize: 10.5, letterSpacing: '0.08em', textTransform: 'uppercase', borderRadius: 0, ...s[tone] }}>
       {children}
     </span>
   )
@@ -429,7 +429,7 @@ export function Heatmap({ rows, cols, data, fmt: fmtFn }: {
                 const v = data[ri]?.[ci] ?? 0
                 const alpha = Math.min(0.85, (v / max) * 0.85)
                 return (
-                  <td key={col} title={fmtFn ? fmtFn(v) : String(v)} style={{ padding: '5px 4px', background: `rgba(55,14,77,${alpha})`, borderRadius: 2, textAlign: 'center', fontSize: 9.5, color: alpha > 0.4 ? '#fff' : '#6B6B6B', fontFamily: 'monospace', minWidth: 34, cursor: 'default' }}>
+                  <td key={col} title={fmtFn ? fmtFn(v) : String(v)} style={{ padding: '5px 4px', background: `rgba(55,14,77,${alpha})`, borderRadius: 0, textAlign: 'center', fontSize: 9.5, color: alpha > 0.4 ? '#fff' : '#6B6B6B', fontFamily: 'monospace', minWidth: 34, cursor: 'default' }}>
                     {v || ''}
                   </td>
                 )
@@ -462,7 +462,7 @@ export function VAreaChart({ data, compare, labels, fmt: fmtFn, height = 230 }: 
         <CartesianGrid strokeDasharray="3 0" stroke="#F0F0EB" vertical={false} />
         <XAxis dataKey="label" tick={{ fontFamily: 'var(--font-league-spartan)', fontSize: 9.5, fill: '#9B9B9B' }} tickLine={false} axisLine={false} />
         <YAxis tick={{ fontFamily: 'monospace', fontSize: 9.5, fill: '#9B9B9B' }} tickLine={false} axisLine={false} tickFormatter={fmtFn} width={48} />
-        <Tooltip contentStyle={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, border: '1px solid #E8E8E8', borderRadius: 6, boxShadow: '0 4px 12px rgba(0,0,0,0.08)', background: '#fff' }}
+        <Tooltip contentStyle={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, border: '1px solid #E8E8E8', borderRadius: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.08)', background: '#fff' }}
           formatter={(v: unknown, name: unknown) => [fmtFn ? fmtFn(Number(v)) : String(v), name === 'value' ? 'Aktuell' : 'Vorperiode']}
           labelStyle={{ color: '#6B6B6B', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase' }} />
         {compare && <Area type="monotone" dataKey="compare" stroke="#C9C9C9" strokeDasharray="4 3" strokeWidth={1.5} fill="none" dot={false} />}
@@ -485,12 +485,12 @@ export function VComboChart({ bars, line, labels, barFmt, lineFmt, height = 230 
         <XAxis dataKey="label" tick={{ fontFamily: 'var(--font-league-spartan)', fontSize: 9.5, fill: '#9B9B9B' }} tickLine={false} axisLine={false} />
         <YAxis yAxisId="l" tick={{ fontFamily: 'monospace', fontSize: 9.5, fill: '#9B9B9B' }} tickLine={false} axisLine={false} tickFormatter={barFmt} width={48} />
         <YAxis yAxisId="r" orientation="right" tick={{ fontFamily: 'monospace', fontSize: 9.5, fill: '#370E4D' }} tickLine={false} axisLine={false} tickFormatter={lineFmt} width={44} />
-        <Tooltip contentStyle={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, border: '1px solid #E8E8E8', borderRadius: 6, boxShadow: '0 4px 12px rgba(0,0,0,0.08)', background: '#fff' }}
+        <Tooltip contentStyle={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, border: '1px solid #E8E8E8', borderRadius: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.08)', background: '#fff' }}
           formatter={(v: unknown, name: unknown) => [
             name === 'bar' ? (barFmt ? barFmt(Number(v)) : String(v)) : (lineFmt ? lineFmt(Number(v)) : String(v)),
             name === 'bar' ? 'Volumen' : 'Linie',
           ]} />
-        <Bar yAxisId="l" dataKey="bar" fill="#E8E8E8" radius={[2, 2, 0, 0]} />
+        <Bar yAxisId="l" dataKey="bar" fill="#E8E8E8" radius={[0, 0, 0, 0]} />
         <Line yAxisId="r" type="monotone" dataKey="line" stroke="#370E4D" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: '#370E4D', stroke: '#fff', strokeWidth: 2 }} />
       </ComposedChart>
     </ResponsiveContainer>
@@ -510,7 +510,7 @@ export function DonutMulti({ segments, centerValue, centerLabel }: {
             <Pie data={segments} cx="50%" cy="50%" innerRadius={56} outerRadius={82} paddingAngle={2} dataKey="value">
               {segments.map((s, i) => <Cell key={i} fill={s.color} />)}
             </Pie>
-            <Tooltip contentStyle={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, border: '1px solid #E8E8E8', borderRadius: 6 }}
+            <Tooltip contentStyle={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, border: '1px solid #E8E8E8', borderRadius: 0 }}
               formatter={(v: unknown, name: unknown) => [`€ ${Number(v).toLocaleString('de-DE')}`, String(name)]} />
           </PieChart>
         </ResponsiveContainer>
@@ -524,7 +524,7 @@ export function DonutMulti({ segments, centerValue, centerLabel }: {
       <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 justify-center">
         {segments.map(s => (
           <div key={s.label} className="flex items-center gap-1.5" style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, color: '#6B6B6B' }}>
-            <span style={{ width: 9, height: 9, background: s.color, display: 'block', borderRadius: 2 }} />
+            <span style={{ width: 9, height: 9, background: s.color, display: 'block', borderRadius: 0 }} />
             {s.label}
           </div>
         ))}
@@ -546,10 +546,10 @@ export function VStackedBar({ data, labels, keys, fmt: fmtFn, height = 220 }: {
         <CartesianGrid strokeDasharray="3 0" stroke="#F0F0EB" vertical={false} />
         <XAxis dataKey="label" tick={{ fontFamily: 'var(--font-league-spartan)', fontSize: 9.5, fill: '#9B9B9B' }} tickLine={false} axisLine={false} />
         <YAxis tick={{ fontFamily: 'monospace', fontSize: 9.5, fill: '#9B9B9B' }} tickLine={false} axisLine={false} tickFormatter={fmtFn} width={48} />
-        <Tooltip contentStyle={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, border: '1px solid #E8E8E8', borderRadius: 6, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
+        <Tooltip contentStyle={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, border: '1px solid #E8E8E8', borderRadius: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
           formatter={(v: unknown, name: unknown) => [fmtFn ? fmtFn(Number(v)) : String(v), keys.find(k => k.key === String(name))?.label ?? String(name)]} />
         {keys.map((k, i) => (
-          <Bar key={k.key} dataKey={k.key} stackId="s" fill={k.color} radius={i === keys.length - 1 ? [2, 2, 0, 0] : undefined} />
+          <Bar key={k.key} dataKey={k.key} stackId="s" fill={k.color} radius={undefined} />
         ))}
       </BarChart>
     </ResponsiveContainer>

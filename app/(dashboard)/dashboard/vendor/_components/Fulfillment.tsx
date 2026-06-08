@@ -36,10 +36,10 @@ function trackingUrl(carrier: Carrier, trackingNumber: string): string {
 }
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
-const INPUT = 'w-full text-[13px] border border-[#E8E8E8] bg-white rounded-lg px-3.5 py-2.5 focus:outline-none focus:border-[#370E4D]/50 focus:ring-2 focus:ring-[#370E4D]/8 transition-all duration-200 placeholder:text-[#C0C0BC]'
+const INPUT = 'w-full text-[13px] border border-[#E8E8E8] bg-white rounded-none px-3.5 py-2.5 focus:outline-none focus:border-[#370E4D]/50 focus:ring-2 focus:ring-[#370E4D]/8 transition-all duration-200 placeholder:text-[#C0C0BC]'
 const LABEL = 'block text-[10px] uppercase tracking-[0.12em] text-[#6B6B6B] font-medium mb-1.5'
-const BTN_PRIMARY = 'flex items-center gap-2 h-9 px-5 rounded-lg text-[12px] font-medium text-white transition-all duration-200 disabled:opacity-40'
-const BTN_GHOST = 'flex items-center gap-2 h-9 px-4 rounded-lg text-[12px] text-[#6B6B6B] border border-[#E8E8E8] hover:bg-[#F5F5F0] transition-all duration-200'
+const BTN_PRIMARY = 'flex items-center gap-2 h-9 px-5 rounded-none text-[12px] font-medium text-white transition-all duration-200 disabled:opacity-40'
+const BTN_GHOST = 'flex items-center gap-2 h-9 px-4 rounded-none text-[12px] text-[#6B6B6B] border border-[#E8E8E8] hover:bg-[#F5F5F0] transition-all duration-200'
 
 // ─── Ship Order Modal ─────────────────────────────────────────────────────────
 function ShipModal({
@@ -80,23 +80,22 @@ function ShipModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-[0_24px_48px_rgba(0,0,0,0.18)] w-full max-w-md mx-4 overflow-hidden">
+      <div className="relative bg-white rounded-none shadow-[0_24px_48px_rgba(0,0,0,0.18)] w-full max-w-md mx-4 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-[#F0F0EB]" style={{ background: '#FAFAF8' }}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#370E4D] flex items-center justify-center">
-              <Truck className="w-4 h-4 text-white" />
-            </div>
             <div>
-              <p className="text-[13px] font-semibold text-[#0A0A0A]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+              <p className="text-[10px] uppercase tracking-[0.22em] font-medium text-[#9B9B9B] mb-1"
+                style={{ fontFamily: 'var(--font-league-spartan)' }}>
                 Versand bestätigen
               </p>
-              <p className="text-[11px] text-[#9B9B9B]">
-                Bestellung #{order.id.slice(0, 8).toUpperCase()}
+              <p className="text-[#0A0A0A] leading-none"
+                style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 20, fontWeight: 300 }}>
+                #{order.id.slice(0, 8).toUpperCase()}
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-xl flex items-center justify-center text-[#9B9B9B] hover:bg-[#F5F5F0] transition-all">
+          <button onClick={onClose} className="p-2 rounded-none text-[#9B9B9B] hover:text-[#0A0A0A] hover:bg-[#F0F0EB] transition-all duration-200">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -142,7 +141,7 @@ function ShipModal({
                   key={c}
                   type="button"
                   onClick={() => setCarrier(c)}
-                  className="px-3.5 py-2 rounded-lg border text-[12px] font-medium transition-all duration-150"
+                  className="px-3.5 py-2 rounded-none border text-[12px] font-medium transition-all duration-150"
                   style={{
                     fontFamily: 'var(--font-league-spartan)',
                     background: carrier === c ? '#370E4D' : '#fff',
@@ -242,20 +241,21 @@ function ProblemModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-[0_24px_48px_rgba(0,0,0,0.18)] w-full max-w-md mx-4 overflow-hidden">
+      <div className="relative bg-white rounded-none shadow-[0_24px_48px_rgba(0,0,0,0.18)] w-full max-w-md mx-4 overflow-hidden">
         <div className="flex items-center justify-between px-6 py-5 border-b border-[#F0F0EB]" style={{ background: '#FAFAF8' }}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center">
-              <AlertTriangle className="w-4 h-4 text-amber-700" />
-            </div>
             <div>
-              <p className="text-[13px] font-semibold text-[#0A0A0A]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+              <p className="text-[10px] uppercase tracking-[0.22em] font-medium text-[#9B9B9B] mb-1"
+                style={{ fontFamily: 'var(--font-league-spartan)' }}>
                 Problem melden
               </p>
-              <p className="text-[11px] text-[#9B9B9B]">Bestellung #{order.id.slice(0, 8).toUpperCase()}</p>
+              <p className="text-[#0A0A0A] leading-none"
+                style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 20, fontWeight: 300 }}>
+                #{order.id.slice(0, 8).toUpperCase()}
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-xl flex items-center justify-center text-[#9B9B9B] hover:bg-[#F5F5F0] transition-all">
+          <button onClick={onClose} className="p-2 rounded-none text-[#9B9B9B] hover:text-[#0A0A0A] hover:bg-[#F0F0EB] transition-all duration-200">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -341,7 +341,7 @@ function OrderRow({
             {isPaid && (
               <button
                 onClick={() => onShip(order)}
-                className="flex items-center gap-1.5 h-7 px-3 rounded-lg text-[11px] font-medium text-white transition-all duration-150"
+                className="flex items-center gap-1.5 h-7 px-3 rounded-none text-[11px] font-medium text-white transition-all duration-150"
                 style={{ background: '#370E4D', fontFamily: 'var(--font-league-spartan)' }}
               >
                 <Truck className="w-3 h-3" /> Versenden
@@ -352,7 +352,7 @@ function OrderRow({
                 href={trackingUrl ?? '#'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 h-7 px-3 rounded-lg text-[11px] font-medium border border-[#E8E8E8] text-[#370E4D] hover:bg-[#F5F5F0] transition-all duration-150"
+                className="flex items-center gap-1.5 h-7 px-3 rounded-none text-[11px] font-medium border border-[#E8E8E8] text-[#370E4D] hover:bg-[#F5F5F0] transition-all duration-150"
                 style={{ fontFamily: 'var(--font-league-spartan)' }}
               >
                 <ExternalLink className="w-3 h-3" /> Tracking
@@ -361,7 +361,7 @@ function OrderRow({
             {(isPaid || isShipped) && (
               <button
                 onClick={() => onProblem(order)}
-                className="h-7 w-7 rounded-lg border border-[#E8E8E8] flex items-center justify-center text-[#9B9B9B] hover:border-amber-300 hover:text-amber-600 hover:bg-amber-50 transition-all duration-150"
+                className="h-7 w-7 rounded-none border border-[#E8E8E8] flex items-center justify-center text-[#9B9B9B] hover:border-amber-300 hover:text-amber-600 hover:bg-amber-50 transition-all duration-150"
                 title="Problem melden"
               >
                 <AlertTriangle className="w-3.5 h-3.5" />
@@ -369,7 +369,7 @@ function OrderRow({
             )}
             <button
               onClick={() => setExpanded(e => !e)}
-              className="h-7 w-7 rounded-lg border border-[#E8E8E8] flex items-center justify-center text-[#9B9B9B] hover:text-[#6B6B6B] transition-all duration-150"
+              className="h-7 w-7 rounded-none border border-[#E8E8E8] flex items-center justify-center text-[#9B9B9B] hover:text-[#6B6B6B] transition-all duration-150"
             >
               {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
@@ -447,28 +447,33 @@ function StatsRow({ orders }: { orders: ApiOrder[] }) {
   const delivered = orders.filter(o => o.status === 'DELIVERED').length
   const returned  = orders.filter(o => o.status === 'RETURN_REQUESTED' || o.status === 'RETURN_APPROVED').length
 
-  const cards = [
-    { label: 'Versandbereit', value: paid,      color: '#7A5C1E', bg: '#FFFBEB', border: '#FDE68A', icon: Package },
-    { label: 'Versandt',      value: shipped,   color: '#6B6B6B', bg: '#F5F5F0', border: '#E8E8E8', icon: Truck },
-    { label: 'Geliefert',     value: delivered, color: '#1A5A3C', bg: '#F0FDF4', border: '#BBF7D0', icon: Check },
-    { label: 'Rückgabe',      value: returned,  color: '#8B1E3F', bg: '#FFF1F2', border: '#FECDD3', icon: AlertTriangle },
+  const cells = [
+    { label: 'Versandbereit', value: paid,      accent: true,          warn: false },
+    { label: 'Versandt',      value: shipped,   accent: false,         warn: false },
+    { label: 'Geliefert',     value: delivered, accent: false,         warn: false },
+    { label: 'Rückgaben',     value: returned,  accent: false,         warn: returned > 0 },
   ]
 
   return (
-    <div className="grid grid-cols-4 gap-4">
-      {cards.map(({ label, value, color, bg, border, icon: Icon }) => (
+    <div className="grid grid-cols-4 bg-white rounded-none overflow-hidden border border-[#E8E8E8]"
+      style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+      {cells.map(({ label, value, accent, warn }) => (
         <div
           key={label}
-          className="rounded-xl border p-4 flex items-center gap-3"
-          style={{ background: bg, borderColor: border }}
+          className="px-6 py-5 border-r border-[#F0F0EB] last:border-r-0 transition-colors duration-150"
+          style={{ background: accent ? '#370E4D' : undefined }}
+          onMouseEnter={e => { if (!accent) e.currentTarget.style.background = '#FAFAF8' }}
+          onMouseLeave={e => { if (!accent) e.currentTarget.style.background = '' }}
         >
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: color + '18' }}>
-            <Icon className="w-4 h-4" style={{ color }} />
-          </div>
-          <div>
-            <p className="text-[22px] font-bold leading-none" style={{ color, fontFamily: 'var(--font-league-spartan)' }}>{value}</p>
-            <p className="text-[10px] mt-1 uppercase tracking-[0.08em]" style={{ color, opacity: 0.7, fontFamily: 'var(--font-league-spartan)' }}>{label}</p>
-          </div>
+          <p className="text-[10px] uppercase tracking-[0.18em] font-medium mb-2.5"
+            style={{ fontFamily: 'var(--font-league-spartan)', color: accent ? 'rgba(255,255,255,0.45)' : '#9B9B9B' }}>
+            {label}
+          </p>
+          <p className="leading-none"
+            style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 28, fontWeight: 300, letterSpacing: '-0.01em',
+              color: accent ? '#fff' : warn && value > 0 ? '#8B1E3F' : '#0A0A0A' }}>
+            {value}
+          </p>
         </div>
       ))}
     </div>
@@ -542,12 +547,12 @@ export default function Fulfillment() {
       {/* Ready-to-ship highlight */}
       {orders.filter(o => o.status === 'PAID').length > 0 && filter !== 'PAID' && (
         <div
-          className="flex items-center justify-between px-5 py-4 rounded-xl border cursor-pointer"
+          className="flex items-center justify-between px-5 py-4 rounded-none border cursor-pointer"
           style={{ background: '#FFFBEB', borderColor: '#FDE68A' }}
           onClick={() => setFilter('PAID')}
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-none bg-amber-100 flex items-center justify-center">
               <Truck className="w-4 h-4 text-amber-700" />
             </div>
             <div>
@@ -574,7 +579,7 @@ export default function Fulfillment() {
           <button
             onClick={() => load(true)}
             disabled={refreshing}
-            className="h-9 w-9 rounded-xl border border-[#E8E8E8] flex items-center justify-center text-[#9B9B9B] hover:text-[#370E4D] hover:border-[#370E4D]/30 transition-all duration-150 bg-white"
+            className="h-9 w-9 rounded-none border border-[#E8E8E8] flex items-center justify-center text-[#9B9B9B] hover:text-[#370E4D] hover:border-[#370E4D]/30 transition-all duration-150 bg-white"
             title="Aktualisieren"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
@@ -616,20 +621,22 @@ export default function Fulfillment() {
       </SectionCard>
 
       {/* Carrier info */}
-      <div className="rounded-xl border border-[#E8E8E8] bg-[#FAFAF8] px-5 py-4">
-        <p className="text-[11px] font-semibold text-[#2D2D2D] mb-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+      <div className="border border-[#E8E8E8] bg-[#FAFAF8] px-5 py-4 rounded-none">
+        <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-3"
+          style={{ fontFamily: 'var(--font-league-spartan)' }}>
           Unterstützte Versanddienstleister
         </p>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 flex-wrap">
           {CARRIERS.map(c => (
-            <span key={c} className="text-[11px] font-medium text-[#6B6B6B] bg-white border border-[#E8E8E8] px-3 py-1.5 rounded-lg"
+            <span key={c}
+              className="text-[11px] font-medium text-[#6B6B6B] bg-white border border-[#E8E8E8] px-3 py-1.5 rounded-none"
               style={{ fontFamily: 'var(--font-league-spartan)' }}>
               {c}
             </span>
           ))}
         </div>
-        <p className="text-[10px] text-[#9B9B9B] mt-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-          Weitere Anbieter können auf Anfrage hinzugefügt werden. Tracking-URLs werden automatisch generiert.
+        <p className="text-[10px] text-[#C0C0BC] mt-2.5" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+          Weitere Anbieter auf Anfrage. Tracking-URLs werden automatisch generiert.
         </p>
       </div>
 
@@ -652,10 +659,17 @@ export default function Fulfillment() {
       {/* Toast */}
       {toast && (
         <div
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3.5 rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
-          style={{ background: '#0A0A0A', color: '#fff', fontFamily: 'var(--font-league-spartan)', fontSize: 12 }}
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-none border"
+          style={{
+            background: 'rgba(26,90,60,0.07)',
+            borderColor: 'rgba(26,90,60,0.22)',
+            color: '#1A5A3C',
+            fontFamily: 'var(--font-league-spartan)',
+            fontSize: 12,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+          }}
         >
-          <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+          <Check className="w-3.5 h-3.5 shrink-0" />
           {toast}
         </div>
       )}

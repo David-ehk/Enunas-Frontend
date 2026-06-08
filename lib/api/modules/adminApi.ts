@@ -26,6 +26,28 @@ export const adminApi = {
         body: JSON.stringify(dto),
       });
     },
+
+    // NOTE: PATCH /admin/brands/{id} needs to be added to the backend
+    async updateStammdaten(id: string, dto: {
+      legalName?: string; addressStreet?: string; addressPostalCode?: string;
+      addressCity?: string; addressCountry?: string; vatId?: string; taxNumber?: string;
+    }): Promise<AdminBrand> {
+      return fetcher<AdminBrand>(`/admin/brands/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      });
+    },
+
+    // NOTE: GET /admin/brands/{id}/22f-export needs to be added to the backend
+    async export22f(id: string, period: string, format: 'csv' | 'json'): Promise<Blob> {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('enunas_token') : null;
+      const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080/api';
+      const res = await fetch(`${BASE}/admin/brands/${id}/22f-export?period=${period}&format=${format}`, {
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      });
+      if (!res.ok) throw new Error(`Export fehlgeschlagen (${res.status})`);
+      return res.blob();
+    },
   },
 
   customers: {

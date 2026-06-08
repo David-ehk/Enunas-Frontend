@@ -80,7 +80,11 @@
       "Bash(curl -s http://localhost:4321/Footer.html)",
       "Bash(python -m http.server 4322)",
       "Bash(curl -s --max-time 3 http://localhost:4322/Cart.html)",
-      "Bash(Start-Process python *)"
+      "Bash(Start-Process python *)",
+      "Bash(xargs grep -l \"ApiListing\\\\|CreateListingDto\")",
+      "Bash(xargs grep -l \"apply\\\\|Apply\")",
+      "Bash(xargs grep -l \"brandpartner\\\\|brand.*apply\\\\|BrandPartner\")",
+      "Bash(xargs grep -l \"brand\\\\|apply\\\\|partner\")"
     ]
   }
 }

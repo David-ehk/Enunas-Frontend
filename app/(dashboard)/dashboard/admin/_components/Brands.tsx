@@ -15,6 +15,44 @@ interface PayoutDraft {
   bic: string
 }
 
+interface StammDraft {
+  legalName: string
+  addressStreet: string
+  addressPostalCode: string
+  addressCity: string
+  addressCountry: string
+  vatId: string
+  taxNumber: string
+}
+
+const COUNTRIES = [
+  { code: 'DE', name: 'Deutschland' },
+  { code: 'AT', name: 'Österreich' },
+  { code: 'CH', name: 'Schweiz' },
+  { code: 'FR', name: 'Frankreich' },
+  { code: 'IT', name: 'Italien' },
+  { code: 'ES', name: 'Spanien' },
+  { code: 'NL', name: 'Niederlande' },
+  { code: 'BE', name: 'Belgien' },
+  { code: 'LU', name: 'Luxemburg' },
+  { code: 'PL', name: 'Polen' },
+  { code: 'CZ', name: 'Tschechien' },
+  { code: 'HU', name: 'Ungarn' },
+  { code: 'RO', name: 'Rumänien' },
+  { code: 'SE', name: 'Schweden' },
+  { code: 'DK', name: 'Dänemark' },
+  { code: 'FI', name: 'Finnland' },
+  { code: 'NO', name: 'Norwegen' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'GR', name: 'Griechenland' },
+  { code: 'GB', name: 'Vereinigtes Königreich' },
+  { code: 'US', name: 'Vereinigte Staaten' },
+  { code: 'CA', name: 'Kanada' },
+  { code: 'JP', name: 'Japan' },
+  { code: 'CN', name: 'China' },
+  { code: 'AU', name: 'Australien' },
+]
+
 function ActionBtn({
   onClick, disabled, variant, children,
 }: {
@@ -440,6 +478,21 @@ export default function Brands() {
   const [savingPayout, setSavingPayout] = useState(false)
   const [payouts, setPayouts]           = useState<AdminPayout[]>([])
 
+  // Stammdaten editing
+  const [editingStamm, setEditingStamm] = useState<string | null>(null)
+  const [stammDraft, setStammDraft]     = useState<StammDraft>({ legalName: '', addressStreet: '', addressPostalCode: '', addressCity: '', addressCountry: 'DE', vatId: '', taxNumber: '' })
+  const [savingStamm, setSavingStamm]   = useState(false)
+  const [confirmStamm, setConfirmStamm] = useState<string | null>(null)
+
+  // §22f export
+  const [export22fId, setExport22fId]     = useState<string | null>(null)
+  const [exportPeriod, setExportPeriod]   = useState(() => {
+    const d = new Date(); d.setMonth(d.getMonth() - 1)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  })
+  const [exportFormat, setExportFormat]   = useState<'csv' | 'json'>('csv')
+  const [exporting, setExporting]         = useState(false)
+
   // Financial panel
   const [selectedBrand, setSelectedBrand] = useState<AdminBrand | null>(null)
   const [ordersCache, setOrdersCache]     = useState<ApiOrder[] | null>(null)
@@ -517,6 +570,37 @@ export default function Brands() {
       await adminApi.brands.setPayoutProfile(brandId, payoutDraft)
       setEditingPayout(null)
     } catch { /* silent */ } finally { setSavingPayout(false) }
+  }
+
+  async function saveStammdaten(brandId: string) {
+    setSavingStamm(true)
+    try {
+      const updated = await adminApi.brands.updateStammdaten(brandId, {
+        legalName: stammDraft.legalName || undefined,
+        addressStreet: stammDraft.addressStreet || undefined,
+        addressPostalCode: stammDraft.addressPostalCode || undefined,
+        addressCity: stammDraft.addressCity || undefined,
+        addressCountry: stammDraft.addressCountry || undefined,
+        vatId: stammDraft.vatId || undefined,
+        taxNumber: stammDraft.taxNumber || undefined,
+      })
+      setBrands(prev => prev.map(b => b.id === brandId ? { ...b, ...updated } : b))
+      setEditingStamm(null)
+      setConfirmStamm(null)
+    } catch { /* silent */ } finally { setSavingStamm(false) }
+  }
+
+  async function download22f(brandId: string) {
+    setExporting(true)
+    try {
+      const blob = await adminApi.brands.export22f(brandId, exportPeriod, exportFormat)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `22f-export_${brandId}_${exportPeriod}.${exportFormat}`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch { /* silent */ } finally { setExporting(false) }
   }
 
   async function openFinancialPanel(brand: AdminBrand) {
@@ -628,6 +712,12 @@ export default function Brands() {
                           <ActionBtn variant="purple" onClick={() => openFinancialPanel(brand)}>
                             Finanzen
                           </ActionBtn>
+                          <ActionBtn variant="ghost" onClick={() => {
+                            setExpanded(brand.id)
+                            setExport22fId(export22fId === brand.id ? null : brand.id)
+                          }}>
+                            §22f-Export
+                          </ActionBtn>
 
                           <button
                             onClick={() => setExpanded(expanded === brand.id ? null : brand.id)}
@@ -697,6 +787,215 @@ export default function Brands() {
                               </div>
                             )}
                           </div>
+
+                          {/* Stammdaten (§22f) */}
+                          <div className="pt-4 mt-4 border-t border-[#EBEBEB]">
+                            <div className="flex items-center justify-between mb-3">
+                              <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium"
+                                style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                                Stammdaten (§22f)
+                              </p>
+                              {editingStamm !== brand.id && (
+                                <button
+                                  onClick={() => {
+                                    setEditingStamm(brand.id)
+                                    setConfirmStamm(null)
+                                    setStammDraft({
+                                      legalName: brand.legalName ?? '',
+                                      addressStreet: brand.addressStreet ?? '',
+                                      addressPostalCode: brand.addressPostalCode ?? '',
+                                      addressCity: brand.addressCity ?? '',
+                                      addressCountry: brand.addressCountry ?? 'DE',
+                                      vatId: brand.vatId ?? '',
+                                      taxNumber: brand.taxNumber ?? '',
+                                    })
+                                  }}
+                                  className="text-[11px] font-medium hover:underline transition-all duration-200"
+                                  style={{ color: '#370E4D', fontFamily: 'var(--font-league-spartan)' }}
+                                >
+                                  Bearbeiten
+                                </button>
+                              )}
+                            </div>
+
+                            {editingStamm === brand.id ? (
+                              <div className="space-y-3">
+                                <div>
+                                  <FLabel>Firmenbezeichnung</FLabel>
+                                  <FInput value={stammDraft.legalName} onChange={v => setStammDraft(d => ({ ...d, legalName: v }))} placeholder="z. B. Muster GmbH" />
+                                </div>
+                                <div>
+                                  <FLabel>Straße und Hausnummer</FLabel>
+                                  <FInput value={stammDraft.addressStreet} onChange={v => setStammDraft(d => ({ ...d, addressStreet: v }))} />
+                                </div>
+                                <div className="grid grid-cols-[100px_1fr] gap-2">
+                                  <div>
+                                    <FLabel>PLZ</FLabel>
+                                    <FInput value={stammDraft.addressPostalCode} onChange={v => setStammDraft(d => ({ ...d, addressPostalCode: v }))} />
+                                  </div>
+                                  <div>
+                                    <FLabel>Ort</FLabel>
+                                    <FInput value={stammDraft.addressCity} onChange={v => setStammDraft(d => ({ ...d, addressCity: v }))} />
+                                  </div>
+                                </div>
+                                <div>
+                                  <FLabel>Land</FLabel>
+                                  <select
+                                    value={stammDraft.addressCountry}
+                                    onChange={e => setStammDraft(d => ({ ...d, addressCountry: e.target.value }))}
+                                    className="w-full text-[12px] border border-[#E8E8E8] bg-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#370E4D]/40 focus:ring-2 focus:ring-[#370E4D]/8 transition-all duration-200"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                  >
+                                    {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+                                  </select>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <FLabel>USt-IdNr.</FLabel>
+                                    <FInput value={stammDraft.vatId} onChange={v => setStammDraft(d => ({ ...d, vatId: v }))} placeholder="DE123456789" />
+                                  </div>
+                                  <div>
+                                    <FLabel>Steuernummer</FLabel>
+                                    <FInput value={stammDraft.taxNumber} onChange={v => setStammDraft(d => ({ ...d, taxNumber: v }))} />
+                                  </div>
+                                </div>
+
+                                {confirmStamm === brand.id ? (
+                                  <div className="p-3 border border-[#E8C870]/60 rounded-lg" style={{ background: '#FFFBF0' }}>
+                                    <p className="text-[11px] text-[#7A5C1E] mb-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                                      Sie ändern Stammdaten einer anderen Partei. Bitte bestätigen Sie diese Aktion.
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        onClick={() => setConfirmStamm(null)}
+                                        className="h-7 px-3 rounded-lg text-[11px] font-medium text-[#6B6B6B] border border-[#E8E8E8] hover:bg-[#F5F5F0] transition-all duration-200"
+                                        style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                      >
+                                        Abbrechen
+                                      </button>
+                                      <button
+                                        onClick={() => saveStammdaten(brand.id)}
+                                        disabled={savingStamm}
+                                        className="h-7 px-3 rounded-lg text-[11px] font-medium text-white transition-all duration-200 disabled:opacity-40"
+                                        style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D' }}
+                                      >
+                                        {savingStamm ? 'Speichert…' : 'Bestätigen & Speichern'}
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center justify-end gap-2">
+                                    <button
+                                      onClick={() => setEditingStamm(null)}
+                                      className="h-7 px-3.5 rounded-lg text-[11px] font-medium text-[#6B6B6B] border border-[#E8E8E8] hover:bg-[#F5F5F0] transition-all duration-200"
+                                      style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                    >
+                                      Abbrechen
+                                    </button>
+                                    <button
+                                      onClick={() => setConfirmStamm(brand.id)}
+                                      className="h-7 px-3.5 rounded-lg text-[11px] font-medium text-white transition-all duration-200"
+                                      style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D' }}
+                                    >
+                                      Speichern
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            ) : brand.legalName ? (
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}>Firmenbezeichnung</p>
+                                  <p className="text-[12px] text-[#0A0A0A]">{brand.legalName}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}>Typ</p>
+                                  <span
+                                    className={`inline-block px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] font-medium ${brand.isDomestic ? 'text-[#1A5A3C]' : 'text-[#370E4D]'}`}
+                                    style={{ fontFamily: 'var(--font-league-spartan)', background: brand.isDomestic ? 'rgba(26,90,60,0.08)' : 'rgba(55,14,77,0.08)' }}
+                                  >
+                                    {brand.isDomestic ? 'Inland' : 'Ausland'}
+                                  </span>
+                                </div>
+                                {(brand.addressStreet || brand.addressCity) && (
+                                  <div className="col-span-2">
+                                    <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
+                                      style={{ fontFamily: 'var(--font-league-spartan)' }}>Anschrift</p>
+                                    <p className="text-[12px] text-[#0A0A0A]">
+                                      {[brand.addressStreet, `${brand.addressPostalCode ?? ''} ${brand.addressCity ?? ''}`.trim(), brand.addressCountry].filter(Boolean).join(', ')}
+                                    </p>
+                                  </div>
+                                )}
+                                {brand.vatId && (
+                                  <div>
+                                    <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
+                                      style={{ fontFamily: 'var(--font-league-spartan)' }}>USt-IdNr.</p>
+                                    <p className="font-mono text-[12px] text-[#0A0A0A]">{brand.vatId}</p>
+                                  </div>
+                                )}
+                                {brand.taxNumber && (
+                                  <div>
+                                    <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
+                                      style={{ fontFamily: 'var(--font-league-spartan)' }}>Steuernummer</p>
+                                    <p className="font-mono text-[12px] text-[#0A0A0A]">{brand.taxNumber}</p>
+                                  </div>
+                                )}
+                                {brand.updatedAt && (
+                                  <div className="col-span-2">
+                                    <p className="text-[10px] text-[#C0C0BC]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                                      Zuletzt geändert: {fmt(brand.updatedAt)}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-[11px] text-[#9B9B9B] italic">Keine Stammdaten hinterlegt — klicken Sie auf Bearbeiten, um sie einzutragen.</p>
+                            )}
+                          </div>
+
+                          {/* §22f-Export */}
+                          {export22fId === brand.id && (
+                            <div className="pt-4 mt-4 border-t border-[#EBEBEB]">
+                              <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-3"
+                                style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                                §22f-Datenexport
+                              </p>
+                              <div className="flex items-end gap-3 flex-wrap">
+                                <div>
+                                  <FLabel>Abrechnungsmonat</FLabel>
+                                  <input
+                                    type="month"
+                                    value={exportPeriod}
+                                    onChange={e => setExportPeriod(e.target.value)}
+                                    className="text-[12px] border border-[#E8E8E8] bg-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#370E4D]/40 focus:ring-2 focus:ring-[#370E4D]/8 transition-all duration-200"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                  />
+                                </div>
+                                <div>
+                                  <FLabel>Format</FLabel>
+                                  <select
+                                    value={exportFormat}
+                                    onChange={e => setExportFormat(e.target.value as 'csv' | 'json')}
+                                    className="text-[12px] border border-[#E8E8E8] bg-white rounded-lg px-3 py-2 focus:outline-none focus:border-[#370E4D]/40 focus:ring-2 focus:ring-[#370E4D]/8 transition-all duration-200"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                  >
+                                    <option value="csv">CSV</option>
+                                    <option value="json">JSON</option>
+                                  </select>
+                                </div>
+                                <button
+                                  onClick={() => download22f(brand.id)}
+                                  disabled={exporting || !exportPeriod}
+                                  className="h-8 px-4 rounded-lg text-[11px] font-medium text-white transition-all duration-200 disabled:opacity-40"
+                                  style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D' }}
+                                >
+                                  {exporting ? 'Lädt…' : 'Herunterladen'}
+                                </button>
+                              </div>
+                            </div>
+                          )}
 
                           {/* Auszahlungsprofil */}
                           <div className="pt-4 mt-4 border-t border-[#EBEBEB]">

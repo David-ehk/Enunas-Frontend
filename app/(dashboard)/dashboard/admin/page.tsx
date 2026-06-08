@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/app/context/AuthContext'
 import { adminApi } from '@/lib/api'
-import type { AdminBrand, AdminCustomer, AdminApiProduct, ApiOrder, AdminPayout } from '@/types/api'
+import type { AdminBrand, AdminCustomer, AdminApiProduct, ApiOrder } from '@/types/api'
 import {
   LayoutDashboard, Users, Store, Package,
-  ShoppingBag, CreditCard, RotateCcw, BarChart2,
-  ShieldAlert, MessageSquare, LogOut, AlertCircle, Sparkles, Tag,
+  ShoppingBag, RotateCcw, BarChart2,
+  ShieldAlert, MessageSquare, LogOut, AlertCircle, Sparkles, Tag, Receipt,
 } from 'lucide-react'
 
 import Overview    from './_components/Overview'
@@ -17,15 +17,16 @@ import Brands      from './_components/Brands'
 import Products    from './_components/Products'
 import Orders      from './_components/Orders'
 import Payments    from './_components/Payments'
-import Returns     from './_components/Returns'
-import Analytics   from './_components/Analytics'
-import Storefront  from './_components/Storefront'
-import Discounts   from './_components/Discounts'
+import Returns      from './_components/Returns'
+import Analytics    from './_components/Analytics'
+import Storefront   from './_components/Storefront'
+import Discounts    from './_components/Discounts'
+import Settlements  from './_components/Settlements'
 
 type Tab =
   | 'overview' | 'customers' | 'brands' | 'products'
-  | 'orders'   | 'payments'  | 'returns' | 'discounts'
-  | 'analytics'| 'content'   | 'support' | 'storefront'
+  | 'orders'   | 'returns'   | 'discounts' | 'settlements'
+  | 'analytics'| 'content'   | 'support'   | 'storefront'
 
 interface NavItem { id: Tab; label: string; icon: React.ElementType; phase2?: boolean }
 
@@ -49,9 +50,9 @@ const NAV_SECTIONS: { group: string; items: NavItem[] }[] = [
   {
     group: 'Finanzen',
     items: [
-      { id: 'payments',   label: 'Zahlungen',      icon: CreditCard },
-      { id: 'returns',    label: 'Rückgaben',      icon: RotateCcw },
-      { id: 'discounts',  label: 'Rabattcodes',    icon: Tag },
+      { id: 'returns',      label: 'Rückgaben',      icon: RotateCcw },
+      { id: 'discounts',    label: 'Rabattcodes',    icon: Tag },
+      { id: 'settlements',  label: 'Abrechnung',     icon: Receipt },
     ],
   },
   {
@@ -70,9 +71,9 @@ const TITLES: Record<Tab, string> = {
   brands:      'Marken',
   products:    'Produkte',
   orders:      'Bestellungen',
-  payments:    'Zahlungen',
   returns:     'Rückgaben',
   discounts:   'Rabattcodes',
+  settlements: 'Abrechnung',
   analytics:   'Analytics',
   content:     'Content Moderation',
   support:     'Support',
@@ -85,9 +86,9 @@ const SUBTITLES: Record<Tab, string> = {
   brands:      'Markenverwaltung & Genehmigungen',
   products:    'Produktkatalog & Freigaben',
   orders:      'Bestellungsverwaltung',
-  payments:    'Zahlungen & Auszahlungen',
   returns:     'Rückgaben & Erstattungen',
   discounts:   'Plattform- & Marken-Rabattcodes',
+  settlements: 'Monatliche Provisionsabrechnung je Brand',
   analytics:   'Phase 2',
   content:     'Phase 2',
   support:     'Phase 2',
@@ -117,7 +118,6 @@ export default function AdminPage() {
   const [products, setProducts]   = useState<AdminApiProduct[]>([])
   const [orders, setOrders]       = useState<ApiOrder[]>([])
   const [customers, setCustomers] = useState<AdminCustomer[]>([])
-  const [payouts, setPayouts]     = useState<AdminPayout[]>([])
   const [loading, setLoading]     = useState(true)
 
   useEffect(() => {
@@ -128,9 +128,8 @@ export default function AdminPage() {
       adminApi.products.getAll().catch(() => []),
       adminApi.orders.getAll().catch(() => []),
       adminApi.customers.getAll().catch(() => []),
-      adminApi.payouts.getAll().catch(() => []),
-    ]).then(([b, p, o, c, py]) => {
-      setBrands(b); setProducts(p); setOrders(o); setCustomers(c); setPayouts(py)
+    ]).then(([b, p, o, c]) => {
+      setBrands(b); setProducts(p); setOrders(o); setCustomers(c)
     }).finally(() => setLoading(false))
   }, [isLoading, user, router])
 
@@ -154,14 +153,12 @@ export default function AdminPage() {
   const pendingBrands   = brands.filter(b => b.status === 'PENDING').length
   const pendingProducts = products.filter(p => p.status === 'PENDING').length
   const pendingReturns  = orders.filter(o => o.status === 'RETURN_REQUESTED').length
-  const pendingPayouts  = payouts.filter(p => p.status === 'PENDING').length
-  const totalAlerts     = pendingBrands + pendingProducts + pendingReturns + pendingPayouts
+  const totalAlerts     = pendingBrands + pendingProducts + pendingReturns
 
   const BADGES: Partial<Record<Tab, number>> = {
     brands:   pendingBrands,
     products: pendingProducts,
     returns:  pendingReturns,
-    payments: pendingPayouts,
   }
 
   return (
@@ -340,9 +337,9 @@ export default function AdminPage() {
           {activeTab === 'brands'    && <Brands />}
           {activeTab === 'products'  && <Products orders={orders} />}
           {activeTab === 'orders'    && <Orders customers={customers} />}
-          {activeTab === 'payments'  && <Payments brands={brands} />}
           {activeTab === 'returns'   && <Returns customers={customers} />}
           {activeTab === 'discounts'   && <Discounts />}
+          {activeTab === 'settlements' && <Settlements />}
           {activeTab === 'analytics'   && <Analytics />}
           {activeTab === 'storefront'  && <Storefront products={products} />}
           {activeTab === 'content'     && <ComingSoon title="Content Moderation" />}

@@ -75,7 +75,7 @@ export default function VendorPage() {
             <button
               key={id}
               onClick={() => setTab(id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors duration-150 text-left ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-none text-sm transition-colors duration-150 text-left ${
                 tab === id ? 'bg-white/15 text-white' : 'text-white/55 hover:bg-white/8 hover:text-white/90'
               }`}
               style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 12, letterSpacing: '0.06em' }}
@@ -93,7 +93,7 @@ export default function VendorPage() {
           </div>
           <button
             onClick={() => { logout(); router.replace('/dashboard/login') }}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-white/55 hover:bg-white/8 hover:text-white/90 transition-colors duration-150"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-none text-white/55 hover:bg-white/8 hover:text-white/90 transition-colors duration-150"
             style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 12, letterSpacing: '0.06em' }}
           >
             <LogOut className="w-4 h-4" />
