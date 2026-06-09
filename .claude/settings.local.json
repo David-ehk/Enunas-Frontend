@@ -84,7 +84,8 @@
       "Bash(xargs grep -l \"ApiListing\\\\|CreateListingDto\")",
       "Bash(xargs grep -l \"apply\\\\|Apply\")",
       "Bash(xargs grep -l \"brandpartner\\\\|brand.*apply\\\\|BrandPartner\")",
-      "Bash(xargs grep -l \"brand\\\\|apply\\\\|partner\")"
+      "Bash(xargs grep -l \"brand\\\\|apply\\\\|partner\")",
+      "Bash(Get-Content \"C:\\\\Users\\\\david\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-david-OneDrive-Desktop-enunas\\\\805f01fa-b0ab-4519-b610-ce964ac7b8bb\\\\tasks\\\\bcd3rhopi.output\" -Tail 10)"
     ]
   }
 }

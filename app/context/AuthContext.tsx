@@ -46,6 +46,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setCustomer(cust);
       }
     } catch {
+      // Dev-only: use mock user from localStorage when backend is unreachable
+      if (process.env.NODE_ENV === 'development') {
+        try {
+          const mock = localStorage.getItem('enunas_mock_user')
+          if (mock) { setUser(JSON.parse(mock)); return }
+        } catch { /* ignore */ }
+      }
       setUser(null);
       setCustomer(null);
     }

@@ -1,0 +1,42 @@
+[     133ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[     232ms] [LOG] [Fast Refresh] done in 200ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[     531ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[     644ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[     967ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ http://localhost:8080/users/me:0
+[    1013ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/brands?page=0&size=100:0
+[    1020ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/products?page=0&size=100:0
+[    1032ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/orders?page=0&size=100:0
+[    1040ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/customers?page=0&size=100:0
+[    3965ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/settlements?period=2026-05:0
+[    3966ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/settlements?period=2026-05:0
+[    6400ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[    7759ms] [LOG] [Fast Refresh] done in 1462ms @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[ 1615856ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/settlements?period=2026-05&includeSettled=true:0
+[ 1617798ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/settlements?period=2026-05:0
+[ 4732822ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[ 4783547ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/settlements?period=2026-06:0
+[ 4786235ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/settlements?period=2026-05:0
+[ 4804450ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/brands?page=0&size=100:0
+[ 4804479ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/brands?page=0&size=100:0
+[ 4804489ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/payouts?page=0&size=100:0
+[ 4804490ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/products?page=0&size=100:0
+[ 4804513ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/products?page=0&size=100:0
+[ 4804513ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/payouts?page=0&size=100:0
+[ 4812810ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/products?page=0&size=100:0
+[ 4812830ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/products?page=0&size=100:0
+[ 4814561ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/products?page=0&size=100:0
+[ 4814576ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/payouts?page=0&size=100:0
+[ 4814576ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/brands?page=0&size=100:0
+[ 4814597ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/brands?page=0&size=100:0
+[ 4814598ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/payouts?page=0&size=100:0
+[ 4814601ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/products?page=0&size=100:0
+[ 4815513ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/customers?page=0&size=100:0
+[ 4815545ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/customers?page=0&size=100:0
+[ 4819823ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/orders?page=0&size=100:0
+[ 4819833ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/orders?page=0&size=100:0
+[ 4820695ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/discounts:0
+[ 4820731ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/discounts:0
+[ 4821981ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/settlements?period=2026-05:0
+[ 4821981ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/settlements?period=2026-05:0
+[ 5727728ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/settlements?period=2026-05:0
+[ 5727828ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ http://localhost:8080/admin/settlements?period=2026-05:0
