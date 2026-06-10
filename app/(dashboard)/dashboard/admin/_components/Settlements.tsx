@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { settlementApi, FetchError } from '@/lib/api'
-import type { SettlementRow } from '@/lib/api'
+import type { SettlementRow, SettlementDashboard } from '@/lib/api'
 import {
   PageHeader, SectionCard, EmptyState, Loader, TH, TD, TableRow,
   KPIGrid, KPICell,
 } from './shared'
-import { Copy, Check, X, ChevronDown, ChevronUp, AlertTriangle, History, Info } from 'lucide-react'
+import { Copy, Check, X, ChevronDown, ChevronUp, AlertTriangle, History, Info, RefreshCw } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
@@ -687,12 +687,14 @@ export default function Settlements() {
   const [loading, setLoading]       = useState(true)
   const [error, setError]           = useState<string | null>(null)
   const [usingMock, setUsingMock]   = useState(false)
-  const [confirmRow, setConfirmRow] = useState<SettlementRow | null>(null)
-  const [submitting, setSubmitting] = useState(false)
-  const [toast, setToast]           = useState<ToastState | null>(null)
-  const [guideOpen, setGuideOpen]   = useState(false)
-  const [trendOpen, setTrendOpen]   = useState(true)
-  const [trendData]                 = useState(() => {
+  const [confirmRow, setConfirmRow]   = useState<SettlementRow | null>(null)
+  const [submitting, setSubmitting]   = useState(false)
+  const [generating, setGenerating]   = useState(false)
+  const [toast, setToast]             = useState<ToastState | null>(null)
+  const [dashboard, setDashboard]     = useState<SettlementDashboard | null>(null)
+  const [guideOpen, setGuideOpen]     = useState(false)
+  const [trendOpen, setTrendOpen]     = useState(true)
+  const [trendData]                   = useState(() => {
     if (typeof window === 'undefined') return TREND_DATA
     try { return JSON.parse(localStorage.getItem(LS_TREND_KEY) ?? 'null') ?? TREND_DATA } catch { return TREND_DATA }
   })
@@ -719,7 +721,13 @@ export default function Settlements() {
     setLoading(true); setError(null)
     try {
       const data = await settlementApi.getSettlements(p, settled)
-      setRows(data); setUsingMock(false)
+      if (data.length > 0) {
+        setRows(data); setUsingMock(false)
+      } else {
+        // Backend returned empty — fall back to seed/preview data if available
+        const mock = getMockRows(p, settled)
+        setRows(mock); setUsingMock(mock.length > 0)
+      }
     } catch {
       setRows(getMockRows(p, settled)); setUsingMock(true)
     } finally {
@@ -727,16 +735,25 @@ export default function Settlements() {
     }
   }
 
-  useEffect(() => { loadRows(period, view === 'settled') }, [period, view])
+  useEffect(() => {
+    loadRows(period, view === 'settled')
+  }, [period, view])
+
+  // Load global payout dashboard stats once on mount
+  useEffect(() => {
+    settlementApi.getDashboard().then(setDashboard).catch(() => { /* non-critical */ })
+  }, [])
 
   async function handleMarkSettled(ref: string) {
     if (!confirmRow) return
     const row = confirmRow
     setSubmitting(true)
     try {
-      await settlementApi.markSettled(row.brandId, period, ref.trim() || undefined)
+      await settlementApi.markSettled(row.brandId, period, ref.trim() || undefined, row.id)
       persistOpenRemoval(row.brandId, period, ref.trim())
       setRows(prev => prev.filter(r => r.brandId !== row.brandId))
+      // Refresh global dashboard totals
+      settlementApi.getDashboard().then(setDashboard).catch(() => {})
       showToast(`${row.brandName} abgerechnet${ref.trim() ? ` · ${ref.trim()}` : ''}.`, 'success')
     } catch (err) {
       if (err instanceof FetchError && err.status === 409) {
@@ -756,6 +773,31 @@ export default function Settlements() {
     }
   }
 
+  async function handleGenerate() {
+    setGenerating(true)
+    try {
+      const generated = await settlementApi.generateSettlements(period)
+      await loadRows(period, false)
+      // Refresh dashboard totals after generating
+      settlementApi.getDashboard().then(setDashboard).catch(() => {})
+      showToast(
+        generated.length > 0
+          ? `${generated.length} Abrechnungen für ${fmtPeriodLabel(period)} generiert.`
+          : `Abrechnungen für ${fmtPeriodLabel(period)} generiert.`,
+        'success'
+      )
+    } catch (err) {
+      if (err instanceof FetchError && err.status === 409) {
+        showToast('Abrechnungen für diese Periode existieren bereits.', 'warn')
+        await loadRows(period, false)
+      } else {
+        showToast('Generierung fehlgeschlagen — Backend nicht erreichbar.', 'error')
+      }
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   const { sepaRows, noSepaRows, sepaTotal, commissionNetTotal, commissionGrossTotal, totalFiktiveVat, rcRows } = useMemo(() => {
     const sepa   = rows.filter(r => r.payoutAmount > 0)
     const noSepa = rows.filter(r => r.payoutAmount <= 0)
@@ -771,7 +813,9 @@ export default function Settlements() {
     }
   }, [rows])
 
-  const ytdCommission = trendData.filter((d: { label: string }) => d.label.includes('26')).reduce((s: number, d: { commission: number }) => s + d.commission, 0)
+  const ytdCommission = dashboard?.totalPaid != null && dashboard.totalPaid > 0
+    ? dashboard.totalPaid
+    : trendData.filter((d: { label: string }) => d.label.includes('26')).reduce((s: number, d: { commission: number }) => s + d.commission, 0)
 
   return (
     <div className="space-y-5">
@@ -954,7 +998,7 @@ export default function Settlements() {
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           {periodOpen && (
             <div className="flex items-center gap-2 text-[11px] text-[#7A5C1E] bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"
               style={{ fontFamily: 'var(--font-league-spartan)' }}>
@@ -972,6 +1016,32 @@ export default function Settlements() {
               className="h-9 px-3 text-[13px] border border-[#E8E8E8] bg-white rounded-lg focus:outline-none focus:border-[#370E4D]/40 transition-all duration-200"
               style={{ fontFamily: 'var(--font-league-spartan)' }} />
           </div>
+          {view === 'open' && (
+            <div>
+              <label className="block text-[10px] uppercase tracking-[0.12em] text-[#6B6B6B] font-medium mb-1 opacity-0"
+                style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                &nbsp;
+              </label>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleGenerate}
+                  disabled={generating || loading}
+                  title="Auszahlungen für diesen Monat im Backend berechnen und anlegen"
+                  className="h-9 inline-flex items-center gap-2 px-4 rounded-lg text-[11px] font-medium border border-[#E8E8E8] bg-white text-[#6B6B6B] hover:border-[#370E4D]/40 hover:text-[#370E4D] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ fontFamily: 'var(--font-league-spartan)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                  <RefreshCw className={`w-3.5 h-3.5 ${generating ? 'animate-spin' : ''}`} />
+                  {generating ? 'Generiert…' : 'Generieren'}
+                </button>
+                <button
+                  onClick={() => loadRows(period, false)}
+                  disabled={loading}
+                  title="Ansicht neu laden"
+                  className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-[#9B9B9B] border border-[#E8E8E8] bg-white hover:border-[#370E4D]/40 hover:text-[#370E4D] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed">
+                  <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

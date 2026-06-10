@@ -12,7 +12,7 @@ export { adminApi } from './modules/adminApi';
 export { payoutApi } from './modules/payoutApi';
 export { discountsApi } from './modules/discountsApi';
 export { settlementApi } from './modules/settlementApi';
-export type { SettlementRow } from './modules/settlementApi';
+export type { SettlementRow, SettlementDashboard } from './modules/settlementApi';
 export { apiProductToProduct, apiProductToCardShape } from './productAdapter';
 export type { ProductCardShape } from './productAdapter';
 export { resolveProductBySlug, resolveProductWithMeta } from './productResolver';

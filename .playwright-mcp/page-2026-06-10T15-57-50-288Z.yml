@@ -1,0 +1,157 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e18]:
+      - generic [ref=e20]:
+        - generic [ref=e22]: E
+        - generic [ref=e23]:
+          - heading "Enunas" [level=1] [ref=e24]
+          - paragraph [ref=e25]: Admin Portal
+      - navigation [ref=e26]:
+        - button "Übersicht" [ref=e31] [cursor=pointer]:
+          - img [ref=e32]
+          - generic [ref=e37]: Übersicht
+        - generic [ref=e38]:
+          - paragraph [ref=e39]: Verwaltung
+          - generic [ref=e40]:
+            - button "Kunden" [ref=e43] [cursor=pointer]:
+              - img [ref=e44]
+              - generic [ref=e49]: Kunden
+            - button "Marken" [ref=e52] [cursor=pointer]:
+              - img [ref=e53]
+              - generic [ref=e57]: Marken
+            - button "Produkte" [ref=e60] [cursor=pointer]:
+              - img [ref=e61]
+              - generic [ref=e65]: Produkte
+            - button "Bestellungen" [ref=e68] [cursor=pointer]:
+              - img [ref=e69]
+              - generic [ref=e72]: Bestellungen
+            - button "Schaufenster" [ref=e75] [cursor=pointer]:
+              - img [ref=e76]
+              - generic [ref=e79]: Schaufenster
+        - generic [ref=e80]:
+          - paragraph [ref=e81]: Finanzen
+          - generic [ref=e82]:
+            - button "Rückgaben" [ref=e85] [cursor=pointer]:
+              - img [ref=e86]
+              - generic [ref=e89]: Rückgaben
+            - button "Rabattcodes" [ref=e92] [cursor=pointer]:
+              - img [ref=e93]
+              - generic [ref=e96]: Rabattcodes
+            - button "Abrechnung" [active] [ref=e99] [cursor=pointer]:
+              - img [ref=e100]
+              - generic [ref=e103]: Abrechnung
+        - generic [ref=e104]:
+          - paragraph [ref=e105]: Phase 2
+          - generic [ref=e106]:
+            - button "Analytics bald" [ref=e109]:
+              - img [ref=e110]
+              - generic [ref=e111]: Analytics
+              - generic [ref=e112]: bald
+            - button "Content bald" [ref=e115]:
+              - img [ref=e116]
+              - generic [ref=e118]: Content
+              - generic [ref=e119]: bald
+            - button "Support bald" [ref=e122]:
+              - img [ref=e123]
+              - generic [ref=e125]: Support
+              - generic [ref=e126]: bald
+      - generic [ref=e127]:
+        - generic [ref=e129]:
+          - generic [ref=e131]: A
+          - generic [ref=e132]:
+            - paragraph [ref=e133]: Admin
+            - paragraph [ref=e134]: admin@enunas.com
+        - button "Abmelden" [ref=e135]:
+          - img [ref=e136]
+          - text: Abmelden
+    - main [ref=e139]:
+      - generic [ref=e142]:
+        - heading "Abrechnung" [level=2] [ref=e388]
+        - paragraph [ref=e144]: Monatliche Provisionsabrechnung je Brand
+      - generic [ref=e389]:
+        - generic [ref=e391]:
+          - paragraph [ref=e392]: Finanzen
+          - heading "Monatliche Abrechnung." [level=1] [ref=e393]:
+            - text: Monatliche
+            - emphasis [ref=e394]: Abrechnung.
+          - paragraph [ref=e395]: Provision und Auszahlungen je Brand — prüfen, in lexoffice erstellen, als abgerechnet markieren.
+        - generic [ref=e396]:
+          - generic [ref=e397]:
+            - paragraph [ref=e398]: SEPA fällig
+            - paragraph [ref=e399]: 0,00 €
+            - paragraph [ref=e400]: 0 Brands · Mai 2026
+            - img [ref=e402]
+          - generic [ref=e404]:
+            - paragraph [ref=e405]: Σ Provision brutto
+            - paragraph [ref=e406]: 0,00 €
+            - paragraph [ref=e407]: "Netto: 0,00 €"
+            - img [ref=e409]
+          - generic [ref=e411]:
+            - paragraph [ref=e412]: YTD Provision
+            - paragraph [ref=e413]: €44K
+            - paragraph [ref=e414]: Jan–Mai 2026
+          - generic [ref=e415]:
+            - paragraph [ref=e416]: Brands diesen Monat
+            - paragraph [ref=e417]: "0"
+            - paragraph [ref=e418]: alle positiv
+        - generic [ref=e419]:
+          - button "Provision & SEPA-Ausgänge — letzte 14 Monate Provision brutto SEPA-Ausgänge" [ref=e420]:
+            - generic [ref=e421]:
+              - paragraph [ref=e422]: Provision & SEPA-Ausgänge — letzte 14 Monate
+              - generic [ref=e423]:
+                - generic [ref=e424]: Provision brutto
+                - generic [ref=e426]: SEPA-Ausgänge
+            - img [ref=e428]
+          - application [ref=e433]:
+            - generic [ref=e450]:
+              - generic [ref=e451]:
+                - generic [ref=e453]: Apr 25
+                - generic [ref=e455]: Mai 25
+                - generic [ref=e457]: Jun 25
+                - generic [ref=e459]: Jul 25
+                - generic [ref=e461]: Aug 25
+                - generic [ref=e463]: Sep 25
+                - generic [ref=e465]: Okt 25
+                - generic [ref=e467]: Nov 25
+                - generic [ref=e469]: Dez 25
+                - generic [ref=e471]: Jan 26
+                - generic [ref=e473]: Feb 26
+                - generic [ref=e475]: Mär 26
+                - generic [ref=e477]: Apr 26
+                - generic [ref=e479]: Mai 26
+              - generic [ref=e480]:
+                - generic [ref=e482]: €0K
+                - generic [ref=e484]: €15K
+                - generic [ref=e486]: €30K
+                - generic [ref=e488]: €45K
+                - generic [ref=e490]: €60K
+        - button "Workflow · Manueller Abrechnungsablauf" [ref=e492]:
+          - paragraph [ref=e493]: Workflow · Manueller Abrechnungsablauf
+          - img [ref=e494]
+        - generic [ref=e496]:
+          - generic [ref=e497]:
+            - button "Offen" [ref=e498]
+            - button "Abgerechnet" [ref=e499]:
+              - img [ref=e500]
+              - text: Abgerechnet
+          - generic [ref=e504]:
+            - generic [ref=e505]:
+              - generic [ref=e506]: Periode
+              - textbox [ref=e507]: 2026-05
+            - generic [ref=e510]:
+              - button "Generieren" [ref=e511]:
+                - img [ref=e512]
+                - text: Generieren
+              - button "Ansicht neu laden" [ref=e517]:
+                - img [ref=e518]
+        - generic [ref=e523]:
+          - generic [ref=e525]:
+            - text: Offene Abrechnungen
+            - generic [ref=e526]: "0"
+          - generic [ref=e528]:
+            - generic [ref=e530]: leer
+            - paragraph [ref=e531]: Für diesen Monat ist alles abgerechnet — oder keine Aktivität.
+  - button "Open Next.js Dev Tools" [ref=e14] [cursor=pointer]:
+    - img [ref=e15]
+  - alert [ref=e386]
+  - generic [ref=e387]: €0K
