@@ -1,4 +1,6 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080/api';
+// Single source of truth for the API base — keep in sync with .env.local (NEXT_PUBLIC_API_URL).
+// The Spring backend serves at the root context (no /api prefix).
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
 
 export interface FetchOptions extends RequestInit {
   auth?: boolean;

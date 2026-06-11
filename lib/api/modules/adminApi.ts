@@ -20,17 +20,19 @@ export const adminApi = {
     async suspend(id: string): Promise<void> {
       return fetcher<void>(`/admin/brands/${id}/suspend`, { method: 'POST' });
     },
-    async setPayoutProfile(id: string, dto: { iban: string; accountHolder: string; bankName: string; bic: string }): Promise<AdminBrand> {
+    // Backend SetPayoutProfileDto = { iban, bankAccountHolder } — nothing else
+    async setPayoutProfile(id: string, dto: { iban: string; bankAccountHolder: string }): Promise<AdminBrand> {
       return fetcher<AdminBrand>(`/admin/brands/${id}/payout-profile`, {
         method: 'PATCH',
         body: JSON.stringify(dto),
       });
     },
 
-    // NOTE: PATCH /admin/brands/{id} needs to be added to the backend
+    // Backend AdminBrandMasterDataDto: address fields are @NotBlank (mandatory),
+    // country is 2-letter; `domestic` is derived server-side from addressCountry === 'DE'.
     async updateStammdaten(id: string, dto: {
-      legalName?: string; addressStreet?: string; addressPostalCode?: string;
-      addressCity?: string; addressCountry?: string; vatId?: string; taxNumber?: string;
+      legalName: string; addressStreet: string; addressPostalCode: string;
+      addressCity: string; addressCountry: string; vatId?: string; taxNumber?: string;
     }): Promise<AdminBrand> {
       return fetcher<AdminBrand>(`/admin/brands/${id}`, {
         method: 'PATCH',
@@ -38,10 +40,9 @@ export const adminApi = {
       });
     },
 
-    // NOTE: GET /admin/brands/{id}/22f-export needs to be added to the backend
     async export22f(id: string, period: string, format: 'csv' | 'json'): Promise<Blob> {
       const token = typeof window !== 'undefined' ? localStorage.getItem('enunas_token') : null;
-      const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080/api';
+      const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
       const res = await fetch(`${BASE}/admin/brands/${id}/22f-export?period=${period}&format=${format}`, {
         headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       });
@@ -57,24 +58,8 @@ export const adminApi = {
     async getById(id: string): Promise<AdminCustomer> {
       return fetcher<AdminCustomer>(`/admin/customers/${id}`);
     },
-    async suspend(id: string): Promise<AdminCustomer> {
-      return fetcher<AdminCustomer>(`/admin/customers/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status: 'SUSPENDED' }),
-      });
-    },
-    async unsuspend(id: string): Promise<AdminCustomer> {
-      return fetcher<AdminCustomer>(`/admin/customers/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status: 'ACTIVE' }),
-      });
-    },
-    async deactivate(id: string): Promise<AdminCustomer> {
-      return fetcher<AdminCustomer>(`/admin/customers/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status: 'DEACTIVATED' }),
-      });
-    },
+    // Backend UpdateCustomerProfileDto has no `status` field — there is currently
+    // no endpoint to suspend/deactivate a customer account.
   },
 
   products: {
@@ -96,21 +81,11 @@ export const adminApi = {
     async delete(id: string): Promise<void> {
       return fetcher<void>(`/admin/products/${id}`, { method: 'DELETE' });
     },
-    async deactivate(id: string): Promise<AdminApiProduct> {
-      return fetcher<AdminApiProduct>(`/admin/products/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status: 'DEACTIVATED' }),
-      });
-    },
+    // Backend UpdateProductDto has no `status` or `price` — status changes go through
+    // approve/reject/hide; prices live on listings. Variant updates are BRAND_PARTNER-only.
     async update(id: string, dto: object): Promise<AdminApiProduct> {
       return fetcher<AdminApiProduct>(`/admin/products/${id}`, {
         method: 'PATCH',
-        body: JSON.stringify(dto),
-      });
-    },
-    async updateVariant(productId: string, variantId: string, dto: object): Promise<object> {
-      return fetcher<object>(`/products/${productId}/variants/${variantId}`, {
-        method: 'PUT',
         body: JSON.stringify(dto),
       });
     },
@@ -126,14 +101,23 @@ export const adminApi = {
     async updateStatus(orderId: string, status: string): Promise<ApiOrder> {
       return fetcher<ApiOrder>(`/admin/orders/${orderId}/status?status=${status}`, { method: 'PATCH' });
     },
-    async cancel(orderId: string, reason: string): Promise<ApiOrder> {
+    // Backend CancelOrderDto: reason is the CancelReason enum (@NotNull), free text goes into note
+    async cancel(
+      orderId: string,
+      reason: 'FRAUD_SUSPICION' | 'OUT_OF_STOCK' | 'CUSTOMER_REQUEST' | 'TECHNICAL_ERROR' | 'OTHER',
+      note?: string,
+    ): Promise<ApiOrder> {
       return fetcher<ApiOrder>(`/admin/orders/${orderId}/cancel`, {
         method: 'POST',
-        body: JSON.stringify({ reason }),
+        body: JSON.stringify({ reason, ...(note ? { note } : {}) }),
       });
     },
     async approveReturn(orderId: string): Promise<ApiOrder> {
       return fetcher<ApiOrder>(`/admin/orders/${orderId}/return/approve`, { method: 'POST' });
+    },
+    // Required between approve and refund: RETURN_APPROVED → RETURN_RECEIVED (restores stock)
+    async receiveReturn(orderId: string): Promise<ApiOrder> {
+      return fetcher<ApiOrder>(`/admin/orders/${orderId}/return/receive`, { method: 'POST' });
     },
     async refund(orderId: string, amount: number): Promise<ApiOrder> {
       return fetcher<ApiOrder>(`/admin/orders/${orderId}/return/refund?refundAmount=${amount}`, { method: 'POST' });
@@ -154,10 +138,11 @@ export const adminApi = {
     async cancel(id: string): Promise<void> {
       return fetcher<void>(`/admin/payouts/${id}/cancel`, { method: 'POST' });
     },
+    // Backend MarkAsPaidDto expects `externalReference` (@NotBlank)
     async markPaid(id: string, reference: string): Promise<void> {
       return fetcher<void>(`/admin/payouts/${id}/paid`, {
         method: 'POST',
-        body: JSON.stringify({ paymentReference: reference }),
+        body: JSON.stringify({ externalReference: reference }),
       });
     },
     async generate(): Promise<AdminPayout[]> {

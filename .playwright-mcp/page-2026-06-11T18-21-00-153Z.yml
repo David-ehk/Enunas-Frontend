@@ -1,0 +1,188 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e42]:
+    - complementary [ref=e43]:
+      - generic [ref=e45]:
+        - generic [ref=e47]: E
+        - generic [ref=e48]:
+          - heading "Enunas" [level=1] [ref=e49]
+          - paragraph [ref=e50]: Admin Portal
+      - navigation [ref=e51]:
+        - button "Übersicht" [ref=e56] [cursor=pointer]:
+          - img [ref=e57]
+          - generic [ref=e62]: Übersicht
+        - generic [ref=e63]:
+          - paragraph [ref=e64]: Verwaltung
+          - generic [ref=e65]:
+            - button "Kunden" [ref=e68] [cursor=pointer]:
+              - img [ref=e69]
+              - generic [ref=e74]: Kunden
+            - button "Marken" [ref=e77] [cursor=pointer]:
+              - img [ref=e78]
+              - generic [ref=e82]: Marken
+            - button "Produkte" [ref=e85] [cursor=pointer]:
+              - img [ref=e86]
+              - generic [ref=e90]: Produkte
+            - button "Bestellungen" [ref=e93] [cursor=pointer]:
+              - img [ref=e94]
+              - generic [ref=e97]: Bestellungen
+            - button "Schaufenster" [ref=e100] [cursor=pointer]:
+              - img [ref=e101]
+              - generic [ref=e104]: Schaufenster
+        - generic [ref=e105]:
+          - paragraph [ref=e106]: Finanzen
+          - generic [ref=e107]:
+            - button "Rückgaben" [ref=e110] [cursor=pointer]:
+              - img [ref=e111]
+              - generic [ref=e114]: Rückgaben
+            - button "Rabattcodes" [ref=e117] [cursor=pointer]:
+              - img [ref=e118]
+              - generic [ref=e121]: Rabattcodes
+            - button "Abrechnung" [ref=e124] [cursor=pointer]:
+              - img [ref=e125]
+              - generic [ref=e128]: Abrechnung
+            - button "Auszahlungen" [ref=e131] [cursor=pointer]:
+              - img [ref=e132]
+              - generic [ref=e135]: Auszahlungen
+        - generic [ref=e136]:
+          - paragraph [ref=e137]: Phase 2
+          - generic [ref=e138]:
+            - button "Analytics bald" [ref=e141]:
+              - img [ref=e142]
+              - generic [ref=e143]: Analytics
+              - generic [ref=e144]: bald
+            - button "Content bald" [ref=e147]:
+              - img [ref=e148]
+              - generic [ref=e150]: Content
+              - generic [ref=e151]: bald
+            - button "Support bald" [ref=e154]:
+              - img [ref=e155]
+              - generic [ref=e157]: Support
+              - generic [ref=e158]: bald
+      - generic [ref=e159]:
+        - generic [ref=e161]:
+          - generic [ref=e163]: A
+          - generic [ref=e164]:
+            - paragraph [ref=e165]: Admin
+            - paragraph [ref=e166]: admin@enunas.com
+        - button "Abmelden" [ref=e167]:
+          - img [ref=e168]
+          - text: Abmelden
+    - main [ref=e171]:
+      - generic [ref=e174]:
+        - heading "Marken" [level=2] [ref=e1088]
+        - paragraph [ref=e176]: Markenverwaltung & Genehmigungen
+      - generic [ref=e1089]:
+        - generic [ref=e1091]:
+          - paragraph [ref=e1092]: Verwaltung
+          - heading "Marken verwaltung." [level=1] [ref=e1093]:
+            - text: Marken
+            - emphasis [ref=e1094]: verwaltung.
+        - generic [ref=e1095]:
+          - generic [ref=e1096]:
+            - paragraph [ref=e1097]: Ausstehend
+            - paragraph [ref=e1098]: "0"
+            - paragraph [ref=e1099]: Benötigen Genehmigung
+          - generic [ref=e1100]:
+            - paragraph [ref=e1101]: Aktive Marken
+            - paragraph [ref=e1102]: "1"
+            - generic [ref=e1104]:
+              - generic [ref=e1105]:
+                - generic [ref=e1106]: ▲
+                - generic [ref=e1107]: "+1"
+              - generic [ref=e1108]: MTD
+            - paragraph [ref=e1109]: Genehmigt
+            - img [ref=e1111]
+          - generic [ref=e1112]:
+            - paragraph [ref=e1113]: Ø Produkte / Marke
+            - paragraph [ref=e1114]: "1.0"
+            - paragraph [ref=e1115]: 1 Produkte gesamt
+          - generic [ref=e1116]:
+            - paragraph [ref=e1117]: Payouts MTD
+            - paragraph [ref=e1118]: € 0,00
+            - paragraph [ref=e1119]: Genehmigt + bezahlt
+            - img [ref=e1121]
+        - generic [ref=e1122]:
+          - generic [ref=e1123]:
+            - button "Alle" [ref=e1124]
+            - button "Ausstehend (0)" [ref=e1125]
+            - button "Genehmigt (1)" [ref=e1126]
+            - button "Abgelehnt (0)" [ref=e1127]
+            - button "Gesperrt (0)" [ref=e1128]
+          - generic [ref=e1130]:
+            - img [ref=e1131]
+            - textbox "Marke oder E-Mail suchen…" [ref=e1134]
+        - generic [ref=e1135]:
+          - generic [ref=e1137]:
+            - text: Marken
+            - generic [ref=e1138]: "1"
+          - table [ref=e1140]:
+            - rowgroup [ref=e1141]:
+              - row "Marke E-Mail Status Produkte Umsatz Registriert Aktionen" [ref=e1142]:
+                - columnheader "Marke" [ref=e1143]
+                - columnheader "E-Mail" [ref=e1144]
+                - columnheader "Status" [ref=e1145]
+                - columnheader "Produkte" [ref=e1146]
+                - columnheader "Umsatz" [ref=e1147]
+                - columnheader "Registriert" [ref=e1148]
+                - columnheader "Aktionen" [ref=e1149]
+            - rowgroup [ref=e1150]:
+              - row "S2 brand@test.com Genehmigt 1 — 2.6.2026 Finanzen §22f-Export Sperren" [ref=e1151]:
+                - cell "S2" [ref=e1152]:
+                  - button "S2" [ref=e1153]
+                - cell "brand@test.com" [ref=e1154]
+                - cell "Genehmigt" [ref=e1155]:
+                  - generic [ref=e1158]: Genehmigt
+                - cell "1" [ref=e1159]
+                - cell "—" [ref=e1160]
+                - cell "2.6.2026" [ref=e1161]
+                - cell "Finanzen §22f-Export Sperren" [ref=e1162]:
+                  - generic [ref=e1163]:
+                    - button "Finanzen" [ref=e1164]
+                    - button "§22f-Export" [ref=e1165]
+                    - button [ref=e1166]:
+                      - img [ref=e1170]
+                    - button "Sperren" [ref=e1169]
+              - 'row "Brand-ID 1 Status Genehmigt Produkte 1 Produkte Produktliste Waterfall Aktiv Stammdaten (§22f) Bearbeiten Firmenbezeichnung Muster GmbH Typ Inland · §14 Anschrift Appenzellerstr, 81475 München, DE USt-IdNr. DE123456789 Zuletzt geändert: 8.6.2026 Auszahlungsprofil Bearbeiten Kein Auszahlungsprofil hinterlegt — klicken Sie auf Bearbeiten, um eines einzurichten." [ref=e1250]':
+                - 'cell "Brand-ID 1 Status Genehmigt Produkte 1 Produkte Produktliste Waterfall Aktiv Stammdaten (§22f) Bearbeiten Firmenbezeichnung Muster GmbH Typ Inland · §14 Anschrift Appenzellerstr, 81475 München, DE USt-IdNr. DE123456789 Zuletzt geändert: 8.6.2026 Auszahlungsprofil Bearbeiten Kein Auszahlungsprofil hinterlegt — klicken Sie auf Bearbeiten, um eines einzurichten." [ref=e1251]':
+                  - generic [ref=e1174]:
+                    - generic [ref=e1175]:
+                      - paragraph [ref=e1176]: Brand-ID
+                      - paragraph [ref=e1177]: "1"
+                    - generic [ref=e1178]:
+                      - paragraph [ref=e1179]: Status
+                      - generic [ref=e1182]: Genehmigt
+                    - generic [ref=e1183]:
+                      - paragraph [ref=e1184]: Produkte
+                      - paragraph [ref=e1185]: 1 Produkte
+                  - generic [ref=e1186]:
+                    - paragraph [ref=e1187]: Produktliste
+                    - generic [ref=e1189]:
+                      - text: Waterfall
+                      - generic [ref=e1192]: Aktiv
+                  - generic [ref=e1193]:
+                    - generic [ref=e1194]:
+                      - paragraph [ref=e1195]: Stammdaten (§22f)
+                      - button "Bearbeiten" [ref=e1252]
+                    - generic [ref=e1197]:
+                      - generic [ref=e1198]:
+                        - paragraph [ref=e1253]: Firmenbezeichnung
+                        - paragraph [ref=e1254]: Muster GmbH
+                      - generic [ref=e1201]:
+                        - paragraph [ref=e1255]: Typ
+                        - generic [ref=e1256]: Inland · §14
+                      - generic [ref=e1204]:
+                        - paragraph [ref=e1257]: Anschrift
+                        - paragraph [ref=e1258]: Appenzellerstr, 81475 München, DE
+                      - generic [ref=e1207]:
+                        - paragraph [ref=e1259]: USt-IdNr.
+                        - paragraph [ref=e1260]: DE123456789
+                      - paragraph [ref=e1261]: "Zuletzt geändert: 8.6.2026"
+                  - generic [ref=e1212]:
+                    - generic [ref=e1213]:
+                      - paragraph [ref=e1214]: Auszahlungsprofil
+                      - button "Bearbeiten" [ref=e1215]
+                    - paragraph [ref=e1216]: Kein Auszahlungsprofil hinterlegt — klicken Sie auf Bearbeiten, um eines einzurichten.
+  - button "Open Next.js Dev Tools" [ref=e14] [cursor=pointer]:
+    - img [ref=e15]
+  - alert [ref=e41]
+  - generic [ref=e418]: €0K

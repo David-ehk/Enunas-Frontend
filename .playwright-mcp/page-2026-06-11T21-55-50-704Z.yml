@@ -1,0 +1,120 @@
+- generic [ref=e1]:
+  - generic [ref=e42]:
+    - complementary [ref=e43]:
+      - generic [ref=e45]:
+        - generic [ref=e47]: E
+        - generic [ref=e48]:
+          - heading "Enunas" [level=1] [ref=e49]
+          - paragraph [ref=e50]: Admin Portal
+      - navigation [ref=e51]:
+        - button "Übersicht" [ref=e56] [cursor=pointer]:
+          - img [ref=e57]
+          - generic [ref=e62]: Übersicht
+        - generic [ref=e63]:
+          - paragraph [ref=e64]: Verwaltung
+          - generic [ref=e65]:
+            - button "Kunden" [ref=e68] [cursor=pointer]:
+              - img [ref=e69]
+              - generic [ref=e74]: Kunden
+            - button "Marken" [ref=e77] [cursor=pointer]:
+              - img [ref=e78]
+              - generic [ref=e82]: Marken
+            - button "Produkte" [ref=e85] [cursor=pointer]:
+              - img [ref=e86]
+              - generic [ref=e90]: Produkte
+            - button "Bestellungen" [active] [ref=e93] [cursor=pointer]:
+              - img [ref=e94]
+              - generic [ref=e97]: Bestellungen
+            - button "Schaufenster" [ref=e100] [cursor=pointer]:
+              - img [ref=e101]
+              - generic [ref=e104]: Schaufenster
+        - generic [ref=e105]:
+          - paragraph [ref=e106]: Finanzen
+          - generic [ref=e107]:
+            - button "Rückgaben" [ref=e110] [cursor=pointer]:
+              - img [ref=e111]
+              - generic [ref=e114]: Rückgaben
+            - button "Rabattcodes" [ref=e117] [cursor=pointer]:
+              - img [ref=e118]
+              - generic [ref=e121]: Rabattcodes
+            - button "Abrechnung" [ref=e124] [cursor=pointer]:
+              - img [ref=e125]
+              - generic [ref=e128]: Abrechnung
+            - button "Auszahlungen" [ref=e131] [cursor=pointer]:
+              - img [ref=e132]
+              - generic [ref=e135]: Auszahlungen
+        - generic [ref=e136]:
+          - paragraph [ref=e137]: Phase 2
+          - generic [ref=e138]:
+            - button "Analytics bald" [ref=e141]:
+              - img [ref=e142]
+              - generic [ref=e143]: Analytics
+              - generic [ref=e144]: bald
+            - button "Content bald" [ref=e147]:
+              - img [ref=e148]
+              - generic [ref=e150]: Content
+              - generic [ref=e151]: bald
+            - button "Support bald" [ref=e154]:
+              - img [ref=e155]
+              - generic [ref=e157]: Support
+              - generic [ref=e158]: bald
+      - generic [ref=e159]:
+        - generic [ref=e161]:
+          - generic [ref=e163]: A
+          - generic [ref=e164]:
+            - paragraph [ref=e165]: Admin
+            - paragraph [ref=e166]: admin@enunas.com
+        - button "Abmelden" [ref=e167]:
+          - img [ref=e168]
+          - text: Abmelden
+    - main [ref=e171]:
+      - generic [ref=e174]:
+        - heading "Bestellungen" [level=2] [ref=e1262]
+        - paragraph [ref=e176]: Bestellungsverwaltung
+      - generic [ref=e1263]:
+        - generic [ref=e1265]:
+          - paragraph [ref=e1266]: Verwaltung
+          - heading "Bestellungen verwaltung." [level=1] [ref=e1267]:
+            - text: Bestellungen
+            - emphasis [ref=e1268]: verwaltung.
+        - generic [ref=e1269]:
+          - generic [ref=e1270]:
+            - button "Alle" [ref=e1271]
+            - button "Pending" [ref=e1272]
+            - button "Bezahlt" [ref=e1273]
+            - button "Bearbeitung" [ref=e1274]
+            - button "Versandt" [ref=e1275]
+            - button "Geliefert" [ref=e1276]
+            - button "Rückgabe" [ref=e1277]
+            - button "Storniert" [ref=e1278]
+            - button "Erstattet" [ref=e1279]
+          - generic [ref=e1280]:
+            - combobox [ref=e1281] [cursor=pointer]:
+              - option "Alle Beträge" [selected]
+              - option "< €50"
+              - option "€50 – €100"
+              - option "€100 – €200"
+              - option "€200 – €500"
+              - option "> €500"
+            - img
+          - generic [ref=e1282]:
+            - combobox [ref=e1283] [cursor=pointer]:
+              - option "Neueste zuerst" [selected]
+              - option "Älteste zuerst"
+              - option "Höchster Betrag"
+              - option "Niedrigster Betrag"
+            - img
+          - generic [ref=e1285]:
+            - img [ref=e1286]
+            - textbox "Order-ID, Kundenname…" [ref=e1289]
+        - generic [ref=e1290]:
+          - generic [ref=e1292]:
+            - text: Bestellungen
+            - generic [ref=e1293]: "0"
+          - generic [ref=e1295]:
+            - generic [ref=e1297]: leer
+            - paragraph [ref=e1298]: Keine Bestellungen gefunden.
+  - button "Open Next.js Dev Tools" [ref=e14] [cursor=pointer]:
+    - img [ref=e15]
+  - alert [ref=e41]
+  - generic [ref=e418]: €0K

@@ -1,13 +1,14 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
-import { settlementApi, FetchError } from '@/lib/api'
+import { settlementApi, adminApi, FetchError } from '@/lib/api'
 import type { SettlementRow, SettlementDashboard } from '@/lib/api'
+import type { AdminPayout } from '@/types/api'
 import {
   PageHeader, SectionCard, EmptyState, Loader, TH, TD, TableRow,
-  KPIGrid, KPICell,
+  KPIGrid, KPICell, StatusBadge, fmt,
 } from './shared'
-import { Copy, Check, X, ChevronDown, ChevronUp, AlertTriangle, History, Info, RefreshCw } from 'lucide-react'
+import { Copy, Check, X, ChevronDown, ChevronUp, AlertTriangle, History, Info, RefreshCw, Banknote, Zap, CheckCircle, XCircle } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
@@ -282,17 +283,19 @@ function getMockRows(p: string, settled: boolean): SettlementRow[] {
   } catch { return [] }
 }
 
-function persistOpenRemoval(brandId: number, p: string, invoiceRef: string) {
+// Archives a settled row locally — the backend has no settled-listing endpoint,
+// so the "Abgerechnet" view is fed from this archive (seeds + real settles).
+function persistSettled(row: SettlementRow, p: string, invoiceRef: string) {
   try {
     const openMap    = JSON.parse(localStorage.getItem(LS_OPEN_KEY)    ?? '{}') as Record<string, SettlementRow[]>
     const settledMap = JSON.parse(localStorage.getItem(LS_SETTLED_KEY) ?? '{}') as Record<string, SettlementRow[]>
-    const row = (openMap[p] ?? []).find(r => r.brandId === brandId)
-    if (row) {
-      openMap[p]    = (openMap[p] ?? []).filter(r => r.brandId !== brandId)
-      settledMap[p] = [...(settledMap[p] ?? []), { ...row, settled: true, settledAt: new Date().toISOString(), invoiceReference: invoiceRef || null }]
-      localStorage.setItem(LS_OPEN_KEY,    JSON.stringify(openMap))
-      localStorage.setItem(LS_SETTLED_KEY, JSON.stringify(settledMap))
-    }
+    openMap[p]    = (openMap[p] ?? []).filter(r => r.brandId !== row.brandId)
+    settledMap[p] = [
+      ...(settledMap[p] ?? []).filter(r => r.brandId !== row.brandId),
+      { ...row, settled: true, settledAt: new Date().toISOString(), invoiceReference: invoiceRef || null },
+    ]
+    localStorage.setItem(LS_OPEN_KEY,    JSON.stringify(openMap))
+    localStorage.setItem(LS_SETTLED_KEY, JSON.stringify(settledMap))
   } catch { /* ignore */ }
 }
 
@@ -682,16 +685,24 @@ function CommissionTrend({ data }: { data: typeof TREND_DATA }) {
 
 export default function Settlements() {
   const [period, setPeriod]         = useState(getDefaultPeriod())
-  const [view, setView]             = useState<'open' | 'settled'>('open')
+  const [view, setView]             = useState<'open' | 'settled' | 'payouts'>('open')
   const [rows, setRows]             = useState<SettlementRow[]>([])
   const [loading, setLoading]       = useState(true)
   const [error, setError]           = useState<string | null>(null)
   const [usingMock, setUsingMock]   = useState(false)
   const [confirmRow, setConfirmRow]   = useState<SettlementRow | null>(null)
   const [submitting, setSubmitting]   = useState(false)
-  const [generating, setGenerating]   = useState(false)
   const [toast, setToast]             = useState<ToastState | null>(null)
   const [dashboard, setDashboard]     = useState<SettlementDashboard | null>(null)
+
+  // Payout-Workflow (SEPA) — generate → approve → paid, gespeist aus /admin/payouts
+  const [payouts, setPayouts]           = useState<AdminPayout[]>([])
+  const [brandNames, setBrandNames]     = useState<Record<string, string>>({})
+  const [payoutLoading, setPayoutLoading] = useState(false)
+  const [payoutActing, setPayoutActing]   = useState<string | null>(null)
+  const [generating, setGenerating]       = useState(false)
+  const [payingId, setPayingId]           = useState<string | null>(null)
+  const [payRef, setPayRef]               = useState('')
   const [guideOpen, setGuideOpen]     = useState(false)
   const [trendOpen, setTrendOpen]     = useState(true)
   const [trendData]                   = useState(() => {
@@ -719,24 +730,49 @@ export default function Settlements() {
 
   async function loadRows(p: string, settled: boolean) {
     setLoading(true); setError(null)
+    if (settled) {
+      // Backend has no settled-listing endpoint — local archive (seeds + real settles)
+      setRows(getMockRows(p, true)); setUsingMock(false); setLoading(false)
+      return
+    }
     try {
-      const data = await settlementApi.getSettlements(p, settled)
+      const data = await settlementApi.getSettlements(p)
       if (data.length > 0) {
         setRows(data); setUsingMock(false)
       } else {
         // Backend returned empty — fall back to seed/preview data if available
-        const mock = getMockRows(p, settled)
+        const mock = getMockRows(p, false)
         setRows(mock); setUsingMock(mock.length > 0)
       }
     } catch {
-      setRows(getMockRows(p, settled)); setUsingMock(true)
+      setRows(getMockRows(p, false)); setUsingMock(true)
     } finally {
       setLoading(false)
     }
   }
 
+  async function loadPayouts() {
+    setPayoutLoading(true)
+    try {
+      const [list, brands] = await Promise.all([
+        adminApi.payouts.getAll(),
+        adminApi.brands.getAll().catch(() => []),
+      ])
+      setPayouts(list)
+      setBrandNames(Object.fromEntries(brands.map(b => [String(b.id), b.brandName])))
+    } catch {
+      showToast('Auszahlungen konnten nicht geladen werden.', 'error')
+    } finally {
+      setPayoutLoading(false)
+    }
+  }
+
   useEffect(() => {
-    loadRows(period, view === 'settled')
+    if (view === 'payouts') {
+      loadPayouts()
+    } else {
+      loadRows(period, view === 'settled')
+    }
   }, [period, view])
 
   // Load global payout dashboard stats once on mount
@@ -744,57 +780,92 @@ export default function Settlements() {
     settlementApi.getDashboard().then(setDashboard).catch(() => { /* non-critical */ })
   }, [])
 
+  const payoutBrandName = (p: AdminPayout) =>
+    brandNames[String(p.brandPartnerId)] ?? (p.brandPartnerId != null ? `Brand #${p.brandPartnerId}` : '—')
+
+  async function generatePayouts() {
+    setGenerating(true)
+    try {
+      const created = await adminApi.payouts.generate()
+      await loadPayouts()
+      settlementApi.getDashboard().then(setDashboard).catch(() => {})
+      showToast(created.length > 0 ? `${created.length} Payout${created.length > 1 ? 's' : ''} generiert.` : 'Keine neuen Payouts — kein offenes Guthaben.', created.length > 0 ? 'success' : 'warn')
+    } catch {
+      showToast('Payout-Generierung fehlgeschlagen.', 'error')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  async function approvePayout(id: string) {
+    setPayoutActing(id)
+    try {
+      await adminApi.payouts.approve(id)
+      setPayouts(prev => prev.map(p => p.id === id ? { ...p, status: 'APPROVED' } : p))
+      showToast('Payout genehmigt — jetzt per SEPA überweisen.', 'success')
+    } catch {
+      showToast('Genehmigen fehlgeschlagen.', 'error')
+    } finally { setPayoutActing(null) }
+  }
+
+  async function cancelPayout(id: string) {
+    setPayoutActing(id)
+    try {
+      await adminApi.payouts.cancel(id)
+      setPayouts(prev => prev.map(p => p.id === id ? { ...p, status: 'CANCELLED' } : p))
+      showToast('Payout storniert.', 'warn')
+    } catch {
+      showToast('Stornieren fehlgeschlagen.', 'error')
+    } finally { setPayoutActing(null) }
+  }
+
+  async function markPayoutPaid(id: string) {
+    if (!payRef.trim()) return
+    setPayoutActing(id)
+    try {
+      await adminApi.payouts.markPaid(id, payRef.trim())
+      setPayouts(prev => prev.map(p => p.id === id ? { ...p, status: 'PAID', externalReference: payRef.trim() } : p))
+      setPayingId(null); setPayRef('')
+      settlementApi.getDashboard().then(setDashboard).catch(() => {})
+      showToast('Payout als bezahlt markiert.', 'success')
+    } catch {
+      showToast('Als bezahlt markieren fehlgeschlagen — Referenz prüfen.', 'error')
+    } finally { setPayoutActing(null) }
+  }
+
   async function handleMarkSettled(ref: string) {
     if (!confirmRow) return
     const row = confirmRow
     setSubmitting(true)
-    try {
-      await settlementApi.markSettled(row.brandId, period, ref.trim() || undefined, row.id)
-      persistOpenRemoval(row.brandId, period, ref.trim())
+
+    // Preview rows (seed data) are settled locally only — no backend call
+    if (usingMock) {
+      persistSettled(row, period, ref.trim())
       setRows(prev => prev.filter(r => r.brandId !== row.brandId))
-      // Refresh global dashboard totals
+      showToast(`${row.brandName} abgerechnet (Vorschaudaten)${ref.trim() ? ` · ${ref.trim()}` : ''}.`, 'warn')
+      setSubmitting(false); setConfirmRow(null)
+      return
+    }
+
+    try {
+      await settlementApi.markSettled(row.brandId, period, ref.trim() || undefined)
+      persistSettled(row, period, ref.trim())
+      setRows(prev => prev.filter(r => r.brandId !== row.brandId))
       settlementApi.getDashboard().then(setDashboard).catch(() => {})
       showToast(`${row.brandName} abgerechnet${ref.trim() ? ` · ${ref.trim()}` : ''}.`, 'success')
     } catch (err) {
       if (err instanceof FetchError && err.status === 409) {
-        persistOpenRemoval(row.brandId, period, ref.trim())
+        persistSettled(row, period, ref.trim())
         setRows(prev => prev.filter(r => r.brandId !== row.brandId))
         showToast(`${row.brandName} war bereits abgerechnet.`, 'warn')
       } else if (err instanceof FetchError && err.status === 422) {
         showToast('Periode noch nicht abgeschlossen.', 'warn')
       } else {
-        // Network error / offline — still persist locally
-        persistOpenRemoval(row.brandId, period, ref.trim())
-        setRows(prev => prev.filter(r => r.brandId !== row.brandId))
-        showToast(`${row.brandName} abgerechnet (Offline-Modus)${ref.trim() ? ` · ${ref.trim()}` : ''}.`, 'warn')
+        // Real data + real error: keep the row, surface the failure
+        showToast(`Abrechnen von ${row.brandName} fehlgeschlagen — bitte erneut versuchen.`, 'error')
       }
     } finally {
       setSubmitting(false); setConfirmRow(null)
-    }
-  }
-
-  async function handleGenerate() {
-    setGenerating(true)
-    try {
-      const generated = await settlementApi.generateSettlements(period)
-      await loadRows(period, false)
-      // Refresh dashboard totals after generating
-      settlementApi.getDashboard().then(setDashboard).catch(() => {})
-      showToast(
-        generated.length > 0
-          ? `${generated.length} Abrechnungen für ${fmtPeriodLabel(period)} generiert.`
-          : `Abrechnungen für ${fmtPeriodLabel(period)} generiert.`,
-        'success'
-      )
-    } catch (err) {
-      if (err instanceof FetchError && err.status === 409) {
-        showToast('Abrechnungen für diese Periode existieren bereits.', 'warn')
-        await loadRows(period, false)
-      } else {
-        showToast('Generierung fehlgeschlagen — Backend nicht erreichbar.', 'error')
-      }
-    } finally {
-      setGenerating(false)
     }
   }
 
@@ -832,7 +903,7 @@ export default function Settlements() {
         <div className="flex items-center gap-2 text-[11px] text-[#7A5C1E] bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5"
           style={{ fontFamily: 'var(--font-league-spartan)' }}>
           <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-          Backend nicht erreichbar — Vorschaudaten aus lokalem Speicher werden angezeigt.
+          Keine echten Abrechnungsdaten für diese Periode — Vorschaudaten aus lokalem Speicher werden angezeigt.
         </div>
       )}
 
@@ -966,7 +1037,7 @@ export default function Settlements() {
               { n: '1', t: 'Zahlen prüfen. Badge zeigt Belegtyp: Inland (inkl. 19 % USt), Reverse Charge (Netto) oder Gutschrift.' },
               { n: '2', t: 'Beleg in lexoffice erstellen. Werte per Copy-Button übernehmen — verhindert Tippfehler.' },
               { n: '3', t: 'Für RC-Brands: Fiktive USt-Spalte beachten. Netto-Umsatz in USt-Voranmeldung und ZM eintragen — du erhältst kein Geld, musst es aber melden.' },
-              { n: '4', t: 'Auszahlung per SEPA überweisen — nur wenn payoutAmount positiv.' },
+              { n: '4', t: 'Im Tab „Auszahlungen" Payouts generieren, genehmigen und nach der SEPA-Überweisung mit Referenz als bezahlt markieren.' },
               { n: '5', t: 'Hier „Als abgerechnet markieren" mit optionaler Rechnungsreferenz.' },
             ] as { n: string; t: string }[]).map(({ n, t }) => (
               <div key={n} className="flex gap-3">
@@ -983,9 +1054,10 @@ export default function Settlements() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="inline-flex rounded-lg border border-[#E8E8E8] overflow-hidden">
           {([
-            { id: 'open',    label: 'Offen',       icon: null },
-            { id: 'settled', label: 'Abgerechnet', icon: <History className="w-3 h-3" /> },
-          ] as { id: 'open' | 'settled'; label: string; icon: React.ReactNode }[]).map(tab => (
+            { id: 'open',    label: 'Offen',        icon: null },
+            { id: 'settled', label: 'Abgerechnet',  icon: <History className="w-3 h-3" /> },
+            { id: 'payouts', label: 'Auszahlungen', icon: <Banknote className="w-3 h-3" /> },
+          ] as { id: 'open' | 'settled' | 'payouts'; label: string; icon: React.ReactNode }[]).map(tab => (
             <button key={tab.id} onClick={() => { setView(tab.id); setRows([]) }}
               className="inline-flex items-center gap-1.5 h-9 px-4 text-[11px] font-medium transition-all duration-150"
               style={{
@@ -999,48 +1071,44 @@ export default function Settlements() {
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          {periodOpen && (
+          {view !== 'payouts' && periodOpen && (
             <div className="flex items-center gap-2 text-[11px] text-[#7A5C1E] bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"
               style={{ fontFamily: 'var(--font-league-spartan)' }}>
               <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
               Periode noch nicht abgeschlossen — Markieren gesperrt.
             </div>
           )}
-          <div>
-            <label className="block text-[10px] uppercase tracking-[0.12em] text-[#6B6B6B] font-medium mb-1"
-              style={{ fontFamily: 'var(--font-league-spartan)' }}>
-              Periode
-            </label>
-            <input type="month" value={period} max={getCurrentPeriod()}
-              onChange={e => { if (e.target.value) setPeriod(e.target.value) }}
-              className="h-9 px-3 text-[13px] border border-[#E8E8E8] bg-white rounded-lg focus:outline-none focus:border-[#370E4D]/40 transition-all duration-200"
-              style={{ fontFamily: 'var(--font-league-spartan)' }} />
-          </div>
-          {view === 'open' && (
+          {view !== 'payouts' && (
             <div>
-              <label className="block text-[10px] uppercase tracking-[0.12em] text-[#6B6B6B] font-medium mb-1 opacity-0"
+              <label className="block text-[10px] uppercase tracking-[0.12em] text-[#6B6B6B] font-medium mb-1"
                 style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                &nbsp;
+                Periode
               </label>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleGenerate}
-                  disabled={generating || loading}
-                  title="Auszahlungen für diesen Monat im Backend berechnen und anlegen"
-                  className="h-9 inline-flex items-center gap-2 px-4 rounded-lg text-[11px] font-medium border border-[#E8E8E8] bg-white text-[#6B6B6B] hover:border-[#370E4D]/40 hover:text-[#370E4D] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-                  style={{ fontFamily: 'var(--font-league-spartan)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                  <RefreshCw className={`w-3.5 h-3.5 ${generating ? 'animate-spin' : ''}`} />
-                  {generating ? 'Generiert…' : 'Generieren'}
-                </button>
-                <button
-                  onClick={() => loadRows(period, false)}
-                  disabled={loading}
-                  title="Ansicht neu laden"
-                  className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-[#9B9B9B] border border-[#E8E8E8] bg-white hover:border-[#370E4D]/40 hover:text-[#370E4D] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed">
-                  <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-                </button>
-              </div>
+              <input type="month" value={period} max={getCurrentPeriod()}
+                onChange={e => { if (e.target.value) setPeriod(e.target.value) }}
+                className="h-9 px-3 text-[13px] border border-[#E8E8E8] bg-white rounded-lg focus:outline-none focus:border-[#370E4D]/40 transition-all duration-200"
+                style={{ fontFamily: 'var(--font-league-spartan)' }} />
             </div>
+          )}
+          {view === 'payouts' && (
+            <button
+              onClick={generatePayouts}
+              disabled={generating || payoutLoading}
+              title="Offene Brand-Guthaben in Payouts umwandeln"
+              className="h-9 inline-flex items-center gap-2 px-4 rounded-lg text-[11px] font-medium border border-[#370E4D]/30 text-[#370E4D] bg-white hover:bg-[#370E4D] hover:text-white transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ fontFamily: 'var(--font-league-spartan)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              <Zap className="w-3.5 h-3.5" />
+              {generating ? 'Generiert…' : 'Payouts generieren'}
+            </button>
+          )}
+          {(view === 'open' || view === 'payouts') && (
+            <button
+              onClick={() => view === 'payouts' ? loadPayouts() : loadRows(period, false)}
+              disabled={view === 'payouts' ? payoutLoading : loading}
+              title="Ansicht neu laden"
+              className="h-9 w-9 inline-flex items-center justify-center rounded-lg text-[#9B9B9B] border border-[#E8E8E8] bg-white hover:border-[#370E4D]/40 hover:text-[#370E4D] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed">
+              <RefreshCw className={`w-3.5 h-3.5 ${(view === 'payouts' ? payoutLoading : loading) ? 'animate-spin' : ''}`} />
+            </button>
           )}
         </div>
       </div>
@@ -1080,6 +1148,150 @@ export default function Settlements() {
           </div>
         </div>
       )}
+
+      {/* Payouts view — SEPA-Workflow: generieren → genehmigen → als bezahlt markieren */}
+      {view === 'payouts' && (() => {
+        const pending  = payouts.filter(p => p.status === 'PENDING')
+        const approved = payouts.filter(p => p.status === 'APPROVED')
+        const paid     = payouts.filter(p => p.status === 'PAID')
+        const sum = (list: AdminPayout[]) => list.reduce((s, p) => s + p.amount, 0)
+        return (
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="rounded-xl border px-4 py-3.5" style={{ background: 'rgba(122,92,30,0.04)', borderColor: 'rgba(122,92,30,0.2)' }}>
+                <p className="text-[9px] uppercase tracking-[0.14em] mb-1" style={{ fontFamily: 'var(--font-league-spartan)', color: '#7A5C1E' }}>
+                  Ausstehend · {pending.length}
+                </p>
+                <p className="text-[18px] font-bold tabular-nums leading-none" style={{ fontFamily: 'var(--font-league-spartan)', color: '#7A5C1E' }}>
+                  {fmtEurDe(sum(pending))}
+                </p>
+                <p className="text-[10px] mt-1" style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B7B3A' }}>warten auf Genehmigung</p>
+              </div>
+              <div className="rounded-xl border px-4 py-3.5" style={{ background: 'rgba(26,90,60,0.06)', borderColor: 'rgba(26,90,60,0.2)' }}>
+                <p className="text-[9px] uppercase tracking-[0.14em] mb-1 text-[#1A5A3C]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                  Genehmigt · {approved.length}
+                </p>
+                <p className="text-[18px] font-bold tabular-nums leading-none text-[#1A5A3C]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                  {fmtEurDe(sum(approved))}
+                </p>
+                <p className="text-[10px] text-[#1A5A3C]/60 mt-1" style={{ fontFamily: 'var(--font-league-spartan)' }}>jetzt per SEPA überweisen</p>
+              </div>
+              <div className="rounded-xl border px-4 py-3.5" style={{ background: '#370E4D', borderColor: '#370E4D' }}>
+                <p className="text-[9px] uppercase tracking-[0.14em] mb-1" style={{ fontFamily: 'var(--font-league-spartan)', color: 'rgba(255,255,255,0.45)' }}>
+                  Bezahlt · {paid.length}
+                </p>
+                <p className="text-[18px] font-bold tabular-nums leading-none text-white" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                  {fmtEurDe(sum(paid))}
+                </p>
+              </div>
+            </div>
+
+            <SectionCard title="Payouts" count={payouts.length}>
+              {payoutLoading ? <Loader /> : payouts.length === 0 ? (
+                <EmptyState message={'Keine Payouts vorhanden — über „Payouts generieren" werden offene Brand-Guthaben in Auszahlungen umgewandelt.'} />
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr>
+                        <TH>Brand</TH>
+                        <TH right>Betrag</TH>
+                        <TH>IBAN / Kontoinhaber</TH>
+                        <TH>Status</TH>
+                        <TH>Erstellt</TH>
+                        <TH>Referenz</TH>
+                        <TH>Aktion</TH>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {payouts.map(p => (
+                        <React.Fragment key={p.id}>
+                          <TableRow>
+                            <TD className="font-medium text-[#0A0A0A]">{payoutBrandName(p)}</TD>
+                            <TD className="text-right font-semibold tabular-nums">{fmtEurDe(p.amount)}</TD>
+                            <TD>
+                              {p.iban ? (
+                                <div style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                                  <span className="font-mono text-[11px] text-[#2D2D2D]">{p.iban}</span>
+                                  {p.bankAccountHolder && <p className="text-[10px] text-[#9B9B9B] mt-0.5">{p.bankAccountHolder}</p>}
+                                </div>
+                              ) : <span className="text-[11px] text-[#8B1E3F]">⚠ kein Auszahlungsprofil</span>}
+                            </TD>
+                            <TD><StatusBadge status={p.status} /></TD>
+                            <TD className="text-[#6B6B6B]">{fmt(p.createdAt)}</TD>
+                            <TD className="font-mono text-[11px] text-[#9B9B9B]">{p.externalReference ?? '—'}</TD>
+                            <TD>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {p.status === 'PENDING' && (
+                                  <button
+                                    onClick={() => approvePayout(p.id)}
+                                    disabled={payoutActing === p.id}
+                                    className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-medium border border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-200 disabled:opacity-40"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                                    <CheckCircle className="w-3 h-3" /> Genehmigen
+                                  </button>
+                                )}
+                                {p.status === 'APPROVED' && payingId !== p.id && (
+                                  <button
+                                    onClick={() => { setPayingId(p.id); setPayRef('') }}
+                                    disabled={payoutActing === p.id}
+                                    className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-medium border border-[#370E4D]/30 text-[#370E4D] hover:bg-[#370E4D] hover:text-white transition-all duration-200 disabled:opacity-40"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                                    Als bezahlt markieren
+                                  </button>
+                                )}
+                                {(p.status === 'PENDING' || p.status === 'APPROVED') && (
+                                  <button
+                                    onClick={() => cancelPayout(p.id)}
+                                    disabled={payoutActing === p.id}
+                                    title="Payout stornieren"
+                                    className="inline-flex items-center h-7 px-2 rounded-lg text-[11px] border border-rose-200 text-rose-600 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all duration-200 disabled:opacity-40">
+                                    <XCircle className="w-3 h-3" />
+                                  </button>
+                                )}
+                              </div>
+                            </TD>
+                          </TableRow>
+                          {payingId === p.id && (
+                            <tr className="border-b border-[#F0F0EB]" style={{ background: '#F8F8F5' }}>
+                              <td colSpan={7} className="px-5 py-3">
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    autoFocus
+                                    value={payRef}
+                                    onChange={e => setPayRef(e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && markPayoutPaid(p.id)}
+                                    placeholder="SEPA-Transaktionsreferenz (Pflicht)…"
+                                    className="text-[11px] border border-[#370E4D]/30 bg-white rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#370E4D]/40 w-72 transition-all duration-200"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                  />
+                                  <button
+                                    onClick={() => markPayoutPaid(p.id)}
+                                    disabled={payoutActing === p.id || !payRef.trim()}
+                                    className="inline-flex items-center h-7 px-3 rounded-lg text-[11px] font-medium text-white transition-all duration-200 disabled:opacity-40"
+                                    style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D' }}>
+                                    Bestätigen
+                                  </button>
+                                  <button
+                                    onClick={() => { setPayingId(null); setPayRef('') }}
+                                    className="inline-flex items-center h-7 px-2.5 rounded-lg text-[11px] font-medium text-[#6B6B6B] hover:text-[#0A0A0A] transition-all duration-200"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                                    Abbrechen
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </SectionCard>
+          </>
+        )
+      })()}
 
       {/* Settled view */}
       {view === 'settled' && (

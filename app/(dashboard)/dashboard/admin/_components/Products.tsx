@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { adminApi, brandApi } from '@/lib/api'
-import type { AdminApiProduct, AdminApiVariant, ApiOrder, ApiProductImage } from '@/types/api'
+import type { AdminApiProduct, ApiOrder, ApiProductImage } from '@/types/api'
 import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, SelectFilter, TH, TD, TableRow, fmt, fmtEur } from './shared'
-import { Eye, EyeOff, Trash2, CheckCircle, XCircle, Flag, Pencil, Ban, RotateCcw, ImagePlus, X, Link2 } from 'lucide-react'
+import { Eye, EyeOff, Trash2, CheckCircle, XCircle, Flag, Pencil, RotateCcw, ImagePlus, X, Link2 } from 'lucide-react'
 
 type Filter = 'all' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'DEACTIVATED'
 type Queue  = 'all' | 'moderation'
@@ -20,9 +20,6 @@ interface EditDraft {
   originCountry: string
   inspirationStory: string | null
   catalogueCategory: string[]
-  status: string
-  variantDrafts: AdminApiVariant[]
-  price: number
 }
 
 const CATALOGUE_CATEGORIES = ['Streetwear', 'Cultural', 'Athleisure', 'Experimental', 'Star']
@@ -40,12 +37,6 @@ const GENDER_OPTIONS = [
   { value: 'MALE', label: 'Herren' },
   { value: 'FEMALE', label: 'Damen' },
   { value: 'UNISEX', label: 'Unisex' },
-]
-const STATUS_OPTIONS = [
-  { value: 'PENDING', label: 'Ausstehend' },
-  { value: 'APPROVED', label: 'Genehmigt' },
-  { value: 'REJECTED', label: 'Abgelehnt' },
-  { value: 'DEACTIVATED', label: 'Deaktiviert' },
 ]
 
 function FLabel({ children }: { children: React.ReactNode }) {
@@ -214,6 +205,7 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [editing, setEditing]   = useState<string | null>(null)
   const [draft, setDraft]       = useState<EditDraft | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [rejectingId, setRejectingId]   = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
   const [brandFilter, setBrandFilter]   = useState<string>('all')
@@ -288,14 +280,6 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
     } catch { /* silent */ } finally { setActing(null) }
   }
 
-  async function deactivate(id: string) {
-    setActing(id)
-    try {
-      await adminApi.products.deactivate(id)
-      setProducts(prev => prev.map(p => p.id === id ? { ...p, status: 'DEACTIVATED' } : p))
-    } catch { /* silent */ } finally { setActing(null) }
-  }
-
   async function del(id: string) {
     setActing(id)
     try {
@@ -317,9 +301,6 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
       originCountry: p.originCountry ?? p.details?.origin ?? '',
       inspirationStory: p.inspirationStory || null,
       catalogueCategory: parseCatalogueCategory(p.catalogueCategory, p.catalogue),
-      status: p.status ?? '',
-      variantDrafts: p.variants ? p.variants.map(v => ({ ...v })) : [],
-      price: p.price ?? 0,
     })
   }
 
@@ -327,18 +308,13 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
     setDraft(d => d ? { ...d, [key]: value } : d)
   }
 
-  function setVariantField(idx: number, key: string, value: string | number) {
-    setDraft(d => {
-      if (!d) return d
-      const vd = d.variantDrafts.map((v, i) => i === idx ? { ...v, [key]: value } : v)
-      return { ...d, variantDrafts: vd }
-    })
-  }
-
   async function saveEdit(p: AdminApiProduct) {
     if (!draft) return
     setActing(p.id)
+    setSaveError(null)
     try {
+      // Backend UpdateProductDto: no status/price (status via approve/hide, prices on listings),
+      // variants are BRAND_PARTNER-only — only these fields are actually persisted.
       const updated = await adminApi.products.update(p.id, {
         name: draft.name,
         description: draft.description,
@@ -350,26 +326,16 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
         originCountry: draft.originCountry,
         inspirationStory: draft.inspirationStory,
         catalogueCategory: draft.catalogueCategory.map(c => c.toUpperCase()),
-        status: draft.status,
-        price: draft.price,
       })
-      for (const v of draft.variantDrafts) {
-        try {
-          await adminApi.products.updateVariant(p.id, v.id, {
-            color: v.color,
-            size: v.size,
-            stockQuantity: v.stockQuantity,
-            weightGrams: v.weightGrams,
-          })
-        } catch { /* individual variant failure is silent */ }
-      }
       setProducts(prev => prev.map(pr => pr.id === p.id
-        ? { ...pr, ...updated, variants: draft.variantDrafts } as AdminApiProduct
+        ? { ...pr, ...updated } as AdminApiProduct
         : pr
       ))
       setEditing(null)
       setDraft(null)
-    } catch { /* silent */ } finally { setActing(null) }
+    } catch {
+      setSaveError('Speichern fehlgeschlagen — Änderungen wurden nicht übernommen.')
+    } finally { setActing(null) }
   }
 
   const STATUS_FILTERS: { id: Filter; label: string }[] = [
@@ -579,18 +545,8 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
                             <EyeOff className="w-4 h-4" />
                           </button>
                         )}
-                        {/* Deactivate */}
-                        {p.status !== 'DEACTIVATED' && p.status !== 'REJECTED' && (
-                          <button
-                            onClick={() => deactivate(p.id)} disabled={acting === p.id}
-                            className="p-1.5 rounded-lg text-[#6B6B6B] hover:bg-rose-50 hover:text-rose-600 transition-all duration-200 disabled:opacity-40"
-                            title="Deaktivieren"
-                          >
-                            <Ban className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                        {/* Reactivate */}
-                        {p.status === 'DEACTIVATED' && (
+                        {/* Reactivate (hidden products) */}
+                        {(p.status === 'HIDDEN' || p.status === 'DEACTIVATED') && (
                           <button
                             onClick={() => act(p.id, 'approve')} disabled={acting === p.id}
                             className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-all duration-200 disabled:opacity-40"
@@ -641,31 +597,12 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
                           {/* Form */}
                           <div className="flex-1 space-y-4">
 
-                            {/* Name / Preis / Kategorie / Geschlecht / Status */}
-                            <div className="grid grid-cols-5 gap-4">
+                            {/* Name / Kategorie / Geschlecht — Preis liegt auf Listings,
+                                Status wird über Genehmigen/Verstecken gesteuert */}
+                            <div className="grid grid-cols-3 gap-4">
                               <div>
                                 <FLabel>Name</FLabel>
                                 <FInput value={draft.name} onChange={v => setField('name', v)} />
-                              </div>
-                              <div>
-                                <FLabel>Preis (EUR)</FLabel>
-                                <div className="relative">
-                                  <span
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-[#9B9B9B] select-none"
-                                    style={{ fontFamily: 'var(--font-league-spartan)' }}
-                                  >
-                                    €
-                                  </span>
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    value={draft.price}
-                                    onChange={e => setField('price', parseFloat(e.target.value) || 0)}
-                                    className="w-full text-[12px] border border-[#E8E8E8] bg-white rounded-lg pl-6 pr-3 py-2 focus:outline-none focus:border-[#370E4D]/40 focus:ring-2 focus:ring-[#370E4D]/8 transition-all duration-200"
-                                    style={{ fontFamily: 'var(--font-league-spartan)' }}
-                                  />
-                                </div>
                               </div>
                               <div>
                                 <FLabel>Kategorie</FLabel>
@@ -674,10 +611,6 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
                               <div>
                                 <FLabel>Geschlecht</FLabel>
                                 <FSelect value={draft.gender} onChange={v => setField('gender', v)} options={GENDER_OPTIONS} />
-                              </div>
-                              <div>
-                                <FLabel>Status</FLabel>
-                                <FSelect value={draft.status} onChange={v => setField('status', v)} options={STATUS_OPTIONS} />
                               </div>
                             </div>
 
@@ -828,10 +761,10 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
                               )}
                             </div>
 
-                            {/* Varianten */}
-                            {draft.variantDrafts.length > 0 && (
+                            {/* Varianten — read-only: Varianten-Updates sind BRAND_PARTNER-only */}
+                            {(p.variants?.length ?? 0) > 0 && (
                               <div>
-                                <FLabel>Varianten</FLabel>
+                                <FLabel>Varianten (nur Ansicht — Pflege durch die Marke)</FLabel>
                                 <div className="border border-[#E8E8E8] rounded-lg overflow-hidden">
                                   <table className="w-full">
                                     <thead>
@@ -845,13 +778,13 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
                                       </tr>
                                     </thead>
                                     <tbody>
-                                      {draft.variantDrafts.map((v, idx) => (
-                                        <tr key={v.id} className="border-t border-[#EBEBEB]">
-                                          <td className="py-1.5 px-3"><FInput value={v.color ?? ''} onChange={val => setVariantField(idx, 'color', val)} /></td>
-                                          <td className="py-1.5 px-3"><FInput value={v.size ?? ''} onChange={val => setVariantField(idx, 'size', val)} /></td>
+                                      {(p.variants ?? []).map(v => (
+                                        <tr key={v.id} className="border-t border-[#EBEBEB]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                                          <td className="py-1.5 px-3 text-[12px] text-[#2D2D2D]">{v.color ?? '—'}</td>
+                                          <td className="py-1.5 px-3 text-[12px] text-[#2D2D2D]">{v.size ?? '—'}</td>
                                           <td className="py-1.5 px-3 font-mono text-[11px] text-[#9B9B9B]">{v.sku ?? '—'}</td>
-                                          <td className="py-1.5 px-3"><FInput value={String(v.stockQuantity ?? '')} onChange={val => setVariantField(idx, 'stockQuantity', Number(val) || 0)} /></td>
-                                          <td className="py-1.5 px-3"><FInput value={String(v.weightGrams ?? '')} onChange={val => setVariantField(idx, 'weightGrams', Number(val) || 0)} /></td>
+                                          <td className="py-1.5 px-3 text-[12px] text-[#2D2D2D]">{v.stockQuantity ?? '—'}</td>
+                                          <td className="py-1.5 px-3 text-[12px] text-[#2D2D2D]">{v.weightGrams ?? '—'}</td>
                                         </tr>
                                       ))}
                                     </tbody>
@@ -861,9 +794,14 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
                             )}
 
                             {/* Save / Cancel */}
+                            {saveError && (
+                              <p className="text-[11px] font-medium text-right" style={{ fontFamily: 'var(--font-league-spartan)', color: '#8B1E3F' }}>
+                                {saveError}
+                              </p>
+                            )}
                             <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#EBEBEB]">
                               <button
-                                onClick={() => { setEditing(null); setDraft(null) }}
+                                onClick={() => { setEditing(null); setDraft(null); setSaveError(null) }}
                                 className="h-7 px-3.5 rounded-lg text-[11px] font-medium text-[#6B6B6B] border border-[#E8E8E8] hover:bg-[#F5F5F0] transition-all duration-200"
                                 style={{ fontFamily: 'var(--font-league-spartan)' }}
                               >

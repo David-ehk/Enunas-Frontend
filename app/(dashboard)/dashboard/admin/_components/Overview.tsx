@@ -178,7 +178,7 @@ export default function Overview({ orders, brands, products, customers }: Props)
     const q = searchQuery.trim().toLowerCase()
     if (q.length < 2) return null
     const matchBrands = brands.filter(b =>
-      b.brandName.toLowerCase().includes(q) || b.email.toLowerCase().includes(q)
+      b.brandName.toLowerCase().includes(q) || (b.email ?? b.userEmail ?? b.contactEmail ?? '').toLowerCase().includes(q)
     ).slice(0, 4)
     const matchProducts = products.filter(p =>
       p.name.toLowerCase().includes(q) ||
@@ -304,7 +304,7 @@ export default function Overview({ orders, brands, products, customers }: Props)
                 {searchResults.matchBrands.length > 0 && (
                   <ResultSection label="Marken" count={searchResults.matchBrands.length}>
                     {searchResults.matchBrands.map(b => (
-                      <ResultRow key={b.id} primary={b.brandName} secondary={b.email} badge={b.status} />
+                      <ResultRow key={b.id} primary={b.brandName} secondary={b.email ?? b.userEmail ?? b.contactEmail ?? '—'} badge={b.status} />
                     ))}
                   </ResultSection>
                 )}

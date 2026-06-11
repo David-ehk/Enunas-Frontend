@@ -28,9 +28,7 @@ export const discountsApi = {
         body: JSON.stringify({ active: false }),
       })
     },
-    async delete(id: number): Promise<void> {
-      return fetcher<void>(`/admin/discounts/${id}`, { method: 'DELETE' })
-    },
+    // No DELETE endpoint in the backend (only POST/GET/PUT) — codes are deactivated, not deleted.
   },
 
   brand: {

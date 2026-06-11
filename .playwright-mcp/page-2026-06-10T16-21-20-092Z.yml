@@ -1,0 +1,145 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e18]:
+      - generic [ref=e20]:
+        - generic [ref=e22]: E
+        - generic [ref=e23]:
+          - heading "Enunas" [level=1] [ref=e24]
+          - paragraph [ref=e25]: Admin Portal
+      - navigation [ref=e26]:
+        - button "Übersicht" [ref=e31] [cursor=pointer]:
+          - img [ref=e32]
+          - generic [ref=e37]: Übersicht
+        - generic [ref=e38]:
+          - paragraph [ref=e39]: Verwaltung
+          - generic [ref=e40]:
+            - button "Kunden" [ref=e43] [cursor=pointer]:
+              - img [ref=e44]
+              - generic [ref=e49]: Kunden
+            - button "Marken" [active] [ref=e52] [cursor=pointer]:
+              - img [ref=e53]
+              - generic [ref=e57]: Marken
+            - button "Produkte" [ref=e60] [cursor=pointer]:
+              - img [ref=e61]
+              - generic [ref=e65]: Produkte
+            - button "Bestellungen" [ref=e68] [cursor=pointer]:
+              - img [ref=e69]
+              - generic [ref=e72]: Bestellungen
+            - button "Schaufenster" [ref=e75] [cursor=pointer]:
+              - img [ref=e76]
+              - generic [ref=e79]: Schaufenster
+        - generic [ref=e80]:
+          - paragraph [ref=e81]: Finanzen
+          - generic [ref=e82]:
+            - button "Rückgaben" [ref=e85] [cursor=pointer]:
+              - img [ref=e86]
+              - generic [ref=e89]: Rückgaben
+            - button "Rabattcodes" [ref=e92] [cursor=pointer]:
+              - img [ref=e93]
+              - generic [ref=e96]: Rabattcodes
+            - button "Abrechnung" [ref=e99] [cursor=pointer]:
+              - img [ref=e100]
+              - generic [ref=e103]: Abrechnung
+        - generic [ref=e104]:
+          - paragraph [ref=e105]: Phase 2
+          - generic [ref=e106]:
+            - button "Analytics bald" [ref=e109]:
+              - img [ref=e110]
+              - generic [ref=e111]: Analytics
+              - generic [ref=e112]: bald
+            - button "Content bald" [ref=e115]:
+              - img [ref=e116]
+              - generic [ref=e118]: Content
+              - generic [ref=e119]: bald
+            - button "Support bald" [ref=e122]:
+              - img [ref=e123]
+              - generic [ref=e125]: Support
+              - generic [ref=e126]: bald
+      - generic [ref=e127]:
+        - generic [ref=e129]:
+          - generic [ref=e131]: A
+          - generic [ref=e132]:
+            - paragraph [ref=e133]: Admin
+            - paragraph [ref=e134]: admin@enunas.com
+        - button "Abmelden" [ref=e135]:
+          - img [ref=e136]
+          - text: Abmelden
+    - main [ref=e139]:
+      - generic [ref=e142]:
+        - heading "Marken" [level=2] [ref=e648]
+        - paragraph [ref=e144]: Markenverwaltung & Genehmigungen
+      - generic [ref=e649]:
+        - generic [ref=e651]:
+          - paragraph [ref=e652]: Verwaltung
+          - heading "Marken verwaltung." [level=1] [ref=e653]:
+            - text: Marken
+            - emphasis [ref=e654]: verwaltung.
+        - generic [ref=e655]:
+          - generic [ref=e656]:
+            - paragraph [ref=e657]: Ausstehend
+            - paragraph [ref=e658]: "0"
+            - paragraph [ref=e659]: Benötigen Genehmigung
+          - generic [ref=e660]:
+            - paragraph [ref=e661]: Aktive Marken
+            - paragraph [ref=e662]: "1"
+            - generic [ref=e664]:
+              - generic [ref=e665]:
+                - generic [ref=e666]: ▲
+                - generic [ref=e667]: "+1"
+              - generic [ref=e668]: MTD
+            - paragraph [ref=e669]: Genehmigt
+            - img [ref=e671]
+          - generic [ref=e672]:
+            - paragraph [ref=e673]: Ø Produkte / Marke
+            - paragraph [ref=e674]: "1.0"
+            - paragraph [ref=e675]: 1 Produkte gesamt
+          - generic [ref=e676]:
+            - paragraph [ref=e677]: Payouts MTD
+            - paragraph [ref=e678]: € 0,00
+            - paragraph [ref=e679]: Genehmigt + bezahlt
+            - img [ref=e681]
+        - generic [ref=e682]:
+          - generic [ref=e683]:
+            - button "Alle" [ref=e684]
+            - button "Ausstehend (0)" [ref=e685]
+            - button "Genehmigt (1)" [ref=e686]
+            - button "Abgelehnt (0)" [ref=e687]
+            - button "Gesperrt (0)" [ref=e688]
+          - generic [ref=e690]:
+            - img [ref=e691]
+            - textbox "Marke oder E-Mail suchen…" [ref=e694]
+        - generic [ref=e695]:
+          - generic [ref=e697]:
+            - text: Marken
+            - generic [ref=e698]: "1"
+          - table [ref=e700]:
+            - rowgroup [ref=e701]:
+              - row "Marke E-Mail Status Produkte Umsatz Registriert Aktionen" [ref=e702]:
+                - columnheader "Marke" [ref=e703]
+                - columnheader "E-Mail" [ref=e704]
+                - columnheader "Status" [ref=e705]
+                - columnheader "Produkte" [ref=e706]
+                - columnheader "Umsatz" [ref=e707]
+                - columnheader "Registriert" [ref=e708]
+                - columnheader "Aktionen" [ref=e709]
+            - rowgroup [ref=e710]:
+              - row "S2 Genehmigt 1 — 2.6.2026 Finanzen §22f-Export Sperren" [ref=e711]:
+                - cell "S2" [ref=e712]:
+                  - button "S2" [ref=e713]
+                - cell [ref=e714]
+                - cell "Genehmigt" [ref=e715]:
+                  - generic [ref=e718]: Genehmigt
+                - cell "1" [ref=e719]
+                - cell "—" [ref=e720]
+                - cell "2.6.2026" [ref=e721]
+                - cell "Finanzen §22f-Export Sperren" [ref=e722]:
+                  - generic [ref=e723]:
+                    - button "Finanzen" [ref=e724]
+                    - button "§22f-Export" [ref=e725]
+                    - button [ref=e726]:
+                      - img [ref=e727]
+                    - button "Sperren" [ref=e729]
+  - button "Open Next.js Dev Tools" [ref=e14] [cursor=pointer]:
+    - img [ref=e15]
+  - alert [ref=e227]
+  - generic [ref=e228]: "0"

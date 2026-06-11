@@ -49,7 +49,7 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
   useEffect(() => {
     adminApi.orders.getAll().catch(() => [])
       .then(all => setOrders(all.filter(o =>
-        ['RETURN_REQUESTED', 'RETURN_APPROVED', 'REFUNDED'].includes(o.status)
+        ['RETURN_REQUESTED', 'RETURN_APPROVED', 'RETURN_RECEIVED', 'REFUNDED'].includes(o.status)
       )))
       .finally(() => setLoading(false))
   }, [])
@@ -81,6 +81,15 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
     setActing(orderId)
     try {
       const updated = await adminApi.orders.approveReturn(orderId)
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o))
+    } catch { /* silent */ } finally { setActing(null) }
+  }
+
+  // Backend flow: RETURN_APPROVED → receive (stock restored) → RETURN_RECEIVED → refund
+  async function receiveReturn(orderId: string) {
+    setActing(orderId)
+    try {
+      const updated = await adminApi.orders.receiveReturn(orderId)
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o))
     } catch { /* silent */ } finally { setActing(null) }
   }
@@ -185,6 +194,11 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
                           </>
                         )}
                         {order.status === 'RETURN_APPROVED' && (
+                          <ActionBtn variant="success" disabled={acting === order.id} onClick={() => receiveReturn(order.id)}>
+                            <CheckCircle className="w-3 h-3" /> Wareneingang bestätigen
+                          </ActionBtn>
+                        )}
+                        {order.status === 'RETURN_RECEIVED' && (
                           refundingId !== order.id ? (
                             <ActionBtn variant="purple" disabled={acting === order.id} onClick={() => { setRefundingId(order.id); setRefundAmount(String(order.totalAmount)) }}>
                               <RotateCcw className="w-3 h-3" /> Refund ({fmtEur(order.totalAmount)})

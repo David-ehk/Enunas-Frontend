@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { Plus, Pencil, Power, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Power } from 'lucide-react'
 import { discountsApi } from '@/lib/api'
 import type { DiscountResponse } from '@/types/api'
 import {
@@ -99,7 +99,6 @@ export default function Discounts() {
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<DiscountResponse | null>(null)
   const [acting, setActing] = useState<number | null>(null)
-  const [deleting, setDeleting] = useState<number | null>(null)
 
   async function refresh() {
     setLoading(true)
@@ -135,19 +134,6 @@ export default function Discounts() {
     active:   items.filter(d => d.active).length,
     used:     items.reduce((s, d) => s + d.usedCount, 0),
   }), [items])
-
-  async function deleteCode(d: DiscountResponse) {
-    if (!confirm(`Code „${d.code}" endgültig löschen? Diese Aktion kann nicht rückgängig gemacht werden.`)) return
-    setDeleting(d.id)
-    try {
-      await discountsApi.admin.delete(d.id)
-      setItems(prev => prev.filter(x => x.id !== d.id))
-    } catch {
-      alert('Löschen fehlgeschlagen.')
-    } finally {
-      setDeleting(null)
-    }
-  }
 
   async function toggleActive(d: DiscountResponse) {
     const verb = d.active ? 'deaktivieren' : 'aktivieren'
@@ -291,17 +277,7 @@ export default function Discounts() {
                             <Power className="w-3 h-3" />
                             {d.active ? 'Deaktivieren' : 'Aktivieren'}
                           </RowAction>
-                          {!isBrandOwned && (
-                            <RowAction
-                              variant="danger"
-                              disabled={deleting === d.id}
-                              onClick={() => deleteCode(d)}
-                              title="Admin-Code löschen"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                              Löschen
-                            </RowAction>
-                          )}
+                          {/* Kein Löschen — das Backend hat keinen DELETE-Endpoint, Codes werden deaktiviert */}
                         </div>
                       </TD>
                     </TableRow>

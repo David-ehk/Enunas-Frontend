@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { adminApi } from '@/lib/api'
 import type { AdminCustomer, ApiOrder } from '@/types/api'
 import { PageHeader, KPIGrid, KPICell, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, SelectFilter, TH, TD, TableRow, fmt, fmtEur, dailyCounts, weekDeltaStr } from './shared'
-import { UserX, UserCheck, UserMinus, ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 
 type Filter      = 'all' | 'active' | 'suspended' | 'new'
 type SpendFilter = 'all' | 'none' | 'low' | 'mid' | 'high' | 'vip'
@@ -35,31 +35,6 @@ const SORT_OPTIONS = [
   { value: 'name',        label: 'Name A–Z' },
 ]
 
-function ActionBtn({
-  onClick, disabled, variant, children,
-}: {
-  onClick: () => void
-  disabled?: boolean
-  variant: 'danger' | 'success' | 'ghost'
-  children: React.ReactNode
-}) {
-  const styles = {
-    danger:  'border-rose-200 text-rose-600 hover:bg-rose-600 hover:text-white hover:border-rose-600',
-    success: 'border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600',
-    ghost:   'border-[#E8E8E8] text-[#6B6B6B] hover:bg-[#F5F5F0] hover:text-[#2D2D2D]',
-  }
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-medium border transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed ${styles[variant]}`}
-      style={{ fontFamily: 'var(--font-league-spartan)' }}
-    >
-      {children}
-    </button>
-  )
-}
-
 export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
   const [customers, setCustomers] = useState<AdminCustomer[]>([])
   const [loading, setLoading]     = useState(true)
@@ -68,7 +43,6 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
   const [sortBy, setSortBy]           = useState<SortBy>('newest')
   const [search, setSearch]           = useState('')
   const [expanded, setExpanded]       = useState<string | null>(null)
-  const [acting, setActing]           = useState<string | null>(null)
 
   useEffect(() => {
     adminApi.customers.getAll().catch(() => []).then(setCustomers).finally(() => setLoading(false))
@@ -167,18 +141,6 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
     }
   }, [customers, orders])
 
-  async function act(id: string, action: 'suspend' | 'unsuspend' | 'deactivate') {
-    setActing(id)
-    try {
-      const updated = await (action === 'suspend'
-        ? adminApi.customers.suspend(id)
-        : action === 'unsuspend'
-        ? adminApi.customers.unsuspend(id)
-        : adminApi.customers.deactivate(id))
-      setCustomers(prev => prev.map(c => c.id === id ? { ...c, ...updated } : c))
-    } catch { /* silent */ } finally { setActing(null) }
-  }
-
   return (
     <div className="space-y-5">
       <PageHeader
@@ -274,31 +236,15 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
                       <StatusBadge status={c.status ?? 'ACTIVE'} />
                     </TD>
                     <TD>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => setExpanded(expanded === c.id ? null : c.id)}
-                          className="p-1.5 rounded-lg hover:bg-[#F5F5F0] text-[#9B9B9B] hover:text-[#6B6B6B] transition-all duration-200"
-                        >
-                          {expanded === c.id
-                            ? <ChevronUp className="w-3.5 h-3.5" />
-                            : <ChevronDown className="w-3.5 h-3.5" />}
-                        </button>
-                        {(!c.status || c.status === 'ACTIVE') && (
-                          <ActionBtn variant="danger" disabled={acting === c.id} onClick={() => act(c.id, 'suspend')}>
-                            <UserX className="w-3 h-3" /> Sperren
-                          </ActionBtn>
-                        )}
-                        {c.status === 'SUSPENDED' && (
-                          <ActionBtn variant="success" disabled={acting === c.id} onClick={() => act(c.id, 'unsuspend')}>
-                            <UserCheck className="w-3 h-3" /> Entsperren
-                          </ActionBtn>
-                        )}
-                        {c.status !== 'DEACTIVATED' && (
-                          <ActionBtn variant="ghost" disabled={acting === c.id} onClick={() => act(c.id, 'deactivate')}>
-                            <UserMinus className="w-3 h-3" />
-                          </ActionBtn>
-                        )}
-                      </div>
+                      {/* Suspend/deactivate removed — the backend has no customer-status endpoint */}
+                      <button
+                        onClick={() => setExpanded(expanded === c.id ? null : c.id)}
+                        className="p-1.5 rounded-lg hover:bg-[#F5F5F0] text-[#9B9B9B] hover:text-[#6B6B6B] transition-all duration-200"
+                      >
+                        {expanded === c.id
+                          ? <ChevronUp className="w-3.5 h-3.5" />
+                          : <ChevronDown className="w-3.5 h-3.5" />}
+                      </button>
                     </TD>
                   </TableRow>
 

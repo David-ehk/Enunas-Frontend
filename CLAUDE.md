@@ -201,7 +201,7 @@ Dynamic product pages: `/bekleidung/[category]/[slug]`
 
 ## API Contract
 
-Base URL: `http://localhost:8080/api/v1` (dev) · `https://backend.railway.app/api/v1` (prod)
+Base URL: `http://localhost:8080` (dev — Spring root context, kein `/api`-Prefix). Single source of truth: `NEXT_PUBLIC_API_URL` in `.env.local`; Fallback in `lib/api/fetcher.ts`.
 
 All protected routes require: `Authorization: Bearer <token>` — handled automatically by `lib/api/fetcher.ts` when `auth: true` (default). Token + role returned by `POST /auth/login`.
 

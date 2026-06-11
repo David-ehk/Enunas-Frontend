@@ -101,18 +101,21 @@ export interface BrandOrder {
   status: 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | string;
 }
 
+// Mirrors backend BrandPartnerResponseDto (email comes as userEmail/contactEmail).
+// iban/bankAccountHolder are NOT echoed by the backend — kept optional for local display
+// after the admin saves a payout profile.
 export interface AdminBrand {
   id: string;
   brandName: string;
-  email: string;
+  email?: string;
+  userEmail?: string;
+  contactEmail?: string;
   status: BrandStatus;
   productsCount?: number;
   revenue?: number;
   createdAt?: string;
   iban?: string;
-  accountHolder?: string;
-  bankName?: string;
-  bic?: string;
+  bankAccountHolder?: string;
   legalName?: string;
   addressStreet?: string;
   addressPostalCode?: string;
@@ -120,7 +123,7 @@ export interface AdminBrand {
   addressCountry?: string;
   vatId?: string;
   taxNumber?: string;
-  isDomestic?: boolean;
+  domestic?: boolean;
   updatedAt?: string;
 }
 
@@ -135,21 +138,31 @@ export interface AdminCustomer {
   status?: 'ACTIVE' | 'SUSPENDED' | 'DEACTIVATED' | string;
 }
 
+// Mirrors backend PayoutResponseDto.
 export interface AdminPayout {
   id: string;
-  brandId?: string;
-  brandName?: string;
+  brandPartnerId?: number;
   amount: number;
-  currency: string;
+  debtAbsorbed?: number;
   status: 'PENDING' | 'APPROVED' | 'PAID' | 'CANCELLED' | string;
+  iban?: string;
+  bankAccountHolder?: string;
+  currency: string;
   createdAt: string;
+  approvedAt?: string;
   paidAt?: string;
+  externalReference?: string;
 }
 
+// Mirrors backend PayoutDashboardDto.
 export interface PayoutDashboard {
-  totalPaid?: number;
-  totalPending?: number;
-  totalCancelled?: number;
+  pendingCount?: number;
+  pendingTotal?: number;
+  approvedCount?: number;
+  approvedTotal?: number;
+  paidCount?: number;
+  paidTotal?: number;
+  negativeBrands?: { brandPartnerId: number; outstandingDebt: number; payoutBalance: number }[];
 }
 
 export interface AdminApiVariant {

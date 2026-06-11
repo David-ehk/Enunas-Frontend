@@ -16,7 +16,6 @@ import Customers   from './_components/Customers'
 import Brands      from './_components/Brands'
 import Products    from './_components/Products'
 import Orders      from './_components/Orders'
-import Payments    from './_components/Payments'
 import Returns      from './_components/Returns'
 import Analytics    from './_components/Analytics'
 import Storefront   from './_components/Storefront'
@@ -88,7 +87,7 @@ const SUBTITLES: Record<Tab, string> = {
   orders:      'Bestellungsverwaltung',
   returns:     'Rückgaben & Erstattungen',
   discounts:   'Plattform- & Marken-Rabattcodes',
-  settlements: 'Monatliche Provisionsabrechnung je Brand',
+  settlements: 'Monatliche Provisionsabrechnung & Auszahlungen je Brand',
   analytics:   'Phase 2',
   content:     'Phase 2',
   support:     'Phase 2',

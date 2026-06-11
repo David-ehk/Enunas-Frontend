@@ -55,8 +55,6 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
   const [expanded, setExpanded] = useState<string | null>(null)
   const [acting, setActing]     = useState<string | null>(null)
   const [statusInput, setStatusInput] = useState('')
-  const [refundingId, setRefundingId]   = useState<string | null>(null)
-  const [refundAmount, setRefundAmount] = useState('')
   const [amountFilter, setAmountFilter] = useState<string>('all')
   const [sortBy, setSortBy]             = useState<string>('newest')
 
@@ -104,7 +102,7 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
   async function cancelOrder(orderId: string) {
     setActing(orderId)
     try {
-      const updated = await adminApi.orders.cancel(orderId, 'Storniert durch Admin')
+      const updated = await adminApi.orders.cancel(orderId, 'OTHER', 'Storniert durch Admin')
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o))
     } catch { /* silent */ } finally { setActing(null) }
   }
@@ -113,14 +111,6 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
     setActing(orderId)
     try {
       const updated = await adminApi.orders.approveReturn(orderId)
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o))
-    } catch { /* silent */ } finally { setActing(null) }
-  }
-
-  async function refund(orderId: string, amount: number) {
-    setActing(orderId)
-    try {
-      const updated = await adminApi.orders.refund(orderId, amount)
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o))
     } catch { /* silent */ } finally { setActing(null) }
   }
@@ -276,7 +266,8 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
                             style={{ fontFamily: 'var(--font-league-spartan)' }}
                           >
                             <option value="">Status ändern…</option>
-                            {['PENDING','PAID','PROCESSING','SHIPPED','DELIVERED','CANCELLED','REFUNDED'].map(s => (
+                            {/* Nur Backend-OrderStatus-Werte; Stornieren/Refund laufen über die dedizierten Aktionen */}
+                            {['PENDING','PAID','SHIPPED','DELIVERED','SHIPPING_PROBLEM','AWAITING_ADMIN','MANUAL_REVIEW'].map(s => (
                               <option key={s} value={s}>{s}</option>
                             ))}
                           </select>
@@ -297,45 +288,13 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
                             </ActionBtn>
                           )}
 
+                          {/* Refund läuft über den Rückgaben-Screen (approve → receive → refund) —
+                              das Backend erlaubt Refunds erst ab RETURN_RECEIVED */}
                           {order.status === 'RETURN_REQUESTED' && (
                             <>
                               <ActionBtn variant="success" disabled={acting === order.id} onClick={() => approveReturn(order.id)}>
                                 <RotateCcw className="w-3 h-3" /> Rückgabe genehmigen
                               </ActionBtn>
-                              {refundingId !== order.id ? (
-                                <ActionBtn variant="purple" disabled={acting === order.id} onClick={() => { setRefundingId(order.id); setRefundAmount(String(order.totalAmount)) }}>
-                                  Refund ({fmtEur(order.totalAmount)})
-                                </ActionBtn>
-                              ) : (
-                                <div className="flex items-center gap-2">
-                                  <input
-                                    autoFocus
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    value={refundAmount}
-                                    onChange={e => setRefundAmount(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && (refund(order.id, parseFloat(refundAmount) || 0), setRefundingId(null))}
-                                    className="text-[11px] border border-[#370E4D]/30 bg-white rounded-lg px-2.5 py-1 focus:outline-none focus:border-[#370E4D]/40 w-28 tabular-nums transition-all duration-200"
-                                    style={{ fontFamily: 'var(--font-league-spartan)' }}
-                                  />
-                                  <button
-                                    onClick={() => { refund(order.id, parseFloat(refundAmount) || 0); setRefundingId(null) }}
-                                    disabled={acting === order.id}
-                                    className="inline-flex items-center h-7 px-3 rounded-lg text-[11px] font-medium text-white transition-all duration-200 disabled:opacity-40"
-                                    style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D' }}
-                                  >
-                                    Bestätigen
-                                  </button>
-                                  <button
-                                    onClick={() => setRefundingId(null)}
-                                    className="inline-flex items-center h-7 px-2.5 rounded-lg text-[11px] font-medium text-[#6B6B6B] hover:text-[#0A0A0A] transition-all duration-200"
-                                    style={{ fontFamily: 'var(--font-league-spartan)' }}
-                                  >
-                                    Abbrechen
-                                  </button>
-                                </div>
-                              )}
                             </>
                           )}
                         </div>

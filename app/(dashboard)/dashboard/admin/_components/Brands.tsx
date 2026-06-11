@@ -8,13 +8,14 @@ import { ChevronDown, ChevronUp, X, TrendingUp, ShoppingBag, Package, Banknote }
 
 type Filter = 'all' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED'
 
+// Mirrors backend SetPayoutProfileDto exactly — { iban, bankAccountHolder }
 interface PayoutDraft {
   iban: string
-  accountHolder: string
-  bankName: string
-  bic: string
+  bankAccountHolder: string
 }
 
+// Address fields are @NotBlank in the backend; `domestic` is derived server-side
+// from addressCountry === 'DE' and cannot be set independently.
 interface StammDraft {
   legalName: string
   addressStreet: string
@@ -23,6 +24,10 @@ interface StammDraft {
   addressCountry: string
   vatId: string
   taxNumber: string
+}
+
+function isDomesticDerived(brand: { domestic?: boolean; isDomestic?: boolean; addressCountry?: string }): boolean {
+  return brand.domestic ?? brand.isDomestic ?? brand.addressCountry === 'DE'
 }
 
 const COUNTRIES = [
@@ -169,9 +174,7 @@ function BrandFinancialPanel({
     return { ...p, sold, revenue }
   }).sort((a, b) => b.revenue - a.revenue)
 
-  const brandPayouts = payouts.filter(p =>
-    p.brandId === brand.id || p.brandName === brand.brandName
-  )
+  const brandPayouts = payouts.filter(p => String(p.brandPartnerId) === String(brand.id))
   const pendingPayoutTotal = brandPayouts
     .filter(p => p.status === 'PENDING' || p.status === 'APPROVED')
     .reduce((sum, p) => sum + p.amount, 0)
@@ -200,7 +203,7 @@ function BrandFinancialPanel({
               <StatusBadge status={isApproved(brand.status) ? 'APPROVED' : brand.status} />
             </div>
             <p className="text-[12px] text-[#9B9B9B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-              {brand.email}
+              {brand.email ?? brand.userEmail ?? brand.contactEmail ?? '—'}
             </p>
             <p className="text-[10px] uppercase tracking-[0.1em] text-[#C0C0BC] font-mono">
               ID: {brand.id}
@@ -430,7 +433,7 @@ function BrandFinancialPanel({
               </div>
 
               {/* ── Bankverbindung ── */}
-              {(brand.iban || brand.accountHolder) && (
+              {(brand.iban || brand.bankAccountHolder) && (
                 <div className="bg-white rounded-xl border border-[#E8E8E8] px-6 py-5 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
                   <h3 className="text-[12px] font-semibold text-[#0A0A0A] mb-4"
                     style={{ fontFamily: 'var(--font-league-spartan)', letterSpacing: '0.03em' }}>
@@ -439,9 +442,7 @@ function BrandFinancialPanel({
                   <div className="grid grid-cols-2 gap-4">
                     {[
                       { label: 'IBAN',         value: brand.iban },
-                      { label: 'BIC',          value: brand.bic },
-                      { label: 'Kontoinhaber', value: brand.accountHolder },
-                      { label: 'Bank',         value: brand.bankName },
+                      { label: 'Kontoinhaber', value: brand.bankAccountHolder },
                     ].map(({ label, value }) => value ? (
                       <div key={label}>
                         <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
@@ -474,14 +475,16 @@ export default function Brands() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [acting, setActing]     = useState<string | null>(null)
   const [editingPayout, setEditingPayout] = useState<string | null>(null)
-  const [payoutDraft, setPayoutDraft] = useState<PayoutDraft>({ iban: '', accountHolder: '', bankName: '', bic: '' })
+  const [payoutDraft, setPayoutDraft] = useState<PayoutDraft>({ iban: '', bankAccountHolder: '' })
   const [savingPayout, setSavingPayout] = useState(false)
+  const [payoutError, setPayoutError]   = useState<string | null>(null)
   const [payouts, setPayouts]           = useState<AdminPayout[]>([])
 
   // Stammdaten editing
   const [editingStamm, setEditingStamm] = useState<string | null>(null)
   const [stammDraft, setStammDraft]     = useState<StammDraft>({ legalName: '', addressStreet: '', addressPostalCode: '', addressCity: '', addressCountry: 'DE', vatId: '', taxNumber: '' })
   const [savingStamm, setSavingStamm]   = useState(false)
+  const [stammError, setStammError]     = useState<string | null>(null)
   const [confirmStamm, setConfirmStamm] = useState<string | null>(null)
 
   // §22f export
@@ -548,7 +551,7 @@ export default function Brands() {
 
   const visible = brands.filter(b => {
     const q = search.toLowerCase()
-    const matchSearch = !q || b.brandName.toLowerCase().includes(q) || b.email.toLowerCase().includes(q)
+    const matchSearch = !q || b.brandName.toLowerCase().includes(q) || (b.email ?? b.userEmail ?? b.contactEmail ?? '').toLowerCase().includes(q)
     if (!matchSearch) return false
     if (filter === 'APPROVED') return isApproved(b.status)
     if (filter !== 'all') return b.status === filter
@@ -565,29 +568,61 @@ export default function Brands() {
   }
 
   async function savePayoutProfile(brandId: string) {
+    const iban = payoutDraft.iban.replace(/\s+/g, '').toUpperCase()
+    if (!iban || !payoutDraft.bankAccountHolder.trim()) {
+      setPayoutError('IBAN und Kontoinhaber sind Pflichtfelder.')
+      return
+    }
     setSavingPayout(true)
+    setPayoutError(null)
     try {
-      await adminApi.brands.setPayoutProfile(brandId, payoutDraft)
+      await adminApi.brands.setPayoutProfile(brandId, {
+        iban,
+        bankAccountHolder: payoutDraft.bankAccountHolder.trim(),
+      })
+      // BrandPartnerResponseDto doesn't echo bank data — keep it locally for display
+      setBrands(prev => prev.map(b => b.id === brandId
+        ? { ...b, iban, bankAccountHolder: payoutDraft.bankAccountHolder.trim() }
+        : b))
       setEditingPayout(null)
-    } catch { /* silent */ } finally { setSavingPayout(false) }
+    } catch {
+      setPayoutError('Speichern fehlgeschlagen — bitte IBAN-Format prüfen und erneut versuchen.')
+    } finally { setSavingPayout(false) }
   }
 
   async function saveStammdaten(brandId: string) {
+    // Backend AdminBrandMasterDataDto: legalName + full address are @NotBlank
+    const missing = [
+      !stammDraft.legalName.trim() && 'Firmenbezeichnung',
+      !stammDraft.addressStreet.trim() && 'Straße',
+      !stammDraft.addressPostalCode.trim() && 'PLZ',
+      !stammDraft.addressCity.trim() && 'Ort',
+      !stammDraft.addressCountry.trim() && 'Land',
+    ].filter(Boolean)
+    if (missing.length > 0) {
+      setStammError(`Pflichtfelder fehlen: ${missing.join(', ')}.`)
+      setConfirmStamm(null)
+      return
+    }
     setSavingStamm(true)
+    setStammError(null)
     try {
       const updated = await adminApi.brands.updateStammdaten(brandId, {
-        legalName: stammDraft.legalName || undefined,
-        addressStreet: stammDraft.addressStreet || undefined,
-        addressPostalCode: stammDraft.addressPostalCode || undefined,
-        addressCity: stammDraft.addressCity || undefined,
-        addressCountry: stammDraft.addressCountry || undefined,
-        vatId: stammDraft.vatId || undefined,
-        taxNumber: stammDraft.taxNumber || undefined,
+        legalName: stammDraft.legalName.trim(),
+        addressStreet: stammDraft.addressStreet.trim(),
+        addressPostalCode: stammDraft.addressPostalCode.trim(),
+        addressCity: stammDraft.addressCity.trim(),
+        addressCountry: stammDraft.addressCountry.trim(),
+        vatId: stammDraft.vatId.trim() || undefined,
+        taxNumber: stammDraft.taxNumber.trim() || undefined,
       })
       setBrands(prev => prev.map(b => b.id === brandId ? { ...b, ...updated } : b))
       setEditingStamm(null)
       setConfirmStamm(null)
-    } catch { /* silent */ } finally { setSavingStamm(false) }
+    } catch {
+      setStammError('Speichern fehlgeschlagen — Änderungen wurden nicht übernommen.')
+      setConfirmStamm(null)
+    } finally { setSavingStamm(false) }
   }
 
   async function download22f(brandId: string) {
@@ -701,7 +736,7 @@ export default function Brands() {
                           {brand.brandName}
                         </button>
                       </TD>
-                      <TD className="text-[#6B6B6B]">{brand.email}</TD>
+                      <TD className="text-[#6B6B6B]">{brand.email ?? brand.userEmail ?? brand.contactEmail ?? '—'}</TD>
                       <TD><StatusBadge status={isApproved(brand.status) ? 'APPROVED' : brand.status} /></TD>
                       <TD className="text-[#6B6B6B]">{brandProducts.length}</TD>
                       <TD className="font-medium text-[#0A0A0A]">{brand.revenue != null ? fmtEur(brand.revenue) : '—'}</TD>
@@ -800,6 +835,7 @@ export default function Brands() {
                                   onClick={() => {
                                     setEditingStamm(brand.id)
                                     setConfirmStamm(null)
+                                    setStammError(null)
                                     setStammDraft({
                                       legalName: brand.legalName ?? '',
                                       addressStreet: brand.addressStreet ?? '',
@@ -860,6 +896,31 @@ export default function Brands() {
                                   </div>
                                 </div>
 
+                                {/* Steuertyp — read-only, server-seitig aus dem Land abgeleitet (DE ⇒ Inland) */}
+                                <div>
+                                  <FLabel>Steuertyp (abgeleitet aus Land)</FLabel>
+                                  <span
+                                    className="inline-block px-2.5 py-1 rounded-md text-[11px] font-semibold"
+                                    style={{
+                                      fontFamily: 'var(--font-league-spartan)',
+                                      letterSpacing: '0.04em',
+                                      background: stammDraft.addressCountry === 'DE' ? 'rgba(26,90,60,0.08)' : 'rgba(55,14,77,0.08)',
+                                      color: stammDraft.addressCountry === 'DE' ? '#1A5A3C' : '#370E4D',
+                                    }}
+                                  >
+                                    {stammDraft.addressCountry === 'DE' ? 'Inland · §14 UStG' : 'Ausland · §13b (Reverse Charge)'}
+                                  </span>
+                                  <p className="mt-1 text-[10px] text-[#9B9B9B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                                    Wird automatisch aus dem Land bestimmt — zum Ändern das Land anpassen.
+                                  </p>
+                                </div>
+
+                                {stammError && (
+                                  <p className="text-[11px] font-medium" style={{ fontFamily: 'var(--font-league-spartan)', color: '#8B1E3F' }}>
+                                    {stammError}
+                                  </p>
+                                )}
+
                                 {confirmStamm === brand.id ? (
                                   <div className="p-3 border border-[#E8C870]/60 rounded-lg" style={{ background: '#FFFBF0' }}>
                                     <p className="text-[11px] text-[#7A5C1E] mb-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>
@@ -913,10 +974,10 @@ export default function Brands() {
                                   <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
                                     style={{ fontFamily: 'var(--font-league-spartan)' }}>Typ</p>
                                   <span
-                                    className={`inline-block px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] font-medium ${brand.isDomestic ? 'text-[#1A5A3C]' : 'text-[#370E4D]'}`}
-                                    style={{ fontFamily: 'var(--font-league-spartan)', background: brand.isDomestic ? 'rgba(26,90,60,0.08)' : 'rgba(55,14,77,0.08)' }}
+                                    className={`inline-block px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] font-medium ${isDomesticDerived(brand) ? 'text-[#1A5A3C]' : 'text-[#370E4D]'}`}
+                                    style={{ fontFamily: 'var(--font-league-spartan)', background: isDomesticDerived(brand) ? 'rgba(26,90,60,0.08)' : 'rgba(55,14,77,0.08)' }}
                                   >
-                                    {brand.isDomestic ? 'Inland' : 'Ausland'}
+                                    {isDomesticDerived(brand) ? 'Inland · §14' : 'Ausland · §13b RC'}
                                   </span>
                                 </div>
                                 {(brand.addressStreet || brand.addressCity) && (
@@ -1005,11 +1066,10 @@ export default function Brands() {
                                 <button
                                   onClick={() => {
                                     setEditingPayout(brand.id)
+                                    setPayoutError(null)
                                     setPayoutDraft({
                                       iban: brand.iban ?? '',
-                                      accountHolder: brand.accountHolder ?? '',
-                                      bankName: brand.bankName ?? '',
-                                      bic: brand.bic ?? '',
+                                      bankAccountHolder: brand.bankAccountHolder ?? '',
                                     })
                                   }}
                                   className="text-[11px] font-medium hover:underline transition-all duration-200"
@@ -1032,31 +1092,21 @@ export default function Brands() {
                                     />
                                   </div>
                                   <div>
-                                    <FLabel>BIC</FLabel>
-                                    <FInput
-                                      value={payoutDraft.bic}
-                                      onChange={v => setPayoutDraft(d => ({ ...d, bic: v }))}
-                                      placeholder="DEUTDEDB"
-                                    />
-                                  </div>
-                                  <div>
                                     <FLabel>Kontoinhaber</FLabel>
                                     <FInput
-                                      value={payoutDraft.accountHolder}
-                                      onChange={v => setPayoutDraft(d => ({ ...d, accountHolder: v }))}
-                                    />
-                                  </div>
-                                  <div>
-                                    <FLabel>Bank</FLabel>
-                                    <FInput
-                                      value={payoutDraft.bankName}
-                                      onChange={v => setPayoutDraft(d => ({ ...d, bankName: v }))}
+                                      value={payoutDraft.bankAccountHolder}
+                                      onChange={v => setPayoutDraft(d => ({ ...d, bankAccountHolder: v }))}
                                     />
                                   </div>
                                 </div>
+                                {payoutError && (
+                                  <p className="text-[11px] font-medium" style={{ fontFamily: 'var(--font-league-spartan)', color: '#8B1E3F' }}>
+                                    {payoutError}
+                                  </p>
+                                )}
                                 <div className="flex items-center justify-end gap-2">
                                   <button
-                                    onClick={() => setEditingPayout(null)}
+                                    onClick={() => { setEditingPayout(null); setPayoutError(null) }}
                                     className="h-7 px-3.5 rounded-lg text-[11px] font-medium text-[#6B6B6B] border border-[#E8E8E8] hover:bg-[#F5F5F0] transition-all duration-200"
                                     style={{ fontFamily: 'var(--font-league-spartan)' }}
                                   >
@@ -1081,18 +1131,8 @@ export default function Brands() {
                                 </div>
                                 <div>
                                   <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
-                                    style={{ fontFamily: 'var(--font-league-spartan)' }}>BIC</p>
-                                  <p className="font-mono text-[12px] text-[#0A0A0A]">{brand.bic || '—'}</p>
-                                </div>
-                                <div>
-                                  <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
                                     style={{ fontFamily: 'var(--font-league-spartan)' }}>Kontoinhaber</p>
-                                  <p className="text-[12px] text-[#0A0A0A]">{brand.accountHolder || '—'}</p>
-                                </div>
-                                <div>
-                                  <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
-                                    style={{ fontFamily: 'var(--font-league-spartan)' }}>Bank</p>
-                                  <p className="text-[12px] text-[#0A0A0A]">{brand.bankName || '—'}</p>
+                                  <p className="text-[12px] text-[#0A0A0A]">{brand.bankAccountHolder || '—'}</p>
                                 </div>
                               </div>
                             ) : (
