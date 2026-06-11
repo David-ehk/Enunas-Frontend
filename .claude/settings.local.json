@@ -89,7 +89,9 @@
       "mcp__playwright__browser_network_requests",
       "mcp__playwright__browser_network_request",
       "Bash(npm run *)",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "Bash(curl -s -X POST http://localhost:8080/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"admin@enunas.com\",\"password\":\"admin123\"}')",
+      "mcp__playwright__browser_run_code_unsafe"
     ]
   }
 }
