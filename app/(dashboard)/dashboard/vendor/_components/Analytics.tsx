@@ -1,12 +1,37 @@
 'use client'
 
+import { VPageHeader, Phase2Panel } from './vshared'
+
+// Phase 2 — Sessions/Conversion/Funnel haben noch keine Backend-Quelle (Tracking folgt).
+// Dieser Screen wird in der nächsten Phase mit echten Daten ausgebaut.
+export default function Analytics() {
+  return (
+    <div className="space-y-4">
+      <VPageHeader
+        eyebrow="Brand Portal · Phase 2"
+        title="Analytics"
+        sub="Traffic, Conversion und Top-Performance — wird in der nächsten Phase freigeschaltet."
+      />
+      <Phase2Panel
+        title="Analytics"
+        sub="Sobald das Tracking live ist, siehst du hier echte Zahlen zu deinem Storefront-Traffic. Geplante Metriken:"
+        metrics={['Sessions', 'Add-to-Cart-Rate', 'Conversion', 'Ø Bestellwert', 'Conversion-Funnel', 'Umsatz nach Produkt', 'Traffic-Kanäle', 'Märkte']}
+      />
+    </div>
+  )
+}
+
+/* ─── Phase-2-Referenz: ursprüngliche Implementierung ─────────────────────────
+   Vorlage für den Ausbau mit echten Daten. Die MOCK_*-Konstanten müssen durch
+   eine echte Tracking-/Analytics-Quelle ersetzt werden (Sessions, Conversion,
+   Funnel, Kanäle, Geografie); AOV kann aus /brand/orders berechnet werden.
+
 import { useState, useEffect } from 'react'
 import { brandApi } from '@/lib/api/modules/brandApi'
 import type { ApiOrder } from '@/types/api'
 import {
   VPageHeader, VKPIGrid, VKPI, VCard, VComboChart, Funnel, HBar,
   Grid21, VTH, VTD, VTR, fmtEur, fmtPct, Loader,
-  SHOW_PREVIEW_DATA, Phase2Panel,
 } from './vshared'
 
 const MOCK_DAYS     = ["16","17","18","19","20","21","22","23","24","25","26","27","28","29"]
@@ -51,21 +76,7 @@ export default function Analytics() {
 
   if (loading) return <Loader />
 
-  // Prod: keine erfundenen Zahlen — Sessions/Conversion/Funnel haben (noch) keine Backend-Quelle
-  if (!SHOW_PREVIEW_DATA) {
-    return (
-      <div className="space-y-4">
-        <VPageHeader eyebrow="Brand Portal" title="Analytics" sub="Traffic, Conversion und Top-Performance." />
-        <Phase2Panel
-          title="Analytics"
-          sub="Sobald das Tracking live ist, siehst du hier echte Zahlen zu deinem Storefront-Traffic. Geplante Metriken:"
-          metrics={['Sessions', 'Add-to-Cart-Rate', 'Conversion', 'Ø Bestellwert', 'Conversion-Funnel', 'Umsatz nach Produkt', 'Traffic-Kanäle', 'Märkte']}
-        />
-      </div>
-    )
-  }
-
-  const aov        = orders.length > 0 ? orders.reduce((s, o) => s + (o.totalAmount ?? 0), 0) / orders.length : 47.54
+  const aov        = orders.length > 0 ? orders.reduce((s, o) => s + (o.totalAmount ?? 0), 0) / orders.length : 0
   const sessions   = MOCK_SESSIONS[MOCK_SESSIONS.length - 1]
   const conversion = MOCK_CONV[MOCK_CONV.length - 1]
   const cartRate   = (MOCK_FUNNEL[2].value / MOCK_FUNNEL[0].value) * 100
@@ -75,7 +86,6 @@ export default function Analytics() {
       <VPageHeader
         eyebrow="Brand Portal"
         title="Analytics"
-        italicTitle="Mai 2026"
         sub="Traffic, Conversion und Top-Performance."
       />
 
@@ -83,7 +93,7 @@ export default function Analytics() {
         <VKPI label="Sessions (heute)"  value={sessions.toLocaleString('de-DE')} delta="+12% vs. Vortag"           deltaTone="up"   />
         <VKPI label="Add-to-Cart"       value={fmtPct(cartRate)}                  delta="+2.1 pp"                    deltaTone="up"   />
         <VKPI label="Conversion"        value={`${conversion}%`}                  delta="+0.5 pp"                    deltaTone="up"   />
-        <VKPI label="Ø Bestellwert"     value={fmtEur(aov)}                       delta="vs. € 43 Vormonat"          deltaTone="up"   spark={[43, 44, 45, 44, 46, 47, 47.54]} />
+        <VKPI label="Ø Bestellwert"     value={fmtEur(aov)}                       delta="aus echten Bestellungen"    deltaTone="muted" />
       </VKPIGrid>
 
       <Grid21>
@@ -145,3 +155,4 @@ export default function Analytics() {
     </div>
   )
 }
+*/

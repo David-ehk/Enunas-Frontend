@@ -19,14 +19,14 @@ import Discounts from './_components/Discounts'
 
 type Tab = 'overview' | 'orders' | 'products' | 'analytics' | 'returns' | 'payouts' | 'marketing' | 'discounts' | 'settings'
 
-const NAV: { id: Tab; label: string; icon: React.ElementType }[] = [
+const NAV: { id: Tab; label: string; icon: React.ElementType; phase2?: boolean }[] = [
   { id: 'overview',   label: 'Übersicht',     icon: LayoutDashboard },
   { id: 'orders',     label: 'Bestellungen',  icon: ShoppingBag },
   { id: 'products',   label: 'Produkte',      icon: Package },
-  { id: 'analytics',  label: 'Analytics',     icon: BarChart2 },
+  { id: 'analytics',  label: 'Analytics',     icon: BarChart2, phase2: true },
   { id: 'returns',    label: 'Retouren',      icon: RotateCcw },
   { id: 'payouts',    label: 'Auszahlungen',  icon: CreditCard },
-  { id: 'marketing',  label: 'Marketing',     icon: Megaphone },
+  { id: 'marketing',  label: 'Marketing',     icon: Megaphone, phase2: true },
   { id: 'discounts',  label: 'Rabattcodes',   icon: Tag },
   { id: 'settings',   label: 'Einstellungen', icon: Settings2 },
 ]
@@ -71,17 +71,23 @@ export default function VendorPage() {
         )}
 
         <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
-          {NAV.map(({ id, label, icon: Icon }) => (
+          {NAV.map(({ id, label, icon: Icon, phase2 }) => (
             <button
               key={id}
               onClick={() => setTab(id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-none text-sm transition-colors duration-150 text-left ${
-                tab === id ? 'bg-white/15 text-white' : 'text-white/55 hover:bg-white/8 hover:text-white/90'
+                tab === id ? 'bg-white/15 text-white' : phase2 ? 'text-white/35 hover:bg-white/8 hover:text-white/60' : 'text-white/55 hover:bg-white/8 hover:text-white/90'
               }`}
               style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 12, letterSpacing: '0.06em' }}
             >
               <Icon className="w-4 h-4 shrink-0" />
-              {label}
+              <span className="flex-1">{label}</span>
+              {phase2 && (
+                <span className="text-[8px] font-medium px-1.5 py-0.5 leading-none"
+                  style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  bald
+                </span>
+              )}
             </button>
           ))}
         </nav>

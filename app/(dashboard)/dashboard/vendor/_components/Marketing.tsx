@@ -1,9 +1,34 @@
 'use client'
 
+import { VPageHeader, Phase2Panel } from './vshared'
+
+// Phase 2 — Kampagnen-/Promo-Tracking hat noch keine Backend-Quelle.
+// Dieser Screen wird in der nächsten Phase mit echten Daten ausgebaut.
+export default function Marketing() {
+  return (
+    <div className="space-y-4">
+      <VPageHeader
+        eyebrow="Brand Portal · Phase 2"
+        title="Marketing"
+        sub="Kampagnen, Aktionscodes und Performance — wird in der nächsten Phase freigeschaltet."
+      />
+      <Phase2Panel
+        title="Marketing"
+        sub="Kampagnen-Tracking und Promo-Auswertung folgen in der nächsten Phase. Geplante Metriken:"
+        metrics={['Kampagnen-Umsatz', 'Werbeausgaben', 'ROAS', 'Promo-Anteil', 'Kampagnen-Performance', 'Hero-Slot-Impressionen', 'Klickrate (CTR)', 'Rabattcode-Umsatz']}
+      />
+    </div>
+  )
+}
+
+/* ─── Phase-2-Referenz: ursprüngliche Implementierung ─────────────────────────
+   Vorlage für den Ausbau mit echten Daten. CAMPAIGNS/PROMOS/HERO_METRICS müssen
+   durch echte Kampagnen-/Promo-Quellen ersetzt werden; Rabattcode-Umsätze können
+   aus /brand/discounts + Order-Daten kommen.
+
 import {
   VPageHeader, VKPIGrid, VKPI, VCard, VComboChart,
   Grid21, VStatus, VTH, VTD, VTR, fmtEur, Loader,
-  SHOW_PREVIEW_DATA, Phase2Panel,
 } from './vshared'
 
 const MOCK_WEEKS   = ["W18","W19","W20","W21","W22","W23"]
@@ -30,23 +55,9 @@ const HERO_METRICS = [
 ]
 
 export default function Marketing() {
-  // Prod: Kampagnen/Promos haben (noch) keine Backend-Quelle — ehrlicher Phase-2-Zustand
-  if (!SHOW_PREVIEW_DATA) {
-    return (
-      <div className="space-y-4">
-        <VPageHeader eyebrow="Brand Portal" title="Marketing" sub="Kampagnen, Aktionscodes und Performance." />
-        <Phase2Panel
-          title="Marketing"
-          sub="Kampagnen-Tracking und Promo-Auswertung folgen in Phase 2. Geplante Metriken:"
-          metrics={['Kampagnen-Umsatz', 'Werbeausgaben', 'ROAS', 'Promo-Anteil', 'Kampagnen-Performance', 'Hero-Slot-Impressionen', 'Klickrate (CTR)', 'Rabattcode-Umsatz']}
-        />
-      </div>
-    )
-  }
-
   const totalSpend   = MOCK_SPEND.reduce((s, v) => s + v, 0)
   const campaignRev  = MOCK_REVENUE.reduce((s, v) => s + v, 0)
-  const roas         = totalSpend > 0 ? (campaignRev / totalSpend) : 9.3
+  const roas         = totalSpend > 0 ? (campaignRev / totalSpend) : 0
   const promoDriven  = Math.round((PROMOS.reduce((s, p) => s + p.revenue, 0) / 21820) * 100)
 
   return (
@@ -54,14 +65,13 @@ export default function Marketing() {
       <VPageHeader
         eyebrow="Brand Portal"
         title="Marketing"
-        italicTitle="Mai 2026"
         sub="Kampagnen, Aktionscodes und Performance."
       />
 
       <VKPIGrid cols={4}>
         <VKPI label="Kampagnen-Umsatz" value={fmtEur(campaignRev)} delta="+24% vs. Vormonat"  deltaTone="up"   />
         <VKPI label="Werbeausgaben"    value={fmtEur(totalSpend)}  delta="lfd. Periode"         deltaTone="muted"/>
-        <VKPI label="ROAS"             value={`${roas.toFixed(1)}×`} delta="Return on Ad Spend" deltaTone="up"   spark={[4.2, 5.1, 6.8, 6.0, 8.9, roas]} />
+        <VKPI label="ROAS"             value={`${roas.toFixed(1)}×`} delta="Return on Ad Spend" deltaTone="up"   />
         <VKPI label="Promo-Anteil"     value={`${promoDriven}%`}   delta="aller Bestellungen"   deltaTone="muted"/>
       </VKPIGrid>
 
@@ -178,3 +188,4 @@ export default function Marketing() {
     </div>
   )
 }
+*/
