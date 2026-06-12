@@ -194,21 +194,40 @@ export interface AdminApiProduct extends Omit<ApiProduct, 'status'> {
 
 export type PriceInputMode = 'GROSS' | 'NET';
 
+// Mirrors backend ListingResponseDto — Listings sind pro Variante;
+// price/discountPrice sind die BRUTTO-Werte, *Net/*Vat liefern die Aufschlüsselung.
 export interface ApiListing {
   id: string;
   productId?: string;
+  productName?: string;
+  variantId?: number;
+  variantSku?: string;
+  variantColor?: string;
+  variantColorFamily?: string;
+  variantSize?: string;
+  variantStockQuantity?: number;
   price: number;
   discountPrice?: number;
   priceInputMode?: PriceInputMode;
+  priceNet?: number;
+  priceGross?: number;
+  priceVat?: number;
+  discountPriceNet?: number;
+  discountPriceGross?: number;
+  discountPriceVat?: number;
   currency?: string;
+  active?: boolean;
   region?: string;
   createdAt: string;
 }
 
+// Mirrors backend ProductImageResponseDto — das URL-Feld heißt `imageUrl`.
 export interface ApiProductImage {
   id: string;
-  productId?: string;
-  url: string;
+  imageUrl: string;
+  altText?: string;
+  primary?: boolean;
+  displayOrder?: number;
   createdAt?: string;
 }
 

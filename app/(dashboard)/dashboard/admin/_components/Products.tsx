@@ -135,7 +135,7 @@ function MediaEditor({ productId }: { productId: string }) {
             <div className="grid grid-cols-2 gap-1.5">
               {images.map(img => (
                 <div key={img.id} className="relative group rounded-lg overflow-hidden bg-[#F0F0EB]" style={{ aspectRatio: '3/4' }}>
-                  <img src={img.url} alt="" className="w-full h-full object-cover" />
+                  <img src={img.imageUrl} alt={img.altText ?? ''} className="w-full h-full object-cover" />
                   <button
                     onClick={() => removeImage(img.id)}
                     disabled={deleting === img.id}

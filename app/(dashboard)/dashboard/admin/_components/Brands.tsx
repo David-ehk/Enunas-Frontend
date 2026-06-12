@@ -908,7 +908,7 @@ export default function Brands() {
                                       color: stammDraft.addressCountry === 'DE' ? '#1A5A3C' : '#370E4D',
                                     }}
                                   >
-                                    {stammDraft.addressCountry === 'DE' ? 'Inland · §14 UStG' : 'Ausland · §13b (Reverse Charge)'}
+                                    {stammDraft.addressCountry === 'DE' ? 'Inland · 19 % USt' : 'Ausland · Reverse Charge (§ 3a Abs. 2 UStG)'}
                                   </span>
                                   <p className="mt-1 text-[10px] text-[#9B9B9B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
                                     Wird automatisch aus dem Land bestimmt — zum Ändern das Land anpassen.
@@ -977,7 +977,7 @@ export default function Brands() {
                                     className={`inline-block px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] font-medium ${isDomesticDerived(brand) ? 'text-[#1A5A3C]' : 'text-[#370E4D]'}`}
                                     style={{ fontFamily: 'var(--font-league-spartan)', background: isDomesticDerived(brand) ? 'rgba(26,90,60,0.08)' : 'rgba(55,14,77,0.08)' }}
                                   >
-                                    {isDomesticDerived(brand) ? 'Inland · §14' : 'Ausland · §13b RC'}
+                                    {isDomesticDerived(brand) ? 'Inland · 19 % USt' : 'Ausland · Reverse Charge'}
                                   </span>
                                 </div>
                                 {(brand.addressStreet || brand.addressCity) && (

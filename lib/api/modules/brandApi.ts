@@ -1,5 +1,5 @@
 import { fetcher } from '../fetcher'
-import type { ApiBrandPartner, AdminApiProduct, AdminApiVariant, ApiOrder, ApiListing, ApiProductImage } from '@/types/api'
+import type { ApiBrandPartner, AdminApiProduct, AdminApiVariant, ApiOrder, ApiListing, ApiProductImage, AdminPayout } from '@/types/api'
 
 export interface CreateProductVariantDto {
   color: string
@@ -46,8 +46,14 @@ export interface RegisterBrandPartnerDto {
   taxNumber?: string
 }
 
+// Mirrors backend UpdateBrandPartnerDto — brandName ist NICHT änderbar (kein Feld im Backend).
 export type UpdateBrandPartnerDto = {
-  brandName?: string
+  description?: string
+  logoUrl?: string
+  websiteUrl?: string
+  instagramHandle?: string
+  tiktokHandle?: string
+  contactEmail?: string
   legalName?: string
   addressStreet?: string
   addressPostalCode?: string
@@ -57,14 +63,23 @@ export type UpdateBrandPartnerDto = {
   taxNumber?: string
 }
 
+// Mirrors backend CreateListingDto — Listings sind PRO VARIANTE (variantId @NotNull).
 export interface CreateListingDto {
+  variantId: number
   price: number
   discountPrice?: number
   priceInputMode: 'GROSS' | 'NET'
   currency?: string
   region?: string
 }
-export type UpdateListingDto = Partial<CreateListingDto>
+// Backend UpdateListingDto: kein variantId/currency — Preis, Modus, discountPrice, active, region.
+export interface UpdateListingDto {
+  price?: number
+  discountPrice?: number
+  priceInputMode?: 'GROSS' | 'NET'
+  active?: boolean
+  region?: string
+}
 
 interface Page<T> { content: T[] }
 function unpage<T>(res: Page<T> | T[]): T[] {
@@ -91,13 +106,21 @@ export const brandApi = {
     })
   },
 
+  payouts: {
+    // GET /brand/payouts — eigene Auszahlungen (read-only; Lifecycle steuert der Admin)
+    async getMine(): Promise<AdminPayout[]> {
+      return fetcher<AdminPayout[]>('/brand/payouts')
+    },
+  },
+
   orders: {
     async getAll(): Promise<ApiOrder[]> {
       return unpage(await fetcher<Page<ApiOrder> | ApiOrder[]>('/brand/orders?page=0&size=100'))
     },
+    // Mirrors backend ShipmentConfirmationDto: { carrier, trackingNumber, note? }
     async ship(
       orderId: string,
-      dto: { trackingNumber: string; carrier: string; estimatedDelivery?: string },
+      dto: { trackingNumber: string; carrier: string; note?: string },
     ): Promise<ApiOrder> {
       return fetcher<ApiOrder>(`/brand/orders/${orderId}/ship`, {
         method: 'POST',
@@ -113,6 +136,7 @@ export const brandApi = {
   },
 
   products: {
+    // Backend liefert hier eine List<ProductResponseDto>, KEINE Page — unpage toleriert beides
     async getMy(): Promise<AdminApiProduct[]> {
       return unpage(await fetcher<Page<AdminApiProduct> | AdminApiProduct[]>('/products/my'))
     },
@@ -158,10 +182,11 @@ export const brandApi = {
     async list(productId: string): Promise<ApiProductImage[]> {
       return fetcher<ApiProductImage[]>(`/products/${productId}/media/images`)
     },
+    // Backend ProductImageDto: das Feld heißt `imageUrl` (@NotBlank), nicht `url`
     async add(productId: string, url: string): Promise<ApiProductImage> {
       return fetcher<ApiProductImage>(`/products/${productId}/media/images`, {
         method: 'POST',
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ imageUrl: url }),
       })
     },
     async delete(productId: string, imageId: string): Promise<void> {

@@ -6,6 +6,7 @@ import type { ApiOrder } from '@/types/api'
 import {
   VPageHeader, VKPIGrid, VKPI, VCard, VComboChart, Funnel, HBar,
   Grid21, VTH, VTD, VTR, fmtEur, fmtPct, Loader,
+  SHOW_PREVIEW_DATA, Phase2Panel,
 } from './vshared'
 
 const MOCK_DAYS     = ["16","17","18","19","20","21","22","23","24","25","26","27","28","29"]
@@ -49,6 +50,20 @@ export default function Analytics() {
   }, [])
 
   if (loading) return <Loader />
+
+  // Prod: keine erfundenen Zahlen — Sessions/Conversion/Funnel haben (noch) keine Backend-Quelle
+  if (!SHOW_PREVIEW_DATA) {
+    return (
+      <div className="space-y-4">
+        <VPageHeader eyebrow="Brand Portal" title="Analytics" sub="Traffic, Conversion und Top-Performance." />
+        <Phase2Panel
+          title="Analytics"
+          sub="Sobald das Tracking live ist, siehst du hier echte Zahlen zu deinem Storefront-Traffic. Geplante Metriken:"
+          metrics={['Sessions', 'Add-to-Cart-Rate', 'Conversion', 'Ø Bestellwert', 'Conversion-Funnel', 'Umsatz nach Produkt', 'Traffic-Kanäle', 'Märkte']}
+        />
+      </div>
+    )
+  }
 
   const aov        = orders.length > 0 ? orders.reduce((s, o) => s + (o.totalAmount ?? 0), 0) / orders.length : 47.54
   const sessions   = MOCK_SESSIONS[MOCK_SESSIONS.length - 1]

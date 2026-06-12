@@ -6,6 +6,7 @@ import type { ApiOrder } from '@/types/api'
 import {
   VPageHeader, VKPIGrid, VKPI, VCard, VAreaChart, ReasonRow,
   Grid2, VStatus, VTH, VTD, VTR, fmtEur, fmtPct, fmt, Loader, EmptyState,
+  SHOW_PREVIEW_DATA, Phase2Tile,
 } from './vshared'
 
 const MOCK_RETURN_MONTHS = ["Dez", "Jan", "Feb", "Mär", "Apr", "Mai"]
@@ -39,11 +40,12 @@ export default function VendorReturns() {
   if (loading) return <Loader />
 
   const returnOrders = orders.filter(o => ['RETURN_REQUESTED', 'RETURN_RECEIVED', 'REFUNDED'].includes(o.status))
-  const useMock      = orders.length === 0
+  // Demodaten nur in Dev — in Prod immer echte Werte (auch 0)
+  const useMock      = SHOW_PREVIEW_DATA && orders.length === 0
   const returnCount  = useMock ? 18 : returnOrders.length
-  const returnRate   = (useMock || orders.length === 0) ? 6.8 : (returnOrders.length / orders.length) * 100
+  const returnRate   = useMock ? 6.8 : (orders.length > 0 ? (returnOrders.length / orders.length) * 100 : null)
   const refundedVal  = useMock ? 2340 : returnOrders.filter(o => o.status === 'REFUNDED').reduce((s, o) => s + (o.totalAmount ?? 0), 0)
-  const restocked    = useMock ? 72   : (returnOrders.length > 0 ? Math.round((returnOrders.filter(o => o.status !== 'RETURN_REQUESTED').length / returnOrders.length) * 100) : 0)
+  const restocked    = useMock ? 72   : (returnOrders.length > 0 ? Math.round((returnOrders.filter(o => o.status !== 'RETURN_REQUESTED').length / returnOrders.length) * 100) : null)
   const totalReasons = MOCK_REASONS.reduce((s, r) => s + r.count, 0)
 
   return (
@@ -57,21 +59,29 @@ export default function VendorReturns() {
 
       <VKPIGrid cols={4}>
         <VKPI label="Retouren"          value={returnCount}        delta="lfd. Monat"          deltaTone="muted" />
-        <VKPI label="Retourenquote"     value={fmtPct(returnRate)} delta="−0.4 pp MTD"          deltaTone="up"    spark={MOCK_RETURN_TREND} />
+        <VKPI label="Retourenquote"     value={returnRate != null ? fmtPct(returnRate) : '—'} delta={useMock ? '−0.4 pp MTD' : 'aus echten Bestellungen'} deltaTone={useMock ? 'up' : 'muted'} spark={useMock ? MOCK_RETURN_TREND : undefined} />
         <VKPI label="Rückerstattungen"  value={fmtEur(refundedVal)} delta="abgeschlossen"       deltaTone="muted" />
-        <VKPI label="Wieder eingelagert" value={`${restocked}%`}   delta="der zurückgekehrten" deltaTone="muted" />
+        <VKPI label="Wieder eingelagert" value={restocked != null ? `${restocked}%` : '—'}   delta="der zurückgekehrten" deltaTone="muted" />
       </VKPIGrid>
 
-      <Grid2>
-        <VCard eyebrow="Quoten-Trend" title="Retourenquote — 6 Monate">
-          <VAreaChart data={MOCK_RETURN_TREND} labels={MOCK_RETURN_MONTHS} fmt={v => `${v}%`} height={200} />
-        </VCard>
-        <VCard eyebrow="Rückgabegründe" title="Analyse">
-          {MOCK_REASONS.map(r => (
-            <ReasonRow key={r.label} label={r.label} count={r.count} total={totalReasons} meta={r.meta} />
-          ))}
-        </VCard>
-      </Grid2>
+      {/* Trend & Gründe haben keine Backend-Quelle — Demo nur in Dev, Prod: Phase-2-Kacheln */}
+      {SHOW_PREVIEW_DATA ? (
+        <Grid2>
+          <VCard eyebrow="Quoten-Trend" title="Retourenquote — 6 Monate">
+            <VAreaChart data={MOCK_RETURN_TREND} labels={MOCK_RETURN_MONTHS} fmt={v => `${v}%`} height={200} />
+          </VCard>
+          <VCard eyebrow="Rückgabegründe" title="Analyse">
+            {MOCK_REASONS.map(r => (
+              <ReasonRow key={r.label} label={r.label} count={r.count} total={totalReasons} meta={r.meta} />
+            ))}
+          </VCard>
+        </Grid2>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          <Phase2Tile label="Retourenquote — 6-Monats-Trend" />
+          <Phase2Tile label="Rückgabegründe-Analyse" />
+        </div>
+      )}
 
       <VCard eyebrow="Retouren-Auflistung" title="Rückgaben" flush>
         {!useMock && returnOrders.length === 0 ? (
@@ -110,9 +120,9 @@ export default function VendorReturns() {
                     </VTD>
                   </VTR>
                 ))
-                : returnOrders.slice(0, 8).map((o, i) => (
+                : returnOrders.slice(0, 8).map(o => (
                   <VTR key={o.id}>
-                    <VTD mono>#{o.id.slice(0, 8).toUpperCase()}</VTD>
+                    <VTD mono>#{String(o.id).slice(0, 8).toUpperCase()}</VTD>
                     <VTD><span style={{ color: '#0A0A0A', fontWeight: 500 }}>{(o.items ?? []).map(it => it.name).join(', ') || '—'}</span></VTD>
                     <VTD right>{fmtEur(o.totalAmount)}</VTD>
                     <VTD muted>{fmt(o.createdAt)}</VTD>
@@ -121,13 +131,8 @@ export default function VendorReturns() {
                         {o.status === 'REFUNDED' ? 'Erstattet' : o.status === 'RETURN_REQUESTED' ? 'Beantragt' : 'Eingegangen'}
                       </VStatus>
                     </VTD>
-                    <VTD>
-                      {MOCK_NOTES[i] && (
-                        <span style={{ fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontWeight: 300, fontSize: 13, color: '#6B6B6B' }}>
-                          &ldquo;{MOCK_NOTES[i]}&rdquo;
-                        </span>
-                      )}
-                    </VTD>
+                    {/* Keine erfundenen Kundennotizen an echten Bestellungen */}
+                    <VTD muted>—</VTD>
                   </VTR>
                 ))
               }

@@ -3,6 +3,7 @@
 import {
   VPageHeader, VKPIGrid, VKPI, VCard, VComboChart,
   Grid21, VStatus, VTH, VTD, VTR, fmtEur, Loader,
+  SHOW_PREVIEW_DATA, Phase2Panel,
 } from './vshared'
 
 const MOCK_WEEKS   = ["W18","W19","W20","W21","W22","W23"]
@@ -29,6 +30,20 @@ const HERO_METRICS = [
 ]
 
 export default function Marketing() {
+  // Prod: Kampagnen/Promos haben (noch) keine Backend-Quelle — ehrlicher Phase-2-Zustand
+  if (!SHOW_PREVIEW_DATA) {
+    return (
+      <div className="space-y-4">
+        <VPageHeader eyebrow="Brand Portal" title="Marketing" sub="Kampagnen, Aktionscodes und Performance." />
+        <Phase2Panel
+          title="Marketing"
+          sub="Kampagnen-Tracking und Promo-Auswertung folgen in Phase 2. Geplante Metriken:"
+          metrics={['Kampagnen-Umsatz', 'Werbeausgaben', 'ROAS', 'Promo-Anteil', 'Kampagnen-Performance', 'Hero-Slot-Impressionen', 'Klickrate (CTR)', 'Rabattcode-Umsatz']}
+        />
+      </div>
+    )
+  }
+
   const totalSpend   = MOCK_SPEND.reduce((s, v) => s + v, 0)
   const campaignRev  = MOCK_REVENUE.reduce((s, v) => s + v, 0)
   const roas         = totalSpend > 0 ? (campaignRev / totalSpend) : 9.3

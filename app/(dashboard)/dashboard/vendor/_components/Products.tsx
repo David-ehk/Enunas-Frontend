@@ -479,7 +479,7 @@ function ImagesSection({ product }: { product: AdminApiProduct }) {
               <div className="grid grid-cols-4 gap-3 mb-5">
                 {images.map(img => (
                   <div key={img.id} className="relative group rounded-none overflow-hidden aspect-[3/4] bg-[#F5F5F0]">
-                    <img src={img.url} alt="" className="w-full h-full object-cover" />
+                    <img src={img.imageUrl} alt={img.altText ?? ''} className="w-full h-full object-cover" />
                     <button
                       onClick={() => deleteImage(img.id)}
                       disabled={deleting === img.id}
@@ -565,8 +565,10 @@ const PRICE_MODE_CONFIG: Record<PriceInputMode, {
 
 function ListingsSection({ product }: { product: AdminApiProduct }) {
   const [listings, setListings]             = useState<ApiListing[]>([])
+  const [variants, setVariants]             = useState<AdminApiVariant[]>([])
   const [loading, setLoading]               = useState(true)
   const [editingListing, setEditingListing] = useState<ApiListing | null>(null)
+  const [variantSel, setVariantSel]         = useState<string>('')
   const [priceInputMode, setPriceInputMode] = useState<PriceInputMode>('GROSS')
   const [price, setPrice]                   = useState('')
   const [discountPrice, setDiscountPrice]   = useState('')
@@ -575,12 +577,21 @@ function ListingsSection({ product }: { product: AdminApiProduct }) {
   const [deleting, setDeleting]             = useState<string | null>(null)
   const [err, setErr]                       = useState<string | null>(null)
 
+  // Listings sind pro Variante (Backend: CreateListingDto.variantId @NotNull) —
+  // Varianten werden für die Pflicht-Auswahl mitgeladen.
   useEffect(() => {
-    brandApi.listings.list(product.id)
-      .then(setListings)
-      .catch(() => setListings([]))
-      .finally(() => setLoading(false))
+    Promise.all([
+      brandApi.listings.list(product.id).catch(() => [] as ApiListing[]),
+      brandApi.variants.list(product.id).catch(() => [] as AdminApiVariant[]),
+    ]).then(([ls, vs]) => {
+      setListings(ls)
+      setVariants(vs)
+      if (vs.length > 0) setVariantSel(String(vs[0].id))
+    }).finally(() => setLoading(false))
   }, [product.id])
+
+  const variantLabel = (v: AdminApiVariant) =>
+    [v.color, v.size, v.sku ? `· ${v.sku}` : ''].filter(Boolean).join(' ')
 
   // Live breakdown
   const parsedPrice = parseFloat(price.replace(',', '.'))
@@ -624,13 +635,16 @@ function ListingsSection({ product }: { product: AdminApiProduct }) {
       setErr('Sale-Preis muss kleiner als der reguläre Preis sein (gleiche Basis).')
       return
     }
+    if (!editingListing && !variantSel) {
+      setErr('Variante wählen — Listings gelten pro Variante.')
+      return
+    }
     setSaving(true); setErr(null)
     try {
       if (editingListing) {
         const dto: UpdateListingDto = {
           price: p,
           priceInputMode,
-          currency: 'EUR',
           discountPrice: dp ?? undefined,
         }
         const updated = await brandApi.listings.update(product.id, editingListing.id, dto)
@@ -638,6 +652,7 @@ function ListingsSection({ product }: { product: AdminApiProduct }) {
         cancelEdit()
       } else {
         const dto: CreateListingDto = {
+          variantId: Number(variantSel),
           price: p,
           priceInputMode,
           currency: 'EUR',
@@ -688,22 +703,30 @@ function ListingsSection({ product }: { product: AdminApiProduct }) {
                         style={{ fontFamily: 'var(--font-league-spartan)' }}>
                         {LISTING_REGIONS.find(r => r.id === l.region)?.label ?? l.region ?? 'Global'}
                       </span>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-[15px] font-semibold text-[#0A0A0A] tabular-nums"
-                          style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                          {fmtEur(l.price)}
+                      {(l.variantColor || l.variantSize || l.variantSku) && (
+                        <span className="text-[11px] text-[#6B6B6B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                          {[l.variantColor, l.variantSize].filter(Boolean).join(' / ')}
+                          {l.variantSku && <span className="font-mono text-[10px] text-[#9B9B9B] ml-1.5">{l.variantSku}</span>}
                         </span>
-                        {l.discountPrice != null && (
-                          <span className="text-[12px] font-semibold text-[#1A5A3C] tabular-nums"
+                      )}
+                      <div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-[15px] font-semibold text-[#0A0A0A] tabular-nums"
                             style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                            Sale: {fmtEur(l.discountPrice)}
+                            {fmtEur(l.priceGross ?? l.price)}
                           </span>
-                        )}
-                        {l.priceInputMode && (
-                          <span className="text-[9px] uppercase tracking-[0.1em] text-[#C0C0BC]"
-                            style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                            {l.priceInputMode === 'GROSS' ? 'Brutto' : 'Netto'}
-                          </span>
+                          {(l.discountPriceGross ?? l.discountPrice) != null && (
+                            <span className="text-[12px] font-semibold text-[#1A5A3C] tabular-nums"
+                              style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                              Sale: {fmtEur((l.discountPriceGross ?? l.discountPrice)!)}
+                            </span>
+                          )}
+                        </div>
+                        {/* Netto · USt · Brutto verbatim aus den API-Feldern — keine Client-Neuberechnung */}
+                        {l.priceNet != null && l.priceVat != null && (
+                          <p className="text-[10px] text-[#9B9B9B] tabular-nums mt-0.5" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                            Netto {fmtEur(l.priceNet)} + USt {fmtEur(l.priceVat)} = {fmtEur(l.priceGross ?? l.price)}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -769,6 +792,23 @@ function ListingsSection({ product }: { product: AdminApiProduct }) {
                   ))}
                 </div>
               </div>
+
+              {/* Varianten-Auswahl — Pflicht beim Anlegen (Backend: variantId @NotNull) */}
+              {!editingListing && (
+                <div>
+                  <p className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Variante *</p>
+                  {variants.length === 0 ? (
+                    <p className="text-[11px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                      Keine Varianten vorhanden — bitte zuerst im Bereich „Varianten &amp; Bestand" anlegen.
+                    </p>
+                  ) : (
+                    <select value={variantSel} onChange={e => setVariantSel(e.target.value)}
+                      className={INPUT} style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                      {variants.map(v => <option key={v.id} value={String(v.id)}>{variantLabel(v)}</option>)}
+                    </select>
+                  )}
+                </div>
+              )}
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
@@ -1083,21 +1123,24 @@ function CreateWizard({ onBack, onCreated }: { onBack: () => void; onCreated: (p
       }
       const created = await brandApi.products.create(dto)
 
-      // Create the first listing (price) for this product.
-      // Best-effort: if it fails, the product still exists and the price
-      // can be added in the EditPanel's Preisgestaltung section.
+      // Preis = Listing pro Variante (Backend: CreateListingDto.variantId @NotNull).
+      // Best-effort: ein Listing je angelegter Variante mit demselben Preis; schlägt eines fehl,
+      // existiert das Produkt trotzdem und der Preis kann in der Preisgestaltung gesetzt werden.
       const p  = parseFloat(price.replace(',', '.'))
       const dp = discountPrice ? parseFloat(discountPrice.replace(',', '.')) : null
-      const listingDto: CreateListingDto = {
-        price: p,
-        priceInputMode: priceMode,
-        currency: 'EUR',
-        region,
-        ...(dp !== null && { discountPrice: dp }),
+      for (const v of created.variants ?? []) {
+        const listingDto: CreateListingDto = {
+          variantId: Number(v.id),
+          price: p,
+          priceInputMode: priceMode,
+          currency: 'EUR',
+          region,
+          ...(dp !== null && { discountPrice: dp }),
+        }
+        try {
+          await brandApi.listings.create(created.id, listingDto)
+        } catch { /* Produkt existiert; Preis kann im Edit-Panel nachgetragen werden */ }
       }
-      try {
-        await brandApi.listings.create(created.id, listingDto)
-      } catch { /* product created; price can be set in edit panel */ }
 
       onCreated(created)
     } catch (e: unknown) {
@@ -1623,6 +1666,9 @@ export default function Products() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [deleting, setDeleting]     = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  // productId → Brutto-Preise der Listings (ProductResponseDto trägt keinen Preis;
+  // Preise leben auf Listings — niemals € 0,00 anzeigen)
+  const [priceMap, setPriceMap] = useState<Record<string, number[]>>({})
 
   useEffect(() => {
     brandApi.products.getMy()
@@ -1630,6 +1676,36 @@ export default function Products() {
       .catch(() => setProducts([]))
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (products.length === 0) return
+    let alive = true
+    Promise.all(products.map(p =>
+      brandApi.listings.list(p.id)
+        .then(ls => [p.id, ls.map(l => l.priceGross ?? l.price).filter((v): v is number => v != null && v > 0)] as const)
+        .catch(() => [p.id, [] as number[]] as const)
+    )).then(entries => { if (alive) setPriceMap(Object.fromEntries(entries)) })
+    return () => { alive = false }
+  }, [products])
+
+  function PriceCell({ productId }: { productId: string }) {
+    const prices = priceMap[productId]
+    if (!prices) return <span className="text-[12px] text-[#C0C0BC]">…</span>
+    const distinct = [...new Set(prices)]
+    if (distinct.length === 0) {
+      return (
+        <span className="text-[11px] italic text-[#9B9B9B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+          Kein Preis gesetzt
+        </span>
+      )
+    }
+    const min = Math.min(...distinct)
+    return (
+      <span className="font-semibold text-[#0A0A0A]">
+        {distinct.length > 1 ? `ab ${fmtEur(min)}` : fmtEur(min)}
+      </span>
+    )
+  }
 
   function reload() {
     setLoading(true)
@@ -1742,7 +1818,9 @@ export default function Products() {
                     <TD>
                       <div className="flex items-center gap-3">
                         {p.images?.[0] ? (
-                          <img src={p.images[0]} alt="" className="w-8 h-10 object-cover rounded bg-[#F5F5F0] shrink-0" />
+                          <img
+                            src={typeof p.images[0] === 'string' ? p.images[0] : (p.images[0] as { imageUrl?: string }).imageUrl}
+                            alt="" className="w-8 h-10 object-cover rounded bg-[#F5F5F0] shrink-0" />
                         ) : (
                           <div className="w-8 h-10 bg-[#F5F5F0] rounded shrink-0 flex items-center justify-center">
                             <Package className="w-3.5 h-3.5 text-[#C0C0BC]" />
@@ -1755,7 +1833,7 @@ export default function Products() {
                       </div>
                     </TD>
                     <TD className="text-[#6B6B6B] capitalize">{p.category?.toLowerCase()}</TD>
-                    <TD className="font-semibold text-[#0A0A0A]">{fmtEur(p.price)}</TD>
+                    <TD><PriceCell productId={p.id} /></TD>
                     <TD><StatusBadge status={p.status} /></TD>
                     <TD className="text-[#9B9B9B]">{fmt(p.createdAt)}</TD>
                     <TD>

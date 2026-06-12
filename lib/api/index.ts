@@ -9,7 +9,6 @@ export { orderApi } from './modules/orderApi';
 export { wardrobeApi } from './modules/wardrobeApi';
 export { brandApi } from './modules/brandApi';
 export { adminApi } from './modules/adminApi';
-export { payoutApi } from './modules/payoutApi';
 export { discountsApi } from './modules/discountsApi';
 export { settlementApi } from './modules/settlementApi';
 export type { SettlementRow, SettlementDashboard } from './modules/settlementApi';

@@ -19,6 +19,46 @@ export function fmt(s?: string | null) {
 }
 export function fmtPct(v: number) { return `${v.toFixed(1)}%` }
 
+// ─── Phase 2 / Vorschaudaten ──────────────────────────────────────────────────
+// Demodaten nur außerhalb von Produktion — in Prod zeigen Screens ohne
+// Backend-Quelle einen ehrlichen „Phase 2"-Vorschauzustand (Metrik-Namen,
+// keine erfundenen Werte).
+export const SHOW_PREVIEW_DATA = process.env.NODE_ENV !== 'production'
+
+export function Phase2Tile({ label }: { label: string }) {
+  return (
+    <div className="bg-white border border-[#E8E8E8] px-5 py-4">
+      <p className="text-[10px] uppercase tracking-[0.12em] font-medium mb-1.5"
+        style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
+        {label}
+      </p>
+      <p className="text-[20px] font-semibold leading-none" style={{ fontFamily: 'var(--font-league-spartan)', color: '#D8D8D4' }}>—</p>
+      <span className="inline-block mt-2.5 px-2 py-0.5 text-[9px] uppercase tracking-[0.14em] font-medium"
+        style={{ fontFamily: 'var(--font-league-spartan)', background: 'rgba(55,14,77,0.06)', color: '#370E4D' }}>
+        Bald verfügbar
+      </span>
+    </div>
+  )
+}
+
+export function Phase2Panel({ title, sub, metrics }: { title: string; sub?: string; metrics: string[] }) {
+  return (
+    <div className="space-y-4">
+      <div className="bg-white border border-[#E8E8E8] px-6 py-5">
+        <p className="text-[13px] font-semibold" style={{ fontFamily: 'var(--font-league-spartan)', color: '#0A0A0A' }}>
+          {title} — Phase 2
+        </p>
+        <p className="text-[12px] mt-1 leading-relaxed max-w-xl" style={{ fontFamily: 'var(--font-league-spartan)', color: '#6B6B6B' }}>
+          {sub ?? 'Dieses Modul wird in Phase 2 mit echten Daten aktiviert. Diese Metriken sind geplant:'}
+        </p>
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {metrics.map(m => <Phase2Tile key={m} label={m} />)}
+      </div>
+    </div>
+  )
+}
+
 // ─── Loader / EmptyState ──────────────────────────────────────────────────────
 export function Loader() {
   return (

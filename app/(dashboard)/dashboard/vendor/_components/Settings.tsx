@@ -42,11 +42,6 @@ export default function SettingsTab({
   brand: ApiBrandPartner | null
   onUpdate: (b: ApiBrandPartner) => void
 }) {
-  const [brandName, setBrandName] = useState(brand?.brandName ?? '')
-  const [saving, setSaving]       = useState(false)
-  const [saved, setSaved]         = useState(false)
-  const [error, setError]         = useState<string | null>(null)
-
   const [legalName, setLegalName]           = useState(brand?.legalName ?? '')
   const [street, setStreet]                 = useState(brand?.addressStreet ?? '')
   const [postalCode, setPostalCode]         = useState(brand?.addressPostalCode ?? '')
@@ -60,7 +55,6 @@ export default function SettingsTab({
 
   useEffect(() => {
     if (brand) {
-      setBrandName(brand.brandName)
       setLegalName(brand.legalName ?? '')
       setStreet(brand.addressStreet ?? '')
       setPostalCode(brand.addressPostalCode ?? '')
@@ -70,22 +64,6 @@ export default function SettingsTab({
       setTaxNumber(brand.taxNumber ?? '')
     }
   }, [brand])
-
-  async function saveBrandName() {
-    if (!brandName.trim()) return
-    setSaving(true)
-    setError(null)
-    try {
-      const updated = await brandApi.updateMe({ brandName: brandName.trim() })
-      onUpdate(updated)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2500)
-    } catch {
-      setError('Speichern fehlgeschlagen. Bitte erneut versuchen.')
-    } finally {
-      setSaving(false)
-    }
-  }
 
   async function saveAddress() {
     if (!legalName.trim() || !street.trim() || !postalCode.trim() || !city.trim()) return
@@ -135,15 +113,12 @@ export default function SettingsTab({
       <SectionCard title="Markenprofil">
         <div className="p-6 space-y-5">
           <div>
-            <p className={labelCls} style={{ fontFamily: 'var(--font-league-spartan)' }}>Markenname</p>
-            <input
-              type="text"
-              value={brandName}
-              onChange={e => setBrandName(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && saveBrandName()}
-              className={inputCls}
-              style={{ fontFamily: 'var(--font-league-spartan)' }}
-            />
+            {/* Backend UpdateBrandPartnerDto hat kein brandName-Feld — Name ist nach
+                der Registrierung fix und nur über den Support/Admin änderbar. */}
+            <p className={labelCls} style={{ fontFamily: 'var(--font-league-spartan)' }}>Markenname (nicht änderbar)</p>
+            <p className="text-[13px] text-[#2D2D2D]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+              {brand?.brandName ?? '—'}
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -168,31 +143,6 @@ export default function SettingsTab({
             </p>
           </div>
 
-          {error && (
-            <p className="text-[11px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-              {error}
-            </p>
-          )}
-
-          <div className="flex items-center gap-3 pt-1">
-            <button
-              onClick={saveBrandName}
-              disabled={saving || !brandName.trim() || brandName === brand?.brandName}
-              className="flex items-center gap-2 h-9 px-5 rounded-none text-[12px] font-medium text-white transition-all duration-200 disabled:opacity-40"
-              style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D' }}
-            >
-              {saving ? 'Speichert…' : saved ? <><Check className="w-3.5 h-3.5" /> Gespeichert</> : 'Speichern'}
-            </button>
-            {brandName !== brand?.brandName && !saving && (
-              <button
-                onClick={() => setBrandName(brand?.brandName ?? '')}
-                className="h-9 px-4 rounded-none text-[12px] text-[#6B6B6B] border border-[#E8E8E8] hover:bg-[#F5F5F0] transition-all duration-200"
-                style={{ fontFamily: 'var(--font-league-spartan)' }}
-              >
-                Abbrechen
-              </button>
-            )}
-          </div>
         </div>
       </SectionCard>
 
@@ -257,6 +207,25 @@ export default function SettingsTab({
                 <option key={c.code} value={c.code}>{c.name}</option>
               ))}
             </select>
+          </div>
+
+          {/* Steuertyp — read-only, server-seitig aus dem Land abgeleitet (DE ⇒ Inland 19 % USt, sonst Reverse Charge) */}
+          <div>
+            <p className={labelCls} style={{ fontFamily: 'var(--font-league-spartan)' }}>Steuertyp (abgeleitet aus Land)</p>
+            <span
+              className="inline-block px-2.5 py-1 text-[11px] font-semibold"
+              style={{
+                fontFamily: 'var(--font-league-spartan)',
+                letterSpacing: '0.04em',
+                background: country === 'DE' ? 'rgba(26,90,60,0.08)' : 'rgba(55,14,77,0.08)',
+                color: country === 'DE' ? '#1A5A3C' : '#370E4D',
+              }}
+            >
+              {country === 'DE' ? 'Inland · 19 % USt' : 'Ausland · Reverse Charge (§ 3a Abs. 2 UStG)'}
+            </span>
+            <p className="mt-1 text-[10px] text-[#9B9B9B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+              Wird automatisch aus dem Land bestimmt und steuert die Provisionsabrechnung (USt vs. Reverse Charge).
+            </p>
           </div>
 
           <div>

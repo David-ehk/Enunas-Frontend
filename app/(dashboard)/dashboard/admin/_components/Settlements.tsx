@@ -365,7 +365,7 @@ function FiktiveVatCell({ row }: { row: SettlementRow }) {
             style={{ fontFamily: 'var(--font-league-spartan)', color: '#7A5C1E' }}>
             {fmtEurDe(amount)}
           </span>
-          <p style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 9, color: '#7A5C1E', textAlign: 'right', marginTop: 1 }}>§ 13b UStG</p>
+          <p style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 9, color: '#7A5C1E', textAlign: 'right', marginTop: 1 }}>nachrichtlich</p>
         </div>
         <CopyBtn value={amount.toFixed(2)} label="Fiktive USt" />
       </div>
@@ -440,7 +440,7 @@ function ConfirmDialog({ row, period, onConfirm, onCancel, submitting }: Confirm
               <div className="flex items-start gap-2.5 text-[11px] px-3 py-2.5 rounded-lg border"
                 style={{ fontFamily: 'var(--font-league-spartan)', background: 'rgba(122,92,30,0.04)', borderColor: 'rgba(122,92,30,0.2)', color: '#7A5C1E' }}>
                 <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                <span>Fiktive USt {fmtEurDe(fv)} (§ 13b UStG) — in der USt-Voranmeldung unter steuerfreie sonstige Leistungen EU-Ausland erfassen.</span>
+                <span>Fiktive USt {fmtEurDe(fv)} — rein nachrichtlich, keine Zahllast. Netto-Umsatz als nicht steuerbare sonstige Leistung (§ 3a Abs. 2 UStG) in USt-Voranmeldung und ZM (§ 18a UStG) erfassen.</span>
               </div>
             )}
 
@@ -945,25 +945,25 @@ export default function Settlements() {
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5"
                   style={{ fontFamily: 'var(--font-league-spartan)', color: '#7A5C1E' }}>
-                  Reverse Charge — Steuerlast Finanzamt (§ 13b UStG)
+                  Reverse Charge — Leistungsort beim Empfänger (§ 3a Abs. 2 UStG)
                 </p>
                 <p className="text-[11.5px] leading-relaxed" style={{ fontFamily: 'var(--font-league-spartan)', color: '#5C4515', maxWidth: 620 }}>
                   Für {rcRows.length} ausländische Brand{rcRows.length > 1 ? 's' : ''} wird keine USt in Rechnung gestellt.
-                  Die fiktive 19 %-Steuerlast ({fmtEurDe(totalFiktiveVat)}) bleibt beim Leistungsempfänger — du erfasst diese
-                  Umsätze als <strong>steuerfreie sonstige Leistungen EU-Ausland</strong> in der USt-Voranmeldung und der
-                  Zusammenfassenden Meldung (ZM). Der Betrag steht in der Spalte <em>Fiktive USt</em> je Brand.
+                  Die fiktive 19 %-USt ({fmtEurDe(totalFiktiveVat)}) ist <strong>rein nachrichtlich — keine Zahllast, keine Einnahme</strong>.
+                  Du erfasst diese Umsätze als <strong>nicht steuerbare sonstige Leistungen</strong> in der USt-Voranmeldung und der
+                  Zusammenfassenden Meldung (ZM, § 18a UStG). Der Betrag steht nachrichtlich in der Spalte <em>Fiktive USt</em> je Brand.
                 </p>
               </div>
             </div>
             <div className="text-right shrink-0">
               <p className="text-[9px] uppercase tracking-[0.2em] mb-1" style={{ fontFamily: 'var(--font-league-spartan)', color: '#7A5C1E' }}>
-                Gesamte fiktive USt
+                Gesamte fiktive USt (nachrichtlich)
               </p>
               <p className="tabular-nums font-bold" style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 20, color: '#7A5C1E', lineHeight: 1 }}>
                 {fmtEurDe(totalFiktiveVat)}
               </p>
               <p className="text-[9px] mt-1" style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B7B3A' }}>
-                nicht eingenommen · USt-Voranmeldung
+                keine Zahllast · keine Einnahme
               </p>
             </div>
           </div>
@@ -1036,7 +1036,7 @@ export default function Settlements() {
             {([
               { n: '1', t: 'Zahlen prüfen. Badge zeigt Belegtyp: Inland (inkl. 19 % USt), Reverse Charge (Netto) oder Gutschrift.' },
               { n: '2', t: 'Beleg in lexoffice erstellen. Werte per Copy-Button übernehmen — verhindert Tippfehler.' },
-              { n: '3', t: 'Für RC-Brands: Fiktive USt-Spalte beachten. Netto-Umsatz in USt-Voranmeldung und ZM eintragen — du erhältst kein Geld, musst es aber melden.' },
+              { n: '3', t: 'Für RC-Brands: Fiktive USt ist rein nachrichtlich (keine Zahllast). Netto-Umsatz als nicht steuerbare sonstige Leistung in USt-Voranmeldung und ZM (§ 18a UStG) eintragen.' },
               { n: '4', t: 'Im Tab „Auszahlungen" Payouts generieren, genehmigen und nach der SEPA-Überweisung mit Referenz als bezahlt markieren.' },
               { n: '5', t: 'Hier „Als abgerechnet markieren" mit optionaler Rechnungsreferenz.' },
             ] as { n: string; t: string }[]).map(({ n, t }) => (
@@ -1133,12 +1133,12 @@ export default function Settlements() {
           </div>
           <div className="rounded-xl border px-4 py-3.5" style={{ background: 'rgba(122,92,30,0.04)', borderColor: 'rgba(122,92,30,0.2)' }}>
             <p className="text-[9px] uppercase tracking-[0.14em] mb-1" style={{ fontFamily: 'var(--font-league-spartan)', color: '#7A5C1E' }}>
-              Fiktive USt (RC) · {rcRows.length} Brand{rcRows.length !== 1 ? 's' : ''}
+              Fiktive USt (RC, nachrichtl.) · {rcRows.length} Brand{rcRows.length !== 1 ? 's' : ''}
             </p>
             <p className="text-[18px] font-semibold tabular-nums leading-none" style={{ fontFamily: 'var(--font-league-spartan)', color: '#7A5C1E' }}>
               {fmtEurDe(totalFiktiveVat)}
             </p>
-            <p className="text-[10px] mt-1" style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B7B3A' }}>§ 13b · USt-Voranmeldung</p>
+            <p className="text-[10px] mt-1" style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B7B3A' }}>nachrichtlich · ZM § 18a</p>
           </div>
           <div className="rounded-xl border px-4 py-3.5" style={{ background: '#370E4D', borderColor: '#370E4D' }}>
             <p className="text-[9px] uppercase tracking-[0.14em] mb-1" style={{ fontFamily: 'var(--font-league-spartan)', color: 'rgba(255,255,255,0.45)' }}>Σ Provision brutto</p>
@@ -1308,7 +1308,7 @@ export default function Settlements() {
                     <TH right>Provision netto</TH>
                     <TH right>USt</TH>
                     <TH right>Provision brutto</TH>
-                    <TH right>Fiktive USt 19%</TH>
+                    <TH right>Fiktive USt (nachrichtl.)</TH>
                     <TH right>Auszahlung</TH>
                     <TH>Abgerechnet am</TH>
                     <TH>Referenz</TH>
@@ -1326,7 +1326,7 @@ export default function Settlements() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[9px] uppercase tracking-[0.18em] text-[#9B9B9B] mb-1" style={{ fontFamily: 'var(--font-league-spartan)' }}>Fiktive USt (RC)</p>
+                  <p className="text-[9px] uppercase tracking-[0.18em] text-[#9B9B9B] mb-1" style={{ fontFamily: 'var(--font-league-spartan)' }}>Fiktive USt (RC, nachrichtl.)</p>
                   <p className="text-[15px] font-semibold tabular-nums" style={{ fontFamily: 'var(--font-league-spartan)', color: '#7A5C1E' }}>
                     {fmtEurDe(rows.filter(r => !r.domestic && !r.isCreditNote).reduce((s, r) => s + fiktiveVat(r), 0))}
                   </p>
@@ -1368,7 +1368,7 @@ export default function Settlements() {
                     <TH right>USt</TH>
                     <TH right>Provision brutto</TH>
                     <TH right>
-                      <span style={{ color: '#7A5C1E' }}>Fiktive USt 19%</span>
+                      <span style={{ color: '#7A5C1E' }}>Fiktive USt (nachrichtl.)</span>
                     </TH>
                     <TH right>Auszahlung</TH>
                     <TH>Orders</TH>
@@ -1426,7 +1426,7 @@ export default function Settlements() {
                 </div>
                 <div className="text-right">
                   <p className="text-[9px] uppercase tracking-[0.18em] mb-1" style={{ fontFamily: 'var(--font-league-spartan)', color: '#7A5C1E' }}>
-                    Fiktive USt (§ 13b)
+                    Fiktive USt (nachrichtlich)
                   </p>
                   <p className="text-[15px] font-semibold tabular-nums" style={{ fontFamily: 'var(--font-league-spartan)', color: '#7A5C1E' }}>
                     {fmtEurDe(totalFiktiveVat)}

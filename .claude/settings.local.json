@@ -91,7 +91,16 @@
       "Bash(npm run *)",
       "Bash(npx eslint *)",
       "Bash(curl -s -X POST http://localhost:8080/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"admin@enunas.com\",\"password\":\"admin123\"}')",
-      "mcp__playwright__browser_run_code_unsafe"
+      "mcp__playwright__browser_run_code_unsafe",
+      "Bash(PGPASSWORD=postgresql psql -h localhost -U postgres -d Enunas -t -c \"SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY 1;\")",
+      "Bash(docker exec *)",
+      "Read(//tmp/**)",
+      "Bash(curl -s -w '\\\\n[HTTP %{http_code}]' -X POST http://localhost:8080/orders -H 'Authorization: Bearer __CMDSUB_OUTPUT__' -H 'Content-Type: application/json' -d '{\"items\":[{\"listingId\":3,\"quantity\":1}],\"shippingAddress\":{\"fullName\":\"E2E Kunde\",\"street\":\"Teststr. 1\",\"city\":\"Berlin\",\"postalCode\":\"10115\",\"country\":\"DE\",\"phone\":\"+4915112345678\"}}')",
+      "Bash(echo \"tsc exit: $?\")",
+      "Bash(docker compose *)",
+      "Bash(curl -s -w '\\\\n[%{http_code}]' -X POST http://localhost:8080/admin/payouts/generate -H 'Authorization: Bearer __TRACKED_VAR__')",
+      "Bash(curl -s -w ' [%{http_code}]' -X POST http://localhost:8080/admin/payouts/1/approve -H 'Authorization: Bearer __CMDSUB_OUTPUT__')",
+      "Bash(curl -s -w '\\\\n[%{http_code}]' http://localhost:8080/brand/payouts -H 'Authorization: Bearer __CMDSUB_OUTPUT__')"
     ]
   }
 }

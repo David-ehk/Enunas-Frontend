@@ -61,10 +61,11 @@ function ShipModal({
     if (!trackingNumber.trim()) { setErr('Tracking-Nummer ist erforderlich.'); return }
     setSubmitting(true); setErr(null)
     try {
+      // Backend ShipmentConfirmationDto kennt kein estimatedDelivery — ETA geht als note mit
       const updated = await brandApi.orders.ship(order.id, {
         carrier,
         trackingNumber: trackingNumber.trim(),
-        estimatedDelivery: estimatedDelivery || undefined,
+        note: estimatedDelivery ? `Voraussichtliche Lieferung: ${estimatedDelivery}` : undefined,
       })
       onShipped(updated)
     } catch (e: unknown) {
@@ -177,7 +178,7 @@ function ShipModal({
 
           {/* ETA */}
           <div>
-            <label className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Voraussichtliche Lieferung</label>
+            <label className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Voraussichtliche Lieferung (optional, als Notiz)</label>
             <input
               type="date"
               className={INPUT}
