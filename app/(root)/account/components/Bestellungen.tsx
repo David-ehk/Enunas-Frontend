@@ -66,6 +66,23 @@ function OrderRow({ order }: { order: AccountOrder }) {
               </button>
             )}
           </div>
+
+          {/* Return address — shown when backend marks return as approved/in-progress */}
+          {order.returnShipToAddress && (
+            <div className="mt-4 border-t border-enunas-gray-light pt-4">
+              <p className="font-league-spartan text-[10px] tracking-[0.2em] uppercase text-enunas-gray-medium mb-2">
+                Retourenadresse
+              </p>
+              <pre className="font-league-spartan text-sm text-enunas-black whitespace-pre-line leading-relaxed">
+                {order.returnShipToAddress}
+              </pre>
+              {order.returnNumber && (
+                <p className="font-league-spartan text-[11px] text-enunas-gray-medium mt-2">
+                  Retourennummer: <span className="font-medium text-enunas-black font-mono">{order.returnNumber}</span>
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
     </article>

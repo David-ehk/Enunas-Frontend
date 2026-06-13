@@ -100,7 +100,9 @@
       "Bash(docker compose *)",
       "Bash(curl -s -w '\\\\n[%{http_code}]' -X POST http://localhost:8080/admin/payouts/generate -H 'Authorization: Bearer __TRACKED_VAR__')",
       "Bash(curl -s -w ' [%{http_code}]' -X POST http://localhost:8080/admin/payouts/1/approve -H 'Authorization: Bearer __CMDSUB_OUTPUT__')",
-      "Bash(curl -s -w '\\\\n[%{http_code}]' http://localhost:8080/brand/payouts -H 'Authorization: Bearer __CMDSUB_OUTPUT__')"
+      "Bash(curl -s -w '\\\\n[%{http_code}]' http://localhost:8080/brand/payouts -H 'Authorization: Bearer __CMDSUB_OUTPUT__')",
+      "Bash(xargs grep -l \"ReturnOrder\\\\|ReturnItem\\\\|ReturnStatus\")",
+      "Bash(dir *)"
     ]
   }
 }

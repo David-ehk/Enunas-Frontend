@@ -297,6 +297,10 @@ export default function SettingsTab({
         <div className="p-6 space-y-3">
           {[
             {
+              title: 'Retourenadresse',
+              text:  'Genehmigte Retouren werden an deine oben hinterlegte Geschäftsadresse gesendet. Der Kunde erhält diese Adresse automatisch per E-Mail, sobald du (oder Enunas) die Rückgabe genehmigst. Halte die Adresse stets aktuell.',
+            },
+            {
               title: 'Produkt-Genehmigungen',
               text:  'Neue Produkte müssen vom Enunas-Team genehmigt werden, bevor sie im Shop erscheinen.',
             },

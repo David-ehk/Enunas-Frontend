@@ -67,6 +67,12 @@ export interface ApiOrder {
   trackingNumber?: string;
   createdAt: string;
   updatedAt: string;
+  // Return fields — present only when a return exists for this order.
+  returnNumber?: string;
+  returnReason?: string;
+  returnDescription?: string;
+  returnRequestedAt?: string;
+  returnShipToAddress?: string;
 }
 
 export interface ApiWardrobeItem {

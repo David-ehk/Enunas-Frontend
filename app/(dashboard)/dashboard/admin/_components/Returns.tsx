@@ -31,6 +31,16 @@ function ActionBtn({
   )
 }
 
+const REASON_LABELS: Record<string, string> = {
+  WRONG_SIZE:        'Falsche Größe',
+  WRONG_COLOR:       'Falsche Farbe',
+  DAMAGED:           'Beschädigt',
+  DEFECTIVE:         'Defekt',
+  NOT_AS_DESCRIBED:  'Nicht wie beschrieben',
+  NO_LONGER_WANTED:  'Nicht mehr gewünscht',
+  OTHER:             'Sonstiges',
+}
+
 export default function Returns({ customers = [] }: { customers?: AdminCustomer[] }) {
   const [orders, setOrders]     = useState<ApiOrder[]>([])
   const [loading, setLoading]   = useState(true)
@@ -158,6 +168,7 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
               <tr>
                 <TH>Bestellung</TH>
                 <TH>Kunde</TH>
+                <TH>Grund</TH>
                 <TH>Datum</TH>
                 <TH>Betrag</TH>
                 <TH>Status</TH>
@@ -170,6 +181,13 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
                   <TableRow>
                     <TD className="font-mono font-semibold text-[#0A0A0A]">#{String(order.id).slice(0, 8).toUpperCase()}</TD>
                     <TD className="text-[#6B6B6B]">{getCustomerLabel(order.userId)}</TD>
+                    <TD>
+                      {order.returnReason ? (
+                        <span className="text-[11px] text-[#2D2D2D]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                          {REASON_LABELS[order.returnReason] ?? order.returnReason}
+                        </span>
+                      ) : <span className="text-[#C9C9C9]">—</span>}
+                    </TD>
                     <TD className="text-[#6B6B6B]">{fmt(order.createdAt)}</TD>
                     <TD className="font-medium text-[#0A0A0A]">{fmtEur(order.totalAmount)}</TD>
                     <TD><StatusBadge status={order.status} /></TD>
@@ -240,8 +258,8 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
 
                   {expanded === order.id && (
                     <tr className="border-b border-[#F0F0EB]" style={{ background: '#F8F8F5' }}>
-                      <td colSpan={6} className="px-6 py-5">
-                        <div className="grid grid-cols-2 gap-6">
+                      <td colSpan={7} className="px-6 py-5">
+                        <div className="grid grid-cols-3 gap-6">
                           <div>
                             <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-2">Artikel</p>
                             {order.items?.map(item => (
@@ -249,6 +267,22 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
                                 {item.name} × {item.quantity} — <span className="text-[#6B6B6B]">{fmtEur(item.price)}</span>
                               </div>
                             ))}
+                          </div>
+                          <div>
+                            <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-2">Rückgabegrund</p>
+                            {order.returnReason ? (
+                              <div className="text-[12px] text-[#0A0A0A]">
+                                <p className="font-medium">{REASON_LABELS[order.returnReason] ?? order.returnReason}</p>
+                                {order.returnDescription && (
+                                  <p className="text-[#6B6B6B] mt-1 italic" style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 300 }}>
+                                    &ldquo;{order.returnDescription}&rdquo;
+                                  </p>
+                                )}
+                                {order.returnNumber && (
+                                  <p className="text-[10px] font-mono text-[#9B9B9B] mt-1">{order.returnNumber}</p>
+                                )}
+                              </div>
+                            ) : <p className="text-[11px] text-[#9B9B9B]">—</p>}
                           </div>
                           <div>
                             <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-2">Lieferadresse</p>

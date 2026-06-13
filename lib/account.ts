@@ -23,6 +23,9 @@ export interface AccountOrder {
   totalCents: number;
   itemsPreview: OrderItemPreview[];
   trackingUrl?: string;
+  // Populated when a return exists — sourced from OrderResponseDto.returnShipToAddress / returnNumber
+  returnShipToAddress?: string;
+  returnNumber?: string;
 }
 
 export interface AccountStats {
