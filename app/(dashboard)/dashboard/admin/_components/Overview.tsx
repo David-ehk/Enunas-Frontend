@@ -89,16 +89,16 @@ export default function Overview({ orders, brands, products, customers }: Props)
     const dayOrders = orders.filter(o => dayKey(o.createdAt) === date)
     return {
       date: date.slice(5).replace('-', '/'),
-      Umsatz: parseFloat(dayOrders.reduce((s, o) => s + o.totalAmount, 0).toFixed(2)),
+      Umsatz: parseFloat(dayOrders.reduce((s, o) => s + (o.total ?? o.totalAmount ?? 0), 0).toFixed(2)),
       Bestellungen: dayOrders.length,
     }
   }), [orders, days])
 
   // ── KPI values ──
-  const revenue      = orders.reduce((s, o) => s + o.totalAmount, 0)
-  const revenueToday = orders.filter(o => isToday(o.createdAt)).reduce((s, o) => s + o.totalAmount, 0)
-  const revenue7d    = orders.filter(o => inLast(o.createdAt, 7)).reduce((s, o) => s + o.totalAmount, 0)
-  const revenue30d   = orders.filter(o => inLast(o.createdAt, 30)).reduce((s, o) => s + o.totalAmount, 0)
+  const revenue      = orders.reduce((s, o) => s + (o.total ?? o.totalAmount ?? 0), 0)
+  const revenueToday = orders.filter(o => isToday(o.createdAt)).reduce((s, o) => s + (o.total ?? o.totalAmount ?? 0), 0)
+  const revenue7d    = orders.filter(o => inLast(o.createdAt, 7)).reduce((s, o) => s + (o.total ?? o.totalAmount ?? 0), 0)
+  const revenue30d   = orders.filter(o => inLast(o.createdAt, 30)).reduce((s, o) => s + (o.total ?? o.totalAmount ?? 0), 0)
   const ordersToday  = orders.filter(o => isToday(o.createdAt)).length
   const openOrders   = orders.filter(o => ['PENDING', 'PROCESSING', 'PAID'].includes(o.status)).length
   const returns      = orders.filter(o => o.status === 'RETURN_REQUESTED').length
@@ -126,8 +126,8 @@ export default function Overview({ orders, brands, products, customers }: Props)
     const m: Record<string, number> = {}
     orders.filter(o => isThisMonth(o.createdAt)).forEach(o => {
       o.items.forEach(item => {
-        const brand = productBrandMap[item.productId]
-        if (brand) m[brand] = (m[brand] ?? 0) + item.price * item.quantity
+        const brand = item.productId != null ? productBrandMap[item.productId] : undefined
+        if (brand) m[brand] = (m[brand] ?? 0) + (item.priceAtPurchase ?? item.price ?? 0) * item.quantity
       })
     })
     return m

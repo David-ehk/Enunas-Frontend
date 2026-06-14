@@ -147,7 +147,7 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
         <KPICell
           label="Erstattet"
           value={refunded.length}
-          sub={fmtEur(refunded.reduce((s, o) => s + o.totalAmount, 0))}
+          sub={fmtEur(refunded.reduce((s, o) => s + (o.total ?? o.totalAmount ?? 0), 0))}
           delta={kpiData.refundedDelta}
           period="vs. Vorwoche"
           spark={kpiData.refundedSpark}
@@ -218,8 +218,8 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
                         )}
                         {order.status === 'RETURN_RECEIVED' && (
                           refundingId !== order.id ? (
-                            <ActionBtn variant="purple" disabled={acting === order.id} onClick={() => { setRefundingId(order.id); setRefundAmount(String(order.totalAmount)) }}>
-                              <RotateCcw className="w-3 h-3" /> Refund ({fmtEur(order.totalAmount)})
+                            <ActionBtn variant="purple" disabled={acting === order.id} onClick={() => { setRefundingId(order.id); setRefundAmount(String(order.total ?? order.totalAmount ?? 0)) }}>
+                              <RotateCcw className="w-3 h-3" /> Refund ({fmtEur(order.total ?? order.totalAmount)})
                             </ActionBtn>
                           ) : (
                             <div className="flex items-center gap-2">

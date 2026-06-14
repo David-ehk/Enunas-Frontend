@@ -8,7 +8,6 @@ import { useAuth } from '@/app/context/AuthContext'
 import CheckoutNavbar from '@/app/(root)/cart/components/CheckoutNavbar'
 import CartFooter from '@/app/(root)/cart/components/CartFooter'
 import { orderApi, authApi, FetchError } from '@/lib/api'
-import { createPayment } from '@/lib/api/payments'
 
 const FREE_SHIPPING_THRESHOLD = 50
 
@@ -87,16 +86,22 @@ export default function CheckoutPage() {
     setError(null)
     setLoading(true)
     try {
+      const missingListing = cartItems.find((item) => !item.defaultListingId)
+      if (missingListing) {
+        setError(
+          `"${missingListing.name}" kann nicht bestellt werden — bitte entferne es und füge es erneut hinzu.`
+        )
+        setLoading(false)
+        return
+      }
+
       const order = await orderApi.create({
-        items: cartItems.map(item => ({
-          productId: item.productId,
+        items: cartItems.map((item) => ({
+          listingId: Number(item.defaultListingId!),
           quantity: item.quantity,
-          size: item.size,
-          colorId: item.color?.id,
         })),
         shippingAddress: {
-          firstName: form.firstName,
-          lastName: form.lastName,
+          fullName: `${form.firstName} ${form.lastName}`,
           street: form.street,
           city: form.city,
           postalCode: form.postalCode,
@@ -105,11 +110,13 @@ export default function CheckoutPage() {
         },
       })
 
-      const redirectUrl = `${window.location.origin}/account`
-      const payment = await createPayment({ orderId: order.id, redirectUrl })
+      if (!order.checkoutUrl) {
+        setError('Kein Zahlungslink erhalten. Bitte versuche es erneut.')
+        return
+      }
 
       clearCart()
-      window.location.href = payment.checkoutUrl
+      window.location.href = order.checkoutUrl
     } catch (err) {
       setError(
         err instanceof FetchError

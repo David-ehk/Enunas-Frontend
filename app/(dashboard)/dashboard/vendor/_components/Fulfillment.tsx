@@ -112,7 +112,7 @@ function ShipModal({
                 <span className="text-[#2D2D2D]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
                   {item.name} {item.size ? `(${item.size})` : ''} × {item.quantity}
                 </span>
-                <span className="font-medium text-[#0A0A0A]">{fmtEur(item.price * item.quantity)}</span>
+                <span className="font-medium text-[#0A0A0A]">{fmtEur((item.priceAtPurchase ?? item.price ?? 0) * item.quantity)}</span>
               </div>
             ))}
             {(order.items ?? []).length > 3 && (
@@ -394,7 +394,7 @@ function OrderRow({
                         {item.color ? <span className="text-[#9B9B9B]"> / {item.color}</span> : null}
                         <span className="text-[#9B9B9B]"> × {item.quantity}</span>
                       </span>
-                      <span className="font-medium text-[#0A0A0A] tabular-nums">{fmtEur(item.price * item.quantity)}</span>
+                      <span className="font-medium text-[#0A0A0A] tabular-nums">{fmtEur((item.priceAtPurchase ?? item.price ?? 0) * item.quantity)}</span>
                     </div>
                   ))}
                 </div>
@@ -529,7 +529,7 @@ export default function Fulfillment() {
     const q = search.toLowerCase()
     const matchSearch = !q
       || o.id.toLowerCase().includes(q)
-      || (o.items ?? []).some(i => i.name.toLowerCase().includes(q))
+      || (o.items ?? []).some(i => (i.productName ?? i.name ?? '').toLowerCase().includes(q))
       || (o.shippingAddress?.city?.toLowerCase().includes(q) ?? false)
     return matchStatus && matchSearch
   })

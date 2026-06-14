@@ -1,8 +1,27 @@
 export type UserRole = 'CUSTOMER' | 'BRAND_PARTNER' | 'ADMIN';
 export type BrandStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'VERIFIED' | 'SUSPENDED';
 export type ProductStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+// Exact backend OrderStatus enum values — PROCESSING does not exist in the backend.
 export type OrderStatus =
-  | 'PENDING' | 'PAID' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'REFUNDED';
+  | 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED'
+  | 'SHIPPING_PROBLEM' | 'AWAITING_ADMIN' | 'MANUAL_REVIEW'
+  | 'RETURN_REQUESTED' | 'RETURN_APPROVED' | 'RETURN_RECEIVED'
+  | 'REFUNDED' | 'CANCELLED';
+
+// Exact backend ReturnReason enum values.
+export type ReturnReason =
+  | 'WRONG_SIZE' | 'WRONG_COLOR' | 'DAMAGED' | 'DEFECTIVE'
+  | 'NOT_AS_DESCRIBED' | 'NO_LONGER_WANTED' | 'OTHER';
+
+// Spring Page<T> wrapper shape.
+export interface ApiPage<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
 
 export interface ApiUser {
   id: string;
@@ -11,12 +30,28 @@ export interface ApiUser {
   createdAt: string;
 }
 
+// Mirrors backend CustomerResponseDto.
 export interface ApiCustomer {
   id: string;
   userId: string;
+  email: string;
   firstName: string;
   lastName: string;
-  email: string;
+  username?: string;
+  profileImageUrl?: string;
+  country?: string;
+  city?: string;
+  preferredSizeTop?: string;
+  preferredSizeBottom?: string;
+  preferredSizeShoes?: string;
+  heightCm?: number;
+  weightKg?: number;
+  preferredStyles?: string[];
+  favoriteBrands?: string[];
+  favoriteCategories?: string[];
+  totalOrders?: number;
+  totalSpent?: number;
+  createdAt?: string;
 }
 
 export interface ApiProduct {
@@ -39,40 +74,73 @@ export interface ApiProduct {
   details?: { material?: string; care?: string; origin?: string };
 }
 
+// Mirrors backend OrderItemResponseDto.
+// All fields are optional — the backend returns priceAtPurchase/productName/listingId, not
+// price/name/productId. Legacy admin views that read price/name will see undefined at runtime.
 export interface ApiOrderItem {
   id: string;
-  productId: string;
-  name: string;
-  price: number;
   quantity: number;
+  // Backend fields from OrderItemResponseDto
+  listingId?: number;
+  productName?: string;
+  variantSku?: string;
+  variantColor?: string;
+  variantSize?: string;
+  priceAtPurchase?: number;
+  discountPriceAtPurchase?: number;
+  lineTotal?: number;
+  // Legacy fields — not returned by the backend; present only in pre-connect mock data.
+  productId?: string;
+  name?: string;
+  price?: number;
   size?: string;
   color?: string;
 }
 
+// Mirrors backend OrderResponseDto.
+// `total` is the canonical backend field. `totalAmount` is not returned by the backend;
+// treat it as always undefined when reading real API responses.
 export interface ApiOrder {
   id: string;
-  userId: string;
+  userId?: string;
   status: OrderStatus | string;
-  totalAmount: number;
   currency: string;
   items: ApiOrderItem[];
   shippingAddress?: {
-    firstName: string;
-    lastName: string;
-    street: string;
-    city: string;
-    postalCode: string;
-    country: string;
+    fullName?: string;
+    firstName?: string;
+    lastName?: string;
+    street?: string;
+    street2?: string;
+    city?: string;
+    postalCode?: string;
+    country?: string;
+    state?: string;
+    phone?: string;
   };
   trackingNumber?: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
+  // Backend canonical fields
+  orderNumber?: string;
+  buyerId?: string;
+  buyerEmail?: string;
+  total?: number;
+  subtotal?: number;
+  shippingTotal?: number;
+  discountCode?: string;
+  discountAmount?: number;
+  discountPercent?: number;
+  notes?: string;
+  checkoutUrl?: string;
   // Return fields — present only when a return exists for this order.
   returnNumber?: string;
   returnReason?: string;
   returnDescription?: string;
   returnRequestedAt?: string;
   returnShipToAddress?: string;
+  // Legacy field — not returned by backend. Admin/vendor views using this see undefined.
+  totalAmount?: number;
 }
 
 export interface ApiWardrobeItem {

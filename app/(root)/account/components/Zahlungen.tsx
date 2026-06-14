@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { getMockPaymentMethods, type PaymentMethod } from '@/lib/account'
+import type { PaymentMethod } from '@/lib/account'
 
 function CardIcon({ type }: { type: PaymentMethod['type'] }) {
   if (type === 'visa') {
@@ -94,7 +94,7 @@ function PaymentCard({ method, onDelete, onSetDefault }: {
 }
 
 export default function Zahlungen() {
-  const [methods, setMethods] = useState<PaymentMethod[]>(getMockPaymentMethods)
+  const [methods, setMethods] = useState<PaymentMethod[]>([])
 
   function handleDelete(id: string) {
     setMethods((prev) => prev.filter((m) => m.id !== id))

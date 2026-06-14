@@ -2,36 +2,29 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { getMockNewsletterPrefs, type NewsletterCategory } from '@/lib/account'
+import type { NewsletterCategory } from '@/lib/account'
 import AccountButton from './AccountButton'
 
+const CATEGORIES: NewsletterCategory[] = [
+  { id: 'new',       label: 'Neuankömmlinge',  description: 'Neue Kollektionen und frische Drops zuerst',   active: false },
+  { id: 'sale',      label: 'Sale & Angebote',  description: 'Exklusive Rabatte und Flash-Sales',            active: false },
+  { id: 'drops',     label: 'Limitierte Drops', description: 'Exklusive Releases und Kooperationen',         active: false },
+  { id: 'editorial', label: 'Editorial',        description: 'Stories, Lookbooks und Inspirationen',         active: false },
+]
+
 export default function Newsletter() {
-  const initial = getMockNewsletterPrefs()
-  const [subscribed, setSubscribed] = useState(initial.subscribed)
-  const [categories, setCategories] = useState<NewsletterCategory[]>(initial.categories)
-  const [saved, setSaved] = useState(false)
+  const [subscribed, setSubscribed] = useState(false)
+  const [categories, setCategories] = useState<NewsletterCategory[]>(CATEGORIES)
 
   function toggleCategory(id: string) {
     setCategories((prev) => prev.map((c) => c.id === id ? { ...c, active: !c.active } : c))
   }
 
-  function handleSave() {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
-  }
-
   return (
     <section>
-      <div className="flex items-baseline justify-between mb-8">
-        <h2 className="font-cormorant text-2xl md:text-[28px] font-normal text-enunas-black">
-          Newsletter
-        </h2>
-        {saved && (
-          <span className="font-league-spartan text-[11px] tracking-[0.2em] uppercase text-enunas-success">
-            Gespeichert ✓
-          </span>
-        )}
-      </div>
+      <h2 className="font-cormorant text-2xl md:text-[28px] font-normal text-enunas-black mb-8">
+        Newsletter
+      </h2>
 
       {/* Master toggle */}
       <div className="flex items-center justify-between border border-enunas-gray-light p-6 mb-6">
@@ -92,7 +85,10 @@ export default function Newsletter() {
         </div>
       </div>
 
-      <AccountButton onClick={handleSave}>Einstellungen speichern</AccountButton>
+      <AccountButton onClick={() => {}}>Einstellungen speichern</AccountButton>
+      <p className="font-league-spartan text-xs text-enunas-gray-medium mt-3">
+        Newsletter-Einstellungen werden in Kürze serverseitig gespeichert.
+      </p>
     </section>
   )
 }

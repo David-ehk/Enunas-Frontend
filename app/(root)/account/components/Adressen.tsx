@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { getMockAddresses, type Address } from '@/lib/account'
+import type { Address } from '@/lib/account'
 import AccountButton from './AccountButton'
 
 interface AddressFormState {
@@ -79,10 +79,9 @@ function AddressCard({ address, onDelete, onSetDefault }: {
 }
 
 export default function Adressen() {
-  const [addresses, setAddresses] = useState<Address[]>(getMockAddresses)
+  const [addresses, setAddresses] = useState<Address[]>([])
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState<AddressFormState>(EMPTY_FORM)
-  const [saved, setSaved] = useState(false)
 
   function handleDelete(id: string) {
     setAddresses((prev) => prev.filter((a) => a.id !== id))
@@ -102,24 +101,20 @@ export default function Adressen() {
     setAddresses((prev) => [...prev, newAddr])
     setForm(EMPTY_FORM)
     setShowForm(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
   }
 
   const set = (key: keyof AddressFormState) => (val: string) => setForm((f) => ({ ...f, [key]: val }))
 
   return (
     <section>
-      <div className="flex items-baseline justify-between mb-8">
+      <div className="flex items-baseline justify-between mb-4">
         <h2 className="font-cormorant text-2xl md:text-[28px] font-normal text-enunas-black">
           Meine Adressen
         </h2>
-        {saved && (
-          <span className="font-league-spartan text-[11px] tracking-[0.2em] uppercase text-enunas-success">
-            Gespeichert ✓
-          </span>
-        )}
       </div>
+      <p className="font-league-spartan text-xs text-enunas-gray-medium mb-8 leading-relaxed">
+        Adressen werden derzeit nicht serverseitig gespeichert. Diese Funktion steht in Kürze zur Verfügung.
+      </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         {addresses.map((addr) => (

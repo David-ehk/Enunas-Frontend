@@ -158,7 +158,7 @@ export default function Overview({ onNavigate }: { onNavigate: (tab: string) => 
                     Bestellung #{String(o.id).slice(0, 8).toUpperCase()} versandbereit
                   </p>
                   <p style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, color: '#9B9B9B', marginTop: 2 }}>
-                    {fmtEur(o.totalAmount)} · Bezahlt
+                    {fmtEur(o.total ?? o.totalAmount ?? 0)} · Bezahlt
                   </p>
                 </div>
                 <button onClick={() => onNavigate('orders')} style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#370E4D', background: 'none', border: 'none', cursor: 'pointer' }}>

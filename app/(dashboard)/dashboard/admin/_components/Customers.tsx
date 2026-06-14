@@ -53,7 +53,7 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
     for (const o of orders) {
       if (!o.userId) continue
       const prev = m.get(o.userId) ?? { total: 0, count: 0 }
-      m.set(o.userId, { total: prev.total + o.totalAmount, count: prev.count + 1 })
+      m.set(o.userId, { total: prev.total + (o.total ?? o.totalAmount ?? 0), count: prev.count + 1 })
     }
     return m
   }, [orders])
@@ -113,7 +113,7 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
 
     // Avg LTV: total revenue per buying customer
     const revenueMap = new Map<string, number>()
-    orders.forEach(o => { if (o.userId) revenueMap.set(o.userId, (revenueMap.get(o.userId) ?? 0) + o.totalAmount) })
+    orders.forEach(o => { if (o.userId) revenueMap.set(o.userId, (revenueMap.get(o.userId) ?? 0) + (o.total ?? o.totalAmount ?? 0)) })
     const buyingCount = revenueMap.size
     const totalRev = Array.from(revenueMap.values()).reduce((s, v) => s + v, 0)
     const avgLTV = buyingCount > 0 ? totalRev / buyingCount : 0
@@ -271,7 +271,7 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
                               if (cOrders.length === 0) return (
                                 <p className="text-[11px] text-[#9B9B9B]">Noch keine Bestellungen</p>
                               )
-                              const ltv = cOrders.reduce((s, o) => s + o.totalAmount, 0)
+                              const ltv = cOrders.reduce((s, o) => s + (o.total ?? o.totalAmount ?? 0), 0)
                               return (
                                 <div className="flex items-center gap-5">
                                   <div>

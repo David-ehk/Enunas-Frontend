@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Navbar from '@/app/Homepage/components/navbar'
 import Footer from '@/app/Homepage/components/footer'
 import { useAuth } from '@/app/context/AuthContext'
@@ -13,7 +13,26 @@ import Adressen from './components/Adressen'
 import Zahlungen from './components/Zahlungen'
 import Newsletter from './components/Newsletter'
 import Einstellungen from './components/Einstellungen'
-import { getMockAccountSummary, getMockWishlist } from '@/lib/account'
+import { orderApi } from '@/lib/api/modules/orderApi'
+import { wardrobeApi } from '@/lib/api/modules/wardrobeApi'
+import type { ApiOrder, ApiWardrobeItem } from '@/types/api'
+import type { WishlistEntry } from '@/lib/account'
+
+function wardrobeToWishlist(item: ApiWardrobeItem): WishlistEntry {
+  const p = item.product
+  return {
+    id: item.id,
+    imgURL: p.images[0] ?? '',
+    brandName: p.brandName,
+    productName: p.name,
+    price: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(p.price),
+    href: `/bekleidung/${p.category}/${p.slug}`,
+    colours: p.colours,
+    createdAt: item.addedAt,
+    sizes: p.sizes,
+    catalogue: p.catalogue,
+  }
+}
 
 const SECTION_TITLES: Record<AccountSection, string> = {
   uebersicht:    'Übersicht',
@@ -27,12 +46,32 @@ const SECTION_TITLES: Record<AccountSection, string> = {
 
 export default function AccountPage() {
   const [activeSection, setActiveSection] = useState<AccountSection>('uebersicht')
+  const [lastOrder, setLastOrder] = useState<ApiOrder | null | undefined>(undefined)
+  const [wishlistItems, setWishlistItems] = useState<WishlistEntry[]>([])
 
-  const summary = getMockAccountSummary()
-  const wishlist = getMockWishlist()
+  const { user, customer, isLoading } = useAuth()
+  const greetingName = customer?.firstName ?? user?.email?.split('@')[0] ?? ''
 
-  const { user, isLoading } = useAuth()
-  const greetingName = user?.email?.split('@')[0] ?? summary.firstName
+  const loadOverview = useCallback(async () => {
+    if (!user || user.role !== 'CUSTOMER') {
+      setLastOrder(null)
+      return
+    }
+    try {
+      const [orderPage, wardrobe] = await Promise.all([
+        orderApi.getMyOrders(0, 1).catch(() => null),
+        wardrobeApi.getAll().catch((): ApiWardrobeItem[] => []),
+      ])
+      setLastOrder(orderPage?.content[0] ?? null)
+      setWishlistItems(wardrobe.map(wardrobeToWishlist))
+    } catch {
+      setLastOrder(null)
+    }
+  }, [user])
+
+  useEffect(() => {
+    if (!isLoading) loadOverview()
+  }, [isLoading, loadOverview])
 
   return (
     <>
@@ -53,7 +92,7 @@ export default function AccountPage() {
               className="font-cormorant text-4xl lg:text-5xl font-light text-enunas-black leading-tight mb-2 animate-fade-in-up"
               style={{ animationDelay: '100ms' }}
             >
-              {isLoading ? 'Willkommen.' : `Guten Tag, ${greetingName}.`}
+              {isLoading ? 'Willkommen.' : greetingName ? `Guten Tag, ${greetingName}.` : 'Mein Konto.'}
             </h1>
             <p
               className="font-cormorant italic text-lg lg:text-xl text-enunas-gray-dark animate-fade-in-up"
@@ -79,17 +118,26 @@ export default function AccountPage() {
 
               {activeSection === 'uebersicht' && (
                 <>
-                  <StatCards stats={summary.stats} />
-                  <RecentOrder order={summary.lastOrder} />
-                  <WishlistPreview items={wishlist} />
+                  <StatCards
+                    ordersCount={customer?.totalOrders ?? 0}
+                    wishlistCount={wishlistItems.length}
+                    totalSpent={customer?.totalSpent}
+                  />
+                  {lastOrder !== undefined && (
+                    <RecentOrder
+                      order={lastOrder}
+                      onSeeAll={() => setActiveSection('bestellungen')}
+                    />
+                  )}
+                  <WishlistPreview items={wishlistItems} />
                 </>
               )}
 
-              {activeSection === 'bestellungen' && <Bestellungen />}
-              {activeSection === 'wunschliste'  && <WishlistPreview items={wishlist} />}
-              {activeSection === 'adressen'     && <Adressen />}
-              {activeSection === 'zahlungen'    && <Zahlungen />}
-              {activeSection === 'newsletter'   && <Newsletter />}
+              {activeSection === 'bestellungen'  && <Bestellungen />}
+              {activeSection === 'wunschliste'   && <WishlistPreview items={wishlistItems} />}
+              {activeSection === 'adressen'      && <Adressen />}
+              {activeSection === 'zahlungen'     && <Zahlungen />}
+              {activeSection === 'newsletter'    && <Newsletter />}
               {activeSection === 'einstellungen' && <Einstellungen />}
             </div>
           </div>

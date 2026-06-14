@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const me = await fetcher<ApiUser>('/users/me');
       setUser(me);
       if (me.role === 'CUSTOMER') {
-        const cust = await fetcher<ApiCustomer>('/customers/me').catch(() => null);
+        const cust = await fetcher<ApiCustomer>('/customer/me').catch(() => null);
         setCustomer(cust);
       }
     } catch {

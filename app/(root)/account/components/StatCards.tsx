@@ -1,20 +1,14 @@
-// ============================================================
-// ENUNAS — Account stat cards (Bestellungen / Wunschliste / Bonus)
-// Drop into: enunas/app/(root)/account/components/StatCards.tsx
-// ============================================================
-
-import { formatEuro, type AccountStats } from '@/lib/account'
-
 interface StatCardsProps {
-  stats: AccountStats;
+  ordersCount: number;
+  wishlistCount: number;
+  totalSpent?: number;
 }
 
-interface StatCardProps {
-  value: string;
-  label: string;
+function fmtEuro(amount: number): string {
+  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount)
 }
 
-function StatCard({ value, label }: StatCardProps) {
+function StatCard({ value, label }: { value: string; label: string }) {
   return (
     <div className="bg-enunas-off-white p-7 transition-transform duration-300 ease-out-expo hover:-translate-y-1">
       <p className="font-cormorant text-4xl font-light text-enunas-black leading-none mb-2">
@@ -27,12 +21,12 @@ function StatCard({ value, label }: StatCardProps) {
   )
 }
 
-export default function StatCards({ stats }: StatCardsProps) {
+export default function StatCards({ ordersCount, wishlistCount, totalSpent }: StatCardsProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-14">
-      <StatCard value={String(stats.ordersCount)}     label="Bestellungen" />
-      <StatCard value={String(stats.wishlistCount)}   label="In der Wunschliste" />
-      <StatCard value={formatEuro(stats.bonusCents)}  label="Bonus-Guthaben" />
+      <StatCard value={String(ordersCount)}                              label="Bestellungen" />
+      <StatCard value={String(wishlistCount)}                            label="In der Wunschliste" />
+      <StatCard value={totalSpent != null ? fmtEuro(totalSpent) : '—'}  label="Ausgegeben" />
     </div>
   )
 }

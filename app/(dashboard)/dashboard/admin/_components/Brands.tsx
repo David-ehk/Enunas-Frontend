@@ -157,20 +157,20 @@ function BrandFinancialPanel({
   const brandProductIds = new Set(products.map(p => p.id))
 
   const brandOrders = orders.filter(order =>
-    order.items.some(item => brandProductIds.has(item.productId))
+    order.items.some(item => item.productId != null && brandProductIds.has(item.productId))
   )
 
   const allBrandItems = brandOrders.flatMap(order =>
-    order.items.filter(item => brandProductIds.has(item.productId))
+    order.items.filter(item => item.productId != null && brandProductIds.has(item.productId))
   )
 
-  const totalRevenue = allBrandItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
+  const totalRevenue = allBrandItems.reduce((sum, i) => sum + (i.price ?? 0) * i.quantity, 0)
   const totalItemsSold = allBrandItems.reduce((sum, i) => sum + i.quantity, 0)
 
   const productStats = products.map(p => {
     const items = allBrandItems.filter(i => i.productId === p.id)
     const sold = items.reduce((sum, i) => sum + i.quantity, 0)
-    const revenue = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+    const revenue = items.reduce((sum, i) => sum + (i.price ?? 0) * i.quantity, 0)
     return { ...p, sold, revenue }
   }).sort((a, b) => b.revenue - a.revenue)
 
@@ -352,8 +352,8 @@ function BrandFinancialPanel({
                       </thead>
                       <tbody>
                         {brandOrders.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(order => {
-                          const relevantItems = order.items.filter(i => brandProductIds.has(i.productId))
-                          const brandAmount = relevantItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
+                          const relevantItems = order.items.filter(i => i.productId != null && brandProductIds.has(i.productId))
+                          const brandAmount = relevantItems.reduce((sum, i) => sum + (i.price ?? 0) * i.quantity, 0)
                           const itemCount = relevantItems.reduce((sum, i) => sum + i.quantity, 0)
                           return (
                             <TableRow key={order.id}>

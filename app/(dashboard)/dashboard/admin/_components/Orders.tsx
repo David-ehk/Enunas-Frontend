@@ -78,14 +78,15 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
       if (filter !== 'all') return o.status === filter
       return true
     })
-    if (amountFilter === 'lt50')    arr = arr.filter(o => o.totalAmount < 50)
-    if (amountFilter === '50-100')  arr = arr.filter(o => o.totalAmount >= 50 && o.totalAmount < 100)
-    if (amountFilter === '100-200') arr = arr.filter(o => o.totalAmount >= 100 && o.totalAmount < 200)
-    if (amountFilter === '200-500') arr = arr.filter(o => o.totalAmount >= 200 && o.totalAmount < 500)
-    if (amountFilter === 'gt500')   arr = arr.filter(o => o.totalAmount >= 500)
+    const amt = (o: ApiOrder) => o.total ?? o.totalAmount ?? 0
+    if (amountFilter === 'lt50')    arr = arr.filter(o => amt(o) < 50)
+    if (amountFilter === '50-100')  arr = arr.filter(o => amt(o) >= 50 && amt(o) < 100)
+    if (amountFilter === '100-200') arr = arr.filter(o => amt(o) >= 100 && amt(o) < 200)
+    if (amountFilter === '200-500') arr = arr.filter(o => amt(o) >= 200 && amt(o) < 500)
+    if (amountFilter === 'gt500')   arr = arr.filter(o => amt(o) >= 500)
     return [...arr].sort((a, b) => {
-      if (sortBy === 'highest') return b.totalAmount - a.totalAmount
-      if (sortBy === 'lowest')  return a.totalAmount - b.totalAmount
+      if (sortBy === 'highest') return amt(b) - amt(a)
+      if (sortBy === 'lowest')  return amt(a) - amt(b)
       if (sortBy === 'oldest')  return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     })
@@ -246,7 +247,7 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-[#9B9B9B]">Aktualisiert</span>
-                                <span>{fmt(order.updatedAt)}</span>
+                                <span>{order.updatedAt ? fmt(order.updatedAt) : '—'}</span>
                               </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-[#9B9B9B]">Status</span>

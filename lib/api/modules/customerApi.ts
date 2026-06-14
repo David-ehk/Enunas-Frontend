@@ -1,12 +1,26 @@
 import { fetcher } from '../fetcher';
 import type { ApiCustomer } from '@/types/api';
 
+// Mirrors backend UpdateCustomerProfileDto
+export interface UpdateCustomerProfileDto {
+  firstName?: string;
+  lastName?: string;
+  username?: string;
+  country?: string;
+  city?: string;
+  preferredSizeTop?: string;
+  preferredSizeBottom?: string;
+  preferredSizeShoes?: string;
+  heightCm?: number;
+  weightKg?: number;
+}
+
 export const customerApi = {
   async getMe(): Promise<ApiCustomer> {
-    return fetcher<ApiCustomer>('/customers/me');
+    return fetcher<ApiCustomer>('/customer/me');
   },
 
-  async updateCustomerProfile(data: { firstName?: string; lastName?: string }): Promise<ApiCustomer> {
-    return fetcher<ApiCustomer>('/auth/profile', { method: 'PATCH', body: JSON.stringify(data) });
+  async updateProfile(dto: UpdateCustomerProfileDto): Promise<ApiCustomer> {
+    return fetcher<ApiCustomer>('/customer/me', { method: 'PATCH', body: JSON.stringify(dto) });
   },
 };
