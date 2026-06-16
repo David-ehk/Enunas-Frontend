@@ -1,0 +1,65 @@
+[    1667ms] [LOG] Depict Content Features support loaded @ https://cultgaia.com/collections/cult-gaia-men:3697
+[    2224ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://cultgaia.com/cdn/shop/t/261/assets/loader.svg?v=44396920905727488851659508018:0
+[    2808ms] [LOG] [lazy-pag] disabled (no next page link) @ https://cultgaia.com/cdn/shop/t/790/assets/theme.js?v=169251047238157586541780550579:30
+[    2844ms] [LOG] removeProductRecommendationsModule {recommendationsSections: NodeList(0)} @ https://cultgaia.com/cdn/shop/t/790/assets/theme.js?v=169251047238157586541780550579:30
+[    2924ms] [LOG] DaH: start1 @ https://cdn.shopify.com/extensions/019df598-30d0-7dc3-a165-6a3d20ebc506/drop-hint-2-181/assets/app_dah.js:0
+[    2924ms] [LOG] DaH: uid @ https://cdn.shopify.com/extensions/019df598-30d0-7dc3-a165-6a3d20ebc506/drop-hint-2-181/assets/app_dah.js:0
+[    2924ms] [LOG] DaH: uid - no date @ https://cdn.shopify.com/extensions/019df598-30d0-7dc3-a165-6a3d20ebc506/drop-hint-2-181/assets/app_dah.js:0
+[    2925ms] [LOG] DaH: Loading Data @ https://cdn.shopify.com/extensions/019df598-30d0-7dc3-a165-6a3d20ebc506/drop-hint-2-181/assets/app_dah.js:0
+[    2926ms] [LOG] DaH: Loading Data @ https://cdn.shopify.com/extensions/019df598-30d0-7dc3-a165-6a3d20ebc506/drop-hint-2-181/assets/app_dah.js:0
+[    3039ms] [WARNING] Route Widget: No elements found matching selector "button[name=checkout]" @ https://cdn.shopify.com/extensions/019e8e29-8278-7835-81a2-d049ccb29ed7/route-shopify-app-304/assets/route-widget.js:26
+[    3041ms] [LOG] [Klaviyo / Onsite] Initializing. @ https://a.klaviyo.com/media/js/onsite/onsite.js:143
+[    3042ms] [LOG] [Klaviyo / Onsite] Executing: init @ https://a.klaviyo.com/media/js/onsite/onsite.js:143
+[    3042ms] [LOG] [Klaviyo / Onsite] Executing: enable @ https://a.klaviyo.com/media/js/onsite/onsite.js:143
+[    3126ms] [LOG] productImageLinks @ https://cultgaia.com/cdn/shop/t/790/assets/theme.js?v=169251047238157586541780550579:30
+[    4117ms] [INFO] k-web-pixel-version 1 @ https://cultgaia.com/web-pixels/strict/app/web-pixel-1204060234@524f6c1ee37bacdca7657a665bdca589.js:0
+[    4158ms] [LOG] DaH: d1 @ https://cdn.shopify.com/extensions/019df598-30d0-7dc3-a165-6a3d20ebc506/drop-hint-2-181/assets/app_dah.js:0
+[    5154ms] [WARNING] In a sandboxed environment, addEventListener may not behave as expected. @ https://cultgaia.com/web-pixels@032da393w19368061p0cc732e2m671615c3/custom/web-pixel-37290058@2/sandbox/modern/collections/cult-gaia-men:6
+[    5510ms] [WARNING] In a sandboxed environment, addEventListener may not behave as expected. @ https://cultgaia.com/web-pixels@032da393w19368061p0cc732e2m671615c3/custom/web-pixel-94994506@1/sandbox/modern/collections/cult-gaia-men:6
+[    6013ms] [INFO] Clear-Site-Data header on 'https://cultgaia.com/cart/update.js': Cleared data types: "prefetchCache", "prerenderCache". @ https://cultgaia.com/collections/cult-gaia-men:0
+[    8084ms] [LOG] inputElement null @ https://cultgaia.com/cdn/shop/t/790/assets/theme.js?v=169251047238157586541780550579:30
+[    8173ms] [ERROR] Error waiting for SWGetExpressWishlistId: Exceeded max attempts waiting for SWGetExpressWishlistId @ https://cultgaia.com/collections/cult-gaia-men:9702
+[    9480ms] [LOG] Using Platform UI bundle @ https://shopify-widget.route.com/shopify.widget.js?shop=cultgaia.myshopify.com&entrypoints%5B0%5D.checkoutSelector=button%5Bname%3Dcheckout%5D&entrypoints%5B0%5D.entrypointSelectorType=preferred-checkout&app_embedded=true:0
+[   11554ms] [ERROR] Shopify's Google Analytics stub called with: [create, UA-103191944-1, Object] 
+See https://help.shopify.com/manual/promoting-marketing/pixels/pixel-migration#google for more information. @ https://shopify-widget.route.com/shopify.widget.js?shop=cultgaia.myshopify.com&entrypoints%5B0%5D.checkoutSelector=button%5Bname%3Dcheckout%5D&entrypoints%5B0%5D.entrypointSelectorType=preferred-checkout&app_embedded=true:0
+[   11558ms] [ERROR] Shopify's Google Analytics stub called with: [] 
+See https://help.shopify.com/manual/promoting-marketing/pixels/pixel-migration#google for more information. @ https://shopify-widget.route.com/shopify.widget.js?shop=cultgaia.myshopify.com&entrypoints%5B0%5D.checkoutSelector=button%5Bname%3Dcheckout%5D&entrypoints%5B0%5D.entrypointSelectorType=preferred-checkout&app_embedded=true:0
+[   11562ms] [ERROR] Shopify's Google Analytics stub called with: [gtag_UA_103191944_1.set, Object] 
+See https://help.shopify.com/manual/promoting-marketing/pixels/pixel-migration#google for more information. @ https://shopify-widget.route.com/shopify.widget.js?shop=cultgaia.myshopify.com&entrypoints%5B0%5D.checkoutSelector=button%5Bname%3Dcheckout%5D&entrypoints%5B0%5D.entrypointSelectorType=preferred-checkout&app_embedded=true:0
+[   11567ms] [ERROR] Shopify's Google Analytics stub called with: [gtag_UA_103191944_1.send, pageview, Object] 
+See https://help.shopify.com/manual/promoting-marketing/pixels/pixel-migration#google for more information. @ https://shopify-widget.route.com/shopify.widget.js?shop=cultgaia.myshopify.com&entrypoints%5B0%5D.checkoutSelector=button%5Bname%3Dcheckout%5D&entrypoints%5B0%5D.entrypointSelectorType=preferred-checkout&app_embedded=true:0
+[   12866ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://cultgaia.com/cdn/shop/t/261/assets/Surt-LightExtended.woff?v=57742928818152035661659508018:0
+[   12867ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://cultgaia.com/cdn/shop/t/261/assets/Love-Regular.woff?v=52581966890289761321659508018:0
+[   14475ms] [LOG] Current sessionStorage value: null @ https://cultgaia.com/collections/cult-gaia-men:3138
+[   14476ms] [LOG] ssSessionIdNamespace not found, creating a new one... @ https://cultgaia.com/collections/cult-gaia-men:3142
+[   14477ms] [LOG] Session ID for this tab: 3f006453-c34c-42ad-92e3-9f6d5996859e @ https://cultgaia.com/collections/cult-gaia-men:3151
+[   14479ms] [LOG] [Loaded CSS, //a.klaviyo.com/media/css/public/klaviyo_subscribe.css] @ https://www.klaviyo.com/media/js/public/klaviyo_subscribe.js:39
+[   14483ms] [LOG] [Loaded JS, //cdnjs.cloudflare.com/ajax/libs/jquery.form/3.32/jquery.form.min.js] @ https://www.klaviyo.com/media/js/public/klaviyo_subscribe.js:39
+[   15405ms] [LOG] [Waiting for DOM to process queue.] @ https://www.klaviyo.com/media/js/public/klaviyo_subscribe.js:39
+[   15451ms] [LOG] [Processing queue.] @ https://www.klaviyo.com/media/js/public/klaviyo_subscribe.js:39
+[   15451ms] [LOG] [Attaching to forms, #email_signup, 1] @ https://www.klaviyo.com/media/js/public/klaviyo_subscribe.js:39
+[   15453ms] [LOG] [Attached to form, form#email_signup.klaviyo_gdpr_embed_QfRKEE] @ https://www.klaviyo.com/media/js/public/klaviyo_subscribe.js:39
+[   15496ms] [LOG] Nosto Shopify script already initialized @ https://connect.nosto.com/include/script/shopify-3367793.js?shop=cultgaia.myshopify.com:207
+[   15511ms] [LOG] SW: Smart Wishlist loaded successfully. @ https://assets.smartwishlist.webmarked.net/static/v6/smartwishlist.js?shop=cultgaia.myshopify.com:26
+[   15636ms] [LOG] Using Platform UI bundle @ https://shopify-widget.route.com/shopify.widget.js?shop=cultgaia.myshopify.com:0
+[   15636ms] [WARNING] [RouteWidget] Widget already initialized, skipping render. @ https://shopify-widget.route.com/shopify.widget.js?shop=cultgaia.myshopify.com:0
+[   16092ms] [INFO] Clear-Site-Data header on 'https://cultgaia.com/cart/update.js?from_update_cart_attributes': Cleared data types: "prefetchCache", "prerenderCache". @ https://cultgaia.com/collections/cult-gaia-men:0
+[   16520ms] [LOG] Reloading Smart Wishlist @ https://assets.smartwishlist.webmarked.net/static/v6/smartwishlist.js?shop=cultgaia.myshopify.com:1432
+[   16529ms] Uncaught ReferenceError: extra_css_product is not defined
+    at SmartWishlistMain (https://assets.smartwishlist.webmarked.net/static/v6/smartwishlist.js?shop=cultgaia.myshopify.com:89:45)
+    at ReloadSmartWishlist (https://assets.smartwishlist.webmarked.net/static/v6/smartwishlist.js?shop=cultgaia.myshopify.com:1433:0)
+    at <anonymous> (https://assets.smartwishlist.webmarked.net/static/v6/reload.js?shop=cultgaia.myshopify.com:17:38)
+[   17229ms] [LOG] [klarna-osm] Current page type: collections @ https://s3.eu-west-1.amazonaws.com/production-klarna-il-shopify-osm/72a80347586bd7910d812dacd7945a4c4d8224ff/cultgaia.myshopify.com-1780585049419.js?shop=cultgaia.myshopify.com:2
+[   17229ms] [LOG] [klarna-osm] Initializing Klarna On-Site Messaging @ https://s3.eu-west-1.amazonaws.com/production-klarna-il-shopify-osm/72a80347586bd7910d812dacd7945a4c4d8224ff/cultgaia.myshopify.com-1780585049419.js?shop=cultgaia.myshopify.com:2
+[   17229ms] [LOG] [klarna-osm] Selected currency: USD @ https://s3.eu-west-1.amazonaws.com/production-klarna-il-shopify-osm/72a80347586bd7910d812dacd7945a4c4d8224ff/cultgaia.myshopify.com-1780585049419.js?shop=cultgaia.myshopify.com:2
+[   17229ms] [LOG] [klarna-osm] Shop currency: USD @ https://s3.eu-west-1.amazonaws.com/production-klarna-il-shopify-osm/72a80347586bd7910d812dacd7945a4c4d8224ff/cultgaia.myshopify.com-1780585049419.js?shop=cultgaia.myshopify.com:2
+[   17230ms] [LOG] [klarna-osm] Page detected: collections @ https://s3.eu-west-1.amazonaws.com/production-klarna-il-shopify-osm/72a80347586bd7910d812dacd7945a4c4d8224ff/cultgaia.myshopify.com-1780585049419.js?shop=cultgaia.myshopify.com:2
+[   17230ms] [LOG] [klarna-osm] Loaded: 0. Failed: 0 @ https://s3.eu-west-1.amazonaws.com/production-klarna-il-shopify-osm/72a80347586bd7910d812dacd7945a4c4d8224ff/cultgaia.myshopify.com-1780585049419.js?shop=cultgaia.myshopify.com:2
+[   17231ms] [LOG] [klarna-osm] Klarna OSM Script Tag has been added successfully @ https://s3.eu-west-1.amazonaws.com/production-klarna-il-shopify-osm/72a80347586bd7910d812dacd7945a4c4d8224ff/cultgaia.myshopify.com-1780585049419.js?shop=cultgaia.myshopify.com:2
+[   17717ms] [INFO] Clear-Site-Data header on 'https://cultgaia.com/cart/update.js': Cleared data types: "prefetchCache", "prerenderCache". @ https://cultgaia.com/collections/cult-gaia-men:0
+[   18016ms] [INFO] Clear-Site-Data header on 'https://cultgaia.com/cart/update.js?from_update_cart_attributes': Cleared data types: "prefetchCache", "prerenderCache". @ https://cultgaia.com/collections/cult-gaia-men:0
+[   20407ms] [LOG] [Processing queue.] @ https://www.klaviyo.com/media/js/public/klaviyo_subscribe.js:39
+[   35063ms] Uncaught TypeError: d.isImmediatePropagationStopped is not a function
+    at g.proxy (https://a.klaviyo.com/media/js/onsite/onsite.js:47:187)
+[   49039ms] Uncaught TypeError: d.isImmediatePropagationStopped is not a function
+    at g.proxy (https://a.klaviyo.com/media/js/onsite/onsite.js:47:187)

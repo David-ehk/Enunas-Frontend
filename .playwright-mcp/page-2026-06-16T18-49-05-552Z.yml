@@ -1,0 +1,134 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - navigation [ref=e4]:
+        - button "Menü öffnen" [ref=e6]:
+          - img [ref=e7]
+        - link "Enunas" [ref=e8] [cursor=pointer]:
+          - /url: /
+          - heading "Enunas" [level=1] [ref=e9]
+        - generic [ref=e10]:
+          - button "Suche öffnen" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+          - link "Mein Konto" [ref=e16] [cursor=pointer]:
+            - /url: /account
+            - img [ref=e17]
+          - link "Wunschliste" [ref=e20] [cursor=pointer]:
+            - /url: /saved-lists
+            - img [ref=e21]
+          - link "Warenkorb mit 0 Artikeln" [ref=e24] [cursor=pointer]:
+            - /url: /cart
+            - img [ref=e25]
+    - contentinfo [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - generic [ref=e33]: Enunas
+          - generic [ref=e34]:
+            - text: Der kuratierte Marktplatz
+            - text: für Designer & Streetwear
+        - generic [ref=e35]:
+          - navigation "Über uns" [ref=e36]:
+            - generic [ref=e37]:
+              - generic [ref=e38]: "01"
+              - generic [ref=e39]: Über uns
+            - generic [ref=e40]:
+              - link "Über uns" [ref=e41] [cursor=pointer]:
+                - /url: /about us
+              - link "Marken" [ref=e42] [cursor=pointer]:
+                - /url: /marken
+              - link "Designer" [ref=e43] [cursor=pointer]:
+                - /url: /marken
+              - link "Karriere" [ref=e44] [cursor=pointer]:
+                - /url: /karriere
+          - navigation "Hilfe" [ref=e45]:
+            - generic [ref=e46]:
+              - generic [ref=e47]: "02"
+              - generic [ref=e48]: Hilfe
+            - generic [ref=e49]:
+              - link "FAQs" [ref=e50] [cursor=pointer]:
+                - /url: /faqs
+              - link "Sendungsverfolgung" [ref=e51] [cursor=pointer]:
+                - /url: /sendungsverfolgung
+              - link "Lieferung & Rücksendung" [ref=e52] [cursor=pointer]:
+                - /url: /lieferung-&-rücksendung
+              - link "Kundenservice" [ref=e53] [cursor=pointer]:
+                - /url: /kundenservice
+          - navigation "Rechtliches" [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: "03"
+              - generic [ref=e57]: Rechtliches
+            - generic [ref=e58]:
+              - link "Impressum" [ref=e59] [cursor=pointer]:
+                - /url: /Impressum
+              - link "AGBs" [ref=e60] [cursor=pointer]:
+                - /url: /agbs
+              - link "Cookie-Richtlinien" [ref=e61] [cursor=pointer]:
+                - /url: /cookie-richtlinien
+              - link "Cookie-Einstellungen" [ref=e62] [cursor=pointer]:
+                - /url: /cookie-einstellungen
+              - link "Nutzungsbedingungen" [ref=e63] [cursor=pointer]:
+                - /url: /nutzungsbedingungen
+              - link "Datenschutzerklärung" [ref=e64] [cursor=pointer]:
+                - /url: /datenschutzerklärung
+          - generic [ref=e65]:
+            - generic [ref=e66]:
+              - generic [ref=e67]: "04"
+              - generic [ref=e68]: Zahlungsarten
+            - generic [ref=e69]:
+              - generic "visa" [ref=e70]:
+                - img [ref=e71]:
+                  - generic [ref=e72]: VISA
+              - generic "mc" [ref=e73]:
+                - img [ref=e74]
+              - generic "amex" [ref=e78]:
+                - img [ref=e79]:
+                  - generic [ref=e81]: AMERICAN
+                  - generic [ref=e82]: EXPRESS
+              - generic "pp" [ref=e83]:
+                - img [ref=e84]:
+                  - generic [ref=e85]: PayPal
+              - generic "klarna" [ref=e86]:
+                - img [ref=e87]:
+                  - generic [ref=e89]: Klarna.
+              - generic "applepay" [ref=e90]:
+                - img [ref=e91]:
+                  - generic [ref=e93]: Pay
+            - generic [ref=e94]:
+              - img [ref=e96]
+              - text: SSL-verschlüsselt · Käuferschutz
+        - generic [ref=e99]:
+          - generic [ref=e100]:
+            - button "Instagram" [ref=e101] [cursor=pointer]:
+              - img [ref=e102]
+            - button "X" [ref=e106] [cursor=pointer]:
+              - img [ref=e107]
+            - button "Facebook" [ref=e109] [cursor=pointer]:
+              - img [ref=e110]
+            - button "Pinterest" [ref=e112] [cursor=pointer]:
+              - img [ref=e113]
+          - button "Deutschland · EUR €" [ref=e115] [cursor=pointer]:
+            - img [ref=e117]
+            - text: Deutschland · EUR €
+        - generic [ref=e120]:
+          - generic [ref=e121]:
+            - img [ref=e122]
+            - text: Enunas 2026 — Alle Rechte vorbehalten
+          - button "Nach oben" [ref=e125] [cursor=pointer]:
+            - text: Nach oben
+            - img [ref=e126]
+    - complementary "Warenkorb" [ref=e128]:
+      - generic [ref=e130]:
+        - tablist [ref=e131]:
+          - tab "Warenkorb0" [selected] [ref=e132] [cursor=pointer]
+          - tab "Wunschliste0" [ref=e133] [cursor=pointer]
+        - button "Schließen" [ref=e134] [cursor=pointer]:
+          - img [ref=e135]
+      - generic [ref=e138]:
+        - img [ref=e140]
+        - generic [ref=e143]: Dein Warenkorb ist leer
+        - generic [ref=e144]: Entdecke kuratierte Designer- und Streetwear-Stücke.
+        - button "Weiter einkaufen" [ref=e145] [cursor=pointer]:
+          - text: Weiter einkaufen
+          - img [ref=e147]
+  - button "Open Next.js Dev Tools" [ref=e154] [cursor=pointer]:
+    - img [ref=e155]

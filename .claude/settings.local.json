@@ -117,7 +117,8 @@
       "Bash(netstat -ano)",
       "Bash(node -e \"const http=require\\('http'\\);http.get\\('http://localhost:3000/bekleidung',r=>{console.log\\(r.statusCode\\)}\\).on\\('error',e=>console.log\\('ERR:',e.message\\)\\)\")",
       "Bash(Start-Sleep -Seconds 8)",
-      "Bash(Get-Content \"C:\\\\Users\\\\david\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-david-OneDrive-Desktop-enunas\\\\1c056570-697e-4123-8912-43f98035724e\\\\tasks\\\\b9acpo3p8.output\" -Tail 10)"
+      "Bash(Get-Content \"C:\\\\Users\\\\david\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-david-OneDrive-Desktop-enunas\\\\1c056570-697e-4123-8912-43f98035724e\\\\tasks\\\\b9acpo3p8.output\" -Tail 10)",
+      "PowerShell(Start-Sleep -Seconds 5; Invoke-WebRequest -Uri \"http://localhost:3000/bekleidung\" -UseBasicParsing -TimeoutSec 5 | Select-Object -ExpandProperty StatusCode)"
     ]
   }
 }

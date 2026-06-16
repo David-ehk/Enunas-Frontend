@@ -2,11 +2,14 @@
 
 import React, { Suspense, useState, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 import { productApi, apiProductToCardShape } from '@/lib/api'
 import type { ProductCardShape } from '@/lib/api'
 import { useIsMobile } from '@/hooks/use-mobile'
 import BlurFilterBar from './components/BlurFilterBar'
+import SortDropdown from './components/SortDropdown'
+import CatalogueDropdown from './components/CatalogueDropdown'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -42,7 +45,7 @@ const FARBEN = [
 const GROESSEN = ['XS','S','M','L','XL','XXL','28','30','32','34','36','38','40','42','44','46']
 
 const SORT_OPTIONS = [
-  { id: 'neu',       label: 'Neuankömmlinge'    },
+  { id: 'neu',       label: 'Neuheiten'         },
   { id: 'preis-auf', label: 'Preis aufsteigend' },
   { id: 'preis-ab',  label: 'Preis absteigend'  },
   { id: 'name',      label: 'Name A–Z'          },
@@ -82,6 +85,7 @@ interface FilterState {
   groessen:   string[]
   marken:     string[]
   sortieren:  string
+  catalogue:  string
 }
 
 // ── Filter Sidebar ────────────────────────────────────────────────────────────
@@ -99,13 +103,116 @@ interface FilterSidebarProps {
   availableMarken: string[]
 }
 
+// Custom checkbox / radio row — defined outside to preserve useState between renders
+function CheckRow({ checked, onToggle, label, radio = false }: {
+  checked: boolean
+  onToggle: () => void
+  label: string
+  radio?: boolean
+}) {
+  const [hov, setHov] = useState(false)
+  return (
+    <div
+      onClick={onToggle}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 14,
+        padding: '11px 32px',
+        cursor: 'pointer',
+        background: hov ? '#F5F5F0' : 'transparent',
+        transition: 'background 200ms ease',
+        userSelect: 'none',
+      }}
+    >
+      {/* Custom box / circle */}
+      <div style={{
+        width: 14,
+        height: 14,
+        flexShrink: 0,
+        border: `1px solid ${checked ? '#0A0A0A' : hov ? '#888888' : '#CCCCCC'}`,
+        borderRadius: radio ? '50%' : 0,
+        background: (!radio && checked) ? '#0A0A0A' : 'transparent',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        transition: 'border-color 180ms ease, background 180ms ease',
+      }}>
+        {!radio && checked && (
+          <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+            <path d="M1 3.5L3.5 6L8 1" stroke="#fff" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+        {radio && checked && (
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#0A0A0A' }} />
+        )}
+      </div>
+      <span style={{
+        fontSize: 13,
+        color: '#0A0A0A',
+        letterSpacing: '0.01em',
+        lineHeight: 1.4,
+        flex: 1,
+      }}>
+        {label}
+      </span>
+    </div>
+  )
+}
+
+// Color swatch button — large square like Gucci reference
+function SwatchBtn({ name, hex, border, selected, onClick }: {
+  name: string
+  hex: string
+  border?: boolean
+  selected: boolean
+  onClick: () => void
+}) {
+  const [hov, setHov] = useState(false)
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      title={name}
+      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
+    >
+      <div style={{
+        width: '100%',
+        aspectRatio: '1 / 1',
+        background: hex,
+        transform: hov && !selected ? 'scale(1.04)' : 'scale(1)',
+        outline: selected
+          ? '2px solid #0A0A0A'
+          : border ? '1px solid #CCCCCC' : '1px solid transparent',
+        outlineOffset: selected ? 2 : 0,
+        transition: 'transform 280ms cubic-bezier(0.16,1,0.3,1), outline 160ms ease, outline-offset 160ms ease',
+      }} />
+      <span style={{
+        display: 'block',
+        marginTop: 7,
+        fontSize: 11,
+        color: selected ? '#0A0A0A' : '#6B6B6B',
+        letterSpacing: '0.02em',
+        lineHeight: 1.3,
+        transition: 'color 160ms ease',
+      }}>
+        {name}
+      </span>
+    </button>
+  )
+}
+
 function FilterSidebar({
   open, onClose, filters, setFilters,
   openSections, toggleSection, toggleFilter, resetFilters,
   resultCount, availableMarken,
 }: FilterSidebarProps) {
 
-  function Accordion({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
+  // Accordion section — stagger-animates on open via `open` closure + animDelay prop
+  function Section({ id, label, children, animDelay = 0 }: { id: string; label: string; children: React.ReactNode; animDelay?: number }) {
     const isOpen = openSections.includes(id)
     const hasActive =
       (id === 'kategorien' && filters.kategorien.length > 0) ||
@@ -114,37 +221,63 @@ function FilterSidebar({
       (id === 'marken'     && filters.marken.length > 0)
 
     return (
-      <div style={{ borderBottom: '1px solid #E8E8E8' }}>
-        <button onClick={() => toggleSection(id)} style={{
-          width: '100%', background: 'none', border: 'none', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '18px 0', fontFamily: 'inherit',
-        }}>
+      <div style={{
+        borderBottom: '1px solid #EBEBEB',
+        opacity: open ? 1 : 0,
+        transform: open ? 'translateY(0)' : 'translateY(10px)',
+        transition: open
+          ? `opacity 420ms cubic-bezier(0.16,1,0.3,1) ${animDelay}ms, transform 420ms cubic-bezier(0.16,1,0.3,1) ${animDelay}ms`
+          : 'opacity 120ms ease, transform 120ms ease',
+      }}>
+        <button
+          onClick={() => toggleSection(id)}
+          style={{
+            width: '100%',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '19px 32px',
+            fontFamily: 'inherit',
+          }}
+        >
           <span style={{
-            fontSize: 13, letterSpacing: '0.05em',
-            color: hasActive ? '#370E4D' : '#0A0A0A',
-            fontWeight: hasActive ? 500 : 400,
-            transition: 'color 200ms',
+            fontSize: 13,
+            color: '#0A0A0A',
+            letterSpacing: '0.02em',
+            fontWeight: hasActive ? 600 : 400,
           }}>
             {label}
           </span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-            stroke={hasActive ? '#370E4D' : '#6B6B6B'} strokeWidth="1.5" strokeLinecap="round"
+          <svg
+            width="10" height="6" viewBox="0 0 10 6" fill="none"
             style={{
               transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 360ms cubic-bezier(0.16,1,0.3,1)',
+              transition: 'transform 380ms cubic-bezier(0.16,1,0.3,1)',
               flexShrink: 0,
-            }}>
-            <path d="M6 9l6 6 6-6" />
+            }}
+          >
+            <path d="M1 1l4 4 4-4" stroke="#0A0A0A" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
+
+        {/* maxHeight transition for smooth open/close */}
         <div style={{
           overflow: 'hidden',
-          maxHeight: isOpen ? 600 : 0,
-          opacity: isOpen ? 1 : 0,
-          transition: 'max-height 400ms cubic-bezier(0.16,1,0.3,1), opacity 250ms ease',
+          maxHeight: isOpen ? 1200 : 0,
+          transition: `max-height ${isOpen ? '520ms' : '300ms'} cubic-bezier(0.16,1,0.3,1)`,
         }}>
-          <div style={{ paddingBottom: 16 }}>{children}</div>
+          {/* Fade + slight upward slide on open */}
+          <div style={{
+            opacity: isOpen ? 1 : 0,
+            transform: isOpen ? 'translateY(0)' : 'translateY(-6px)',
+            transition: `opacity 260ms ease ${isOpen ? '90ms' : '0ms'}, transform 300ms cubic-bezier(0.16,1,0.3,1) ${isOpen ? '60ms' : '0ms'}`,
+            paddingBottom: 8,
+          }}>
+            {children}
+          </div>
         </div>
       </div>
     )
@@ -153,174 +286,217 @@ function FilterSidebar({
   return (
     <>
       {/* Scrim */}
-      <div onClick={onClose} style={{
-        position: 'fixed', inset: 0, zIndex: 998,
-        background: 'rgba(10,8,14,0.45)',
-        opacity: open ? 1 : 0,
-        pointerEvents: open ? 'auto' : 'none',
-        transition: 'opacity 400ms cubic-bezier(0.16,1,0.3,1)',
-        backdropFilter: 'blur(1px)',
-      }} />
+      <div
+        onClick={onClose}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 998,
+          background: 'rgba(10,8,14,0.36)',
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? 'auto' : 'none',
+          transition: 'opacity 420ms cubic-bezier(0.16,1,0.3,1)',
+          backdropFilter: 'blur(3px)',
+          WebkitBackdropFilter: 'blur(3px)',
+        }}
+      />
 
       {/* Panel */}
       <div style={{
-        position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 999,
-        width: 400, background: '#fff',
-        display: 'flex', flexDirection: 'column',
+        position: 'fixed',
+        top: 0, right: 0, bottom: 0,
+        zIndex: 999,
+        width: 'min(420px, 92vw)',
+        background: '#fff',
+        display: 'flex',
+        flexDirection: 'column',
         transform: open ? 'translateX(0)' : 'translateX(100%)',
-        transition: 'transform 600ms cubic-bezier(0.16,1,0.3,1)',
-        boxShadow: '-16px 0 56px rgba(0,0,0,0.12)',
+        transition: 'transform 620ms cubic-bezier(0.16,1,0.3,1)',
+        boxShadow: '-4px 0 56px rgba(0,0,0,0.07)',
       }}>
 
-        {/* Header */}
+        {/* ── Header ── */}
         <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '24px 28px 20px', borderBottom: '1px solid #E8E8E8', flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '30px 32px 26px',
+          borderBottom: '1px solid #EBEBEB',
+          flexShrink: 0,
+          opacity: open ? 1 : 0,
+          transform: open ? 'translateY(0)' : 'translateY(-4px)',
+          transition: open
+            ? 'opacity 350ms cubic-bezier(0.16,1,0.3,1) 50ms, transform 350ms cubic-bezier(0.16,1,0.3,1) 50ms'
+            : 'opacity 100ms ease',
         }}>
           <span style={{
-            fontSize: 10, letterSpacing: '0.28em', textTransform: 'uppercase',
-            fontWeight: 600, color: '#0A0A0A',
+            fontFamily: "'League Spartan', sans-serif",
+            fontSize: 11,
+            letterSpacing: '0.24em',
+            textTransform: 'uppercase',
+            fontWeight: 700,
+            color: '#0A0A0A',
           }}>
             Filtern &amp; Sortieren
           </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <button onClick={resetFilters} style={{
-              background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-              fontFamily: 'inherit', fontSize: 11, letterSpacing: '0.06em',
-              color: '#6B6B6B', textDecoration: 'underline', textUnderlineOffset: 3,
-            }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+            <button
+              onClick={resetFilters}
+              onMouseEnter={e => { e.currentTarget.style.color = '#0A0A0A' }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#888888' }}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 0,
+                fontFamily: 'inherit',
+                fontSize: 12,
+                color: '#888888',
+                textDecoration: 'underline',
+                textUnderlineOffset: 3,
+                transition: 'color 180ms ease',
+              }}
+            >
               Alle löschen
             </button>
-            <button onClick={onClose} style={{
-              background: 'none', border: 'none', cursor: 'pointer', padding: 6,
-              display: 'flex', color: '#0A0A0A', marginRight: -6,
-            }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <button
+              onClick={onClose}
+              onMouseEnter={e => { e.currentTarget.style.background = '#2D2D2D' }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#0A0A0A' }}
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: '50%',
+                background: '#0A0A0A',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                transition: 'background 200ms ease',
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round">
                 <path d="M6 6l12 12M18 6 6 18" />
               </svg>
             </button>
           </div>
         </div>
 
-        {/* Scrollable body */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 28px' }}>
+        {/* ── Scrollable body — rows manage their own horizontal padding ── */}
+        <div style={{ flex: 1, overflowY: 'auto' }}>
 
-          <Accordion id="kategorien" label="Kategorien">
-            {SIDEBAR_CATEGORIES.map(k => {
-              const on = filters.kategorien.includes(k.id)
-              return (
-                <label key={k.id} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '8px 0', cursor: 'pointer', borderBottom: '1px solid #F5F5F0',
-                }}>
-                  <span style={{ fontSize: 13, color: on ? '#370E4D' : '#2D2D2D', transition: 'color 150ms' }}>
-                    {k.label}
-                  </span>
-                  <input type="checkbox" checked={on}
-                    onChange={() => toggleFilter('kategorien', k.id)}
-                    style={{ accentColor: '#370E4D', width: 13, height: 13, cursor: 'pointer' }} />
-                </label>
-              )
-            })}
-          </Accordion>
+          <Section id="kategorien" label="Kategorien" animDelay={90}>
+            {SIDEBAR_CATEGORIES.map(k => (
+              <CheckRow
+                key={k.id}
+                checked={filters.kategorien.includes(k.id)}
+                onToggle={() => toggleFilter('kategorien', k.id)}
+                label={k.label}
+              />
+            ))}
+          </Section>
 
-          <Accordion id="farben" label="Farben">
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, paddingTop: 4 }}>
-              {FARBEN.map(f => {
-                const on = filters.farben.includes(f.name)
-                return (
-                  <button key={f.name} onClick={() => toggleFilter('farben', f.name)} title={f.name}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                    <div style={{
-                      width: 24, height: 24,
-                      background: f.hex,
-                      border: on ? '2px solid #370E4D' : `1px solid ${f.border ? '#CCC' : 'transparent'}`,
-                      outline: on ? '2px solid #fff' : 'none',
-                      outlineOffset: on ? -3 : 0,
-                      boxShadow: '0 0 0 1px #E8E8E8',
-                      transition: 'all 150ms',
-                    }} />
-                    <span style={{ fontSize: 9, color: '#6B6B6B', letterSpacing: '0.08em', lineHeight: 1 }}>
-                      {f.name}
-                    </span>
-                  </button>
-                )
-              })}
+          <Section id="farben" label="Farben" animDelay={130}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: 10,
+              padding: '4px 32px 0',
+            }}>
+              {FARBEN.map(f => (
+                <SwatchBtn
+                  key={f.name}
+                  name={f.name}
+                  hex={f.hex}
+                  border={f.border}
+                  selected={filters.farben.includes(f.name)}
+                  onClick={() => toggleFilter('farben', f.name)}
+                />
+              ))}
             </div>
-          </Accordion>
+          </Section>
 
-          <Accordion id="groessen" label="Größen">
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, paddingTop: 4 }}>
-              {GROESSEN.map(g => {
-                const on = filters.groessen.includes(g)
-                return (
-                  <button key={g} onClick={() => toggleFilter('groessen', g)} style={{
-                    padding: '6px 10px',
-                    border: on ? '1px solid #0A0A0A' : '1px solid #E8E8E8',
-                    background: on ? '#0A0A0A' : 'transparent',
-                    color: on ? '#fff' : '#0A0A0A',
-                    fontSize: 11, letterSpacing: '0.08em',
-                    cursor: 'pointer', fontFamily: 'inherit',
-                    transition: 'all 150ms',
-                  }}>{g}</button>
-                )
-              })}
-            </div>
-          </Accordion>
+          <Section id="groessen" label="Größen" animDelay={170}>
+            {GROESSEN.map(g => (
+              <CheckRow
+                key={g}
+                checked={filters.groessen.includes(g)}
+                onToggle={() => toggleFilter('groessen', g)}
+                label={g}
+              />
+            ))}
+          </Section>
 
-          <Accordion id="marken" label="Marken">
+          <Section id="marken" label="Marken" animDelay={210}>
             {availableMarken.length === 0
-              ? <p style={{ fontSize: 12, color: '#9B9B9B', padding: '8px 0', fontStyle: 'italic' }}>Keine verfügbar</p>
-              : availableMarken.map(m => {
-                const on = filters.marken.includes(m)
-                return (
-                  <label key={m} style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '8px 0', cursor: 'pointer', borderBottom: '1px solid #F5F5F0',
-                  }}>
-                    <span style={{ fontSize: 13, color: on ? '#370E4D' : '#2D2D2D', transition: 'color 150ms' }}>
-                      {m}
-                    </span>
-                    <input type="checkbox" checked={on}
-                      onChange={() => toggleFilter('marken', m)}
-                      style={{ accentColor: '#370E4D', width: 13, height: 13, cursor: 'pointer' }} />
-                  </label>
-                )
-              })
-            }
-          </Accordion>
-
-          <Accordion id="sortieren" label="Sortieren nach">
-            {SORT_OPTIONS.map(s => {
-              const on = filters.sortieren === s.id
-              return (
-                <label key={s.id} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '8px 0', cursor: 'pointer', borderBottom: '1px solid #F5F5F0',
+              ? (
+                <p style={{
+                  fontSize: 13,
+                  color: '#9B9B9B',
+                  padding: '10px 32px',
+                  fontStyle: 'italic',
+                  margin: 0,
                 }}>
-                  <span style={{ fontSize: 13, color: on ? '#370E4D' : '#2D2D2D', transition: 'color 150ms' }}>
-                    {s.label}
-                  </span>
-                  <input type="radio" name="sb-sort" value={s.id} checked={on}
-                    onChange={() => setFilters(prev => ({ ...prev, sortieren: s.id }))}
-                    style={{ accentColor: '#370E4D', width: 13, height: 13, cursor: 'pointer' }} />
-                </label>
+                  Keine verfügbar
+                </p>
               )
-            })}
-          </Accordion>
+              : availableMarken.map(m => (
+                <CheckRow
+                  key={m}
+                  checked={filters.marken.includes(m)}
+                  onToggle={() => toggleFilter('marken', m)}
+                  label={m}
+                />
+              ))
+            }
+          </Section>
+
+          <Section id="sortieren" label="Sortieren nach" animDelay={250}>
+            {SORT_OPTIONS.map(s => (
+              <CheckRow
+                key={s.id}
+                checked={filters.sortieren === s.id}
+                onToggle={() => setFilters(prev => ({ ...prev, sortieren: s.id }))}
+                label={s.label}
+                radio
+              />
+            ))}
+          </Section>
 
         </div>
 
-        {/* Bottom CTA */}
-        <div style={{ padding: '16px 28px 24px', flexShrink: 0, borderTop: '1px solid #E8E8E8' }}>
-          <button onClick={onClose} style={{
-            width: '100%', padding: '16px 0',
-            background: '#0A0A0A', color: '#fff', border: 'none', cursor: 'pointer',
-            fontFamily: 'inherit', fontSize: 10, letterSpacing: '0.26em', textTransform: 'uppercase',
-            transition: 'background 200ms',
-          }}>
-            {resultCount} {resultCount === 1 ? 'Artikel' : 'Artikel'} anzeigen
+        {/* ── CTA ── */}
+        <div style={{
+          padding: '20px 32px 32px',
+          flexShrink: 0,
+          opacity: open ? 1 : 0,
+          transform: open ? 'translateY(0)' : 'translateY(6px)',
+          transition: open
+            ? 'opacity 380ms cubic-bezier(0.16,1,0.3,1) 320ms, transform 380ms cubic-bezier(0.16,1,0.3,1) 320ms'
+            : 'opacity 100ms ease',
+        }}>
+          <button
+            onClick={onClose}
+            onMouseEnter={e => { e.currentTarget.style.background = '#1E1E1E' }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#0A0A0A' }}
+            style={{
+              width: '100%',
+              padding: '17px 0',
+              background: '#0A0A0A',
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: "'League Spartan', sans-serif",
+              fontSize: 10,
+              letterSpacing: '0.28em',
+              textTransform: 'uppercase',
+              fontWeight: 600,
+              transition: 'background 220ms ease',
+            }}
+          >
+            {resultCount} Artikel anzeigen
           </button>
         </div>
       </div>
@@ -375,11 +551,11 @@ function BekleidungContent() {
 
   // Filter state
   const [activeCat, setActiveCat]       = useState('alle')
-  const [gender, setGender]             = useState<'alle' | 'damen' | 'herren'>('alle')
+  const [gender, setGender]             = useState<('damen' | 'herren')[]>([])
   const [filterOpen, setFilterOpen]     = useState(false)
   const [openSections, setOpenSections] = useState<string[]>(['kategorien'])
   const [filters, setFilters]           = useState<FilterState>({
-    kategorien: [], farben: [], groessen: [], marken: [], sortieren: 'neu',
+    kategorien: [], farben: [], groessen: [], marken: [], sortieren: 'neu', catalogue: '',
   })
 
   // Fetch
@@ -411,6 +587,7 @@ function BekleidungContent() {
     if (filters.farben.length > 0)      r = r.filter(p => p.colours.some(c => filters.farben.includes(c.name)))
     if (filters.groessen.length > 0)    r = r.filter(p => p.sizes?.some(s => filters.groessen.includes(s)))
     if (filters.marken.length > 0)      r = r.filter(p => filters.marken.includes(p.brandName))
+    if (filters.catalogue)              r = r.filter(p => (p.catalogue ?? []).includes(filters.catalogue))
     if (filters.sortieren === 'preis-auf') return [...r].sort((a, b) => parsePriceNum(a.price) - parsePriceNum(b.price))
     if (filters.sortieren === 'preis-ab')  return [...r].sort((a, b) => parsePriceNum(b.price) - parsePriceNum(a.price))
     if (filters.sortieren === 'name')      return [...r].sort((a, b) => a.productName.localeCompare(b.productName))
@@ -425,7 +602,9 @@ function BekleidungContent() {
       return { ...prev, [key]: arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val] }
     })
 
-  const resetFilters = () => setFilters({ kategorien: [], farben: [], groessen: [], marken: [], sortieren: 'neu' })
+  const resetFilters = () => setFilters({ kategorien: [], farben: [], groessen: [], marken: [], sortieren: 'neu', catalogue: '' })
+  const toggleGender = (g: 'damen' | 'herren') =>
+    setGender(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g])
   const openAt = (section: string) => {
     setOpenSections(prev => prev.includes(section) ? prev : [...prev, section])
     setFilterOpen(true)
@@ -438,7 +617,7 @@ function BekleidungContent() {
   return (
     <div style={{ background: '#fff', fontFamily: "'League Spartan', sans-serif", color: '#0A0A0A', minHeight: '100vh' }}>
 
-      {/* ── Editorial header ── above strip so it's always visible on load ─ */}
+      {/* ── Editorial header ── */}
       <section style={{ textAlign: 'center', padding: isMobile ? '40px 20px 36px' : '72px 24px 56px', borderBottom: '1px solid #E8E8E8' }}>
         {!searchQuery && (
           <p style={{
@@ -492,7 +671,7 @@ function BekleidungContent() {
         </p>
       </section>
 
-      {/* ── Category strip ── sticky flush below navbar ───────────────────── */}
+      {/* ── Category strip — sticky flush below navbar ── */}
       <div style={{
         position: 'sticky',
         top: navH,
@@ -550,7 +729,7 @@ function BekleidungContent() {
         </div>
       </div>
 
-      {/* ── Filter bar ───────────────────────────────────────────────────── */}
+      {/* ── Filter bar ── */}
       <div ref={filterBarRef} style={{
         maxWidth: 1800,
         margin: '0 auto',
@@ -567,22 +746,38 @@ function BekleidungContent() {
         <div style={{ display: 'flex', gap: 0, alignItems: 'center' }}>
           {(['Damen', 'Herren'] as const).map((label) => {
             const id = label.toLowerCase() as 'damen' | 'herren'
-            const active = gender === 'alle' || gender === id
+            const noneSelected = gender.length === 0
+            const isSelected   = gender.includes(id)
+            const isActive     = noneSelected || isSelected
+            const accentColor  = id === 'damen' ? '#C41E3A' : '#2457A3'
             return (
               <button key={id}
-                onClick={() => setGender(prev => prev === id ? 'alle' : id)}
+                onClick={() => toggleGender(id)}
                 style={{
+                  position: 'relative',
                   background: 'none', border: 'none', cursor: 'pointer',
-                  padding: '0 16px 0 0',
+                  padding: '2px 16px 5px 0',
                   fontFamily: 'inherit',
                   fontSize: 10,
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
-                  color: active ? '#0A0A0A' : '#BBBBBB',
-                  fontWeight: active ? 500 : 400,
+                  color: isActive ? '#0A0A0A' : '#BBBBBB',
+                  fontWeight: isSelected ? 600 : isActive ? 400 : 400,
                   transition: 'color 200ms cubic-bezier(0.16,1,0.3,1)',
                 }}>
                 {label}
+                <span style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 16,
+                  bottom: 0,
+                  height: 2,
+                  background: accentColor,
+                  transformOrigin: 'left',
+                  transform: isSelected ? 'scaleX(1)' : 'scaleX(0)',
+                  transition: 'transform 350ms cubic-bezier(0.16,1,0.3,1)',
+                  borderRadius: 1,
+                }} />
               </button>
             )
           })}
@@ -590,19 +785,13 @@ function BekleidungContent() {
 
         {/* Right — filter controls */}
         <div style={{ display: 'flex', gap: isMobile ? 16 : 24, alignItems: 'center' }}>
-          {!isMobile && [
-            { label: 'Marken',     section: 'marken'     },
-            { label: 'Kategorien', section: 'kategorien' },
-          ].map(({ label, section }) => (
-            <button key={section} onClick={() => openAt(section)} style={{
-              background: 'transparent', border: 'none', cursor: 'pointer',
-              fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase',
-              color: '#0A0A0A', fontFamily: 'inherit', padding: 0,
-              transition: 'color 200ms',
-            }}>
-              {label}
-            </button>
-          ))}
+          {!isMobile && (
+            <CatalogueDropdown
+              value={filters.catalogue}
+              onChange={(id) => setFilters(prev => ({ ...prev, catalogue: id }))}
+              align="right"
+            />
+          )}
 
           <button onClick={() => setFilterOpen(true)} style={{
             background: 'transparent', border: 'none', cursor: 'pointer',
@@ -626,17 +815,15 @@ function BekleidungContent() {
 
           <span style={{ width: 1, height: 12, background: '#D8D8D8', flexShrink: 0 }} />
 
-          <button onClick={() => openAt('sortieren')} style={{
-            background: 'transparent', border: 'none', cursor: 'pointer',
-            fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase',
-            color: '#0A0A0A', fontFamily: 'inherit', padding: 0,
-          }}>
-            Sortieren
-          </button>
+          <SortDropdown
+            value={filters.sortieren}
+            onChange={(id) => setFilters(prev => ({ ...prev, sortieren: id }))}
+            align="right"
+          />
         </div>
       </div>
 
-      {/* ── Product grid ────────────────────────────────────────────────── */}
+      {/* ── Product grid ── */}
       <section style={{
         maxWidth: 1800,
         margin: '0 auto',
@@ -692,7 +879,7 @@ function BekleidungContent() {
         )}
       </section>
 
-      {/* ── Filter sidebar ──────────────────────────────────────────────── */}
+      {/* ── Filter sidebar ── */}
       <FilterSidebar
         open={filterOpen}
         onClose={() => setFilterOpen(false)}
@@ -706,15 +893,18 @@ function BekleidungContent() {
         availableMarken={availableMarken}
       />
 
-      {/* ── Floating blur filter bar ─────────────────────────────────────── */}
+      {/* ── Floating blur filter bar ── */}
       <BlurFilterBar
         watchRef={filterBarRef}
-        gender={gender}
-        onGenderToggle={(g) => setGender(prev => prev === g ? 'alle' : g)}
+        selectedGenders={gender}
+        onGenderToggle={toggleGender}
         activeFilterCount={activeFilterCount}
         onOpenFilter={() => setFilterOpen(true)}
         onOpenAt={openAt}
-        resultCount={visibleProducts.length}
+        sortValue={filters.sortieren}
+        onSort={(id) => setFilters(prev => ({ ...prev, sortieren: id }))}
+        catalogueValue={filters.catalogue}
+        onCatalogue={(id) => setFilters(prev => ({ ...prev, catalogue: id }))}
       />
     </div>
   )
