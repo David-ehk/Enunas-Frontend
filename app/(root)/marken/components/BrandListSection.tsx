@@ -1,4 +1,6 @@
 import React from 'react';
+import Link from 'next/link';
+import { generateSlug } from '@/lib/product';
 
 interface Brand {
   id: number;
@@ -19,13 +21,13 @@ export const BrandListSection: React.FC<BrandListSectionProps> = ({ letter, bran
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-4">
         {brands.map((brand) => (
-          <a
+          <Link
             key={brand.id}
-            href={`/marken/${brand.name.toLowerCase().replace(/\s+/g, '-')}`}
+            href={`/bekleidung/${generateSlug(brand.name)}`}
             className="text-sm text-gray-700 hover:text-black transition-colors"
           >
             {brand.name}
-          </a>
+          </Link>
         ))}
       </div>
     </div>

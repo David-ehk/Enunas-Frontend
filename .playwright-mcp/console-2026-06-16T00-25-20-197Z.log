@@ -1,0 +1,26 @@
+[     154ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[    1100ms] [LOG] [Fast Refresh] done in 1058ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[    1201ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[    1824ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[    1954ms] [LOG] [HMR] connected @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[    2580ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[    2581ms] [ERROR] Access to fetch at 'http://localhost:8080/users/me' from origin 'http://localhost:3001' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3001/bekleidung:0
+[    2582ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:8080/users/me:0
+[    2755ms] [ERROR] Access to fetch at 'http://localhost:8080/products?size=200' from origin 'http://localhost:3001' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3001/bekleidung:0
+[    2755ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:8080/products?size=200:0
+[    3802ms] [LOG] [Fast Refresh] done in 1488ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[ 5682180ms] [LOG] [HMR] connected @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[ 5682454ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[ 5682583ms] [LOG] [Fast Refresh] done in 237ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[17068318ms] [LOG] [HMR] connected @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[17068433ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[17068685ms] [LOG] [Fast Refresh] done in 359ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[17165085ms] [LOG] [HMR] connected @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58344862ms] [LOG] [HMR] connected @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58344991ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58345188ms] [ERROR] Failed to load resource: net::ERR_NETWORK_CHANGED @ https://eu.i.posthog.com/flags/?v=2&ip=0&_=1781627864900&ver=1.376.3&compression=base64:0
+[58345579ms] [LOG] [Fast Refresh] done in 703ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58345734ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58346293ms] [LOG] [Fast Refresh] done in 663ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58346403ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58346562ms] [LOG] [Fast Refresh] done in 266ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297

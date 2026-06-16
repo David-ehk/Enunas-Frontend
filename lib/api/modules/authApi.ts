@@ -3,34 +3,27 @@ import { setToken } from '../auth';
 import type { ApiUser } from '@/types/api';
 
 interface LoginRequest { email: string; password: string }
-interface LoginResponse { token: string; refreshToken?: string; user: ApiUser }
-interface SignupRequest {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  role: 'CUSTOMER' | 'BRAND_PARTNER';
-}
+// Backend LoginResponseDto: { token: String, expiresIn: long } — no user field.
+interface LoginResponse { token: string; expiresIn: number }
+// Backend RegisterUserDto: { email, password } only — no firstName/lastName/role.
+interface SignupRequest { email: string; password: string }
 
 export const authApi = {
-  async login(data: LoginRequest): Promise<LoginResponse> {
+  async login(data: LoginRequest): Promise<void> {
     const res = await fetcher<LoginResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(data),
       auth: false,
     });
     setToken(res.token);
-    return res;
   },
 
-  async signup(data: SignupRequest): Promise<LoginResponse> {
-    const res = await fetcher<LoginResponse>('/auth/register', {
+  async signup(data: SignupRequest): Promise<ApiUser> {
+    return fetcher<ApiUser>('/auth/signup', {
       method: 'POST',
       body: JSON.stringify(data),
       auth: false,
     });
-    setToken(res.token);
-    return res;
   },
 
   async logout(): Promise<void> {

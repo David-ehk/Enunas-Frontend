@@ -17,6 +17,9 @@ import { X } from 'lucide-react'
 import { Product, findVariant, uniqueColors } from '../types/product'
 import type { Color } from '@/lib/color'
 import { useCart } from '@/app/context/CartContext'
+import { useAuth } from '@/app/context/AuthContext'
+import { productApi } from '@/lib/api'
+import type { ApiListing } from '@/types/api'
 
 interface ProductDetailsProps {
   product: Product
@@ -25,7 +28,8 @@ interface ProductDetailsProps {
   brandSlug: string
   productSlug: string
   colorHexMap: Record<string, string>
-  defaultListingId?: string
+  /** Backend product ID — used to fetch listings client-side. */
+  productId: string
 }
 
 export default function ProductDetails({
@@ -35,7 +39,7 @@ export default function ProductDetails({
   brandSlug,
   productSlug,
   colorHexMap,
-  defaultListingId,
+  productId,
 }: ProductDetailsProps) {
   const colorList = useMemo(() => uniqueColors(product.variants), [product.variants])
   const colorsForSelector: Color[] = useMemo(
@@ -49,8 +53,24 @@ export default function ProductDetails({
   const [showSizeModal, setShowSizeModal] = useState(false)
   const [openAccordion, setOpenAccordion] = useState<string | null>('details')
 
+  // Listings fetched client-side (endpoint requires auth token from localStorage).
+  const [listings, setListings] = useState<ApiListing[]>([])
+  const [listingsLoading, setListingsLoading] = useState(false)
+  const [listingsFailed, setListingsFailed] = useState(false)
+
+  const { isAuthenticated } = useAuth()
   const ctaRef = useRef<HTMLButtonElement>(null)
   const { addToCart, openCart } = useCart()
+
+  useEffect(() => {
+    if (!isAuthenticated || !productId) return
+    setListingsLoading(true)
+    setListingsFailed(false)
+    productApi.getListings(productId)
+      .then(setListings)
+      .catch(() => setListingsFailed(true))
+      .finally(() => setListingsLoading(false))
+  }, [isAuthenticated, productId])
 
   const selectedVariant = findVariant(product.variants, selectedColor?.name ?? null, selectedSize)
   // SKU shown as soon as a color is selected — not size-dependent
@@ -60,8 +80,24 @@ export default function ProductDetails({
   )
   const isOutOfStock = !!(selectedVariant && selectedVariant.stockQuantity === 0)
 
-  const formattedPrice = new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(price)
+  // Find the listing that matches the currently selected color + size.
+  // Each listing maps to exactly one variant (variantColor + variantSize).
+  const activeListing = useMemo<ApiListing | null>(() => {
+    if (!selectedColor || !selectedSize) return null
+    return listings.find(
+      l => l.variantColor === selectedColor.name && l.variantSize === selectedSize
+    ) ?? null
+  }, [listings, selectedColor, selectedSize])
 
+  // If authenticated and listings loaded but no listing found for this variant → unavailable.
+  const variantUnavailable =
+    isAuthenticated &&
+    !listingsLoading &&
+    !listingsFailed &&
+    selectedSize !== null &&
+    activeListing === null
+
+  const formattedPrice = new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(price)
 
   // Reset size when color changes if selected size no longer available for new color
   const handleColorSelect = (color: Color) => {
@@ -72,23 +108,28 @@ export default function ProductDetails({
     }
   }
 
-  const buildCartItem = (size: string) => ({
-    productId: String(product.id),
-    name: product.name,
-    brand: product.brandName,
-    price,
-    currency,
-    size,
-    color: selectedColor ? { id: selectedColor.id, name: selectedColor.name, hex: selectedColor.hex } : undefined,
-    image: product.images[0] ?? '',
-    defaultListingId,
-    productPath: `/bekleidung/${brandSlug}/${productSlug}`,
-  })
+  const buildCartItem = (size: string) => {
+    const listing = listings.find(
+      l => l.variantColor === selectedColor?.name && l.variantSize === size
+    )
+    return {
+      productId: String(product.id),
+      name: product.name,
+      brand: product.brandName,
+      price,
+      currency,
+      size,
+      color: selectedColor ? { id: selectedColor.id, name: selectedColor.name, hex: selectedColor.hex } : undefined,
+      image: product.images[0] ?? '',
+      defaultListingId: listing?.id ? String(listing.id) : undefined,
+      productPath: `/bekleidung/${brandSlug}/${productSlug}`,
+    }
+  }
 
   const handleAddToCart = (size: string) => { addToCart(buildCartItem(size)); openCart() }
 
   const handleCta = () => {
-    if (isOutOfStock) return
+    if (isOutOfStock || variantUnavailable) return
     if (!selectedSize) { setShowSizeModal(true); return }
     handleAddToCart(selectedSize)
   }
@@ -103,8 +144,11 @@ export default function ProductDetails({
 
   const toggle = (key: string) => setOpenAccordion(prev => (prev === key ? null : key))
 
+  const ctaDisabled = isOutOfStock || variantUnavailable
   const ctaLabel = isOutOfStock
     ? 'Ausverkauft'
+    : variantUnavailable
+    ? 'Derzeit nicht verfügbar'
     : selectedSize
     ? 'Zum Warenkorb hinzufügen'
     : 'Größe wählen'
@@ -205,10 +249,15 @@ export default function ProductDetails({
             <SizeGuideRow />
 
             {/* 10. CTA */}
+            {listingsFailed && (
+              <p className="text-[12px] text-enunas-error mb-3" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                Verfügbarkeit konnte nicht geladen werden.
+              </p>
+            )}
             <button
               ref={ctaRef}
               onClick={handleCta}
-              disabled={isOutOfStock}
+              disabled={ctaDisabled}
               className="group relative w-full max-w-[460px] overflow-hidden mb-6 disabled:opacity-60 disabled:cursor-not-allowed"
               style={{
                 padding: '22px 32px',
@@ -310,7 +359,7 @@ export default function ProductDetails({
         formattedPrice={formattedPrice}
         selectedSize={selectedSize}
         ctaLabel={ctaLabel}
-        isOutOfStock={isOutOfStock}
+        isOutOfStock={ctaDisabled}
         onCta={handleCta}
         watchRef={ctaRef}
       />

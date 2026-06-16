@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getCuration } from '@/lib/curation'
 import { productApi } from '@/lib/api'
+import { generateSlug } from '@/lib/product'
 import type { ApiProduct } from '@/types/api'
 
 export default function CuratedTrendySection() {
@@ -36,7 +37,7 @@ export default function CuratedTrendySection() {
         {products.map(product => (
           <Link
             key={product.id}
-            href={`/bekleidung/${product.category}/${product.slug}`}
+            href={`/bekleidung/${generateSlug(product.brandName)}/${product.slug}`}
             className="group cursor-pointer"
           >
             <div className="relative overflow-hidden aspect-[3/4] bg-[#F5F5F0] rounded-xl mb-3">

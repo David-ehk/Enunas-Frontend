@@ -129,12 +129,13 @@ const Navbar = () => {
           </div>
 
           <div>
-            <button
+            <Link
+              href="/saved-lists"
               className="relative cursor-pointer hidden sm:block"
               aria-label="Wunschliste"
             >
               <HeartIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]"/>
-            </button>
+            </Link>
           </div>
 
           <div>

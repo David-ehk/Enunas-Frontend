@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useRouter } from 'next/navigation'
 import { Input } from "@/components/ui/input"
 import Link from 'next/link'
 
@@ -13,6 +14,7 @@ interface SearchBarProps {
 const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [mounted, setMounted] = useState(false)
+  const router = useRouter()
 
   // Mount state for portal (SSR safety)
   useEffect(() => {
@@ -42,13 +44,14 @@ const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
   ]
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTerm = e.target.value
-    setSearchTerm(newTerm)
+    setSearchTerm(e.target.value)
+  }
 
-    // Hier Query ausführen wenn mehr als 2 Zeichen
-    if (newTerm.length > 2) {
-      // fetch(`/api/search?q=${newTerm}`)
-      console.log('Suche nach:', newTerm)
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchTerm.trim().length > 0) {
+      router.push(`/bekleidung?q=${encodeURIComponent(searchTerm.trim())}`)
+      onClose()
+      setSearchTerm('')
     }
   }
 
@@ -108,6 +111,7 @@ const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
               placeholder="SUCHEN"
               value={searchTerm}
               onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
               autoFocus
               className="w-full bg-transparent border-0 border-b-[1.5px] border-black
                        rounded-none px-0 pb-3 text-[13px] tracking-[0.1em] uppercase
@@ -155,23 +159,11 @@ const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
           </ul>
         </div>
 
-        {/* Search Results (wenn searchTerm > 0) */}
-        {searchTerm.length > 0 && (
+        {searchTerm.trim().length > 0 && (
           <div className="px-6 py-4 border-t border-black/10">
-            <h3 className="text-[11px] tracking-[0.15em] uppercase font-medium mb-4 text-black/80">
-              SUCHERGEBNISSE
-            </h3>
-
-            {/* Beispiel-Ergebnisse - später dynamisch */}
-            <div className="space-y-4">
-              <p className="text-sm text-black/60">
-                {searchTerm.length < 3
-                  ? 'Geben Sie mindestens 3 Zeichen ein...'
-                  : `Suche nach "${searchTerm}"...`}
-              </p>
-
-              {/* Hier kommen später die echten Suchergebnisse */}
-            </div>
+            <p className="text-xs text-black/50 tracking-[0.05em]">
+              Enter drücken, um nach „{searchTerm}" zu suchen
+            </p>
           </div>
         )}
       </aside>

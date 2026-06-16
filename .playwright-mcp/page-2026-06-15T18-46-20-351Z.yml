@@ -1,0 +1,276 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - navigation [ref=e4]:
+        - button "Menü öffnen" [ref=e6]:
+          - img [ref=e7]
+        - link "Enunas" [ref=e8] [cursor=pointer]:
+          - /url: /
+          - heading "Enunas" [level=1] [ref=e9]
+        - generic [ref=e10]:
+          - button "Suche öffnen" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+          - link "Mein Konto" [ref=e16] [cursor=pointer]:
+            - /url: /account
+            - img [ref=e17]
+          - link "Wunschliste" [ref=e20] [cursor=pointer]:
+            - /url: /saved-lists
+            - img [ref=e21]
+          - link "Warenkorb mit 0 Artikeln" [ref=e24] [cursor=pointer]:
+            - /url: /cart
+            - img [ref=e25]
+    - generic [ref=e29]:
+      - generic [ref=e31]:
+        - button "Alle ansehen" [ref=e32] [cursor=pointer]: Alle ansehen
+        - button "Oberteile" [ref=e34] [cursor=pointer]: Oberteile
+        - button "Hoodies & Sweatshirts" [ref=e35] [cursor=pointer]: Hoodies & Sweatshirts
+        - button "Jacken" [ref=e36] [cursor=pointer]: Jacken
+        - button "T-Shirts" [ref=e37] [cursor=pointer]: T-Shirts
+        - button "Pullover & Strick" [ref=e38] [cursor=pointer]: Pullover & Strick
+        - button "Hemden" [ref=e39] [cursor=pointer]: Hemden
+        - button "Hosen" [ref=e40] [cursor=pointer]: Hosen
+        - button "Jeans" [ref=e41] [cursor=pointer]: Jeans
+        - button "Jogger" [ref=e42] [cursor=pointer]: Jogger
+        - button "Shorts" [ref=e43] [cursor=pointer]: Shorts
+        - button "Accessoires" [ref=e44] [cursor=pointer]: Accessoires
+      - banner [ref=e45]:
+        - heading "Bekleidung" [level=1] [ref=e46]
+        - paragraph [ref=e47]: Kuratierte Auswahl an Premium-Streetwear und Designermode. Jeder Look, ein Statement.
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - button "herren" [ref=e50] [cursor=pointer]:
+            - img [ref=e51]
+          - button "damen" [ref=e57] [cursor=pointer]:
+            - img [ref=e58]
+        - paragraph [ref=e62]: …
+        - generic [ref=e63]:
+          - button "Marken" [ref=e64] [cursor=pointer]
+          - button "Kategorien" [ref=e65] [cursor=pointer]
+          - button "Filter" [ref=e66] [cursor=pointer]
+          - button "Sortieren" [ref=e68] [cursor=pointer]
+      - generic [ref=e111]:
+        - generic [ref=e112]:
+          - generic [ref=e113]: Filtern und Sortieren
+          - generic [ref=e114]:
+            - button "Alle löschen" [ref=e115] [cursor=pointer]
+            - button [ref=e116] [cursor=pointer]:
+              - img [ref=e117]
+        - generic [ref=e119]:
+          - generic [ref=e120]:
+            - button "Kategorien" [ref=e121] [cursor=pointer]:
+              - generic [ref=e122]: Kategorien
+              - img [ref=e123]
+            - generic [ref=e126]:
+              - generic [ref=e127] [cursor=pointer]:
+                - generic [ref=e128]: Oberteile
+                - checkbox "Oberteile" [ref=e129]
+              - generic [ref=e130] [cursor=pointer]:
+                - generic [ref=e131]: Hoodies & Sweatshirts
+                - checkbox "Hoodies & Sweatshirts" [ref=e132]
+              - generic [ref=e133] [cursor=pointer]:
+                - generic [ref=e134]: Jacken
+                - checkbox "Jacken" [ref=e135]
+              - generic [ref=e136] [cursor=pointer]:
+                - generic [ref=e137]: T-Shirts
+                - checkbox "T-Shirts" [ref=e138]
+              - generic [ref=e139] [cursor=pointer]:
+                - generic [ref=e140]: Pullover & Strick
+                - checkbox "Pullover & Strick" [ref=e141]
+              - generic [ref=e142] [cursor=pointer]:
+                - generic [ref=e143]: Hemden
+                - checkbox "Hemden" [ref=e144]
+              - generic [ref=e145] [cursor=pointer]:
+                - generic [ref=e146]: Hosen
+                - checkbox "Hosen" [ref=e147]
+              - generic [ref=e148] [cursor=pointer]:
+                - generic [ref=e149]: Jeans
+                - checkbox "Jeans" [ref=e150]
+              - generic [ref=e151] [cursor=pointer]:
+                - generic [ref=e152]: Jogger
+                - checkbox "Jogger" [ref=e153]
+              - generic [ref=e154] [cursor=pointer]:
+                - generic [ref=e155]: Shorts
+                - checkbox "Shorts" [ref=e156]
+              - generic [ref=e157] [cursor=pointer]:
+                - generic [ref=e158]: Accessoires
+                - checkbox "Accessoires" [ref=e159]
+          - generic [ref=e160]:
+            - button "Farben" [ref=e161] [cursor=pointer]:
+              - generic [ref=e162]: Farben
+              - img [ref=e163]
+            - generic [ref=e166]:
+              - button "Schwarz" [ref=e167] [cursor=pointer]:
+                - generic [ref=e169]: Schwarz
+              - button "Weiß" [ref=e170] [cursor=pointer]:
+                - generic [ref=e172]: Weiß
+              - button "Beige" [ref=e173] [cursor=pointer]:
+                - generic [ref=e175]: Beige
+              - button "Braun" [ref=e176] [cursor=pointer]:
+                - generic [ref=e178]: Braun
+              - button "Grau" [ref=e179] [cursor=pointer]:
+                - generic [ref=e181]: Grau
+              - button "Blau" [ref=e182] [cursor=pointer]:
+                - generic [ref=e184]: Blau
+              - button "Lila" [ref=e185] [cursor=pointer]:
+                - generic [ref=e187]: Lila
+              - button "Grün" [ref=e188] [cursor=pointer]:
+                - generic [ref=e190]: Grün
+              - button "Rot" [ref=e191] [cursor=pointer]:
+                - generic [ref=e193]: Rot
+          - generic [ref=e194]:
+            - button "Größen" [ref=e195] [cursor=pointer]:
+              - generic [ref=e196]: Größen
+              - img [ref=e197]
+            - generic [ref=e200]:
+              - button "XS" [ref=e201] [cursor=pointer]
+              - button "S" [ref=e202] [cursor=pointer]
+              - button "M" [ref=e203] [cursor=pointer]
+              - button "L" [ref=e204] [cursor=pointer]
+              - button "XL" [ref=e205] [cursor=pointer]
+              - button "XXL" [ref=e206] [cursor=pointer]
+              - button "28" [ref=e207] [cursor=pointer]
+              - button "30" [ref=e208] [cursor=pointer]
+              - button "32" [ref=e209] [cursor=pointer]
+              - button "34" [ref=e210] [cursor=pointer]
+              - button "36" [ref=e211] [cursor=pointer]
+              - button "38" [ref=e212] [cursor=pointer]
+              - button "40" [ref=e213] [cursor=pointer]
+              - button "42" [ref=e214] [cursor=pointer]
+              - button "44" [ref=e215] [cursor=pointer]
+              - button "46" [ref=e216] [cursor=pointer]
+          - generic [ref=e217]:
+            - button "Marken" [ref=e218] [cursor=pointer]:
+              - generic [ref=e219]: Marken
+              - img [ref=e220]
+            - paragraph [ref=e223]: Keine Marken geladen
+          - generic [ref=e224]:
+            - button "Sortieren nach" [ref=e225] [cursor=pointer]:
+              - generic [ref=e226]: Sortieren nach
+              - img [ref=e227]
+            - generic [ref=e229]:
+              - generic [ref=e230] [cursor=pointer]:
+                - generic [ref=e231]: Neuankömmlinge
+                - radio "Neuankömmlinge" [checked] [ref=e232]
+              - generic [ref=e233] [cursor=pointer]:
+                - generic [ref=e234]: Preis aufsteigend
+                - radio "Preis aufsteigend" [ref=e235]
+              - generic [ref=e236] [cursor=pointer]:
+                - generic [ref=e237]: Preis absteigend
+                - radio "Preis absteigend" [ref=e238]
+              - generic [ref=e239] [cursor=pointer]:
+                - generic [ref=e240]: Name A–Z
+                - radio "Name A–Z" [ref=e241]
+        - button "0 Artikel anzeigen" [ref=e243] [cursor=pointer]
+    - contentinfo [ref=e244]:
+      - generic [ref=e245]:
+        - generic [ref=e246]:
+          - generic [ref=e247]: Enunas
+          - generic [ref=e248]:
+            - text: Der kuratierte Marktplatz
+            - text: für Designer & Streetwear
+        - generic [ref=e249]:
+          - navigation "Über uns" [ref=e250]:
+            - generic [ref=e251]:
+              - generic [ref=e252]: "01"
+              - generic [ref=e253]: Über uns
+            - generic [ref=e254]:
+              - link "Über uns" [ref=e255] [cursor=pointer]:
+                - /url: /about us
+              - link "Marken" [ref=e256] [cursor=pointer]:
+                - /url: /marken
+              - link "Designer" [ref=e257] [cursor=pointer]:
+                - /url: /marken
+              - link "Karriere" [ref=e258] [cursor=pointer]:
+                - /url: /karriere
+          - navigation "Hilfe" [ref=e259]:
+            - generic [ref=e260]:
+              - generic [ref=e261]: "02"
+              - generic [ref=e262]: Hilfe
+            - generic [ref=e263]:
+              - link "FAQs" [ref=e264] [cursor=pointer]:
+                - /url: /faqs
+              - link "Sendungsverfolgung" [ref=e265] [cursor=pointer]:
+                - /url: /sendungsverfolgung
+              - link "Lieferung & Rücksendung" [ref=e266] [cursor=pointer]:
+                - /url: /lieferung-&-rücksendung
+              - link "Kundenservice" [ref=e267] [cursor=pointer]:
+                - /url: /kundenservice
+          - navigation "Rechtliches" [ref=e268]:
+            - generic [ref=e269]:
+              - generic [ref=e270]: "03"
+              - generic [ref=e271]: Rechtliches
+            - generic [ref=e272]:
+              - link "Impressum" [ref=e273] [cursor=pointer]:
+                - /url: /Impressum
+              - link "AGBs" [ref=e274] [cursor=pointer]:
+                - /url: /agbs
+              - link "Cookie-Richtlinien" [ref=e275] [cursor=pointer]:
+                - /url: /cookie-richtlinien
+              - link "Cookie-Einstellungen" [ref=e276] [cursor=pointer]:
+                - /url: /cookie-einstellungen
+              - link "Nutzungsbedingungen" [ref=e277] [cursor=pointer]:
+                - /url: /nutzungsbedingungen
+              - link "Datenschutzerklärung" [ref=e278] [cursor=pointer]:
+                - /url: /datenschutzerklärung
+          - generic [ref=e279]:
+            - generic [ref=e280]:
+              - generic [ref=e281]: "04"
+              - generic [ref=e282]: Zahlungsarten
+            - generic [ref=e283]:
+              - generic "visa" [ref=e284]:
+                - img [ref=e285]:
+                  - generic [ref=e286]: VISA
+              - generic "mc" [ref=e287]:
+                - img [ref=e288]
+              - generic "amex" [ref=e292]:
+                - img [ref=e293]:
+                  - generic [ref=e295]: AMERICAN
+                  - generic [ref=e296]: EXPRESS
+              - generic "pp" [ref=e297]:
+                - img [ref=e298]:
+                  - generic [ref=e299]: PayPal
+              - generic "klarna" [ref=e300]:
+                - img [ref=e301]:
+                  - generic [ref=e303]: Klarna.
+              - generic "applepay" [ref=e304]:
+                - img [ref=e305]:
+                  - generic [ref=e307]: Pay
+            - generic [ref=e308]:
+              - img [ref=e310]
+              - text: SSL-verschlüsselt · Käuferschutz
+        - generic [ref=e313]:
+          - generic [ref=e314]:
+            - button "Instagram" [ref=e315] [cursor=pointer]:
+              - img [ref=e316]
+            - button "X" [ref=e320] [cursor=pointer]:
+              - img [ref=e321]
+            - button "Facebook" [ref=e323] [cursor=pointer]:
+              - img [ref=e324]
+            - button "Pinterest" [ref=e326] [cursor=pointer]:
+              - img [ref=e327]
+          - button "Deutschland · EUR €" [ref=e329] [cursor=pointer]:
+            - img [ref=e331]
+            - text: Deutschland · EUR €
+        - generic [ref=e334]:
+          - generic [ref=e335]:
+            - img [ref=e336]
+            - text: Enunas 2026 — Alle Rechte vorbehalten
+          - button "Nach oben" [ref=e339] [cursor=pointer]:
+            - text: Nach oben
+            - img [ref=e340]
+    - complementary "Warenkorb" [ref=e342]:
+      - generic [ref=e344]:
+        - tablist [ref=e345]:
+          - tab "Warenkorb0" [selected] [ref=e346] [cursor=pointer]
+          - tab "Wunschliste0" [ref=e347] [cursor=pointer]
+        - button "Schließen" [ref=e348] [cursor=pointer]:
+          - img [ref=e349]
+      - generic [ref=e352]:
+        - img [ref=e354]
+        - generic [ref=e357]: Dein Warenkorb ist leer
+        - generic [ref=e358]: Entdecke kuratierte Designer- und Streetwear-Stücke.
+        - button "Weiter einkaufen" [ref=e359] [cursor=pointer]:
+          - text: Weiter einkaufen
+          - img [ref=e361]
+  - button "Open Next.js Dev Tools" [ref=e368] [cursor=pointer]:
+    - img [ref=e369]

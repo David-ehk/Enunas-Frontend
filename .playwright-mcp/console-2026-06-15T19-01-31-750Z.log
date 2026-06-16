@@ -1,0 +1,22 @@
+[     529ms] [ERROR] Ignoring duplicate Content-Security-Policy directive 'worker-src'. @ https://www.gucci.com/de/de/ca/women/ready-to-wear-for-women-c-women-readytowear:0
+[    1961ms] [ERROR] Ignoring duplicate Content-Security-Policy directive 'worker-src'. @ https://www.gucci.com/static/7941ce5497c4f05c60ad3b5f0ef2bf8454a63794300564:137
+[    1963ms] [ERROR] Ignoring duplicate Content-Security-Policy directive 'worker-src'. @ https://www.gucci.com/static/7941ce5497c4f05c60ad3b5f0ef2bf8454a63794300564:137
+[    2054ms] [ERROR] Ignoring duplicate Content-Security-Policy directive 'worker-src'. @ https://www.gucci.com/static/7941ce5497c4f05c60ad3b5f0ef2bf8454a63794300564:164
+[    2057ms] [ERROR] Ignoring duplicate Content-Security-Policy directive 'worker-src'. @ https://www.gucci.com/static/7941ce5497c4f05c60ad3b5f0ef2bf8454a63794300564:164
+[    4757ms] [LOG] [web-tracking-compliance] [prd] loaded - v: 1.1.0 @ https://www.gucci.com/componentsfront/_public/web_tracking_compliance/index.js:0
+[    4774ms] [WARNING] Datadog Browser SDK: SDK is loaded more than once. This is unsupported and might have unexpected behavior. @ https://www.gucci.com/deps/_static/@datadog/browser-core@6.4.0/es2022/browser-core.mjs:3
+[    4941ms] [LOG] Logger set with Service: search and Environment: prd @ https://www.gucci.com/search/_static/parse-M7XxFHqy.js:0
+[    5052ms] [LOG] Logger set with Service: header-footer-mfe and Environment: prd @ https://www.gucci.com/header-footer/_static/navigation/index-BeDZXoYq.js:1
+[    5840ms] [LOG] Logger set with Service: geo-markup and Environment: prd @ https://www.gucci.com/geo-markup/_static/footer/geo-section/index-DUA8Vu1C.js:0
+[    5959ms] [LOG] Logger set with Service: plp and Environment: prd @ https://www.gucci.com/plp/_next/static/chunks/780-2d5b30f3804dadfc.js:0
+[    5999ms] [ERROR] Ignoring duplicate Content-Security-Policy directive 'worker-src'. @ https://www.gucci.com/static/7941ce5497c4f05c60ad3b5f0ef2bf8454a63794300564:23
+[    6001ms] [ERROR] Ignoring duplicate Content-Security-Policy directive 'worker-src'. @ https://www.gucci.com/static/7941ce5497c4f05c60ad3b5f0ef2bf8454a63794300564:23
+[    6135ms] [ERROR] Ignoring duplicate Content-Security-Policy directive 'worker-src'. @ https://www.gucci.com/static/7941ce5497c4f05c60ad3b5f0ef2bf8454a63794300564:23
+[    6136ms] [ERROR] Ignoring duplicate Content-Security-Policy directive 'worker-src'. @ https://www.gucci.com/static/7941ce5497c4f05c60ad3b5f0ef2bf8454a63794300564:23
+[   10075ms] [ERROR] Ignoring duplicate Content-Security-Policy directive 'worker-src'. @ https://www.gucci.com/static/7941ce5497c4f05c60ad3b5f0ef2bf8454a63794300564:23
+[   10079ms] [ERROR] Ignoring duplicate Content-Security-Policy directive 'worker-src'. @ https://www.gucci.com/static/7941ce5497c4f05c60ad3b5f0ef2bf8454a63794300564:23
+[   10104ms] [ERROR] Ignoring duplicate Content-Security-Policy directive 'worker-src'. @ https://www.gucci.com/static/7941ce5497c4f05c60ad3b5f0ef2bf8454a63794300564:23
+[   10107ms] [ERROR] Ignoring duplicate Content-Security-Policy directive 'worker-src'. @ https://www.gucci.com/static/7941ce5497c4f05c60ad3b5f0ef2bf8454a63794300564:23
+[   12970ms] [LOG] front.js => connectedToInside @ https://eu3-cdn.inside-graph.com/js/frontend-framework.js.bundle?v=996bfc2e3d-139975:2381
+[   13028ms] [LOG] [INSIDE] Custom script loaded @ https://eu3-cdn.inside-graph.com/custom/4-customScript.js?v=996bfc2e3d-139975:3
+[   13676ms] [LOG] googleAnalytics {category: Inside : Reactive Chat, action: view, label: undefined} @ https://eu3-cdn.inside-graph.com/custom/4-customChatTab.js?v=996bfc2e3d-139975:478

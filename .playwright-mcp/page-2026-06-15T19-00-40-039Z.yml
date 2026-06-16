@@ -1,0 +1,1064 @@
+- generic:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - paragraph:
+                      - text: Neue Saison Sneaker.
+                      - link:
+                        - /url: /de-de/ca/damen/alle-schuhe/sneakers
+                        - text: Damen shoppen
+                      - text: .
+                      - link:
+                        - /url: /de-de/ca/herren/schuhe/sneakers
+                        - text: Herren shoppen
+                      - text: .
+                - generic:
+                  - generic:
+                    - paragraph:
+                      - text: Die Sommerausgabe.
+                      - link:
+                        - /url: /de-de/ca/damen/kollectionen/seasonal-edit
+                        - text: Damen.
+                - generic:
+                  - generic:
+                    - paragraph:
+                      - text: Neue Saison Sneaker.
+                      - link:
+                        - /url: /de-de/ca/damen/alle-schuhe/sneakers
+                        - text: Damen shoppen
+                      - text: .
+                      - link:
+                        - /url: /de-de/ca/herren/schuhe/sneakers
+                        - text: Herren shoppen
+                      - text: .
+                - generic:
+                  - generic:
+                    - paragraph:
+                      - text: Die Sommerausgabe.
+                      - link:
+                        - /url: /de-de/ca/damen/kollectionen/seasonal-edit
+                        - text: Damen.
+          - banner:
+            - link:
+              - /url: /de-de
+              - generic:
+                - img
+            - list:
+              - listitem:
+                - button:
+                  - generic:
+                    - generic: Suchen
+                    - generic:
+                      - generic:
+                        - img
+              - listitem:
+                - link:
+                  - /url: /de-de/signin
+                  - generic:
+                    - img
+              - listitem:
+                - link:
+                  - /url: https://www.alexandermcqueen.com/de-de/cart
+                  - generic:
+                    - img
+              - listitem:
+                - button:
+                  - img
+                  - generic: MENÜ
+      - generic:
+        - generic:
+          - generic:
+            - link:
+              - /url: /de-de/ca/damen/ready-to-wear
+              - generic: Ready-To-Wear
+          - list:
+            - link:
+              - /url: /de-de/ca/damen/ready-to-wear
+              - listitem:
+                - generic: Alle einsehen Ready-To-Wear
+            - link:
+              - /url: /de-de/ca/damen/ready-to-wear/tailoring
+              - listitem:
+                - generic: Tailoring
+            - link:
+              - /url: /de-de/ca/damen/ready-to-wear/mantel-und-outerwear
+              - listitem:
+                - generic: Mäntel und Outerwear
+            - link:
+              - /url: /de-de/ca/damen/ready-to-wear/jacken
+              - listitem:
+                - generic: Jacken
+            - link:
+              - /url: /de-de/ca/damen/ready-to-wear/kleider
+              - listitem:
+                - generic: Kleider für Damen
+            - link:
+              - /url: /de-de/ca/damen/ready-to-wear/strickwaren
+              - listitem:
+                - generic: Strickwaren
+            - link:
+              - /url: /de-de/ca/damen/ready-to-wear/leder
+              - listitem:
+                - generic: Leder und Lammfell
+            - link:
+              - /url: /de-de/ca/damen/ready-to-wear/jeans
+              - listitem:
+                - generic: Denim
+            - link:
+              - /url: /de-de/ca/damen/ready-to-wear/tops-and-blusen
+              - listitem:
+                - generic: Tops and Blusen
+            - link:
+              - /url: /de-de/ca/damen/ready-to-wear/t-shirts-und-sweatshirts
+              - listitem:
+                - generic: T-Shirts und Sweatshirts
+            - link:
+              - /url: /de-de/ca/damen/ready-to-wear/rocke
+              - listitem:
+                - generic: Röcke
+            - link:
+              - /url: /de-de/ca/damen/ready-to-wear/hosen
+              - listitem:
+                - generic: Hosen
+          - button:
+            - img
+      - main:
+        - generic:
+          - generic:
+            - heading [level=1]: Ready-To-Wear
+          - generic:
+            - generic:
+              - generic:
+                - generic: 168 Artikel
+                - generic:
+                  - button:
+                    - generic:
+                      - img
+                    - text: Sortiert
+                  - button:
+                    - generic:
+                      - generic:
+                        - img
+                    - generic: Filtern
+          - generic:
+            - generic:
+              - generic:
+                - button [ref=e1] [cursor=pointer]:
+                  - img [ref=e2]
+                - button [ref=e4] [cursor=pointer]:
+                  - img [ref=e5]
+                - link "Jackett mit freien Schultern, Gurtbanddetails und Vichy-Karomuster":
+                  - /url: /de-de/pr/jackett-mit-freien-schultern-gurtbanddetails-und-vichy-karomuster-876232QJAGD1080.html
+                  - generic:
+                    - generic:
+                      - group "6 / 6":
+                        - img "Jackett mit freien Schultern, Gurtbanddetails und Vichy-Karomuster | Alexander McQueen - image 6"
+                      - group "1 / 6":
+                        - img "Jackett mit freien Schultern, Gurtbanddetails und Vichy-Karomuster | Alexander McQueen - image 1"
+                      - group "2 / 6":
+                        - img "Jackett mit freien Schultern, Gurtbanddetails und Vichy-Karomuster | Alexander McQueen - image 2"
+                      - group "3 / 6":
+                        - img "Jackett mit freien Schultern, Gurtbanddetails und Vichy-Karomuster | Alexander McQueen - image 3"
+                      - group "4 / 6":
+                        - img "Jackett mit freien Schultern, Gurtbanddetails und Vichy-Karomuster | Alexander McQueen - image 4"
+                      - group "5 / 6":
+                        - img "Jackett mit freien Schultern, Gurtbanddetails und Vichy-Karomuster | Alexander McQueen - image 5"
+                      - group "6 / 6":
+                        - img "Jackett mit freien Schultern, Gurtbanddetails und Vichy-Karomuster | Alexander McQueen - image 6"
+                      - group "1 / 6":
+                        - img "Jackett mit freien Schultern, Gurtbanddetails und Vichy-Karomuster | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/jackett-mit-freien-schultern-gurtbanddetails-und-vichy-karomuster-876232QJAGD1080.html
+                  - heading [level=2]: Jackett mit freien Schultern, Gurtbanddetails und Vichy-Karomuster in Schwarz/Elfenbein
+                - generic:
+                  - generic: 2 590 €
+            - generic:
+              - generic:
+                - button [ref=e7] [cursor=pointer]:
+                  - img [ref=e8]
+                - button [ref=e10] [cursor=pointer]:
+                  - img [ref=e11]
+                - link "Couture-Hose mit Vichy-Karomuster":
+                  - /url: /de-de/pr/couture-hose-mit-vichy-karomuster-A002YUQJAGD1080.html
+                  - generic:
+                    - generic:
+                      - group "4 / 4":
+                        - img "Couture-Hose mit Vichy-Karomuster | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Couture-Hose mit Vichy-Karomuster | Alexander McQueen - image 1"
+                      - group "2 / 4":
+                        - img "Couture-Hose mit Vichy-Karomuster | Alexander McQueen - image 2"
+                      - group "3 / 4":
+                        - img "Couture-Hose mit Vichy-Karomuster | Alexander McQueen - image 3"
+                      - group "4 / 4":
+                        - img "Couture-Hose mit Vichy-Karomuster | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Couture-Hose mit Vichy-Karomuster | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/couture-hose-mit-vichy-karomuster-A002YUQJAGD1080.html
+                  - heading [level=2]: Couture-Hose mit Vichy-Karomuster in Schwarz/Elfenbein
+                - generic:
+                  - generic: 1 100 €
+            - generic:
+              - generic:
+                - button [ref=e13] [cursor=pointer]:
+                  - img [ref=e14]
+                - button [ref=e16] [cursor=pointer]:
+                  - img [ref=e17]
+                - link "Pointelle-Stricktop":
+                  - /url: /de-de/pr/pointelle-stricktop-876348Q1BH31000.html
+                  - generic:
+                    - generic:
+                      - group "5 / 5":
+                        - img "Pointelle-Stricktop | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "Pointelle-Stricktop | Alexander McQueen - image 1"
+                      - group "2 / 5":
+                        - img "Pointelle-Stricktop | Alexander McQueen - image 2"
+                      - group "3 / 5":
+                        - img "Pointelle-Stricktop | Alexander McQueen - image 3"
+                      - group "4 / 5":
+                        - img "Pointelle-Stricktop | Alexander McQueen - image 4"
+                      - group "5 / 5":
+                        - img "Pointelle-Stricktop | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "Pointelle-Stricktop | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/pointelle-stricktop-876348Q1BH31000.html
+                  - heading [level=2]: Pointelle-Stricktop in Schwarz
+                - generic:
+                  - generic: + 1 Farben
+                  - generic:
+                    - link:
+                      - /url: /de-de/pr/pointelle-stricktop-876348Q1BH39004.html
+                - generic:
+                  - generic: 1 190 €
+            - generic:
+              - generic:
+                - button [ref=e19] [cursor=pointer]:
+                  - img [ref=e20]
+                - button [ref=e22] [cursor=pointer]:
+                  - img [ref=e23]
+                - link "Bleistiftkleid mit Gingham-Karomuster und Korsettschnürung":
+                  - /url: /de-de/pr/bleistiftkleid-mit-gingham-karomuster-und-korsettschnurung-A0004BQJAGD1080.html
+                  - generic:
+                    - generic:
+                      - group "5 / 5":
+                        - img "Bleistiftkleid mit Gingham-Karomuster und Korsettschnürung | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "Bleistiftkleid mit Gingham-Karomuster und Korsettschnürung | Alexander McQueen - image 1"
+                      - group "2 / 5":
+                        - img "Bleistiftkleid mit Gingham-Karomuster und Korsettschnürung | Alexander McQueen - image 2"
+                      - group "3 / 5":
+                        - img "Bleistiftkleid mit Gingham-Karomuster und Korsettschnürung | Alexander McQueen - image 3"
+                      - group "4 / 5":
+                        - img "Bleistiftkleid mit Gingham-Karomuster und Korsettschnürung | Alexander McQueen - image 4"
+                      - group "5 / 5":
+                        - img "Bleistiftkleid mit Gingham-Karomuster und Korsettschnürung | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "Bleistiftkleid mit Gingham-Karomuster und Korsettschnürung | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/bleistiftkleid-mit-gingham-karomuster-und-korsettschnurung-A0004BQJAGD1080.html
+                  - heading [level=2]: Bleistiftkleid mit Gingham-Karomuster und Korsettschnürung in Schwarz/Elfenbein
+                - generic:
+                  - generic: 1 990 €
+            - generic:
+              - generic:
+                - button [ref=e25] [cursor=pointer]:
+                  - img [ref=e26]
+                - button [ref=e28] [cursor=pointer]:
+                  - img [ref=e29]
+                - link "Jackett mit freien Schultern und Gurtbandetails":
+                  - /url: /de-de/pr/jackett-mit-freien-schultern-und-gurtbandetails-865434QJAAC1000.html
+                  - generic:
+                    - generic:
+                      - group "6 / 6":
+                        - img "Jackett mit freien Schultern und Gurtbandetails | Alexander McQueen - image 6"
+                      - group "1 / 6":
+                        - img "Jackett mit freien Schultern und Gurtbandetails | Alexander McQueen - image 1"
+                      - group "2 / 6":
+                        - img "Jackett mit freien Schultern und Gurtbandetails | Alexander McQueen - image 2"
+                      - group "3 / 6":
+                        - img "Jackett mit freien Schultern und Gurtbandetails | Alexander McQueen - image 3"
+                      - group "4 / 6":
+                        - img "Jackett mit freien Schultern und Gurtbandetails | Alexander McQueen - image 4"
+                      - group "5 / 6":
+                        - img "Jackett mit freien Schultern und Gurtbandetails | Alexander McQueen - image 5"
+                      - group "6 / 6":
+                        - img "Jackett mit freien Schultern und Gurtbandetails | Alexander McQueen - image 6"
+                      - group "1 / 6":
+                        - img "Jackett mit freien Schultern und Gurtbandetails | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/jackett-mit-freien-schultern-und-gurtbandetails-865434QJAAC1000.html
+                  - heading [level=2]: Jackett mit freien Schultern und Gurtbandetails in Schwarz
+                - generic:
+                  - generic: 2 490 €
+            - generic:
+              - generic:
+                - button [ref=e31] [cursor=pointer]:
+                  - img [ref=e32]
+                - button [ref=e34] [cursor=pointer]:
+                  - img [ref=e35]
+                - link "Couture-Hose mit hohem Bund":
+                  - /url: /de-de/pr/couture-hose-mit-hohem-bund-847381QJAAC1000.html
+                  - generic:
+                    - generic:
+                      - group "4 / 4":
+                        - img "Couture-Hose mit hohem Bund | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Couture-Hose mit hohem Bund | Alexander McQueen - image 1"
+                      - group "2 / 4":
+                        - img "Couture-Hose mit hohem Bund | Alexander McQueen - image 2"
+                      - group "3 / 4":
+                        - img "Couture-Hose mit hohem Bund | Alexander McQueen - image 3"
+                      - group "4 / 4":
+                        - img "Couture-Hose mit hohem Bund | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Couture-Hose mit hohem Bund | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/couture-hose-mit-hohem-bund-847381QJAAC1000.html
+                  - heading [level=2]: Couture-Hose mit hohem Bund in Schwarz
+                - generic:
+                  - generic: 1 100 €
+            - generic:
+              - generic:
+                - button [ref=e37] [cursor=pointer]:
+                  - img [ref=e38]
+                - button [ref=e40] [cursor=pointer]:
+                  - img [ref=e41]
+                - link "Seidenhemd mit Bindedetail":
+                  - /url: /de-de/pr/seidenhemd-mit-bindedetail-A0002BQBADT9007.html
+                  - generic:
+                    - generic:
+                      - group "5 / 5":
+                        - img "Seidenhemd mit Bindedetail | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "Seidenhemd mit Bindedetail | Alexander McQueen - image 1"
+                      - group "2 / 5":
+                        - img "Seidenhemd mit Bindedetail | Alexander McQueen - image 2"
+                      - group "3 / 5":
+                        - img "Seidenhemd mit Bindedetail | Alexander McQueen - image 3"
+                      - group "4 / 5":
+                        - img "Seidenhemd mit Bindedetail | Alexander McQueen - image 4"
+                      - group "5 / 5":
+                        - img "Seidenhemd mit Bindedetail | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "Seidenhemd mit Bindedetail | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/seidenhemd-mit-bindedetail-A0002BQBADT9007.html
+                  - heading [level=2]: Seidenhemd mit Bindedetail in Elfenbeinfarben
+                - generic:
+                  - generic: 1 100 €
+            - generic:
+              - generic:
+                - button [ref=e43] [cursor=pointer]:
+                  - img [ref=e44]
+                - button [ref=e46] [cursor=pointer]:
+                  - img [ref=e47]
+                - link "Midikleid mit Spitzeneinsatz":
+                  - /url: /de-de/pr/midikleid-mit-spitzeneinsatz-A0000HQEAAL1000.html
+                  - generic:
+                    - generic:
+                      - group "5 / 5":
+                        - img "Midikleid mit Spitzeneinsatz | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "Midikleid mit Spitzeneinsatz | Alexander McQueen - image 1"
+                      - group "2 / 5":
+                        - img "Midikleid mit Spitzeneinsatz | Alexander McQueen - image 2"
+                      - group "3 / 5":
+                        - img "Midikleid mit Spitzeneinsatz | Alexander McQueen - image 3"
+                      - group "4 / 5":
+                        - img "Midikleid mit Spitzeneinsatz | Alexander McQueen - image 4"
+                      - group "5 / 5":
+                        - img "Midikleid mit Spitzeneinsatz | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "Midikleid mit Spitzeneinsatz | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/midikleid-mit-spitzeneinsatz-A0000HQEAAL1000.html
+                  - heading [level=2]: Midikleid mit Spitzeneinsatz in Schwarz
+                - generic:
+                  - generic: 2 890 €
+            - generic:
+              - generic:
+                - button [ref=e49] [cursor=pointer]:
+                  - img [ref=e50]
+                - button [ref=e52] [cursor=pointer]:
+                  - img [ref=e53]
+                - link "Cutaway-Jackett mit Vichy-Karomuster":
+                  - /url: /de-de/pr/cutaway-jackett-mit-vichy-karomuster-876508QJAGD1080.html
+                  - generic:
+                    - generic:
+                      - group "5 / 5":
+                        - img "Cutaway-Jackett mit Vichy-Karomuster | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "Cutaway-Jackett mit Vichy-Karomuster | Alexander McQueen - image 1"
+                      - group "2 / 5":
+                        - img "Cutaway-Jackett mit Vichy-Karomuster | Alexander McQueen - image 2"
+                      - group "3 / 5":
+                        - img "Cutaway-Jackett mit Vichy-Karomuster | Alexander McQueen - image 3"
+                      - group "4 / 5":
+                        - img "Cutaway-Jackett mit Vichy-Karomuster | Alexander McQueen - image 4"
+                      - group "5 / 5":
+                        - img "Cutaway-Jackett mit Vichy-Karomuster | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "Cutaway-Jackett mit Vichy-Karomuster | Alexander McQueen - image 1"
+              - generic:
+                - generic:
+                  - paragraph: Zur Waitlist anmelden
+                - link:
+                  - /url: /de-de/pr/cutaway-jackett-mit-vichy-karomuster-876508QJAGD1080.html
+                  - heading [level=2]: Cutaway-Jackett mit Vichy-Karomuster in Schwarz/Elfenbein
+                - generic:
+                  - generic: 2 190 €
+            - generic:
+              - generic:
+                - button [ref=e55] [cursor=pointer]:
+                  - img [ref=e56]
+                - button [ref=e58] [cursor=pointer]:
+                  - img [ref=e59]
+                - link "Couture-Caprihose mit Vichy-Karomuster":
+                  - /url: /de-de/pr/couture-caprihose-mit-vichy-karomuster-876513QJAGD1080.html
+                  - generic:
+                    - generic:
+                      - group "4 / 4":
+                        - img "Couture-Caprihose mit Vichy-Karomuster | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Couture-Caprihose mit Vichy-Karomuster | Alexander McQueen - image 1"
+                      - group "2 / 4":
+                        - img "Couture-Caprihose mit Vichy-Karomuster | Alexander McQueen - image 2"
+                      - group "3 / 4":
+                        - img "Couture-Caprihose mit Vichy-Karomuster | Alexander McQueen - image 3"
+                      - group "4 / 4":
+                        - img "Couture-Caprihose mit Vichy-Karomuster | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Couture-Caprihose mit Vichy-Karomuster | Alexander McQueen - image 1"
+              - generic:
+                - generic:
+                  - paragraph: Zur Waitlist anmelden
+                - link:
+                  - /url: /de-de/pr/couture-caprihose-mit-vichy-karomuster-876513QJAGD1080.html
+                  - heading [level=2]: Couture-Caprihose mit Vichy-Karomuster in Schwarz/Elfenbein
+                - generic:
+                  - generic: 1 100 €
+            - generic:
+              - generic:
+                - button [ref=e61] [cursor=pointer]:
+                  - img [ref=e62]
+                - button [ref=e64] [cursor=pointer]:
+                  - img [ref=e65]
+                - link "Spitzen-T-Shirt mit Schößchen":
+                  - /url: /de-de/pr/spitzen-t-shirt-mit-schosschen-A000L5QLAEZ1000.html
+                  - generic:
+                    - generic:
+                      - group "4 / 4":
+                        - img "Spitzen-T-Shirt mit Schößchen | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Spitzen-T-Shirt mit Schößchen | Alexander McQueen - image 1"
+                      - group "2 / 4":
+                        - img "Spitzen-T-Shirt mit Schößchen | Alexander McQueen - image 2"
+                      - group "3 / 4":
+                        - img "Spitzen-T-Shirt mit Schößchen | Alexander McQueen - image 3"
+                      - group "4 / 4":
+                        - img "Spitzen-T-Shirt mit Schößchen | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Spitzen-T-Shirt mit Schößchen | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/spitzen-t-shirt-mit-schosschen-A000L5QLAEZ1000.html
+                  - heading [level=2]: Spitzen-T-Shirt mit Schößchen in Schwarz
+                - generic:
+                  - generic: 490 €
+            - generic:
+              - generic:
+                - button [ref=e67] [cursor=pointer]:
+                  - img [ref=e68]
+                - button [ref=e70] [cursor=pointer]:
+                  - img [ref=e71]
+                - link "Bleistiftrock mit Korsett-Schnürung":
+                  - /url: /de-de/pr/bleistiftrock-mit-korsett-schnurung-A00047QJAAC1000.html
+                  - generic:
+                    - generic:
+                      - group "3 / 3":
+                        - img "Bleistiftrock mit Korsett-Schnürung | Alexander McQueen - image 3"
+                      - group "1 / 3":
+                        - img "Bleistiftrock mit Korsett-Schnürung | Alexander McQueen - image 1"
+                      - group "2 / 3":
+                        - img "Bleistiftrock mit Korsett-Schnürung | Alexander McQueen - image 2"
+                      - group "3 / 3":
+                        - img "Bleistiftrock mit Korsett-Schnürung | Alexander McQueen - image 3"
+                      - group "1 / 3":
+                        - img "Bleistiftrock mit Korsett-Schnürung | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/bleistiftrock-mit-korsett-schnurung-A00047QJAAC1000.html
+                  - heading [level=2]: Bleistiftrock mit Korsett-Schnürung in Schwarz
+                - generic:
+                  - generic: 1 290 €
+            - generic:
+              - generic:
+                - button [ref=e73] [cursor=pointer]:
+                  - img [ref=e74]
+                - button [ref=e76] [cursor=pointer]:
+                  - img [ref=e77]
+                - link "Pyjamahemd mit Blumenprint":
+                  - /url: /de-de/pr/pyjamahemd-mit-blumenprint-819016QCAMY8034.html
+                  - generic:
+                    - generic:
+                      - group "5 / 5":
+                        - img "Pyjamahemd mit Blumenprint | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "Pyjamahemd mit Blumenprint | Alexander McQueen - image 1"
+                      - group "2 / 5":
+                        - img "Pyjamahemd mit Blumenprint | Alexander McQueen - image 2"
+                      - group "3 / 5":
+                        - img "Pyjamahemd mit Blumenprint | Alexander McQueen - image 3"
+                      - group "4 / 5":
+                        - img "Pyjamahemd mit Blumenprint | Alexander McQueen - image 4"
+                      - group "5 / 5":
+                        - img "Pyjamahemd mit Blumenprint | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "Pyjamahemd mit Blumenprint | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/pyjamahemd-mit-blumenprint-819016QCAMY8034.html
+                  - heading [level=2]: Pyjamahemd mit Blumenprint in Stein/Hellorange
+                - generic:
+                  - generic: 1 350 €
+            - generic:
+              - generic:
+                - button [ref=e79] [cursor=pointer]:
+                  - img [ref=e80]
+                - button [ref=e82] [cursor=pointer]:
+                  - img [ref=e83]
+                - link "Florale Pyjamahose":
+                  - /url: /de-de/pr/florale-pyjamahose-862294QCAMY8034.html
+                  - generic:
+                    - generic:
+                      - group "4 / 4":
+                        - img "Florale Pyjamahose | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Florale Pyjamahose | Alexander McQueen - image 1"
+                      - group "2 / 4":
+                        - img "Florale Pyjamahose | Alexander McQueen - image 2"
+                      - group "3 / 4":
+                        - img "Florale Pyjamahose | Alexander McQueen - image 3"
+                      - group "4 / 4":
+                        - img "Florale Pyjamahose | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Florale Pyjamahose | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/florale-pyjamahose-862294QCAMY8034.html
+                  - heading [level=2]: Florale Pyjamahose in Stein/Hellorange
+                - generic:
+                  - generic: 1 290 €
+            - generic:
+              - generic:
+                - button [ref=e85] [cursor=pointer]:
+                  - img [ref=e86]
+                - button [ref=e88] [cursor=pointer]:
+                  - img [ref=e89]
+                - link "T-Shirt mit Floral-Skull":
+                  - /url: /de-de/pr/t-shirt-mit-floral-skull-872397QZASF0999.html
+                  - generic:
+                    - generic:
+                      - group "5 / 5":
+                        - img "T-Shirt mit Floral-Skull | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "T-Shirt mit Floral-Skull | Alexander McQueen - image 1"
+                      - group "2 / 5":
+                        - img "T-Shirt mit Floral-Skull | Alexander McQueen - image 2"
+                      - group "3 / 5":
+                        - img "T-Shirt mit Floral-Skull | Alexander McQueen - image 3"
+                      - group "4 / 5":
+                        - img "T-Shirt mit Floral-Skull | Alexander McQueen - image 4"
+                      - group "5 / 5":
+                        - img "T-Shirt mit Floral-Skull | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "T-Shirt mit Floral-Skull | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/t-shirt-mit-floral-skull-872397QZASF0999.html
+                  - heading [level=2]: T-Shirt mit Floral-Skull in Elfenbeinfarben
+                - generic:
+                  - generic: 390 €
+            - generic:
+              - generic:
+                - button [ref=e91] [cursor=pointer]:
+                  - img [ref=e92]
+                - button [ref=e94] [cursor=pointer]:
+                  - img [ref=e95]
+                - link "Minikleid aus Pointelle-Strick":
+                  - /url: /de-de/pr/minikleid-aus-pointelle-strick-876688Q1BH29004.html
+                  - generic:
+                    - generic:
+                      - group "4 / 4":
+                        - img "Minikleid aus Pointelle-Strick | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Minikleid aus Pointelle-Strick | Alexander McQueen - image 1"
+                      - group "2 / 4":
+                        - img "Minikleid aus Pointelle-Strick | Alexander McQueen - image 2"
+                      - group "3 / 4":
+                        - img "Minikleid aus Pointelle-Strick | Alexander McQueen - image 3"
+                      - group "4 / 4":
+                        - img "Minikleid aus Pointelle-Strick | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Minikleid aus Pointelle-Strick | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/minikleid-aus-pointelle-strick-876688Q1BH29004.html
+                  - heading [level=2]: Minikleid aus Pointelle-Strick in Elfenbeinfarben
+                - generic:
+                  - generic: + 1 Farben
+                  - generic:
+                    - link:
+                      - /url: /de-de/pr/minikleid-aus-pointelle-strick-876688Q1BH21000.html
+                - generic:
+                  - generic: 1 790 €
+            - generic:
+              - generic:
+                - button [ref=e97] [cursor=pointer]:
+                  - img [ref=e98]
+                - button [ref=e100] [cursor=pointer]:
+                  - img [ref=e101]
+                - link "Einreihiges Jackett aus Wollgabardine":
+                  - /url: /de-de/pr/einreihiges-jackett-aus-wollgabardine-857750QJAGA7095.html
+                  - generic:
+                    - generic:
+                      - group "4 / 4":
+                        - img "Einreihiges Jackett aus Wollgabardine | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Einreihiges Jackett aus Wollgabardine | Alexander McQueen - image 1"
+                      - group "2 / 4":
+                        - img "Einreihiges Jackett aus Wollgabardine | Alexander McQueen - image 2"
+                      - group "3 / 4":
+                        - img "Einreihiges Jackett aus Wollgabardine | Alexander McQueen - image 3"
+                      - group "4 / 4":
+                        - img "Einreihiges Jackett aus Wollgabardine | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Einreihiges Jackett aus Wollgabardine | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/einreihiges-jackett-aus-wollgabardine-857750QJAGA7095.html
+                  - heading [level=2]: Einreihiges Jackett aus Wollgabardine in Gelb
+                - generic:
+                  - generic: 1 890 €
+            - generic:
+              - generic:
+                - button [ref=e103] [cursor=pointer]:
+                  - img [ref=e104]
+                - button [ref=e106] [cursor=pointer]:
+                  - img [ref=e107]
+                - link "Zigarettenhose aus Gabardine-Wolle":
+                  - /url: /de-de/pr/zigarettenhose-aus-gabardine-wolle-830044QJAGA7095.html
+                  - generic:
+                    - generic:
+                      - group "4 / 4":
+                        - img "Zigarettenhose aus Gabardine-Wolle | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Zigarettenhose aus Gabardine-Wolle | Alexander McQueen - image 1"
+                      - group "2 / 4":
+                        - img "Zigarettenhose aus Gabardine-Wolle | Alexander McQueen - image 2"
+                      - group "3 / 4":
+                        - img "Zigarettenhose aus Gabardine-Wolle | Alexander McQueen - image 3"
+                      - group "4 / 4":
+                        - img "Zigarettenhose aus Gabardine-Wolle | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Zigarettenhose aus Gabardine-Wolle | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/zigarettenhose-aus-gabardine-wolle-830044QJAGA7095.html
+                  - heading [level=2]: Zigarettenhose aus Gabardine-Wolle in Gelb
+                - generic:
+                  - generic: 890 €
+            - generic:
+              - generic:
+                - button [ref=e109] [cursor=pointer]:
+                  - img [ref=e110]
+                - button [ref=e112] [cursor=pointer]:
+                  - img [ref=e113]
+                - link "Plissiertes Top mit Blumenmuster":
+                  - /url: /de-de/pr/plissiertes-top-mit-blumenmuster-865422QCAM18034.html
+                  - generic:
+                    - generic:
+                      - group "4 / 4":
+                        - img "Plissiertes Top mit Blumenmuster | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Plissiertes Top mit Blumenmuster | Alexander McQueen - image 1"
+                      - group "2 / 4":
+                        - img "Plissiertes Top mit Blumenmuster | Alexander McQueen - image 2"
+                      - group "3 / 4":
+                        - img "Plissiertes Top mit Blumenmuster | Alexander McQueen - image 3"
+                      - group "4 / 4":
+                        - img "Plissiertes Top mit Blumenmuster | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Plissiertes Top mit Blumenmuster | Alexander McQueen - image 1"
+              - generic:
+                - generic:
+                  - paragraph: Zur Waitlist anmelden
+                - link:
+                  - /url: /de-de/pr/plissiertes-top-mit-blumenmuster-865422QCAM18034.html
+                  - heading [level=2]: Plissiertes Top mit Blumenmuster in Stein/Hellorange
+                - generic:
+                  - generic: 1 690 €
+            - generic:
+              - generic:
+                - button [ref=e115] [cursor=pointer]:
+                  - img [ref=e116]
+                - button [ref=e118] [cursor=pointer]:
+                  - img [ref=e119]
+                - link "Bustier-Abendkleid":
+                  - /url: /de-de/pr/bustier-abendkleid-842937QBABX7095.html
+                  - generic:
+                    - generic:
+                      - group "4 / 4":
+                        - img "Bustier-Abendkleid | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Bustier-Abendkleid | Alexander McQueen - image 1"
+                      - group "2 / 4":
+                        - img "Bustier-Abendkleid | Alexander McQueen - image 2"
+                      - group "3 / 4":
+                        - img "Bustier-Abendkleid | Alexander McQueen - image 3"
+                      - group "4 / 4":
+                        - img "Bustier-Abendkleid | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Bustier-Abendkleid | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/bustier-abendkleid-842937QBABX7095.html
+                  - heading [level=2]: Bustier-Abendkleid in Gelb
+                - generic:
+                  - generic: + 2 Farben
+                  - generic:
+                    - link:
+                      - /url: /de-de/pr/bustier-abendkleid-842937QBABX3079.html
+                    - link:
+                      - /url: /de-de/pr/bustier-abendkleid-842937QBABX6193.html
+                - generic:
+                  - generic: 3 500 €
+            - generic:
+              - generic:
+                - button [ref=e121] [cursor=pointer]:
+                  - img [ref=e122]
+                - button [ref=e124] [cursor=pointer]:
+                  - img [ref=e125]
+                - link "Bustier-Abendkleid":
+                  - /url: /de-de/pr/bustier-abendkleid-842937QBABX3079.html
+                  - generic:
+                    - generic:
+                      - group "4 / 4":
+                        - img "Bustier-Abendkleid | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Bustier-Abendkleid | Alexander McQueen - image 1"
+                      - group "2 / 4":
+                        - img "Bustier-Abendkleid | Alexander McQueen - image 2"
+                      - group "3 / 4":
+                        - img "Bustier-Abendkleid | Alexander McQueen - image 3"
+                      - group "4 / 4":
+                        - img "Bustier-Abendkleid | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Bustier-Abendkleid | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/bustier-abendkleid-842937QBABX3079.html
+                  - heading [level=2]: Bustier-Abendkleid in Blau
+                - generic:
+                  - generic: + 2 Farben
+                  - generic:
+                    - link:
+                      - /url: /de-de/pr/bustier-abendkleid-842937QBABX7095.html
+                    - link:
+                      - /url: /de-de/pr/bustier-abendkleid-842937QBABX6193.html
+                - generic:
+                  - generic: 3 500 €
+            - generic:
+              - generic:
+                - button [ref=e127] [cursor=pointer]:
+                  - img [ref=e128]
+                - button [ref=e130] [cursor=pointer]:
+                  - img [ref=e131]
+                - link "Asymmetrisch drapiertes Abendkleid":
+                  - /url: /de-de/pr/asymmetrisch-drapiertes-abendkleid-A000BAQEAAL3079.html
+                  - generic:
+                    - generic:
+                      - group "4 / 4":
+                        - img "Asymmetrisch drapiertes Abendkleid | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Asymmetrisch drapiertes Abendkleid | Alexander McQueen - image 1"
+                      - group "2 / 4":
+                        - img "Asymmetrisch drapiertes Abendkleid | Alexander McQueen - image 2"
+                      - group "3 / 4":
+                        - img "Asymmetrisch drapiertes Abendkleid | Alexander McQueen - image 3"
+                      - group "4 / 4":
+                        - img "Asymmetrisch drapiertes Abendkleid | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Asymmetrisch drapiertes Abendkleid | Alexander McQueen - image 1"
+              - generic:
+                - generic:
+                  - paragraph: Zur Waitlist anmelden
+                - link:
+                  - /url: /de-de/pr/asymmetrisch-drapiertes-abendkleid-A000BAQEAAL3079.html
+                  - heading [level=2]: Asymmetrisch drapiertes Abendkleid in Blau
+                - generic:
+                  - generic: 3 500 €
+            - generic:
+              - generic:
+                - button [ref=e133] [cursor=pointer]:
+                  - img [ref=e134]
+                - button [ref=e136] [cursor=pointer]:
+                  - img [ref=e137]
+                - link "Asymmetrisch drapiertes Abendkleid":
+                  - /url: /de-de/pr/asymmetrisch-drapiertes-abendkleid-A000BAQEAF82154.html
+                  - generic:
+                    - generic:
+                      - group "4 / 4":
+                        - img "Asymmetrisch drapiertes Abendkleid | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Asymmetrisch drapiertes Abendkleid | Alexander McQueen - image 1"
+                      - group "2 / 4":
+                        - img "Asymmetrisch drapiertes Abendkleid | Alexander McQueen - image 2"
+                      - group "3 / 4":
+                        - img "Asymmetrisch drapiertes Abendkleid | Alexander McQueen - image 3"
+                      - group "4 / 4":
+                        - img "Asymmetrisch drapiertes Abendkleid | Alexander McQueen - image 4"
+                      - group "1 / 4":
+                        - img "Asymmetrisch drapiertes Abendkleid | Alexander McQueen - image 1"
+              - generic:
+                - link:
+                  - /url: /de-de/pr/asymmetrisch-drapiertes-abendkleid-A000BAQEAF82154.html
+                  - heading [level=2]: Asymmetrisch drapiertes Abendkleid in Braun
+                - generic:
+                  - generic: 3 500 €
+            - generic:
+              - generic:
+                - button [ref=e139] [cursor=pointer]:
+                  - img [ref=e140]
+                - button [ref=e142] [cursor=pointer]:
+                  - img [ref=e143]
+                - link "Asymmetrisches Cape":
+                  - /url: /de-de/pr/asymmetrisches-cape-A000BBQEAF82154.html
+                  - generic:
+                    - generic:
+                      - group "5 / 5":
+                        - img "Asymmetrisches Cape | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "Asymmetrisches Cape | Alexander McQueen - image 1"
+                      - group "2 / 5":
+                        - img "Asymmetrisches Cape | Alexander McQueen - image 2"
+                      - group "3 / 5":
+                        - img "Asymmetrisches Cape | Alexander McQueen - image 3"
+                      - group "4 / 5":
+                        - img "Asymmetrisches Cape | Alexander McQueen - image 4"
+                      - group "5 / 5":
+                        - img "Asymmetrisches Cape | Alexander McQueen - image 5"
+                      - group "1 / 5":
+                        - img "Asymmetrisches Cape | Alexander McQueen - image 1"
+              - generic:
+                - generic:
+                  - paragraph: Zur Waitlist anmelden
+                - link:
+                  - /url: /de-de/pr/asymmetrisches-cape-A000BBQEAF82154.html
+                  - heading [level=2]: Asymmetrisches Cape in Braun
+                - generic:
+                  - generic: 1 050 €
+          - generic:
+            - button "Mehr laden"
+        - generic:
+          - img
+        - generic:
+          - generic:
+            - generic:
+              - heading [level=2]: Ready-to-Wear Kollektion für Damen
+              - paragraph
+              - paragraph:
+                - text: Die McQueen Damen-Ready-to-Wear-Kollektion stellt Schnitt, Proportion und Silhouette in den Mittelpunkt – von den charakteristischen
+                - link:
+                  - /url: /de-de/ca/damen/ready-to-wear/jacken
+                  - text: taillierten Blazern
+                - text: des Hauses bis zu
+                - link:
+                  - /url: /de-de/ca/damen/ready-to-wear/kleider
+                  - text: Kleidern
+                - text: ","
+                - link:
+                  - /url: /de-de/ca/damen/ready-to-wear/strickwaren
+                  - text: Strickwaren
+                - text: ", Hosen,"
+                - link:
+                  - /url: /de-de/ca/damen/ready-to-wear/rocke
+                  - text: Röcken
+                - text: und Hemden aus luxuriösen Stoffen und mit markanten Prints.
+      - generic:
+        - generic:
+          - generic:
+            - link:
+              - /url: /de-de
+              - text: Home
+          - generic: /
+          - generic:
+            - link:
+              - /url: /de-de/ca/damen
+              - text: Damen
+          - generic: /
+          - generic: Ready-To-Wear
+      - generic:
+        - heading [level=2]: UNSERE EXKLUSIVEN SERVICES
+        - list:
+          - listitem:
+            - link:
+              - /url: /de-de/cp/client-service/contact-us
+              - generic:
+                - img
+              - paragraph: Online Services
+          - listitem:
+            - link:
+              - /url: /de-de/storelocator
+              - generic:
+                - img
+              - paragraph: Services in Boutique
+          - listitem:
+            - link:
+              - /url: /de-de/cp/faq#returns-exchanges
+              - generic:
+                - img
+              - paragraph: Liefer- und Rückversand
+      - generic:
+        - contentinfo:
+          - generic:
+            - navigation:
+              - heading [level=2]: Unsere exklusiven Services
+              - list:
+                - listitem:
+                  - link:
+                    - /url: /de-de/cp/faq
+                    - generic: Häufig Gestellte Fragen
+                - listitem:
+                  - link:
+                    - /url: /de-de/ca/product-aftercare
+                    - generic: Produktpflege
+                - listitem:
+                  - link:
+                    - /url: /de-de/track-order
+                    - generic: Meine Bestellung
+                - listitem:
+                  - link:
+                    - /url: /de-de/return-order
+                    - generic: Rückgaben
+                - listitem:
+                  - link:
+                    - /url: /de-de/stores
+                    - generic: Boutique locator
+                - listitem:
+                  - link:
+                    - /url: /de-de
+                    - generic: Einen Termin anfragen
+            - navigation:
+              - heading [level=2]: Die Maison Alexander McQueen
+              - list:
+                - listitem:
+                  - link:
+                    - /url: /de-de/legal/terms-and-conditions-of-sale
+                    - generic: Geschäfts- und Nutzungsbedingungen
+                - listitem:
+                  - link:
+                    - /url: /de-de/legal/privacy-policy
+                    - generic: Datenschutzrichtlinie & Cookies
+                - listitem:
+                  - link:
+                    - /url: /de-de/legal/cookie-policy
+                    - generic: Cookie Policy
+                - listitem:
+                  - link:
+                    - /url: /de-de
+                    - generic: Cookie-Einstellungen
+                - listitem:
+                  - link:
+                    - /url: "https://careers.kering.com/careers?filter_house=Alexander+McQueen "
+                    - generic: Karriere
+                - listitem:
+                  - link:
+                    - /url: /de-de/legal/terms-and-conditions-of-sale
+                    - generic: Alexander McQueen
+            - navigation:
+              - heading [level=2]: Folgen Sie uns
+              - list:
+                - listitem:
+                  - link:
+                    - /url: https://www.facebook.com/AlexanderMcQueen
+                    - generic: Facebook
+                - listitem:
+                  - link:
+                    - /url: https://www.instagram.com/alexandermcqueen/
+                    - generic: Instagram
+                - listitem:
+                  - link:
+                    - /url: https://twitter.com/mcqueen
+                    - generic: X
+                - listitem:
+                  - link:
+                    - /url: https://www.youtube.com/c/alexandermcqueen
+                    - generic: YouTube
+                - listitem:
+                  - link:
+                    - /url: https://www.tiktok.com/@mcqueen
+                    - generic: TikTok
+            - generic:
+              - button:
+                - generic: Abonnieren Sie sich für unser Newsletter
+                - generic:
+                  - img
+              - generic:
+                - paragraph: "Versand nach:"
+                - generic:
+                  - button: Deutschland
+                  - button: DE
+          - generic:
+            - generic:
+              - img
+            - generic:
+              - generic:
+                - paragraph: © 2026 Alexander McQueen Trading Limited/Autumnpaper Limited
+  - generic:
+    - alert
+  - dialog [ref=e146]:
+    - generic [ref=e147]:
+      - heading [level=2]
+      - button "Schließen" [active] [ref=e148]:
+        - img [ref=e150]
+    - generic [ref=e152]:
+      - generic [ref=e153]: Willkommen bei McQueen
+      - generic [ref=e154]: Sie besuchen gerade unsere Germany-Website. Klicken Sie unten, wenn Sie Ihren Standort auswählen möchten. Wenn Sie Ihren Browserstandort aktualisieren, können alle Artikel aus Ihrem Warenkorb entfernt werden.
+      - generic [ref=e155]:
+        - 'button "Online einkaufen: Switzerland" [ref=e156] [cursor=pointer]'
+        - button "Weiter zu Germany" [ref=e157] [cursor=pointer]
+  - generic:
+    - generic:
+      - img
+  - dialog "Datenschutz" [ref=e160]:
+    - generic [ref=e162]:
+      - generic [ref=e165]:
+        - text: Zusätzlich zu den Cookies, die für den Betrieb dieser Website unbedingt erforderlich sind, verwendet Alexander McQueen Cookies und andere Tracking-Tools, um sich an Ihre Präferenzen zu erinnern und Ihnen zusätzliche Dienste vorzuschlagen, um die Leistung unserer Website zu messen, um unser Verständnis Ihrer Interessen zu verbessern und, um Ihnen Warenkorbbenachrichtigungen zu senden. Unsere Partner verwenden Tracker, um personalisierte Werbung basierend auf Ihren Surfgewohnheiten und Ihrem Profil, auch durch Profilerstellung, zu platzieren.
+        - text: Sie können auf „Alle cookies akzeptieren“ klicken, um den oben genannten Verwendungen zuzustimmen, oder auf „Cookie-Einstellungen“, um Ihre Auswahl zu konfigurieren. Sie können Ihre Einstellungen jederzeit auf unserer Website ändern und insbesondere Ihre Einwilligung widerrufen.
+        - text: Weitere Informationen zu diesen Technologien und ihrer Verwendung auf dieser Website finden Sie in unserer
+        - link "Cookie-Richtlinie" [ref=e166] [cursor=pointer]:
+          - /url: https://www.alexandermcqueen.com/legal/cookie-policy
+        - text: .
+      - generic [ref=e168]:
+        - button "Cookie-Einstellungen, Öffnet das Einstellungscenter-Dialogfeld" [ref=e169] [cursor=pointer]: Cookie-Einstellungen
+        - button "Alle Cookies akzeptieren" [ref=e170] [cursor=pointer]

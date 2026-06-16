@@ -4,7 +4,7 @@ import { FeaturedBrandCard } from './FeaturedBrandCard';
 interface Brand {
   id: number;
   name: string;
-  image: string;
+  image?: string;
 }
 
 interface TopDesignerSectionProps {

@@ -10,6 +10,7 @@ export async function resolveProductBySlug(slug: string): Promise<ApiProduct | n
     // fall through to mock
   }
 
+  if (process.env.NODE_ENV !== 'development') return null;
   const mock = mockProducts.find(p => p.slug === slug);
   if (!mock) return null;
   return {

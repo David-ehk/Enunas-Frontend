@@ -6,6 +6,7 @@ import SimilarProducts from './components/SimilarProducts'
 import CuratedRecommendations from '@/components/CuratedRecommendations'
 import { notFound } from 'next/navigation'
 import { productApi, resolveProductWithMeta } from '@/lib/api'
+// productApi used below for category/brand recommendations
 import { generateSlug } from '@/lib/product'
 import type { ApiProduct } from '@/types/api'
 import type { Product as PdpProduct, Variant } from './types/product'
@@ -121,6 +122,7 @@ async function ProductPage({ params }: ProductPageProps) {
         brandSlug={brand}
         productSlug={slug}
         colorHexMap={colorHexMap}
+        productId={resolved.id}
       />
       <CompleteTheLook items={relatedItems} />
       <MoreFromBrand brand={product.brandName} items={brandItems} />
