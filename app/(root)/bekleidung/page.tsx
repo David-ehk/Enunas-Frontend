@@ -1,10 +1,12 @@
 'use client'
 
-import React, { Suspense, useState, useEffect, useMemo } from 'react'
+import React, { Suspense, useState, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 import { productApi, apiProductToCardShape } from '@/lib/api'
 import type { ProductCardShape } from '@/lib/api'
+import { useIsMobile } from '@/hooks/use-mobile'
+import BlurFilterBar from './components/BlurFilterBar'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -354,6 +356,9 @@ export default function BekleidungPage() {
 function BekleidungContent() {
   const searchParams  = useSearchParams()
   const searchQuery   = searchParams.get('q') || ''
+  const isMobile      = useIsMobile()
+
+  const filterBarRef = useRef<HTMLDivElement>(null)
 
   // Measure the fixed navbar height at runtime so the category strip
   // sticks flush beneath it with zero gap.
@@ -434,7 +439,7 @@ function BekleidungContent() {
     <div style={{ background: '#fff', fontFamily: "'League Spartan', sans-serif", color: '#0A0A0A', minHeight: '100vh' }}>
 
       {/* ── Editorial header ── above strip so it's always visible on load ─ */}
-      <section style={{ textAlign: 'center', padding: '72px 24px 56px', borderBottom: '1px solid #E8E8E8' }}>
+      <section style={{ textAlign: 'center', padding: isMobile ? '40px 20px 36px' : '72px 24px 56px', borderBottom: '1px solid #E8E8E8' }}>
         {!searchQuery && (
           <p style={{
             fontFamily: 'inherit',
@@ -442,7 +447,7 @@ function BekleidungContent() {
             letterSpacing: '0.32em',
             textTransform: 'uppercase',
             color: '#9B9B9B',
-            margin: '0 0 20px',
+            margin: '0 0 16px',
             fontWeight: 400,
           }}>
             Neue Kollektion 2026
@@ -450,7 +455,7 @@ function BekleidungContent() {
         )}
         <h1 style={{
           fontFamily: "'Cormorant Garamond', serif",
-          fontSize: 'clamp(52px, 6.5vw, 88px)',
+          fontSize: 'clamp(36px, 10vw, 88px)',
           fontWeight: 300,
           letterSpacing: searchQuery ? '0.01em' : '0.06em',
           margin: 0,
@@ -500,7 +505,7 @@ function BekleidungContent() {
           alignItems: 'center',
           maxWidth: 1800,
           margin: '0 auto',
-          padding: '0 48px',
+          padding: isMobile ? '0 16px' : '0 48px',
           overflowX: 'auto',
           scrollbarWidth: 'none',
         }}>
@@ -546,19 +551,21 @@ function BekleidungContent() {
       </div>
 
       {/* ── Filter bar ───────────────────────────────────────────────────── */}
-      <div style={{
+      <div ref={filterBarRef} style={{
         maxWidth: 1800,
         margin: '0 auto',
-        padding: '14px 48px',
+        padding: isMobile ? '12px 16px' : '14px 48px',
         borderBottom: '1px solid #E8E8E8',
         display: 'flex',
+        flexWrap: isMobile ? 'wrap' : 'nowrap',
         alignItems: 'center',
         justifyContent: 'space-between',
+        gap: isMobile ? '10px' : 0,
       }}>
 
         {/* Left — gender toggles */}
         <div style={{ display: 'flex', gap: 0, alignItems: 'center' }}>
-          {(['Damen', 'Herren'] as const).map((label, i) => {
+          {(['Damen', 'Herren'] as const).map((label) => {
             const id = label.toLowerCase() as 'damen' | 'herren'
             const active = gender === 'alle' || gender === id
             return (
@@ -574,7 +581,6 @@ function BekleidungContent() {
                   color: active ? '#0A0A0A' : '#BBBBBB',
                   fontWeight: active ? 500 : 400,
                   transition: 'color 200ms cubic-bezier(0.16,1,0.3,1)',
-                  paddingLeft: i === 0 ? 0 : 0,
                 }}>
                 {label}
               </button>
@@ -583,8 +589,8 @@ function BekleidungContent() {
         </div>
 
         {/* Right — filter controls */}
-        <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-          {[
+        <div style={{ display: 'flex', gap: isMobile ? 16 : 24, alignItems: 'center' }}>
+          {!isMobile && [
             { label: 'Marken',     section: 'marken'     },
             { label: 'Kategorien', section: 'kategorien' },
           ].map(({ label, section }) => (
@@ -634,13 +640,13 @@ function BekleidungContent() {
       <section style={{
         maxWidth: 1800,
         margin: '0 auto',
-        padding: '40px 48px 96px',
+        padding: isMobile ? '24px 16px 72px' : '40px 48px 96px',
       }}>
         {loading ? (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            columnGap: 16, rowGap: 48,
+            gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+            columnGap: isMobile ? 12 : 16, rowGap: isMobile ? 36 : 48,
           }}>
             {Array.from({ length: 8 }).map((_, i) => <ProductSkeleton key={i} />)}
           </div>
@@ -676,8 +682,8 @@ function BekleidungContent() {
         ) : (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            columnGap: 16, rowGap: 52,
+            gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+            columnGap: isMobile ? 12 : 16, rowGap: isMobile ? 36 : 52,
           }}>
             {visibleProducts.map(p => (
               <PopularProductCard key={p.id} {...p} />
@@ -698,6 +704,17 @@ function BekleidungContent() {
         resetFilters={resetFilters}
         resultCount={visibleProducts.length}
         availableMarken={availableMarken}
+      />
+
+      {/* ── Floating blur filter bar ─────────────────────────────────────── */}
+      <BlurFilterBar
+        watchRef={filterBarRef}
+        gender={gender}
+        onGenderToggle={(g) => setGender(prev => prev === g ? 'alle' : g)}
+        activeFilterCount={activeFilterCount}
+        onOpenFilter={() => setFilterOpen(true)}
+        onOpenAt={openAt}
+        resultCount={visibleProducts.length}
       />
     </div>
   )

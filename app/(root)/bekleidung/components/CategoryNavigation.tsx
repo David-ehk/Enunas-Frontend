@@ -10,7 +10,6 @@ const CATEGORIES = [
   { name: 'Jacken', slug: 'jacken', href: '/bekleidung?category=jacken', category: 'jacken', type: '' },
   { name: 'T-Shirts', slug: 't-shirts', href: '/bekleidung?category=oberteile&type=tshirts', category: 'oberteile', type: 'tshirts' },
   { name: 'Pullover & Strickwaren', slug: 'pullover', href: '/bekleidung?category=oberteile&type=sweater', category: 'oberteile', type: 'sweater' },
-  { name: 'Hemden', slug: 'hemden', href: '/bekleidung?category=oberteile&type=hemden', category: 'oberteile', type: 'hemden' },
   { name: 'Hosen', slug: 'hosen', href: '/bekleidung?category=hosen', category: 'hosen', type: '' },
   { name: 'Jeans', slug: 'jeans', href: '/bekleidung?category=hosen&type=jeans', category: 'hosen', type: 'jeans' },
   { name: 'Jogger', slug: 'jogger', href: '/bekleidung?category=hosen&type=jogging', category: 'hosen', type: 'jogging' },

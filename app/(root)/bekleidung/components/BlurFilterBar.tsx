@@ -1,86 +1,190 @@
-import React, { useState } from 'react';
-import { ChevronDown, ArrowUpDown } from 'lucide-react';
+'use client'
 
-export default function BlurFilterBar() {
-  const [viewOpen, setViewOpen] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
+import { useState, useEffect, type RefObject } from 'react'
+
+interface BlurFilterBarProps {
+  watchRef: RefObject<HTMLElement | null>
+  gender: 'alle' | 'damen' | 'herren'
+  onGenderToggle: (g: 'damen' | 'herren') => void
+  activeFilterCount: number
+  onOpenFilter: () => void
+  onOpenAt: (section: string) => void
+  resultCount: number
+}
+
+function Divider() {
+  return (
+    <span style={{
+      display: 'block',
+      width: 1,
+      height: 14,
+      background: '#E8E8E8',
+      flexShrink: 0,
+      margin: '0 2px',
+    }} />
+  )
+}
+
+function BarButton({
+  children,
+  onClick,
+  active,
+  style: extraStyle,
+}: {
+  children: React.ReactNode
+  onClick?: () => void
+  active?: boolean
+  style?: React.CSSProperties
+}) {
+  const [hovered, setHovered] = useState(false)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 p-8">
-      {/* Background content for blur effect */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-64 h-64 bg-yellow-300 rounded-full opacity-50 blur-3xl"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-blue-300 rounded-full opacity-40 blur-3xl"></div>
-        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-pink-300 rounded-full opacity-30 blur-3xl"></div>
-      </div>
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        padding: '15px 16px',
+        fontFamily: "'League Spartan', sans-serif",
+        fontSize: 10,
+        letterSpacing: '0.16em',
+        textTransform: 'uppercase',
+        whiteSpace: 'nowrap',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        color: active === false
+          ? '#BBBBBB'
+          : hovered
+          ? '#370E4D'
+          : '#0A0A0A',
+        fontWeight: active ? 500 : 400,
+        transition: 'color 200ms cubic-bezier(0.16,1,0.3,1)',
+        ...extraStyle,
+      }}
+    >
+      {children}
+    </button>
+  )
+}
 
-      {/* Frosted glass bar */}
-      <div className="relative max-w-4xl mx-auto mt-20">
-        <div className="flex items-center gap-4 px-6 py-4 backdrop-blur-xl bg-white/30 border border-white/20 rounded-2xl shadow-2xl">
-          {/* View all dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => {
-                setViewOpen(!viewOpen);
-                setSortOpen(false);
-              }}
-              className="flex items-center gap-2 px-5 py-3 bg-white/40 backdrop-blur-sm hover:bg-white/50 transition-all duration-200 rounded-xl border border-white/30 shadow-lg"
+export default function BlurFilterBar({
+  watchRef,
+  gender,
+  onGenderToggle,
+  activeFilterCount,
+  onOpenFilter,
+  onOpenAt,
+  resultCount,
+}: BlurFilterBarProps) {
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (!watchRef.current) return
+      const gone = watchRef.current.getBoundingClientRect().bottom < 0
+      setVisible(gone)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [watchRef])
+
+  return (
+    <div
+      aria-hidden={!visible}
+      style={{
+        position: 'fixed',
+        bottom: 28,
+        left: '50%',
+        zIndex: 50,
+        pointerEvents: visible ? 'auto' : 'none',
+        transition: 'transform 550ms cubic-bezier(0.16, 1, 0.3, 1), opacity 400ms cubic-bezier(0.16, 1, 0.3, 1)',
+        transform: visible
+          ? 'translateX(-50%) translateY(0px)'
+          : 'translateX(-50%) translateY(calc(100% + 36px))',
+        opacity: visible ? 1 : 0,
+      }}
+    >
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        background: 'rgba(255, 255, 255, 0.88)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        border: '1px solid rgba(232, 232, 232, 0.9)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.05)',
+      }}>
+
+        {/* Gender toggles */}
+        {(['Damen', 'Herren'] as const).map((label) => {
+          const id = label.toLowerCase() as 'damen' | 'herren'
+          const active = gender === 'alle' || gender === id
+          return (
+            <BarButton
+              key={id}
+              onClick={() => onGenderToggle(id)}
+              active={active}
+              style={{ color: active ? '#0A0A0A' : '#BBBBBB' }}
             >
-              <span className="text-gray-800 font-medium">View all</span>
-              <sup className="text-xs text-gray-600">1115</sup>
-              <ChevronDown className="w-4 h-4 text-gray-700" />
-            </button>
-            
-            {viewOpen && (
-              <div className="absolute top-full mt-2 w-48 backdrop-blur-xl bg-white/40 border border-white/20 rounded-xl shadow-2xl overflow-hidden z-10">
-                <div className="p-2 space-y-1">
-                  <div className="px-4 py-2 hover:bg-white/30 rounded-lg cursor-pointer text-gray-800">All items</div>
-                  <div className="px-4 py-2 hover:bg-white/30 rounded-lg cursor-pointer text-gray-800">Active</div>
-                  <div className="px-4 py-2 hover:bg-white/30 rounded-lg cursor-pointer text-gray-800">Archived</div>
-                </div>
-              </div>
-            )}
-          </div>
+              {label}
+            </BarButton>
+          )
+        })}
 
-          {/* Sort by dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => {
-                setSortOpen(!sortOpen);
-                setViewOpen(false);
-              }}
-              className="flex items-center gap-2 px-5 py-3 bg-white/40 backdrop-blur-sm hover:bg-white/50 transition-all duration-200 rounded-xl border border-white/30 shadow-lg"
-            >
-              <span className="text-gray-800 font-medium">Sort by</span>
-              <ArrowUpDown className="w-4 h-4 text-gray-700" />
-            </button>
-            
-            {sortOpen && (
-              <div className="absolute top-full mt-2 w-48 backdrop-blur-xl bg-white/40 border border-white/20 rounded-xl shadow-2xl overflow-hidden z-10">
-                <div className="p-2 space-y-1">
-                  <div className="px-4 py-2 hover:bg-white/30 rounded-lg cursor-pointer text-gray-800">Name</div>
-                  <div className="px-4 py-2 hover:bg-white/30 rounded-lg cursor-pointer text-gray-800">Date</div>
-                  <div className="px-4 py-2 hover:bg-white/30 rounded-lg cursor-pointer text-gray-800">Size</div>
-                </div>
-              </div>
-            )}
-          </div>
+        <Divider />
 
-          {/* Filter button */}
-          <button className="ml-auto px-8 py-3 bg-black hover:bg-gray-900 transition-all duration-200 text-white font-medium rounded-xl shadow-lg">
+        <BarButton onClick={() => onOpenAt('marken')}>Marken</BarButton>
+        <BarButton onClick={() => onOpenAt('kategorien')}>Kategorien</BarButton>
+
+        <Divider />
+
+        {/* Filter button with badge */}
+        <div style={{ position: 'relative' }}>
+          <BarButton onClick={onOpenFilter}>
             Filter
-          </button>
+          </BarButton>
+          {activeFilterCount > 0 && (
+            <span style={{
+              position: 'absolute',
+              top: 8,
+              right: 6,
+              background: '#370E4D',
+              color: '#fff',
+              fontSize: 8,
+              width: 13,
+              height: 13,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 600,
+              fontFamily: "'League Spartan', sans-serif",
+              pointerEvents: 'none',
+            }}>
+              {activeFilterCount}
+            </span>
+          )}
         </div>
 
-        {/* Sample content below to show the blur effect */}
-        <div className="mt-8 p-6 backdrop-blur-md bg-white/20 border border-white/20 rounded-2xl">
-          <h2 className="text-2xl font-bold text-white mb-4">Sample Content</h2>
-          <p className="text-white/90">
-            This demonstrates how the frosted glass effect works with content behind it. 
-            The backdrop-blur creates that beautiful iOS-style glassmorphism effect.
-          </p>
-        </div>
+        <Divider />
+
+        {/* Sort + article count */}
+        <BarButton onClick={() => onOpenAt('sortieren')} style={{ paddingRight: 20 }}>
+          Sortieren
+          <span style={{
+            fontSize: 9,
+            letterSpacing: '0.06em',
+            color: '#BBBBBB',
+            fontWeight: 400,
+          }}>
+            {resultCount}
+          </span>
+        </BarButton>
       </div>
     </div>
-  );
+  )
 }

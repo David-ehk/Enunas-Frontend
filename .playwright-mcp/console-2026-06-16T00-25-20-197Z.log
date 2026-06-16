@@ -24,3 +24,27 @@
 [58346293ms] [LOG] [Fast Refresh] done in 663ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
 [58346403ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
 [58346562ms] [LOG] [Fast Refresh] done in 266ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58681997ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58682972ms] [LOG] [Fast Refresh] done in 1077ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58813044ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58813791ms] [LOG] [Fast Refresh] done in 753ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58820716ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58821617ms] [LOG] [Fast Refresh] done in 830ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58821936ms] [ERROR] Access to fetch at 'http://localhost:8080/products?size=200' from origin 'http://localhost:3001' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3001/bekleidung:0
+[58821939ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:8080/products?size=200:0
+[58832494ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58832918ms] [LOG] [Fast Refresh] done in 419ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58839049ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58839495ms] [LOG] [Fast Refresh] done in 485ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58860812ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58861192ms] [ERROR] %s a style property during rerender (%s) when a conflicting property is set (%s) can lead to styling bugs. To avoid this, don't mix shorthand and non-shorthand properties for the same value; instead, replace the shorthand with separate values. Removing paddingLeft padding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:3127
+[58861206ms] [ERROR] %s a style property during rerender (%s) when a conflicting property is set (%s) can lead to styling bugs. To avoid this, don't mix shorthand and non-shorthand properties for the same value; instead, replace the shorthand with separate values. Removing paddingLeft padding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:3127
+[58861256ms] [LOG] [Fast Refresh] done in 432ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58861398ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58861455ms] [LOG] [Fast Refresh] done in 167ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58861560ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58861636ms] [LOG] [Fast Refresh] done in 180ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58869862ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58870427ms] [LOG] [Fast Refresh] done in 545ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58873942ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
+[58874417ms] [LOG] [Fast Refresh] done in 504ms @ http://localhost:3001/_next/static/chunks/079ae_next_dist_e4f9772e._.js:2297
