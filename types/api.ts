@@ -66,7 +66,7 @@ export interface ApiProduct {
   category: string;
   subcategory?: string;
   images: string[];
-  colours: { id?: string; hex: string; name: string }[];
+  colours: { id?: string; hex: string; name: string; colorFamily?: string }[];
   sizes: string[];
   catalogue?: string[];
   status: ProductStatus;

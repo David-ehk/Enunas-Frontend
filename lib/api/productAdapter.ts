@@ -8,10 +8,11 @@ export interface ProductCardShape {
   productName: string;
   price: string;
   href: string;
-  colours: { hex: string; name: string }[];
+  colours: { hex: string; name: string; colorFamily?: string }[];
   createdAt: Date | string;
   sizes?: string[];
   catalogue?: string[];
+  category?: string;
   subcategory?: string;
 }
 
@@ -28,10 +29,11 @@ export function apiProductToCardShape(p: ApiProduct): ProductCardShape {
     productName: p.name,
     price: `${p.price.toFixed(2).replace('.', ',')}€`,
     href: `/bekleidung/${brandSlug}/${p.slug}`,
-    colours: p.colours.map(c => ({ hex: c.hex, name: c.name })),
+    colours: p.colours.map(c => ({ hex: c.hex, name: c.name, colorFamily: c.colorFamily })),
     createdAt: p.createdAt,
-    sizes: p.sizes,
+    sizes: p.sizes?.map(s => s.trim().toUpperCase()),
     catalogue: p.catalogue,
+    category: p.category,
     subcategory: p.subcategory,
   };
 }

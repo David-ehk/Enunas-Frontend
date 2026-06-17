@@ -1,46 +1,28 @@
 'use client'
 
-import React, { Suspense, useState, useEffect, useMemo, useRef } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useState, useMemo, useRef, useEffect } from 'react'
+import Link from 'next/link'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
-import { productApi, apiProductToCardShape } from '@/lib/api'
 import type { ProductCardShape } from '@/lib/api'
 import { useIsMobile } from '@/hooks/use-mobile'
-import BlurFilterBar from './components/BlurFilterBar'
-import SortDropdown from './components/SortDropdown'
-import CatalogueDropdown from './components/CatalogueDropdown'
-import FilterSidebar, { FilterState, CATEGORIES, catMatchesProduct, parsePriceNum } from './components/FilterSidebar'
+import FilterSidebar, { FilterState, CATEGORIES, catMatchesProduct, parsePriceNum } from './FilterSidebar'
+import SortDropdown from './SortDropdown'
+import BlurFilterBar from './BlurFilterBar'
 
-// ── Loading Skeletons ─────────────────────────────────────────────────────────
-
-function ProductSkeleton() {
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="aspect-[3/4] bg-[#F5F5F0] animate-pulse" />
-      <div className="h-2.5 w-1/2 bg-[#F0EFEA] animate-pulse" />
-      <div className="h-3.5 w-2/3 bg-[#F0EFEA] animate-pulse" />
-      <div className="h-2.5 w-1/4 bg-[#F0EFEA] animate-pulse" />
-    </div>
-  )
+export interface CatalogueConfig {
+  name: string
+  slug: string
+  tagline: string
+  color: string
 }
 
-// ── Suspense Wrapper ──────────────────────────────────────────────────────────
-
-export default function BekleidungPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-white" />}>
-      <BekleidungContent />
-    </Suspense>
-  )
+interface Props {
+  initialProducts: ProductCardShape[]
+  config: CatalogueConfig
 }
 
-// ── Main Content ──────────────────────────────────────────────────────────────
-
-function BekleidungContent() {
-  const searchParams  = useSearchParams()
-  const searchQuery   = searchParams.get('q') || ''
-  const isMobile      = useIsMobile()
-
+export default function CatalogueContent({ initialProducts, config }: Props) {
+  const isMobile     = useIsMobile()
   const filterBarRef = useRef<HTMLDivElement>(null)
 
   const [navH, setNavH] = useState(60)
@@ -49,8 +31,6 @@ function BekleidungContent() {
     if (header) setNavH(header.getBoundingClientRect().height)
   }, [])
 
-  const [allProducts, setAllProducts]   = useState<ProductCardShape[]>([])
-  const [loading, setLoading]           = useState(true)
   const [activeCat, setActiveCat]       = useState('alle')
   const [gender, setGender]             = useState<('damen' | 'herren')[]>([])
   const [filterOpen, setFilterOpen]     = useState(false)
@@ -60,25 +40,17 @@ function BekleidungContent() {
   })
 
   useEffect(() => {
-    setLoading(true)
-    const p = searchQuery
-      ? productApi.search(searchQuery).then(r => r.content.map(apiProductToCardShape))
-      : productApi.list({ size: 200 }).then(r => r.content.map(apiProductToCardShape))
-    p.then(setAllProducts).catch(() => setAllProducts([])).finally(() => setLoading(false))
-  }, [searchQuery])
-
-  useEffect(() => {
     document.body.style.overflow = filterOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [filterOpen])
 
   const availableMarken = useMemo(
-    () => [...new Set(allProducts.map(p => p.brandName))].sort(),
-    [allProducts]
+    () => [...new Set(initialProducts.map(p => p.brandName))].sort(),
+    [initialProducts]
   )
 
   const visibleProducts = useMemo(() => {
-    let r = allProducts
+    let r = initialProducts
     if (activeCat !== 'alle')           r = r.filter(p => catMatchesProduct(activeCat, p))
     if (filters.kategorien.length > 0)  r = r.filter(p => filters.kategorien.some(k => catMatchesProduct(k, p)))
     if (filters.farben.length > 0)      r = r.filter(p => p.colours.some(c =>
@@ -89,12 +61,11 @@ function BekleidungContent() {
     ))
     if (filters.groessen.length > 0)    r = r.filter(p => p.sizes?.some(s => filters.groessen.includes(s)))
     if (filters.marken.length > 0)      r = r.filter(p => filters.marken.includes(p.brandName))
-    if (filters.catalogue)              r = r.filter(p => (p.catalogue ?? []).some(c => c.toLowerCase() === filters.catalogue.toLowerCase()))
     if (filters.sortieren === 'preis-auf') return [...r].sort((a, b) => parsePriceNum(a.price) - parsePriceNum(b.price))
     if (filters.sortieren === 'preis-ab')  return [...r].sort((a, b) => parsePriceNum(b.price) - parsePriceNum(a.price))
     if (filters.sortieren === 'name')      return [...r].sort((a, b) => a.productName.localeCompare(b.productName))
     return r
-  }, [allProducts, activeCat, filters])
+  }, [initialProducts, activeCat, filters])
 
   const activeFilterCount = filters.kategorien.length + filters.farben.length + filters.groessen.length + filters.marken.length
 
@@ -104,76 +75,130 @@ function BekleidungContent() {
       return { ...prev, [key]: arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val] }
     })
 
-  const resetFilters = () => setFilters({ kategorien: [], farben: [], groessen: [], marken: [], sortieren: 'neu', catalogue: '' })
+  const resetFilters = () =>
+    setFilters({ kategorien: [], farben: [], groessen: [], marken: [], sortieren: 'neu', catalogue: '' })
+
   const toggleGender = (g: 'damen' | 'herren') =>
     setGender(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g])
+
   const openAt = (section: string) => {
     setOpenSections(prev => prev.includes(section) ? prev : [...prev, section])
     setFilterOpen(true)
   }
+
   const toggleSection = (id: string) =>
     setOpenSections(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id])
-
-  const pageTitle = searchQuery ? `Suchergebnisse für „${searchQuery}"` : 'Bekleidung'
 
   return (
     <div style={{ background: '#fff', fontFamily: "'League Spartan', sans-serif", color: '#0A0A0A', minHeight: '100vh' }}>
 
-      {/* ── Editorial header ── */}
-      <section style={{ textAlign: 'center', padding: isMobile ? '40px 20px 36px' : '72px 24px 56px', borderBottom: '1px solid #E8E8E8' }}>
-        {!searchQuery && (
-          <p style={{
-            fontFamily: 'inherit',
-            fontSize: 9,
-            letterSpacing: '0.32em',
+      {/* ── Coloured hero — "ENUNAS CATALOGUE" + title + tagline ── */}
+      <section
+        style={{
+          position: 'relative',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          backgroundColor: config.color,
+          minHeight: isMobile ? '380px' : '520px',
+          padding: isMobile ? '80px 24px 80px' : '120px 24px 100px',
+        }}
+      >
+        {/* Back breadcrumb */}
+        <Link
+          href="/bekleidung"
+          style={{
+            position: 'absolute',
+            top: isMobile ? 24 : 32,
+            left: isMobile ? 20 : 32,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            color: 'rgba(255,255,255,0.55)',
+            fontFamily: "'League Spartan', sans-serif",
+            fontSize: 10,
+            letterSpacing: '0.3em',
             textTransform: 'uppercase',
-            color: '#9B9B9B',
-            margin: '0 0 16px',
-            fontWeight: 400,
-          }}>
-            Neue Kollektion 2026
-          </p>
-        )}
-        <h1 style={{
-          fontFamily: "'Cormorant Garamond', serif",
-          fontSize: 'clamp(36px, 10vw, 88px)',
-          fontWeight: 300,
-          letterSpacing: searchQuery ? '0.01em' : '0.06em',
-          margin: 0,
-          lineHeight: 0.95,
-          color: '#0A0A0A',
-          textTransform: searchQuery ? 'none' : 'uppercase',
-        }}>
-          {pageTitle}
-        </h1>
-        {!searchQuery && (
-          <p style={{
-            fontFamily: "'Cormorant Garamond', serif",
-            fontStyle: 'italic',
-            fontSize: 'clamp(15px, 1.5vw, 18px)',
-            fontWeight: 400,
-            color: '#6B6B6B',
-            maxWidth: 420,
-            margin: '22px auto 0',
-            lineHeight: 1.65,
-            letterSpacing: '0.01em',
-          }}>
-            Kuratierte Auswahl an Premium-Streetwear und Designermode.
-          </p>
-        )}
-        <p style={{
+            textDecoration: 'none',
+            transition: 'opacity 200ms ease',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = '0.7' }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M8 2L4 6l4 4" />
+          </svg>
+          Bekleidung
+        </Link>
+
+        {/* Eyebrow */}
+        <span style={{
+          display: 'block',
+          marginBottom: 28,
+          color: 'rgba(255,255,255,0.5)',
+          fontFamily: "'League Spartan', sans-serif",
           fontSize: 10,
-          letterSpacing: '0.22em',
+          letterSpacing: '0.45em',
           textTransform: 'uppercase',
-          color: '#BBBBBB',
-          margin: '20px 0 0',
-          fontFamily: 'inherit',
         }}>
-          {loading ? '—' : `${visibleProducts.length} Artikel`}
+          Enunas Catalogue
+        </span>
+
+        {/* Title */}
+        <h1 style={{
+          color: '#fff',
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: isMobile ? 'clamp(52px, 16vw, 80px)' : 'clamp(68px, 10vw, 116px)',
+          fontWeight: 300,
+          lineHeight: 1,
+          letterSpacing: '-0.01em',
+          margin: '0 0 24px',
+        }}>
+          {config.name}
+        </h1>
+
+        {/* Tagline */}
+        <p style={{
+          color: 'rgba(255,255,255,0.78)',
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: isMobile ? 16 : 19,
+          fontStyle: 'italic',
+          lineHeight: 1.55,
+          maxWidth: 380,
+          margin: 0,
+        }}>
+          {config.tagline}
         </p>
+
+        {/* Article count at bottom */}
+        <div style={{
+          position: 'absolute',
+          bottom: 32,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+        }}>
+          <span style={{ display: 'block', height: 1, width: 40, background: 'rgba(255,255,255,0.22)' }} />
+          <span style={{
+            color: 'rgba(255,255,255,0.45)',
+            fontFamily: "'League Spartan', sans-serif",
+            fontSize: 10,
+            letterSpacing: '0.25em',
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+          }}>
+            {visibleProducts.length} Artikel
+          </span>
+          <span style={{ display: 'block', height: 1, width: 40, background: 'rgba(255,255,255,0.22)' }} />
+        </div>
       </section>
 
-      {/* ── Category strip — sticky flush below navbar ── */}
+      {/* ── Category strip — sticky, white, identical to /bekleidung ── */}
       <div style={{
         position: 'sticky',
         top: navH,
@@ -231,7 +256,7 @@ function BekleidungContent() {
         </div>
       </div>
 
-      {/* ── Filter bar ── */}
+      {/* ── Filter bar — white, identical to /bekleidung ── */}
       <div ref={filterBarRef} style={{
         maxWidth: 1800,
         margin: '0 auto',
@@ -247,13 +272,14 @@ function BekleidungContent() {
         {/* Left — gender toggles */}
         <div style={{ display: 'flex', gap: 0, alignItems: 'center' }}>
           {(['Damen', 'Herren'] as const).map((label) => {
-            const id = label.toLowerCase() as 'damen' | 'herren'
+            const id          = label.toLowerCase() as 'damen' | 'herren'
             const noneSelected = gender.length === 0
-            const isSelected   = gender.includes(id)
-            const isActive     = noneSelected || isSelected
-            const accentColor  = id === 'damen' ? '#C41E3A' : '#2457A3'
+            const isSelected  = gender.includes(id)
+            const isActive    = noneSelected || isSelected
+            const accentColor = id === 'damen' ? '#C41E3A' : '#2457A3'
             return (
-              <button key={id}
+              <button
+                key={id}
                 onClick={() => toggleGender(id)}
                 style={{
                   position: 'relative',
@@ -264,9 +290,10 @@ function BekleidungContent() {
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
                   color: isActive ? '#0A0A0A' : '#BBBBBB',
-                  fontWeight: isSelected ? 600 : isActive ? 400 : 400,
+                  fontWeight: isSelected ? 600 : 400,
                   transition: 'color 200ms cubic-bezier(0.16,1,0.3,1)',
-                }}>
+                }}
+              >
                 {label}
                 <span style={{
                   position: 'absolute',
@@ -287,20 +314,15 @@ function BekleidungContent() {
 
         {/* Right — filter controls */}
         <div style={{ display: 'flex', gap: isMobile ? 16 : 24, alignItems: 'center' }}>
-          {!isMobile && (
-            <CatalogueDropdown
-              value={filters.catalogue}
-              onChange={(id) => setFilters(prev => ({ ...prev, catalogue: id }))}
-              align="right"
-            />
-          )}
-
-          <button onClick={() => setFilterOpen(true)} style={{
-            background: 'transparent', border: 'none', cursor: 'pointer',
-            fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase',
-            color: '#0A0A0A', fontFamily: 'inherit', padding: 0,
-            position: 'relative',
-          }}>
+          <button
+            onClick={() => setFilterOpen(true)}
+            style={{
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase',
+              color: '#0A0A0A', fontFamily: 'inherit', padding: 0,
+              position: 'relative',
+            }}
+          >
             Filter
             {activeFilterCount > 0 && (
               <span style={{
@@ -331,15 +353,7 @@ function BekleidungContent() {
         margin: '0 auto',
         padding: isMobile ? '24px 16px 72px' : '40px 48px 96px',
       }}>
-        {loading ? (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
-            columnGap: isMobile ? 12 : 16, rowGap: isMobile ? 36 : 48,
-          }}>
-            {Array.from({ length: 8 }).map((_, i) => <ProductSkeleton key={i} />)}
-          </div>
-        ) : visibleProducts.length === 0 ? (
+        {visibleProducts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '100px 0 140px' }}>
             <p style={{
               fontFamily: "'Cormorant Garamond', serif",
@@ -350,29 +364,39 @@ function BekleidungContent() {
               margin: '0 0 12px',
               letterSpacing: '0.01em',
             }}>
-              Keine Artikel gefunden
-            </p>
-            <p style={{ fontSize: 10, color: '#9B9B9B', letterSpacing: '0.16em', textTransform: 'uppercase', margin: '0 0 32px' }}>
-              {activeFilterCount > 0 || activeCat !== 'alle'
-                ? 'Passe deine Filter an'
-                : 'Bitte melde dich an, um die Kollektion zu sehen'}
+              {initialProducts.length === 0 ? 'Keine Artikel verfügbar.' : 'Keine Artikel gefunden'}
             </p>
             {(activeFilterCount > 0 || activeCat !== 'alle') && (
-              <button onClick={() => { resetFilters(); setActiveCat('alle') }} style={{
-                background: 'transparent', border: 'none', cursor: 'pointer',
-                fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase',
-                color: '#0A0A0A', fontFamily: 'inherit', padding: '2px 0',
-                borderBottom: '1px solid #0A0A0A',
-              }}>
-                Filter zurücksetzen
-              </button>
+              <>
+                <p style={{
+                  fontSize: 10,
+                  color: '#9B9B9B',
+                  letterSpacing: '0.16em',
+                  textTransform: 'uppercase',
+                  margin: '0 0 32px',
+                }}>
+                  Passe deine Filter an
+                </p>
+                <button
+                  onClick={() => { resetFilters(); setActiveCat('alle') }}
+                  style={{
+                    background: 'transparent', border: 'none', cursor: 'pointer',
+                    fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase',
+                    color: '#0A0A0A', fontFamily: 'inherit', padding: '2px 0',
+                    borderBottom: '1px solid #0A0A0A',
+                  }}
+                >
+                  Filter zurücksetzen
+                </button>
+              </>
             )}
           </div>
         ) : (
           <div style={{
             display: 'grid',
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
-            columnGap: isMobile ? 12 : 16, rowGap: isMobile ? 36 : 52,
+            columnGap: isMobile ? 12 : 16,
+            rowGap: isMobile ? 36 : 52,
           }}>
             {visibleProducts.map(p => (
               <PopularProductCard key={p.id} {...p} />
@@ -405,8 +429,8 @@ function BekleidungContent() {
         onOpenAt={openAt}
         sortValue={filters.sortieren}
         onSort={(id) => setFilters(prev => ({ ...prev, sortieren: id }))}
-        catalogueValue={filters.catalogue}
-        onCatalogue={(id) => setFilters(prev => ({ ...prev, catalogue: id }))}
+        catalogueValue={config.slug}
+        onCatalogue={() => {}}
       />
     </div>
   )
