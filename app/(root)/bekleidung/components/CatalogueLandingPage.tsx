@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { productApi, apiProductToCardShape } from '@/lib/api'
 import type { ApiProduct } from '@/types/api'
 import CatalogueContent from './CatalogueContent'
@@ -19,5 +20,9 @@ export default async function CatalogueLandingPage({ config }: { config: Catalog
     .filter(p => matchesCatalogue(p, config.slug))
     .map(apiProductToCardShape)
 
-  return <CatalogueContent initialProducts={products} config={config} />
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#fff' }} />}>
+      <CatalogueContent initialProducts={products} config={config} />
+    </Suspense>
+  )
 }

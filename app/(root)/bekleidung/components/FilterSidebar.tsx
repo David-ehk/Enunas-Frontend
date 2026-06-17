@@ -41,6 +41,7 @@ export const CATEGORIES = [
   { id: 'jeans',       label: 'Jeans'                 },
   { id: 'jogger',      label: 'Jogger'                },
   { id: 'shorts',      label: 'Shorts'                },
+  { id: 'schuhe',      label: 'Schuhe'                },
   { id: 'accessoires', label: 'Accessoires'           },
 ]
 
@@ -78,6 +79,16 @@ export function parsePriceNum(price: string): number {
   return parseFloat(price.replace('€', '').replace(',', '.').trim()) || 0
 }
 
+export function genderMatchesProduct(selected: ('damen' | 'herren')[], p: ProductCardShape): boolean {
+  if (selected.length === 0) return true
+  const g = (p.gender ?? '').toUpperCase()
+  // Products without a gender or marked unisex appear in all filters
+  if (!g || g === 'UNISEX' || g === 'GENDER_NEUTRAL') return true
+  const isFemale = g === 'FEMALE' || g === 'WOMEN' || g === 'DAMEN' || g === 'W' || g === 'F'
+  const isMale   = g === 'MALE'   || g === 'MEN'   || g === 'HERREN' || g === 'M'
+  return (selected.includes('damen') && isFemale) || (selected.includes('herren') && isMale)
+}
+
 export function catMatchesProduct(catId: string, p: ProductCardShape): boolean {
   const slot = (p.category ?? '').toUpperCase()
   const type = (p.subcategory ?? '').toUpperCase()
@@ -92,7 +103,8 @@ export function catMatchesProduct(catId: string, p: ProductCardShape): boolean {
     jeans:       { slots: [],                        types: ['JEANS'] },
     jogger:      { slots: [],                        types: ['JOGGER', 'CARGO_PANTS'] },
     shorts:      { slots: [],                        types: ['SHORTS'] },
-    accessoires: { slots: ['ACCESSORY', 'FOOTWEAR'], types: ['CAP', 'BEANIE', 'BAG', 'BELT', 'JEWELRY', 'SNEAKERS', 'BOOTS'] },
+    schuhe:      { slots: ['FOOTWEAR'],              types: ['SNEAKERS', 'BOOTS', 'SHOES', 'LOAFERS', 'SANDALS'] },
+    accessoires: { slots: ['ACCESSORY'],             types: ['CAP', 'BEANIE', 'BAG', 'BELT', 'JEWELRY'] },
   }
   const mapping = MAP[catId]
   if (!mapping) return false

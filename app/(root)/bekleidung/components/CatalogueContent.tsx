@@ -2,12 +2,14 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 import type { ProductCardShape } from '@/lib/api'
 import { useIsMobile } from '@/hooks/use-mobile'
-import FilterSidebar, { FilterState, CATEGORIES, catMatchesProduct, parsePriceNum } from './FilterSidebar'
+import FilterSidebar, { FilterState, CATEGORIES, catMatchesProduct, parsePriceNum, genderMatchesProduct } from './FilterSidebar'
 import SortDropdown from './SortDropdown'
 import BlurFilterBar from './BlurFilterBar'
+import CategoryNavigation from './CategoryNavigation'
 
 export interface CatalogueConfig {
   name: string
@@ -24,6 +26,7 @@ interface Props {
 export default function CatalogueContent({ initialProducts, config }: Props) {
   const isMobile     = useIsMobile()
   const filterBarRef = useRef<HTMLDivElement>(null)
+  const searchParams = useSearchParams()
 
   const [navH, setNavH] = useState(60)
   useEffect(() => {
@@ -31,13 +34,21 @@ export default function CatalogueContent({ initialProducts, config }: Props) {
     if (header) setNavH(header.getBoundingClientRect().height)
   }, [])
 
-  const [activeCat, setActiveCat]       = useState('alle')
+  const [activeCat, setActiveCat] = useState(() => {
+    const cat = searchParams.get('cat')
+    return cat && CATEGORIES.some(c => c.id === cat) ? cat : 'alle'
+  })
   const [gender, setGender]             = useState<('damen' | 'herren')[]>([])
   const [filterOpen, setFilterOpen]     = useState(false)
   const [openSections, setOpenSections] = useState<string[]>(['kategorien'])
   const [filters, setFilters]           = useState<FilterState>({
     kategorien: [], farben: [], groessen: [], marken: [], sortieren: 'neu', catalogue: '',
   })
+
+  useEffect(() => {
+    const cat = searchParams.get('cat')
+    setActiveCat(cat && CATEGORIES.some(c => c.id === cat) ? cat : 'alle')
+  }, [searchParams])
 
   useEffect(() => {
     document.body.style.overflow = filterOpen ? 'hidden' : ''
@@ -52,6 +63,7 @@ export default function CatalogueContent({ initialProducts, config }: Props) {
   const visibleProducts = useMemo(() => {
     let r = initialProducts
     if (activeCat !== 'alle')           r = r.filter(p => catMatchesProduct(activeCat, p))
+    if (gender.length > 0)              r = r.filter(p => genderMatchesProduct(gender, p))
     if (filters.kategorien.length > 0)  r = r.filter(p => filters.kategorien.some(k => catMatchesProduct(k, p)))
     if (filters.farben.length > 0)      r = r.filter(p => p.colours.some(c =>
       filters.farben.some(f =>
@@ -65,7 +77,7 @@ export default function CatalogueContent({ initialProducts, config }: Props) {
     if (filters.sortieren === 'preis-ab')  return [...r].sort((a, b) => parsePriceNum(b.price) - parsePriceNum(a.price))
     if (filters.sortieren === 'name')      return [...r].sort((a, b) => a.productName.localeCompare(b.productName))
     return r
-  }, [initialProducts, activeCat, filters])
+  }, [initialProducts, activeCat, gender, filters])
 
   const activeFilterCount = filters.kategorien.length + filters.farben.length + filters.groessen.length + filters.marken.length
 
@@ -198,7 +210,7 @@ export default function CatalogueContent({ initialProducts, config }: Props) {
         </div>
       </section>
 
-      {/* ── Category strip — sticky, white, identical to /bekleidung ── */}
+      {/* ── Category strip — sticky, white ── */}
       <div style={{
         position: 'sticky',
         top: navH,
@@ -206,54 +218,7 @@ export default function CatalogueContent({ initialProducts, config }: Props) {
         background: '#fff',
         borderBottom: '1px solid #E8E8E8',
       }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          maxWidth: 1800,
-          margin: '0 auto',
-          padding: isMobile ? '0 16px' : '0 48px',
-          overflowX: 'auto',
-          scrollbarWidth: 'none',
-        }}>
-          {CATEGORIES.map(c => {
-            const active = activeCat === c.id
-            return (
-              <button
-                key={c.id}
-                onClick={() => setActiveCat(c.id)}
-                style={{
-                  position: 'relative',
-                  flexShrink: 0,
-                  fontSize: 10,
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase',
-                  color: active ? '#0A0A0A' : '#9B9B9B',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '18px 20px',
-                  whiteSpace: 'nowrap',
-                  fontWeight: active ? 500 : 400,
-                  fontFamily: 'inherit',
-                  transition: 'color 300ms cubic-bezier(0.16,1,0.3,1)',
-                }}
-              >
-                {c.label}
-                <span style={{
-                  position: 'absolute',
-                  left: 20,
-                  right: 20,
-                  bottom: 0,
-                  height: 1,
-                  background: '#0A0A0A',
-                  transform: active ? 'scaleX(1)' : 'scaleX(0)',
-                  transformOrigin: active ? 'left' : 'right',
-                  transition: 'transform 400ms cubic-bezier(0.16,1,0.3,1)',
-                }} />
-              </button>
-            )
-          })}
-        </div>
+        <CategoryNavigation basePath={`/bekleidung/${config.slug}`} />
       </div>
 
       {/* ── Filter bar — white, identical to /bekleidung ── */}

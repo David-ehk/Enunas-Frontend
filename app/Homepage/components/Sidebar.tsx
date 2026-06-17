@@ -5,7 +5,8 @@ import { createPortal } from 'react-dom'
 
 /* ─── Types ─────────────────────────────────────────────────── */
 interface TileData  { video?: boolean; kicker: string; name: string; img: string }
-interface SubLink   { label: string; href?: string; deep?: boolean }
+interface SubChild  { label: string; href: string }
+interface SubLink   { label: string; href?: string; deep?: boolean; children?: SubChild[] }
 interface Highlight { label: string }
 interface Category  {
   key: string; label: string; title: string; kicker: string; tone?: 'sale'
@@ -61,11 +62,11 @@ const CATEGORIES: Category[] = [
   {
     key: 'catalogue', label: 'Catalogue', title: 'Katalog', kicker: '248 Stücke · 42 Marken', route: '/catalogue',
     sub: [
-      { label: 'Alle Kategorien', href: '/catalogue' },
-      { label: 'Streetwear',      href: '/catalogue', deep: true },
-      { label: 'Experimental',    href: '/catalogue', deep: true },
-      { label: 'Athleisure',      href: '/catalogue', deep: true },
-      { label: 'Culture',         href: '/catalogue', deep: true },
+      { label: 'Streetwear',      href: '/bekleidung/streetwear', deep: true },
+      { label: 'Experimental',    href: '/bekleidung/experimental', deep: true },
+      { label: 'Athleisure',      href: '/bekleidung/athleisure', deep: true },
+      { label: 'Culture',         href: '/bekleidung/cultural', deep: true },
+       { label: 'Star',         href: '/bekleidung/star', deep: true },
     ],
     highlights: [{ label: 'Nach Marke' }, { label: 'Nach Farbe' }, { label: 'Nach Preis' }],
     tiles: [
@@ -78,13 +79,32 @@ const CATEGORIES: Category[] = [
   {
     key: 'bekleidung', label: 'Bekleidung', title: 'Bekleidung', kicker: 'Vom Shirt bis zum Mantel', route: '/bekleidung',
     sub: [
-      { label: 'Alle Bekleidung', href: '/bekleidung' },
-      { label: 'Tops',            href: '/bekleidung', deep: true },
-      { label: 'Bottoms',         href: '/bekleidung', deep: true },
-      { label: 'Kleider',         href: '/bekleidung' },
-      { label: 'Outerwear',       href: '/bekleidung', deep: true },
-      { label: 'Strick',          href: '/bekleidung' },
-      { label: 'Denim',           href: '/bekleidung' },
+      {
+        label: 'Tops', deep: true,
+        children: [
+          { label: 'Alle Tops',              href: '/bekleidung?cat=oberteile' },
+          { label: 'T-Shirts & Longsleeves', href: '/bekleidung?cat=tshirts'   },
+          { label: 'Hoodies & Sweatshirts',  href: '/bekleidung?cat=hoodies'   },
+          { label: 'Pullover & Strickwaren', href: '/bekleidung?cat=strick'    },
+        ],
+      },
+      {
+        label: 'Bottoms', deep: true,
+        children: [
+          { label: 'Alle Hosen',    href: '/bekleidung?cat=hosen'  },
+          { label: 'Jeans & Denim', href: '/bekleidung?cat=jeans'  },
+          { label: 'Jogger',        href: '/bekleidung?cat=jogger' },
+          { label: 'Shorts',        href: '/bekleidung?cat=shorts' },
+        ],
+      },
+      { label: 'Schuhe',   href: '/bekleidung?cat=schuhe' },
+      {
+        label: 'Outerwear', deep: true,
+        children: [
+          { label: 'Alle Outerwear', href: '/bekleidung?cat=jacken' },
+          { label: 'Jacken',         href: '/bekleidung?cat=jacken' },
+        ],
+      },
     ],
     highlights: [{ label: 'Die Hosen-Edit' }, { label: 'Leichte Jacken' }, { label: 'Basics neu gedacht' }],
     tiles: [
@@ -95,15 +115,13 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: 'women', label: 'Women', title: 'Damen', kicker: 'Damenmode entdecken', route: '/bekleidung',
+    key: 'women', label: 'Women', title: 'Damen', kicker: 'Damenmode entdecken', route: '/bekleidung?gender=damen',
     sub: [
-      { label: 'Damenmode entdecken', href: '/bekleidung' },
-      { label: 'Prêt-à-porter',       href: '/bekleidung', deep: true },
-      { label: 'Taschen',             href: '/bekleidung', deep: true },
-      { label: 'Kleinlederwaren',     href: '/bekleidung', deep: true },
-      { label: 'Accessoires',         href: '/bekleidung', deep: true },
-      { label: 'Schmuck',             href: '/bekleidung', deep: true },
-      { label: 'Schuhe',              href: '/bekleidung', deep: true },
+      { label: 'Damenmode entdecken', href: '/bekleidung?gender=damen' },
+      { label: 'Prêt-à-porter',       href: '/bekleidung?gender=damen', deep: true },
+      { label: 'Taschen',             href: '/bekleidung?gender=damen&cat=accessoires', deep: true },
+      { label: 'Accessoires',         href: '/bekleidung?gender=damen&cat=accessoires', deep: true },
+      { label: 'Schuhe',              href: '/bekleidung?gender=damen&cat=schuhe', deep: true },
     ],
     highlights: [{ label: 'Herbstkollektion 2026' }, { label: 'Die Book Cover Kollektion' }, { label: 'Hochzeitsoutfits' }],
     tiles: [
@@ -114,14 +132,14 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: 'men', label: 'Men', title: 'Herren', kicker: 'Herrenmode entdecken', route: '/bekleidung',
+    key: 'men', label: 'Men', title: 'Herren', kicker: 'Herrenmode entdecken', route: '/bekleidung?gender=herren',
     sub: [
-      { label: 'Herrenmode entdecken', href: '/bekleidung' },
-      { label: 'Prêt-à-porter',        href: '/bekleidung', deep: true },
-      { label: 'Taschen',              href: '/bekleidung', deep: true },
-      { label: 'Schuhe',               href: '/bekleidung', deep: true },
-      { label: 'Accessoires',          href: '/bekleidung', deep: true },
-      { label: 'Grooming',             href: '/bekleidung' },
+      { label: 'Herrenmode entdecken', href: '/bekleidung?gender=herren' },
+      { label: 'Prêt-à-porter',        href: '/bekleidung?gender=herren', deep: true },
+      { label: 'Taschen',              href: '/bekleidung?gender=herren&cat=accessoires', deep: true },
+      { label: 'Accessoires',          href: '/bekleidung?gender=herren&cat=accessoires', deep: true },
+      { label: 'Schuhe',               href: '/bekleidung?gender=herren&cat=schuhe', deep: true },
+
     ],
     highlights: [{ label: 'Tailoring' }, { label: 'Die Sneaker-Galerie' }, { label: 'Workwear' }],
     tiles: [
@@ -155,8 +173,8 @@ const CATEGORIES: Category[] = [
     sub: [
       { label: 'Live jetzt',            href: '/drop' },
       { label: 'Kommende Drops',        href: '/drop' },
-      { label: 'Vergangene Drops',      href: '/drop' },
-      { label: 'Erinnerung aktivieren', href: '/drop' },
+     // { label: 'Vergangene Drops',      href: '/drop' },
+     // { label: 'Erinnerung aktivieren', href: '/drop' },
     ],
     highlights: [{ label: 'Drop Vol.1' }, { label: 'Worlds End × Enunas' }, { label: 'Der Countdown' }],
     tiles: [
@@ -166,14 +184,14 @@ const CATEGORIES: Category[] = [
       { kicker: 'Bald',      name: 'Winter-Drop',          img: IMG.t4    },
     ],
   },
-  {
+  /*{
     key: 'sale', label: 'Sale', title: 'Sale', kicker: 'Bis −50% · nur kurze Zeit', route: '/bekleidung',
     tone: 'sale',
     sub: [
       { label: 'Alle Reduzierungen', href: '/bekleidung' },
-      { label: 'Damen Sale',         href: '/bekleidung', deep: true },
-      { label: 'Herren Sale',        href: '/bekleidung', deep: true },
-      { label: 'Schuhe Sale',        href: '/bekleidung' },
+      { label: 'Damen Sale',         href: '/bekleidung?gender=damen', deep: true },
+      { label: 'Herren Sale',        href: '/bekleidung?gender=herren', deep: true },
+      { label: 'Schuhe Sale',        href: '/bekleidung?cat=accessoires' },
       { label: 'Letzte Chance',      href: '/bekleidung' },
     ],
     highlights: [{ label: 'Bis −50%' }, { label: 'Nur kurze Zeit' }, { label: 'Letzte Größen' }],
@@ -183,7 +201,7 @@ const CATEGORIES: Category[] = [
       { kicker: 'Letzte Chance', name: 'Featherweight Puffer',  img: IMG.newin },
       { kicker: 'Herren',        name: 'Walker Trouser',        img: IMG.t4    },
     ],
-  },
+  }, */
 ]
 
 /* ─── Icons ──────────────────────────────────────────────────── */
@@ -464,6 +482,21 @@ const MEGA_CSS = `
 }
 .mn-sub-item:hover .mn-sub-chev { color: var(--mn-pane-accent); transform: translateX(3px); }
 
+.mn-sub-child {
+  background: none; border: 0; text-align: left; cursor: pointer; width: 100%;
+  padding: 9px 0 9px 14px; border-bottom: 1px solid var(--mn-pane-hair);
+  font-size: 12px; letter-spacing: 0.04em; color: var(--mn-pane-muted);
+  display: flex; align-items: center; font-family: var(--mn-sans);
+  transition: color 220ms cubic-bezier(0.25,1,0.5,1),
+              padding-left 340ms cubic-bezier(0.16,1,0.3,1);
+}
+.mn-sub-child:hover { color: var(--mn-pane-accent); padding-left: 20px; }
+.mn-sub-child-all {
+  font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--mn-pane-accent); padding-top: 12px; padding-bottom: 12px;
+}
+.mn-sub-child-all:hover { padding-left: 20px; }
+
 .mn-sub-section { margin-top: 26px; }
 .mn-sub-section-label {
   font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
@@ -634,6 +667,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [activeKey,    setActiveKey]   = useState('women')
   const [tileKey,      setTileKey]     = useState(0)
   const [mobilePanel,  setMobilePanel] = useState<'rail' | 'sub'>('rail')
+  const [expandedSub,  setExpandedSub]  = useState<string | null>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => { setMounted(true) }, [])
@@ -663,7 +697,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const handleSetActive = (key: string) => {
     setActiveKey(key)
     setTileKey(k => k + 1)
-    // On mobile, navigate to sub-nav panel
+    setExpandedSub(null)
     if (typeof window !== 'undefined' && window.innerWidth <= 768) {
       setMobilePanel('sub')
     }
@@ -748,16 +782,49 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               </a>
 
               <div className="mn-sub-list">
-                {active.sub.map((s, i) => (
-                  <button
-                    key={i}
-                    className="mn-sub-item"
-                    onClick={() => s.href && (window.location.href = s.href)}
-                  >
-                    {s.label}
-                    {s.deep && <span className="mn-sub-chev"><IChevR /></span>}
-                  </button>
-                ))}
+                {active.sub.map((s, i) => {
+                  const hasChildren = !!s.children?.length
+                  const isExpanded  = expandedSub === s.label
+                  return (
+                    <div key={i}>
+                      <button
+                        className="mn-sub-item"
+                        style={isExpanded ? { color: 'var(--mn-pane-accent)' } : undefined}
+                        onClick={() => {
+                          if (hasChildren) setExpandedSub(isExpanded ? null : s.label)
+                          else if (s.href) window.location.href = s.href
+                        }}
+                      >
+                        {s.label}
+                        {hasChildren && (
+                          <span
+                            className="mn-sub-chev"
+                            style={{ transform: isExpanded ? 'rotate(90deg)' : undefined, transition: 'transform 300ms cubic-bezier(0.16,1,0.3,1)' }}
+                          >
+                            <IChevR />
+                          </span>
+                        )}
+                      </button>
+                      {hasChildren && (
+                        <div style={{
+                          maxHeight: isExpanded ? 500 : 0,
+                          overflow: 'hidden',
+                          transition: `max-height ${isExpanded ? '420ms' : '280ms'} cubic-bezier(0.16,1,0.3,1)`,
+                        }}>
+                          {s.children!.map((child, j) => (
+                            <button
+                              key={j}
+                              className={j === 0 ? 'mn-sub-child mn-sub-child-all' : 'mn-sub-child'}
+                              onClick={() => { window.location.href = child.href }}
+                            >
+                              {child.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
 
               <div className="mn-sub-section">

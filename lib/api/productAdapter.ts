@@ -14,6 +14,7 @@ export interface ProductCardShape {
   catalogue?: string[];
   category?: string;
   subcategory?: string;
+  gender?: string;
 }
 
 export function apiProductToProduct(p: ApiProduct): ApiProduct {
@@ -35,5 +36,6 @@ export function apiProductToCardShape(p: ApiProduct): ProductCardShape {
     catalogue: p.catalogue,
     category: p.category,
     subcategory: p.subcategory,
+    gender: p.gender,
   };
 }

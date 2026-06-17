@@ -1,6 +1,6 @@
+import { Suspense } from 'react'
 import { Metadata } from 'next'
-import HeroTrendy from './components/HeroTrendy'
-import CuratedTrendySection from './components/CuratedSection'
+import TrendyPageContent from './components/TrendyPageContent'
 
 export const metadata: Metadata = {
   title: "Enunas - Premium Fashion & Streetwear",
@@ -9,11 +9,8 @@ export const metadata: Metadata = {
 
 export default function page() {
   return (
-    <div>
-      <section>
-        <HeroTrendy />
-      </section>
-      <CuratedTrendySection />
-    </div>
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <TrendyPageContent />
+    </Suspense>
   )
 }

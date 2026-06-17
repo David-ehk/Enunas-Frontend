@@ -65,6 +65,7 @@ export interface ApiProduct {
   currency?: string;
   category: string;
   subcategory?: string;
+  gender?: string;
   images: string[];
   colours: { id?: string; hex: string; name: string; colorFamily?: string }[];
   sizes: string[];

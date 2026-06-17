@@ -1,5 +1,6 @@
+import { Suspense } from 'react'
 import { Metadata } from 'next'
-import HeroNew from './components/HeroNew'
+import NeuPageContent from './components/NeuPageContent'
 
 export const metadata: Metadata = {
   title: "Enunas - Premium Fashion & Streetwear",
@@ -8,15 +9,9 @@ export const metadata: Metadata = {
 
 export default function page() {
   return (
-    <div>
-        <section>
-          <HeroNew/>
-        </section>
-
-        <section>
-        </section>
-
-    </div>
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <NeuPageContent />
+    </Suspense>
   )
 }
 
