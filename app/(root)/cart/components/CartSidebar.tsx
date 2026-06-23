@@ -521,27 +521,7 @@ export default function CartSidebar() {
           </div>
         </div>
 
-        {/* ── Free-shipping bar ── */}
-        {activeTab === 'cart' && cartItems.length > 0 && (
-          <div
-            className="enu-ship"
-            style={{ '--pct': `${pct}%` } as React.CSSProperties}
-          >
-            <div className="enu-ship-row">
-              {freeShip ? (
-                <div className="enu-ship-msg is-done">Kostenloser Versand freigeschaltet</div>
-              ) : (
-                <div className="enu-ship-msg">
-                  Noch <span className="enu-amt">{fmt(remaining)}</span> bis zum kostenlosen Versand
-                </div>
-              )}
-              <div className="enu-ship-meta">{fmt(totalPrice)} / {fmt(FREE_SHIPPING_THRESHOLD)}</div>
-            </div>
-            <div className="enu-ship-track">
-              <div className="enu-ship-fill" />
-            </div>
-          </div>
-        )}
+        {/* Free-shipping bar — re-enable once per-product shipping is configured */}
 
         {/* ── Body ── */}
         <div className="enu-cart-body">
@@ -608,9 +588,9 @@ export default function CartSidebar() {
               <span className="enu-checkout-line bot" />
             </Link>
 
-            <button className="enu-continue" onClick={closeCart}>
-              <span>Weiter einkaufen</span>
-            </button>
+            <Link href="/cart" onClick={closeCart} className="enu-continue" style={{ textDecoration: 'none' }}>
+              <span>Warenkorb anzeigen</span>
+            </Link>
 
             <div className="enu-trust">
               <LockIcon width={11} height={11} />

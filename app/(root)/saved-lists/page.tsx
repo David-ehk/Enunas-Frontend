@@ -62,9 +62,22 @@ export default function SavedListsPage() {
           </p>
           <Link
             href="/account"
-            className="px-8 py-4 bg-enunas-purple text-white font-league-spartan text-sm tracking-[0.15em] uppercase hover:bg-enunas-purple-dark transition-colors duration-200"
+            className="group relative inline-block overflow-hidden"
+            style={{
+              padding: '16px 32px',
+              background: '#370E4D',
+              fontFamily: 'var(--font-Cormorant-Garamond)',
+              fontSize: '18px',
+              fontWeight: 400,
+              letterSpacing: '0.06em',
+              color: 'white',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#250838' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#370E4D' }}
           >
-            Anmelden
+            <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
+            <span className="relative z-10">Anmelden</span>
+            <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
           </Link>
         </div>
         <footer className="bg-enunas-purple w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
@@ -98,9 +111,22 @@ export default function SavedListsPage() {
               </p>
               <Link
                 href="/bekleidung"
-                className="font-league-spartan text-xs uppercase tracking-[0.15em] text-enunas-purple border border-enunas-purple px-8 py-3 hover:bg-enunas-purple hover:text-white transition-colors duration-200"
+                className="group relative inline-block overflow-hidden"
+                style={{
+                  padding: '16px 32px',
+                  background: '#370E4D',
+                  fontFamily: 'var(--font-Cormorant-Garamond)',
+                  fontSize: '18px',
+                  fontWeight: 400,
+                  letterSpacing: '0.06em',
+                  color: 'white',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#250838' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#370E4D' }}
               >
-                Entdecken
+                <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
+                <span className="relative z-10">Entdecken</span>
+                <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
               </Link>
             </div>
           ) : (

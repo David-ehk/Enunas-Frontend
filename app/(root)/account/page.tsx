@@ -115,9 +115,28 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
           <input type="email" placeholder="E-Mail" value={form.email} onChange={set('email')} required className={inputClass} />
           <input type="password" placeholder="Passwort" value={form.password} onChange={set('password')} required className={inputClass} />
           {error && <p className="text-[13px] text-[#8B1E3F]">{error}</p>}
-          <button type="submit" disabled={submitting}
-            className="w-full py-3 bg-[#370E4D] text-white text-[11px] uppercase tracking-[0.15em] hover:bg-[#4A1566] transition-colors duration-200 disabled:opacity-60">
-            {submitting ? 'Bitte warten…' : 'Anmelden'}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="group relative w-full overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{
+              padding: '16px 32px',
+              background: '#370E4D',
+              fontFamily: 'var(--font-Cormorant-Garamond)',
+              fontSize: '18px',
+              fontWeight: 400,
+              letterSpacing: '0.06em',
+              color: 'white',
+              border: 'none',
+              cursor: submitting ? 'not-allowed' : 'pointer',
+              transition: 'background-color 300ms',
+            }}
+            onMouseEnter={e => { if (!submitting) e.currentTarget.style.backgroundColor = '#250838' }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#370E4D' }}
+          >
+            <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
+            <span className="relative z-10">{submitting ? 'Bitte warten…' : 'Anmelden'}</span>
+            <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
           </button>
         </form>
       ) : (
@@ -128,9 +147,28 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
             Du kannst deinen Namen nach der Anmeldung unter Einstellungen ergänzen.
           </p>
           {error && <p className="text-[13px] text-[#8B1E3F]">{error}</p>}
-          <button type="submit" disabled={submitting}
-            className="w-full py-3 bg-[#370E4D] text-white text-[11px] uppercase tracking-[0.15em] hover:bg-[#4A1566] transition-colors duration-200 disabled:opacity-60">
-            {submitting ? 'Bitte warten…' : 'Konto erstellen'}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="group relative w-full overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{
+              padding: '16px 32px',
+              background: '#370E4D',
+              fontFamily: 'var(--font-Cormorant-Garamond)',
+              fontSize: '18px',
+              fontWeight: 400,
+              letterSpacing: '0.06em',
+              color: 'white',
+              border: 'none',
+              cursor: submitting ? 'not-allowed' : 'pointer',
+              transition: 'background-color 300ms',
+            }}
+            onMouseEnter={e => { if (!submitting) e.currentTarget.style.backgroundColor = '#250838' }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#370E4D' }}
+          >
+            <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
+            <span className="relative z-10">{submitting ? 'Bitte warten…' : 'Konto erstellen'}</span>
+            <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
           </button>
         </form>
       )}

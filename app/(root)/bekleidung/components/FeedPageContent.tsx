@@ -32,7 +32,7 @@ export default function FeedPageContent({ basePath, HeroComponent }: Props) {
   const isMobile     = useIsMobile()
   const filterBarRef = useRef<HTMLDivElement>(null)
 
-  const [navH, setNavH] = useState(60)
+  const [navH, setNavH] = useState(70)
   useEffect(() => {
     const header = document.querySelector('header')
     if (header) setNavH(header.getBoundingClientRect().height)

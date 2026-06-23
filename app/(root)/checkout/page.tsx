@@ -51,6 +51,8 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showLogin, setShowLogin] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'applepay' | 'klarna' | 'card'>('paypal')
+  const [promoCode, setPromoCode] = useState('')
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
   const [loginError, setLoginError] = useState<string | null>(null)
@@ -324,6 +326,77 @@ export default function CheckoutPage() {
                 </div>
               </section>
 
+              {/* Payment method */}
+              <section>
+                <h2 className="font-league-spartan text-xs uppercase tracking-[0.15em] text-enunas-gray-medium mb-4">
+                  Zahlungsmethode
+                </h2>
+                <div className="flex flex-col gap-3">
+                  {([
+                    { id: 'paypal',   label: 'PayPal',      sub: 'Schnell & sicher', icon: (
+                      // PayPal: iconic overlapping double-P mark
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6.5 20.5 8 10h5c2 0 3.5 1 3 3.5-.4 2-2 3.5-4 3.5H10l-1 7.5" />
+                        <path d="M9.5 13.5h1c2 0 4-1.5 4.5-4C15.5 7 14 5.5 12 5.5H8L6.5 14" />
+                      </svg>
+                    )},
+                    { id: 'applepay', label: 'Apple Pay',   sub: 'Mit Face ID & Touch ID', icon: (
+                      // Apple Pay: Apple logo silhouette — leaf + apple body with bite
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 6.5c.6-1.2 1.8-2 3-2-.1 1.2-.7 2.2-1.5 2.8-.8.6-1.9.8-2.8.5" />
+                        <path d="M8.5 8.5C7 8.5 5.5 9.5 4.8 11 3.5 13.2 4 17 5.8 19.2c.8 1 1.7 2 3 2 1 0 1.5-.6 2.7-.6 1.2 0 1.7.6 2.7.6 1.3 0 2.2-1 3-2 .6-.8 1-1.7 1.2-2.5-2.4-.9-2.8-4.2-.5-5.5-1-1.7-2.7-2.7-4.4-2.7-1.2 0-2 .5-3 .5z" />
+                      </svg>
+                    )},
+                    { id: 'klarna',   label: 'Klarna',      sub: 'Jetzt kaufen, später zahlen', icon: (
+                      // Klarna: the brand's distinctive K mark with dot
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="9" y1="4" x2="9" y2="20" />
+                        <path d="M9 12.5 L15.5 4" />
+                        <path d="M9 12.5 L15.5 20" />
+                        <circle cx="18" cy="19.5" r="1.2" fill="currentColor" stroke="none" />
+                      </svg>
+                    )},
+                    { id: 'card',     label: 'Kreditkarte', sub: 'Visa & Mastercard', icon: (
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="5" width="20" height="14" rx="2" />
+                        <path d="M2 10h20" />
+                        <path d="M6 14h4" />
+                      </svg>
+                    )},
+                  ] as const).map(({ id, label, sub, icon }) => {
+                    const selected = paymentMethod === id
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => setPaymentMethod(id)}
+                        className="flex items-center gap-4 px-4 py-3.5 border text-left transition-colors duration-200"
+                        style={{
+                          borderColor: selected ? '#370E4D' : '#E8E8E8',
+                          backgroundColor: selected ? 'rgba(55,14,77,0.04)' : '#ffffff',
+                        }}
+                      >
+                        <span style={{ color: selected ? '#370E4D' : '#6B6B6B', flexShrink: 0 }}>{icon}</span>
+                        <span className="flex-1">
+                          <span className="block font-league-spartan text-sm text-enunas-black">{label}</span>
+                          <span className="block font-league-spartan text-[11px] text-enunas-gray-medium mt-0.5">{sub}</span>
+                        </span>
+                        <span
+                          className="w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors duration-200"
+                          style={{ borderColor: selected ? '#370E4D' : '#E8E8E8', backgroundColor: selected ? '#370E4D' : 'transparent' }}
+                        >
+                          {selected && (
+                            <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                              <path d="M1.5 4L3 5.5L6.5 2" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          )}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </section>
+
               {/* Error */}
               {error && (
                 <p className="font-league-spartan text-xs text-enunas-error">{error}</p>
@@ -432,6 +505,24 @@ export default function CheckoutPage() {
                   <p className="font-league-spartan text-[10px] text-enunas-gray-medium">
                     inkl. MwSt.
                   </p>
+                </div>
+
+                {/* Promo code */}
+                <div className="flex mt-5">
+                  <input
+                    type="text"
+                    value={promoCode}
+                    onChange={e => setPromoCode(e.target.value)}
+                    placeholder="Promo Code"
+                    className="flex-1 px-3.5 py-3 border border-enunas-gray-light border-r-0 bg-white font-league-spartan text-xs tracking-[0.05em] focus:outline-none focus:border-enunas-purple transition-colors duration-300"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => { /* TODO: applyPromo(promoCode) */ }}
+                    className="px-4 bg-enunas-black text-white font-league-spartan text-[10px] tracking-[0.2em] uppercase hover:bg-enunas-purple transition-colors duration-300"
+                  >
+                    Anwenden
+                  </button>
                 </div>
               </div>
             </aside>

@@ -1,3 +1,5 @@
+'use client'
+
 const Subscribe = () => {
   return (
     <section className="w-full h-full ">
@@ -20,17 +22,26 @@ const Subscribe = () => {
       className="w-full px-4 py-3 border border-gray-300 mb-3 focus:outline-none focus:border-black"
     />
 
- <button className="relative w-full py-4 px-6  tracking-widest text-white bg-[#370E4D] overflow-hidden group transition-colors duration-600">
-  
-  {/* Obere Linie - zentriert verkürzen */}
-  <span className="absolute left-1/2 -translate-x-1/2 top-[10%] w-full h-[1px] bg-white transition-all duration-500 ease-out group-hover:w-[75%]"></span>
-  
-  {/* Text */}
-  <span className="relative z-10">ABONNIEREN</span>
-  
-  {/* Untere Linie - zentriert verkürzen */}
-  <span className="absolute left-1/2 -translate-x-1/2 bottom-[10%] w-full h-[1px] bg-white transition-all duration-500 ease-out group-hover:w-[75%]"></span>
-  
+ <button
+  className="group relative w-full overflow-hidden"
+  style={{
+    padding: '16px 32px',
+    background: '#370E4D',
+    fontFamily: 'var(--font-Cormorant-Garamond)',
+    fontSize: '18px',
+    fontWeight: 400,
+    letterSpacing: '0.06em',
+    color: 'white',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'background-color 300ms',
+  }}
+  onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#250838' }}
+  onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#370E4D' }}
+>
+  <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
+  <span className="relative z-10">Abonnieren</span>
+  <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
 </button>
 
   </div>

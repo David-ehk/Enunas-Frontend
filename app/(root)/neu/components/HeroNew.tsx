@@ -1,6 +1,6 @@
 const HeroNew = ({ count, loading = false }: { count?: number; loading?: boolean }) => {
   return (
-    <section style={{ position: 'relative', width: '100%', height: '88vh', overflow: 'hidden', minHeight: 520 }}>
+    <section style={{ position: 'relative', width: '100%', height: '88vh', overflow: 'hidden', minHeight: 520, background: '#0a0a0a' }}>
 
       {/* Photo — fills the section, no overlap with navbar needed since section is in normal flow */}
       <img
@@ -20,7 +20,7 @@ const HeroNew = ({ count, loading = false }: { count?: number; loading?: boolean
       <div style={{
         position: 'absolute',
         inset: 0,
-        background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.06) 40%, rgba(0,0,0,0.78) 100%)',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.04) 30%, rgba(0,0,0,0.68) 68%, rgba(0,0,0,0.96) 100%)',
       }} />
 
       {/* Editorial text block — bottom-left */}

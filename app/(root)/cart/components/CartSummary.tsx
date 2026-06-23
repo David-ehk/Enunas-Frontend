@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { formatEuro } from '@/lib/format'
@@ -25,7 +24,6 @@ function Row({ label, value, bold }: { label: string; value: string; bold?: bool
 }
 
 export default function CartSummary({ subtotal }: CartSummaryProps) {
-  const [promo, setPromo] = useState('')
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST
   const total = subtotal + shipping
 
@@ -40,24 +38,6 @@ export default function CartSummary({ subtotal }: CartSummaryProps) {
         <Row label="Versand" value={shipping === 0 ? 'Kostenlos' : formatEuro(shipping)} />
         <div className="h-px bg-enunas-gray-light my-1.5" />
         <Row label="Gesamt" value={formatEuro(total)} bold />
-      </div>
-
-      {/* Promo code */}
-      <div className="flex mb-5">
-        <input
-          type="text"
-          value={promo}
-          onChange={(e) => setPromo(e.target.value)}
-          placeholder="Promo Code"
-          className="flex-1 px-3.5 py-3 border border-enunas-gray-light border-r-0 bg-white font-league-spartan text-xs tracking-[0.05em] focus:outline-none focus:border-enunas-purple transition-colors duration-300"
-        />
-        <button
-          type="button"
-          onClick={() => { /* TODO: applyPromo(promo) */ }}
-          className="px-4 bg-enunas-black text-white font-league-spartan text-[10px] tracking-[0.2em] uppercase hover:bg-enunas-purple transition-colors duration-300 ease-out-expo"
-        >
-          Anwenden
-        </button>
       </div>
 
       <Link

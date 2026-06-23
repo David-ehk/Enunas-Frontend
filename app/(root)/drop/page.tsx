@@ -1,16 +1,11 @@
-import React from 'react'
-import Test from './components/Test'
-import CuratedDropSection from './components/CuratedDropSection'
+import type { Metadata } from 'next'
+import DropsPageContent from './components/DropsPageContent'
 
-function page() {
-  return (
-    <div className="min-h-screen bg-black flex flex-col">
-      <section className="flex-1">
-        <Test />
-      </section>
-      <CuratedDropSection />
-    </div>
-  )
+export const metadata: Metadata = {
+  title: 'Drops — Enunas',
+  description: 'Limited-edition collaborative releases. Dark theme. Season 01.',
 }
 
-export default page
+export default function page() {
+  return <DropsPageContent />
+}
