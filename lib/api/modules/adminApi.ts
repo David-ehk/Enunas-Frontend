@@ -1,4 +1,4 @@
-import { fetcher } from '../fetcher';
+import { fetcher, getBaseUrl } from '../fetcher';
 import type { AdminBrand, AdminCustomer, AdminPayout, ApiOrder, PayoutDashboard, AdminApiProduct } from '@/types/api';
 
 interface Page<T> { content: T[] }
@@ -42,7 +42,7 @@ export const adminApi = {
 
     async export22f(id: string, period: string, format: 'csv' | 'json'): Promise<Blob> {
       const token = typeof window !== 'undefined' ? localStorage.getItem('enunas_token') : null;
-      const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
+      const BASE = getBaseUrl();
       const res = await fetch(`${BASE}/admin/brands/${id}/22f-export?period=${period}&format=${format}`, {
         headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       });

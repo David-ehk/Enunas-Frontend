@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getCuration } from '@/lib/curation'
-import { productApi } from '@/lib/api'
+import { getCuration, resolveCuratedOrNewest } from '@/lib/curation'
 import { generateSlug } from '@/lib/product'
 import type { ApiProduct } from '@/types/api'
 
@@ -12,10 +11,7 @@ export default function CuratedDropSection() {
   const [products, setProducts] = useState<ApiProduct[]>([])
 
   useEffect(() => {
-    const ids = getCuration().drops
-    if (ids.length === 0) return
-    Promise.all(ids.map(id => productApi.getById(id).catch(() => null)))
-      .then(results => setProducts(results.filter((p): p is ApiProduct => p !== null)))
+    resolveCuratedOrNewest(getCuration().drops, 8).then(setProducts)
   }, [])
 
   if (products.length === 0) return null

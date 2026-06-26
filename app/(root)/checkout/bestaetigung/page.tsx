@@ -7,6 +7,7 @@ import CheckoutNavbar from '@/app/(root)/cart/components/CheckoutNavbar'
 import CartFooter from '@/app/(root)/cart/components/CartFooter'
 import { orderApi } from '@/lib/api/modules/orderApi'
 import { productApi, apiProductToCardShape } from '@/lib/api'
+import { generateSlug } from '@/lib/product'
 import type { ApiOrder } from '@/types/api'
 import type { ProductCardShape } from '@/lib/api'
 
@@ -235,15 +236,33 @@ function OrderDetails({ order }: { order: ApiOrder }) {
   )
 }
 
-// ── 10-minute countdown ───────────────────────────────────────────────────────
+// ── 10-minute countdown (shared with /angebot via sessionStorage) ─────────────
 
-function useCountdown(seconds: number) {
-  const [remaining, setRemaining] = useState(seconds)
+const ANGEBOT_STORAGE_KEY = 'enunas-angebot-start'
+
+function useCountdown(totalSeconds: number) {
+  const [remaining, setRemaining] = useState<number>(() => {
+    if (typeof window === 'undefined') return totalSeconds
+    const stored = sessionStorage.getItem(ANGEBOT_STORAGE_KEY)
+    if (stored) {
+      const elapsed = Math.floor((Date.now() - parseInt(stored, 10)) / 1000)
+      return Math.max(0, totalSeconds - elapsed)
+    }
+    sessionStorage.setItem(ANGEBOT_STORAGE_KEY, String(Date.now()))
+    return totalSeconds
+  })
+
   useEffect(() => {
     if (remaining <= 0) return
-    const id = setInterval(() => setRemaining(r => r - 1), 1000)
+    const id = setInterval(() => {
+      const stored = sessionStorage.getItem(ANGEBOT_STORAGE_KEY)
+      if (!stored) return
+      const elapsed = Math.floor((Date.now() - parseInt(stored, 10)) / 1000)
+      setRemaining(Math.max(0, totalSeconds - elapsed))
+    }, 1000)
     return () => clearInterval(id)
-  }, [remaining])
+  }, [totalSeconds, remaining])
+
   const m = String(Math.floor(remaining / 60)).padStart(2, '0')
   const s = String(remaining % 60).padStart(2, '0')
   return { display: `${m}:${s}`, expired: remaining <= 0 }
@@ -315,7 +334,10 @@ function BestaetiguungContent() {
   useEffect(() => {
     if (!isUpsell) return
     productApi.list({ size: 4 })
-      .then(r => setProducts(r.content.map(apiProductToCardShape)))
+      .then(r => setProducts(r.content.map(p => ({
+        ...apiProductToCardShape(p),
+        href: `/angebot/${generateSlug(p.brandName)}/${p.slug}`,
+      }))))
       .catch(() => {})
   }, [isUpsell])
 

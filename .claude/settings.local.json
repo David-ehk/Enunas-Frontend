@@ -120,7 +120,10 @@
       "Bash(Get-Content \"C:\\\\Users\\\\david\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-david-OneDrive-Desktop-enunas\\\\1c056570-697e-4123-8912-43f98035724e\\\\tasks\\\\b9acpo3p8.output\" -Tail 10)",
       "PowerShell(Start-Sleep -Seconds 5; Invoke-WebRequest -Uri \"http://localhost:3000/bekleidung\" -UseBasicParsing -TimeoutSec 5 | Select-Object -ExpandProperty StatusCode)",
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\david\\\\OneDrive\\\\Desktop\\\\enunas\\\\app\\\\Homepage\\\\components\\\\\" -Recurse -File | ForEach-Object { $_.FullName })",
-      "PowerShell(Start-Sleep -Seconds 5; $null)"
+      "PowerShell(Start-Sleep -Seconds 5; $null)",
+      "Bash(node -e \"const p = require\\('./package.json'\\); console.log\\('next:', p.dependencies?.next || p.devDependencies?.next\\)\")",
+      "Bash(size=3 2>&1)",
+      "Bash(xargs grep -l \"discount\\\\|Rabatt\\\\|crossed\\\\|upsell\\\\|angebot\")"
     ]
   }
 }

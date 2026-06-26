@@ -1,17 +1,4 @@
-'use client'
-
-import { useState } from 'react'
-
 export default function CookieEinstellungenPage() {
-  const [analytics, setAnalytics] = useState(false)
-  const [marketing, setMarketing] = useState(false)
-  const [saved, setSaved] = useState(false)
-
-  const handleSave = () => {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
-  }
-
   return (
     <div className="max-w-3xl mx-auto px-6 py-16 lg:py-24">
       <p
@@ -21,11 +8,20 @@ export default function CookieEinstellungenPage() {
         Datenschutz
       </p>
       <h1
-        className="text-3xl lg:text-4xl font-light text-[#0A0A0A] mb-12"
+        className="text-3xl lg:text-4xl font-light text-[#0A0A0A] mb-6"
         style={{ fontFamily: 'var(--font-cormorant)' }}
       >
         Cookie-Einstellungen
       </h1>
+
+      <p
+        className="text-[14px] text-[#2D2D2D] leading-relaxed mb-12 max-w-2xl"
+        style={{ fontFamily: 'var(--font-league-spartan)' }}
+      >
+        Enunas verzichtet bewusst auf Tracking-Cookies. Wir verwenden ausschließlich
+        technisch notwendige Cookies sowie eine anonyme, cookielose Reichweitenmessung —
+        deshalb gibt es hier nichts zu konfigurieren und keinen Cookie-Banner.
+      </p>
 
       <div
         className="space-y-6 text-[14px] text-[#2D2D2D]"
@@ -36,33 +32,33 @@ export default function CookieEinstellungenPage() {
             <div>
               <p className="text-[11px] uppercase tracking-[0.1em] text-[#0A0A0A] font-medium mb-1">Notwendige Cookies</p>
               <p className="text-[13px] text-[#6B6B6B] leading-relaxed">
-                Erforderlich für den Betrieb der Website. Können nicht deaktiviert werden.
+                Erforderlich für den Betrieb der Website (z.&nbsp;B. Warenkorb, Anmeldung).
+                Können nicht deaktiviert werden.
               </p>
             </div>
-            <div className="w-10 h-6 bg-[#370E4D] rounded-full flex-shrink-0 ml-6 opacity-50 cursor-not-allowed" />
+            <span
+              className="text-[10px] uppercase tracking-[0.1em] text-[#1A5A3C] flex-shrink-0 ml-6"
+            >
+              Aktiv
+            </span>
           </div>
         </div>
 
         <div className="border border-[#E8E8E8] p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.1em] text-[#0A0A0A] font-medium mb-1">Analyse-Cookies</p>
+              <p className="text-[11px] uppercase tracking-[0.1em] text-[#0A0A0A] font-medium mb-1">Anonyme Reichweitenmessung</p>
               <p className="text-[13px] text-[#6B6B6B] leading-relaxed">
-                Helfen uns zu verstehen, wie Besucher die Website nutzen.
+                Wir messen die Nutzung der Website cookielos und ohne personenbezogene
+                Daten — es werden keine Cookies gesetzt und kein geräteübergreifendes
+                Profil gebildet.
               </p>
             </div>
-            <button
-              role="switch"
-              aria-checked={analytics}
-              onClick={() => setAnalytics(v => !v)}
-              className={`w-10 h-6 rounded-full flex-shrink-0 ml-6 transition-colors duration-200 relative ${
-                analytics ? 'bg-[#370E4D]' : 'bg-[#E8E8E8]'
-              }`}
+            <span
+              className="text-[10px] uppercase tracking-[0.1em] text-[#6B6B6B] flex-shrink-0 ml-6 text-right"
             >
-              <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
-                analytics ? 'translate-x-5' : 'translate-x-1'
-              }`} />
-            </button>
+              Cookielos
+            </span>
           </div>
         </div>
 
@@ -71,31 +67,16 @@ export default function CookieEinstellungenPage() {
             <div>
               <p className="text-[11px] uppercase tracking-[0.1em] text-[#0A0A0A] font-medium mb-1">Marketing-Cookies</p>
               <p className="text-[13px] text-[#6B6B6B] leading-relaxed">
-                Ermöglichen personalisierte Werbung auf anderen Plattformen.
+                Wir setzen keine Marketing- oder Werbe-Cookies ein.
               </p>
             </div>
-            <button
-              role="switch"
-              aria-checked={marketing}
-              onClick={() => setMarketing(v => !v)}
-              className={`w-10 h-6 rounded-full flex-shrink-0 ml-6 transition-colors duration-200 relative ${
-                marketing ? 'bg-[#370E4D]' : 'bg-[#E8E8E8]'
-              }`}
+            <span
+              className="text-[10px] uppercase tracking-[0.1em] text-[#6B6B6B] flex-shrink-0 ml-6"
             >
-              <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
-                marketing ? 'translate-x-5' : 'translate-x-1'
-              }`} />
-            </button>
+              Keine
+            </span>
           </div>
         </div>
-
-        <button
-          onClick={handleSave}
-          className="mt-4 px-8 py-3 bg-[#370E4D] text-white text-[11px] uppercase tracking-[0.15em] hover:bg-[#4A1566] transition-colors duration-200"
-          style={{ fontFamily: 'var(--font-league-spartan)' }}
-        >
-          {saved ? 'Gespeichert' : 'Einstellungen speichern'}
-        </button>
       </div>
     </div>
   )

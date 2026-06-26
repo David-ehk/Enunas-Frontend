@@ -17,15 +17,16 @@ export const metadata: Metadata = {
   // Keywords (weniger wichtig für SEO, aber kann helfen)
   keywords: ['fashion', 'streetwear', 'sneaker', 'designer mode', 'online shop'],
   
-  // Open Graph (für Social Media Shares)
+  // Open Graph (für Social Media Shares). The image path is relative — it resolves against
+  // metadataBase set in app/layout.tsx.
   openGraph: {
     title: "Enunas - Premium Fashion & Streetwear",
     description: "Entdecke exklusive Mode von Top-Marken",
-    url: 'https://enunas.com',
+    url: '/',
     siteName: 'Enunas',
     images: [
       {
-        url: 'https://enunas.com/og-image.jpg',  // Dein Vorschaubild
+        url: '/og-image.jpg',
         width: 1200,
         height: 630,
       }

@@ -1,5 +1,5 @@
 'use client'
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
+import { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react'
 
 // Cart Item Type
 export interface CartItem {
@@ -53,6 +53,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const closeCart = () => setIsCartOpen(false)
   const toggleCart = () => setIsCartOpen(prev => !prev)
 
+  // Guard so the persist effect doesn't clobber storage with the initial empty array
+  // before the cart has been hydrated from localStorage on mount.
+  const hydrated = useRef(false)
+
   // ✅ localStorage: Beim Start laden
   useEffect(() => {
     const saved = localStorage.getItem('cart')
@@ -63,13 +67,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
         console.error('Fehler beim Laden des Carts:', error)
       }
     }
+    hydrated.current = true
   }, [])
 
-  // ✅ localStorage: Bei Änderung speichern
+  // ✅ localStorage: Bei Änderung speichern — always persist (incl. the empty array, so
+  // removing the last item actually clears storage instead of leaving a stale cart).
   useEffect(() => {
-    if (cartItems.length > 0) {
-      localStorage.setItem('cart', JSON.stringify(cartItems))
-    }
+    if (!hydrated.current) return
+    localStorage.setItem('cart', JSON.stringify(cartItems))
   }, [cartItems])
 
   // Add Item to Cart

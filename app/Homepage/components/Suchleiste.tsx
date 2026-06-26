@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
-import { Input } from "@/components/ui/input"
 import Link from 'next/link'
 
 interface SearchBarProps {
@@ -11,147 +10,161 @@ interface SearchBarProps {
   onClose: () => void
 }
 
+const highlights = [
+  { title: 'Alle Bekleidung', href: '/bekleidung' },
+  { title: 'Neu', href: '/neu' },
+  { title: 'Trendy', href: '/trendy' },
+  { title: 'Drops', href: '/drop' },
+  { title: 'Catalogue', href: '/catalogue' },
+]
+
 const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [mounted, setMounted] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
-  // Mount state for portal (SSR safety)
   useEffect(() => {
     setMounted(true)
     return () => setMounted(false)
   }, [])
 
-  // Lock body scroll when search is open
+  // Focus input whenever the panel opens (works on every open, not just first mount)
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
+    if (!isOpen) return
+    const t = setTimeout(() => inputRef.current?.focus(), 60)
+    return () => clearTimeout(t)
   }, [isOpen])
 
-  // Highlights - könnten aus einer API/Datenbank kommen
-  const highlights = [
-    { title: 'GESCHENKE FUER SIE', href: '/geschenke/sie' },
-    { title: 'GESCHENKE FUER IHN', href: '/geschenke/ihn' },
-    { title: 'Accesoirs', href: '/accesoirs' },
-    { title: 'DROPS', href: '/Drops' },
-    { title: 'ALLE BEKLEIDUNG ', href: '/bekleidung' }
-  ]
+  // Body scroll lock + Escape to close
+  useEffect(() => {
+    if (!isOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prev
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [isOpen, onClose])
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value)
-  }
+  const handleSubmit = useCallback(() => {
+    if (!searchTerm.trim()) return
+    router.push(`/bekleidung?q=${encodeURIComponent(searchTerm.trim())}`)
+    onClose()
+    setSearchTerm('')
+  }, [searchTerm, router, onClose])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchTerm.trim().length > 0) {
-      router.push(`/bekleidung?q=${encodeURIComponent(searchTerm.trim())}`)
-      onClose()
-      setSearchTerm('')
-    }
+    if (e.key === 'Enter') handleSubmit()
   }
 
-  const handleLinkClick = () => {
-    onClose()
-  }
+  if (!mounted) return null
 
-  // Search content to be portaled
-  const searchContent = (
+  return createPortal(
     <>
-      {/* Overlay */}
+      {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm transition-all duration-300
-                    ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
+          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
         style={{ zIndex: 9998 }}
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Search Sidebar */}
+      {/* Search panel */}
       <aside
-        className={`fixed top-0 right-0 w-full md:w-[500px]
-                    transform transition-transform duration-500 ease-out
-                    ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
-        style={{ backgroundColor: '#F5F5F0', zIndex: 9999, height: '100vh', minHeight: '100vh' }}
-        aria-label="Search panel"
+        className={`fixed top-0 right-0 w-full md:w-[500px] flex flex-col
+                    transition-transform duration-500 ease-out-expo ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        style={{ backgroundColor: '#F5F5F0', zIndex: 9999, height: '100dvh' }}
         role="dialog"
         aria-modal="true"
+        aria-label="Suchbereich"
       >
-        {/* Close Button */}
+        {/* Corner bracket — top-right */}
+        <span
+          className="absolute pointer-events-none"
+          style={{
+            top: 16, right: 16, width: 14, height: 14,
+            borderTop: '1px solid rgba(10,10,10,0.3)',
+            borderRight: '1px solid rgba(10,10,10,0.3)',
+          }}
+        />
+        {/* Corner bracket — bottom-left */}
+        <span
+          className="absolute pointer-events-none"
+          style={{
+            bottom: 16, left: 16, width: 14, height: 14,
+            borderBottom: '1px solid rgba(10,10,10,0.3)',
+            borderLeft: '1px solid rgba(10,10,10,0.3)',
+          }}
+        />
+
+        {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center
-                   hover:bg-black/5 rounded-full transition-all duration-300"
+          className="absolute top-5 right-5 w-9 h-9 flex items-center justify-center
+                     hover:bg-black/8 rounded-full transition-colors duration-200"
           aria-label="Suche schließen"
         >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M6 18L18 6M6 6l12 12"
-            />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+              d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
-        {/* Search Input Container */}
-        <div className="px-6 pt-32 pb-8">
-          <div className="relative">
-            <Input
-              type="text"
+        {/* Input area */}
+        <div className="px-6 sm:px-8 pt-20 pb-6">
+          <div className="flex items-center border-b-[1.5px] border-black pb-3 gap-3">
+            {/* Tappable search icon on the left */}
+            <button
+              onClick={handleSubmit}
+              aria-label="Suchen"
+              className="flex-shrink-0 text-black/50 hover:text-black transition-colors duration-200"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+
+            <input
+              ref={inputRef}
+              type="search"
+              enterKeyHint="search"
               placeholder="SUCHEN"
               value={searchTerm}
-              onChange={handleSearchChange}
+              onChange={e => setSearchTerm(e.target.value)}
               onKeyDown={handleKeyDown}
-              autoFocus
-              className="w-full bg-transparent border-0 border-b-[1.5px] border-black
-                       rounded-none px-0 pb-3 text-[13px] tracking-[0.1em] uppercase
-                       placeholder:text-black/40 placeholder:tracking-[0.1em]
-                       focus-visible:ring-0 focus-visible:ring-offset-0
-                       focus-visible:border-black transition-colors duration-300"
+              className="flex-1 bg-transparent border-0 rounded-none
+                         text-[13px] font-league-spartan tracking-[0.1em] uppercase
+                         placeholder:text-black/40 placeholder:tracking-[0.1em]
+                         focus:outline-none transition-colors duration-300"
             />
-            {/* Search Icon */}
-            <svg
-              className="absolute right-0 top-1 w-5 h-5 text-black/60"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
           </div>
         </div>
 
-        {/* Highlights Section */}
-        <div className="px-6 py-8">
-          <h3 className="text-xs tracking-[0.15em] uppercase mb-6 text-black/80">
-            HIGHLIGHTS
-          </h3>
-
-          <ul className="space-y-3">
-            {highlights.map((item, index) => (
-              <li key={index}>
+        {/* Highlights */}
+        <div className="px-6 sm:px-8 flex-1 overflow-y-auto">
+          <p className="text-[10px] font-league-spartan tracking-[0.2em] uppercase text-black/45 mb-4">
+            Highlights
+          </p>
+          <ul>
+            {highlights.map((item) => (
+              <li key={item.href}>
                 <Link
                   href={item.href}
-                  onClick={handleLinkClick}
-                  className="block text-[13px] tracking-[0.05em] uppercase
-                           hover:translate-x-1 transition-transform duration-300
-                           text-black hover:text-black"
+                  onClick={onClose}
+                  className="group flex items-center py-3.5 border-b border-black/8
+                             font-league-spartan text-[13px] tracking-[0.08em] uppercase
+                             text-black hover:text-enunas-purple transition-colors duration-200"
                 >
+                  <span className="block w-0 group-hover:w-4 h-px bg-enunas-purple mr-0 group-hover:mr-3
+                                   transition-all duration-300 ease-out-expo flex-shrink-0" />
                   {item.title}
                 </Link>
               </li>
@@ -159,22 +172,18 @@ const SearchBar = ({ isOpen, onClose }: SearchBarProps) => {
           </ul>
         </div>
 
+        {/* Hint when typing */}
         {searchTerm.trim().length > 0 && (
-          <div className="px-6 py-4 border-t border-black/10">
-            <p className="text-xs text-black/50 tracking-[0.05em]">
-              Enter drücken, um nach „{searchTerm}" zu suchen
+          <div className="px-6 sm:px-8 py-4 border-t border-black/10">
+            <p className="font-league-spartan text-[11px] text-black/45 tracking-[0.05em]">
+              „{searchTerm}" suchen — Enter oder auf die Lupe tippen
             </p>
           </div>
         )}
       </aside>
-    </>
+    </>,
+    document.body
   )
-
-  // Use portal to render at document body level (escapes header stacking context)
-  // Only render portal after component is mounted (SSR safety)
-  if (!mounted) return null
-
-  return createPortal(searchContent, document.body)
 }
 
 export default SearchBar

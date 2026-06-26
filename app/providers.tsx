@@ -24,11 +24,18 @@ function PostHogPageView() {
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
+    // Cookieless analytics: `persistence: 'memory'` keeps no cookies and writes nothing to
+    // localStorage, so no consent banner is required under TTDSG/GDPR for basic
+    // pageview/funnel measurement. Trade-off: no cross-session identity (each visit is a
+    // fresh anonymous id). Do NOT add cookie-setting persistence or third-party tags here —
+    // that would re-introduce the consent-banner requirement we are deliberately avoiding.
     posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
       api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
       ui_host: 'https://eu.posthog.com',
       capture_pageview: false,
       capture_pageleave: true,
+      persistence: 'memory',
+      disable_session_recording: true,
     })
   }, [])
 

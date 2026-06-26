@@ -1,4 +1,0 @@
-[  262296ms] [LOG] disconnected from inside @ https://eu3-cdn.inside-graph.com/js/frontend-framework.js.bundle?v=996bfc2e3d-139975:2903
-[  567903ms] SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.
-    at <anonymous>:2:87
-    at <anonymous>:3:7

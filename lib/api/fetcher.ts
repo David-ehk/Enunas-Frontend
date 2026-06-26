@@ -1,6 +1,21 @@
 // Single source of truth for the API base — keep in sync with .env.local (NEXT_PUBLIC_API_URL).
 // The Spring backend serves at the root context (no /api prefix).
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
+//
+// In production, NEXT_PUBLIC_API_URL MUST be set. Falling back to localhost in a prod build
+// silently makes every request fail against a host that isn't there — and it's invisible
+// locally because localhost works on the dev machine. So we throw loudly instead of
+// defaulting. The localhost default is kept only for local development.
+export function getBaseUrl(): string {
+  const url = process.env.NEXT_PUBLIC_API_URL;
+  if (url) return url;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'NEXT_PUBLIC_API_URL is not set. Refusing to fall back to localhost in production — ' +
+      'configure the API base URL in the deployment environment.'
+    );
+  }
+  return 'http://localhost:8080';
+}
 
 export interface FetchOptions extends RequestInit {
   auth?: boolean;
@@ -32,7 +47,7 @@ export async function fetcher<T>(path: string, options: FetchOptions = {}): Prom
     if (token) headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${BASE_URL}${path}`, { ...rest, headers });
+  const res = await fetch(`${getBaseUrl()}${path}`, { ...rest, headers });
 
   if (res.status === 401) {
     onUnauthorized?.();

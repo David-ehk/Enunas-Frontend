@@ -54,7 +54,7 @@ export default function CartFooter() {
             <p className="font-league-spartan text-[11px] tracking-[0.28em] uppercase text-white/55">
               Zahlungsarten
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               <PayTile><MarkVisa /></PayTile>
               <PayTile><MarkMastercard /></PayTile>
               <PayTile><MarkAmex /></PayTile>
@@ -81,7 +81,7 @@ export default function CartFooter() {
 ─────────────────────────────────────────────────────────── */
 function PayTile({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center justify-center w-[60px] h-10 bg-white rounded-[4px]">
+    <span className="inline-flex items-center justify-center w-[46px] h-8 sm:w-[60px] sm:h-10 bg-white rounded-[4px]">
       {children}
     </span>
   );

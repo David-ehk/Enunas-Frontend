@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getCuration, type Segment } from '@/lib/curation'
-import { productApi } from '@/lib/api'
+import { getCuration, resolveCuratedOrNewest, type Segment } from '@/lib/curation'
 import { generateSlug } from '@/lib/product'
 import type { ApiProduct } from '@/types/api'
 
@@ -30,10 +29,8 @@ export default function CuratedRecommendations({ excludeId, title = 'Das könnte
   const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
-    const ids = resolveIds(excludeId)
-    if (ids.length === 0) return
-    Promise.all(ids.map(id => productApi.getById(id).catch(() => null)))
-      .then(res => setProducts(res.filter((p): p is ApiProduct => p !== null)))
+    resolveCuratedOrNewest(resolveIds(excludeId), 8)
+      .then(res => setProducts(res.filter(p => p.id !== excludeId)))
   }, [excludeId])
 
   if (products.length === 0) return null

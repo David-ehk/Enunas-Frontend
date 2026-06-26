@@ -1,16 +1,20 @@
 import { fetcher } from './fetcher';
 import type { ApiProduct } from '@/types/api';
 import { mockProducts } from './mockProducts';
+import { adaptProduct, type RawProductResponse } from './productResponseAdapter';
 
 export async function resolveProductBySlug(slug: string): Promise<ApiProduct | null> {
   try {
-    const result = await fetcher<ApiProduct>(`/products/slug/${slug}`, { auth: false });
-    if (result) return result;
+    const result = await fetcher<RawProductResponse>(`/products/slug/${slug}`, { auth: false });
+    if (result) return adaptProduct(result);
   } catch {
-    // fall through to mock
+    // fall through to mock (dev only, unless mock is explicitly disabled)
   }
 
-  if (process.env.NODE_ENV !== 'development') return null;
+  // Step-0 masking switch: NEXT_PUBLIC_DISABLE_MOCK=true forbids the dev mock fallback so a
+  // missing/failed real product surfaces as a real notFound instead of mock data.
+  const mockAllowed = process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_DISABLE_MOCK !== 'true';
+  if (!mockAllowed) return null;
   const mock = mockProducts.find(p => p.slug === slug);
   if (!mock) return null;
   return {

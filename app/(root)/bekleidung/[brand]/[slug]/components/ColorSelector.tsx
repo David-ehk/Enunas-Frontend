@@ -100,7 +100,7 @@ export default function ColorSelector({
         </div>
 
         {/* ── Swatch row — centred so the middle swatch sits under the | ── */}
-        <div className="flex justify-center items-center gap-3.5">
+        <div className="flex justify-center items-start gap-3.5">
           {visibleColors.map((color) => {
             const isSelected = selectedColor?.id === color.id
             return (
@@ -112,20 +112,24 @@ export default function ColorSelector({
                 onMouseLeave={() => setHoveredColor(null)}
                 aria-label={`Farbe ${color.name} auswählen`}
                 aria-pressed={isSelected}
-                className="relative flex-shrink-0 focus:outline-none"
-                style={{ width: '22px', height: '22px' }}
+                className="flex flex-col items-center flex-shrink-0 focus:outline-none"
               >
                 <div
-                  className="w-full h-full transition-all duration-150"
+                  className="transition-all duration-150"
                   style={{
+                    width: '22px', height: '22px',
                     backgroundColor: color.hex,
                     border: isSelected ? '1.5px solid #0A0A0A' : '1px solid #E8E8E8',
                   }}
                 />
-                {/* Selection underline — outside the swatch, no layout impact */}
-                <span
-                  className="absolute left-0 right-0 bg-enunas-black transition-opacity duration-150"
-                  style={{ bottom: '-6px', height: '1.5px', opacity: isSelected ? 1 : 0 }}
+                <div
+                  className="transition-opacity duration-150"
+                  style={{
+                    width: '26px', height: '1px',
+                    marginTop: '4px',
+                    backgroundColor: '#0A0A0A',
+                    opacity: isSelected ? 1 : 0,
+                  }}
                 />
               </button>
             )

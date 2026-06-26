@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCart } from '@/app/context/CartContext'
@@ -36,7 +36,6 @@ export default function CheckoutPage() {
   const { isAuthenticated, user, refreshUser } = useAuth()
 
   const shippingCost = totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : 4.99
-  const finalTotal = totalPrice + shippingCost
 
   const [form, setForm] = useState<ShippingForm>({
     firstName: '',
@@ -53,10 +52,24 @@ export default function CheckoutPage() {
   const [showLogin, setShowLogin] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'applepay' | 'klarna' | 'card'>('paypal')
   const [promoCode, setPromoCode] = useState('')
+
+  // Auto-apply discount code passed from the upsell confirmation flow
+  useEffect(() => {
+    const upsellCode = localStorage.getItem('enunas_upsell_code')
+    if (upsellCode) {
+      setPromoCode(upsellCode)
+    }
+  }, [])
+
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
   const [loginError, setLoginError] = useState<string | null>(null)
   const [loginLoading, setLoginLoading] = useState(false)
+
+  const upsellDiscount = promoCode.trim().toUpperCase() === 'UPSELL10'
+    ? Math.round(totalPrice * 0.1 * 100) / 100
+    : 0
+  const finalTotal = totalPrice + shippingCost - upsellDiscount
 
   function update(field: keyof ShippingForm) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -110,6 +123,7 @@ export default function CheckoutPage() {
           country: form.country,
           phone: form.phone || undefined,
         },
+        discountCode: promoCode.trim() || undefined,
       })
 
       if (!order.checkoutUrl) {
@@ -117,6 +131,7 @@ export default function CheckoutPage() {
         return
       }
 
+      localStorage.removeItem('enunas_upsell_code')
       clearCart()
       window.location.href = order.checkoutUrl
     } catch (err) {
@@ -498,6 +513,12 @@ export default function CheckoutPage() {
                     <span>Versand</span>
                     <span>{shippingCost === 0 ? 'Kostenlos' : `€${shippingCost.toFixed(2)}`}</span>
                   </div>
+                  {upsellDiscount > 0 && (
+                    <div className="flex justify-between font-league-spartan text-xs text-enunas-success">
+                      <span>Enunas-Vorteil (−10&nbsp;%)</span>
+                      <span>−€{upsellDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-league-spartan text-sm text-enunas-black pt-3 border-t border-enunas-gray-light">
                     <span className="font-medium">Gesamt</span>
                     <span className="font-medium">€{finalTotal.toFixed(2)}</span>
@@ -507,23 +528,13 @@ export default function CheckoutPage() {
                   </p>
                 </div>
 
-                {/* Promo code */}
-                <div className="flex mt-5">
-                  <input
-                    type="text"
-                    value={promoCode}
-                    onChange={e => setPromoCode(e.target.value)}
-                    placeholder="Promo Code"
-                    className="flex-1 px-3.5 py-3 border border-enunas-gray-light border-r-0 bg-white font-league-spartan text-xs tracking-[0.05em] focus:outline-none focus:border-enunas-purple transition-colors duration-300"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => { /* TODO: applyPromo(promoCode) */ }}
-                    className="px-4 bg-enunas-black text-white font-league-spartan text-[10px] tracking-[0.2em] uppercase hover:bg-enunas-purple transition-colors duration-300"
-                  >
-                    Anwenden
-                  </button>
-                </div>
+                {/*
+                  Promo-code field intentionally removed. The only working code (UPSELL10) is
+                  auto-attached invisibly via localStorage on the upsell path. A manual entry
+                  field would either be a no-op (the old "Anwenden" TODO) or require validating
+                  discount codes client-side — i.e. letting the client decide the price. If a
+                  visible promo field is wanted later it must validate against the backend.
+                */}
               </div>
             </aside>
 

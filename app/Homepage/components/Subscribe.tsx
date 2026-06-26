@@ -1,6 +1,26 @@
 'use client'
 
+import { useState } from 'react'
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 const Subscribe = () => {
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState<'idle' | 'error' | 'success'>('idle')
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!EMAIL_RE.test(email.trim())) {
+      setStatus('error')
+      return
+    }
+    // No backend newsletter endpoint yet. Validate + acknowledge so the form isn't dead UI.
+    // When a provider (Brevo/Mailchimp hosted form) or backend endpoint is wired, replace
+    // this with the real submit. Keep it cookie-free to preserve the no-consent-banner setup.
+    setStatus('success')
+    setEmail('')
+  }
+
   return (
     <section className="w-full h-full ">
 
@@ -8,21 +28,27 @@ const Subscribe = () => {
         {/* Linke Emailliste Anmelden */}
         <div className="flex flex-col justify-center items-center px-6 py-10 md:py-15 lg:py-20">
          <h2 className="text-2xl md:text-3xl lg:text-4xl mb-4">Newsletter</h2>
-  
-  <h4 className="text-center text-lg font-serif text-gray-700 mb-6 max-w-md">
-    Subscribe to the Newsletter and be the first to receive 
-    the latest news and secrets from Enunas
+
+  <h4 className="text-center text-lg font-cormorant italic text-enunas-gray-medium mb-6 max-w-md leading-relaxed">
+    Sei der Erste, der von neuen Drops, exklusiven Kollektionen und Geheimnissen aus der Enunas-Welt erfährt.
   </h4>
-  
+
   {/* EMAIL INPUT */}
-  <div className="w-full max-w-md">
-    <input 
+  <form className="w-full max-w-md" onSubmit={handleSubmit} noValidate>
+    <input
       type="email"
+      value={email}
+      onChange={e => { setEmail(e.target.value); if (status !== 'idle') setStatus('idle') }}
       placeholder="Deine E-Mail Adresse"
-      className="w-full px-4 py-3 border border-gray-300 mb-3 focus:outline-none focus:border-black"
+      aria-label="E-Mail Adresse"
+      aria-invalid={status === 'error'}
+      className={`w-full px-4 py-3 border mb-3 focus:outline-none transition-colors ${
+        status === 'error' ? 'border-enunas-error focus:border-enunas-error' : 'border-gray-300 focus:border-black'
+      }`}
     />
 
  <button
+  type="submit"
   className="group relative w-full overflow-hidden"
   style={{
     padding: '16px 32px',
@@ -44,7 +70,17 @@ const Subscribe = () => {
   <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
 </button>
 
-  </div>
+  {status === 'error' && (
+    <p className="mt-3 text-sm text-enunas-error font-league-spartan" role="alert">
+      Bitte gib eine gültige E-Mail-Adresse ein.
+    </p>
+  )}
+  {status === 'success' && (
+    <p className="mt-3 text-sm text-enunas-success font-league-spartan" role="status">
+      Danke! Wir melden uns, sobald der Newsletter startet.
+    </p>
+  )}
+  </form>
         </div>
         
         {/* Rechte Seite mit Logo - BEGRENZTE HÖHE */}

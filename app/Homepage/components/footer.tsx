@@ -80,7 +80,7 @@ const css = `
 .col-link:hover { color: var(--fg); }
 .col-link:hover::after { transform: scaleX(1); }
 
-.pay-tiles { display: grid; grid-template-columns: repeat(3, 56px); gap: 8px; }
+.pay-tiles { display: grid; grid-template-columns: repeat(2, 56px); gap: 8px; }
 .pay-tile {
   width: 56px; height: 38px; display: grid; place-items: center;
   background: var(--tile-bg); border: 1px solid var(--tile-bd);
@@ -154,10 +154,11 @@ const css = `
   .foot-tagline { text-align: left; }
 }
 @media (max-width: 620px) {
-  .foot      { padding: 64px 28px 28px; }
-  .foot-cols { grid-template-columns: 1fr; }
-  .foot-mark { font-size: 48px; }
-  .foot-utility { flex-direction: column; align-items: flex-start; gap: 22px; }
+  .foot        { padding: 56px 24px 32px; }
+  .foot-cols   { grid-template-columns: repeat(2, 1fr); gap: 36px 20px; }
+  .foot-mark   { font-size: 44px; }
+  .foot-utility { flex-direction: column; align-items: flex-start; gap: 20px; }
+  .foot-legal  { flex-direction: column; align-items: flex-start; gap: 12px; }
 }
 `;
 
