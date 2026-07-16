@@ -46,7 +46,7 @@ function TrackingContent() {
       </p>
       <h1
         className="text-3xl lg:text-4xl font-light text-[#0A0A0A] mb-12"
-        style={{ fontFamily: 'var(--font-cormorant)' }}
+        style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
       >
         Sendungsverfolgung
       </h1>

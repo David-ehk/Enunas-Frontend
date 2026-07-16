@@ -66,9 +66,9 @@ export const footerLinks = [
     {
         title: "Über uns",
         links: [
-            { name: "Über uns", link: "/about us" },
-            { name: "Marken", link: "/marken" },
-            { name: "Designer", link: "/marken" },
+            { name: "Über uns", link: "/ueber-uns" },
+            { name: "Marken & Designer", link: "/marken" },
+            { name: "Teil von Enunas", link: "/bewerbung" },
             { name: "Karriere", link: "/karriere" },
         ],
     },
@@ -89,7 +89,7 @@ export const footerLinks = [
             { name: "Cookie-Richtlinien", link: "/cookie-richtlinien" },
             { name: "Cookie-Einstellungen", link: "/cookie-einstellungen" },
             { name: "Nutzungsbedingungen", link: "/nutzungsbedingungen" },
-            { name: "Datenschutzerklärung", link: "/datenschutzerklärung" },
+            { name: "Datenschutzerklärung", link: "/datenschutzerklaerung" },
         ],
     },
 ];

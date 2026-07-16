@@ -1,19 +1,27 @@
-import { fetcher } from './fetcher';
+import { fetcher, FetchError } from './fetcher';
 import type { ApiProduct } from '@/types/api';
 import { mockProducts } from './mockProducts';
 import { adaptProduct, type RawProductResponse } from './productResponseAdapter';
 
 export async function resolveProductBySlug(slug: string): Promise<ApiProduct | null> {
-  try {
-    const result = await fetcher<RawProductResponse>(`/products/slug/${slug}`, { auth: false });
-    if (result) return adaptProduct(result);
-  } catch {
-    // fall through to mock (dev only, unless mock is explicitly disabled)
-  }
-
   // Step-0 masking switch: NEXT_PUBLIC_DISABLE_MOCK=true forbids the dev mock fallback so a
   // missing/failed real product surfaces as a real notFound instead of mock data.
   const mockAllowed = process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_DISABLE_MOCK !== 'true';
+
+  try {
+    const result = await fetcher<RawProductResponse>(`/products/slug/${slug}`, { auth: false });
+    if (result) return adaptProduct(result);
+    // A 2xx with no body → genuinely nothing to show; fall through to not-found.
+  } catch (err) {
+    // Only a real 404 means "this product doesn't exist" → fall through to notFound().
+    // Any other failure (5xx, network, timeout) is a BACKEND problem, not a missing product.
+    // Without mock fallback (i.e. production) we must rethrow so the error boundary shows,
+    // rather than silently rendering a 404 for what may be a real product.
+    const isGenuine404 = err instanceof FetchError && err.status === 404;
+    if (!isGenuine404 && !mockAllowed) throw err;
+    // Genuine 404, or dev with mock allowed → fall through to the mock/not-found handling.
+  }
+
   if (!mockAllowed) return null;
   const mock = mockProducts.find(p => p.slug === slug);
   if (!mock) return null;

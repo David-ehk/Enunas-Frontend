@@ -9,7 +9,7 @@ export default function CookieEinstellungenPage() {
       </p>
       <h1
         className="text-3xl lg:text-4xl font-light text-[#0A0A0A] mb-6"
-        style={{ fontFamily: 'var(--font-cormorant)' }}
+        style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
       >
         Cookie-Einstellungen
       </h1>

@@ -57,6 +57,36 @@ function ImageGallery({ images, productName }: ImageGalleryProps) {
     })
   }
 
+  if (images.length === 0) {
+    return (
+      <div
+        className="w-full h-[60vh] md:h-[100vh] flex flex-col items-center justify-center"
+        style={{ background: '#F5F5F0' }}
+      >
+        <svg
+          width="48" height="48" viewBox="0 0 48 48" fill="none"
+          style={{ opacity: 0.18, marginBottom: '16px' }}
+        >
+          <rect x="4" y="8" width="40" height="32" rx="2" stroke="#370E4D" strokeWidth="1.5" />
+          <circle cx="17" cy="20" r="4" stroke="#370E4D" strokeWidth="1.5" />
+          <path d="M4 36l10-10 8 8 6-6 16 12" stroke="#370E4D" strokeWidth="1.5" strokeLinejoin="round" />
+        </svg>
+        <span
+          style={{
+            fontFamily: 'var(--font-league-spartan)',
+            fontSize: '11px',
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+            color: '#6B6B6B',
+            opacity: 0.7,
+          }}
+        >
+          {productName}
+        </span>
+      </div>
+    )
+  }
+
   return (
     <div className="relative w-full h-[60vh] md:h-[100vh]">
       {/* Quadrat-Indikator - Unten auf Mobile, Links auf Desktop */}
@@ -66,7 +96,7 @@ function ImageGallery({ images, productName }: ImageGalleryProps) {
             key={index}
             onClick={() => scrollToImage(index)}
             className={`
-              transition-all duration-300 
+              transition-all duration-300
               ${activeIndex === index
                 ? 'w-2.5 h-2.5 opacity-100 bg-[#370E4D]'
                 : 'w-1.5 h-1.5 opacity-40 hover:opacity-70 bg-black'

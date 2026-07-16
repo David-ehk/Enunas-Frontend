@@ -1,6 +1,25 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/datenschutzerkl%C3%A4rung',
+        destination: '/datenschutzerklaerung',
+        permanent: true,
+      },
+      {
+        source: '/datenschutzerklärung',
+        destination: '/datenschutzerklaerung',
+        permanent: true,
+      },
+      {
+        source: '/about%20us',
+        destination: '/ueber-uns',
+        permanent: true,
+      },
+    ]
+  },
   images: {
     remotePatterns: [
       // ── Production product images (AWS S3 / CloudFront) — the host that actually

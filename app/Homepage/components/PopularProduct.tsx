@@ -27,15 +27,18 @@ const PopularProduct = () => {
       {/* Section header */}
       <div
         className={cn(
-          "flex justify-center items-center gap-4 px-7 mb-4 transition-all duration-700",
+          "flex justify-center items-center gap-5 px-7 mb-6 transition-all duration-700",
           isVisible ? "opacity-100" : "opacity-0"
         )}
       >
-        <hr className="flex-1 max-w-20 border-gray-300" />
-        <p className="text-lg sm:text-xl md:text-2xl whitespace-nowrap tracking-wide">
+        <div className="flex-1 h-[1px] bg-enunas-gray-light" />
+        <h2
+          className="whitespace-nowrap font-cormorant"
+          style={{ fontSize: '40px', fontWeight: 300, letterSpacing: '0.08em', color: '#0A0A0A', lineHeight: 1 }}
+        >
           Unsere Favoriten
-        </p>
-        <hr className="flex-1 max-w-20 border-gray-300" />
+        </h2>
+        <div className="flex-1 h-[1px] bg-enunas-gray-light" />
       </div>
 
       {/* Product grid with stagger */}
@@ -70,11 +73,24 @@ const PopularProduct = () => {
       </div>
 
       {/* Button */}
-      <div className="py-2 mt-5 flex justify-center items-center">
-        <button className="relative w-full py-4 px-6 tracking-widest text-black/80 bg-[#F5F5F0] overflow-hidden group transition-colors duration-600">
-          <span className="absolute left-1/2 -translate-x-1/2 top-[10%] w-full h-[1px] bg-[#370E4D] transition-all duration-500 ease-out group-hover:w-[75%]" />
+      <div className="py-2 mt-6 flex justify-center items-center">
+        <button
+          className="group relative w-full overflow-hidden"
+          style={{
+            padding: '18px 32px',
+            background: '#F5F5F0',
+            fontFamily: 'var(--font-Cormorant-Garamond)',
+            fontSize: '20px',
+            fontWeight: 400,
+            letterSpacing: '0.06em',
+            color: '#0A0A0A',
+            cursor: 'pointer',
+            border: 'none',
+          }}
+        >
+          <span className="absolute left-1/2 -translate-x-1/2 top-[12%] w-full h-[1px] bg-black/30 transition-all duration-500 ease-out-expo group-hover:w-[75%]" />
           <span className="relative z-10">Mehr entdecken</span>
-          <span className="absolute left-1/2 -translate-x-1/2 bottom-[10%] w-full h-[1px] bg-[#370E4D] transition-all duration-500 ease-out group-hover:w-[75%]" />
+          <span className="absolute left-1/2 -translate-x-1/2 bottom-[12%] w-full h-[1px] bg-black/30 transition-all duration-500 ease-out-expo group-hover:w-[75%]" />
         </button>
       </div>
     </section>

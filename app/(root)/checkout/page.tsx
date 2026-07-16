@@ -8,8 +8,7 @@ import { useAuth } from '@/app/context/AuthContext'
 import CheckoutNavbar from '@/app/(root)/cart/components/CheckoutNavbar'
 import CartFooter from '@/app/(root)/cart/components/CartFooter'
 import { orderApi, authApi, FetchError } from '@/lib/api'
-
-const FREE_SHIPPING_THRESHOLD = 50
+import { calcShipping, calcUpsellDiscount, calcFinalTotal } from '@/lib/pricing'
 
 interface ShippingForm {
   firstName: string
@@ -35,7 +34,7 @@ export default function CheckoutPage() {
   const { cartItems, totalPrice, clearCart } = useCart()
   const { isAuthenticated, user, refreshUser } = useAuth()
 
-  const shippingCost = totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : 4.99
+  const shippingCost = calcShipping(totalPrice)
 
   const [form, setForm] = useState<ShippingForm>({
     firstName: '',
@@ -66,10 +65,8 @@ export default function CheckoutPage() {
   const [loginError, setLoginError] = useState<string | null>(null)
   const [loginLoading, setLoginLoading] = useState(false)
 
-  const upsellDiscount = promoCode.trim().toUpperCase() === 'UPSELL10'
-    ? Math.round(totalPrice * 0.1 * 100) / 100
-    : 0
-  const finalTotal = totalPrice + shippingCost - upsellDiscount
+  const upsellDiscount = calcUpsellDiscount(totalPrice, promoCode)
+  const finalTotal = calcFinalTotal(totalPrice, shippingCost, upsellDiscount)
 
   function update(field: keyof ShippingForm) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>

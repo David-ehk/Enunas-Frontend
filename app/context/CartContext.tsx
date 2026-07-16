@@ -1,5 +1,6 @@
 'use client'
 import { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react'
+import { cartItemCount, cartTotal, addItem, updateQty, removeItem } from '@/lib/cart-logic'
 
 // Cart Item Type
 export interface CartItem {
@@ -79,47 +80,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Add Item to Cart
   const addToCart = (item: Omit<CartItem, 'id' | 'quantity'>) => {
-    setCartItems(prev => {
-      const existingItem = prev.find(
-        i => i.productId === item.productId && 
-             i.size === item.size && 
-             i.color?.id === item.color?.id
-      )
-
-      if (existingItem) {
-        return prev.map(i =>
-          i.id === existingItem.id
-            ? { ...i, quantity: i.quantity + 1 }
-            : i
-        )
-      }
-
-      const newItem: CartItem = {
-        ...item,
-        id: `${item.productId}-${item.size}-${item.color?.id || 'default'}-${Date.now()}`,
-        quantity: 1
-      }
-      return [...prev, newItem]
-    })
+    setCartItems(prev => addItem(prev, item))
   }
 
   // Remove Item
   const removeFromCart = (itemId: string) => {
-    setCartItems(prev => prev.filter(item => item.id !== itemId))
+    setCartItems(prev => removeItem(prev, itemId))
   }
 
   // Update Quantity
   const updateQuantity = (itemId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(itemId)
-      return
-    }
-
-    setCartItems(prev =>
-      prev.map(item =>
-        item.id === itemId ? { ...item, quantity } : item
-      )
-    )
+    setCartItems(prev => updateQty(prev, itemId, quantity))
   }
 
   // Clear Cart
@@ -129,11 +100,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   // Computed Values
-  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
-  const totalPrice = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  )
+  const itemCount = cartItemCount(cartItems)
+  const totalPrice = cartTotal(cartItems)
 
   return (
     <CartContext.Provider

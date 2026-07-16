@@ -76,7 +76,10 @@ function toRecItem(p: ApiProduct): RecItem {
 async function ProductPage({ params }: ProductPageProps) {
   const { brand, slug } = await params
 
-  const resolved = await resolveProductWithMeta(slug).catch(() => null)
+  // No blanket catch here: the resolver returns null only for a genuine 404 (→ notFound),
+  // and throws for real backend errors so they reach error.tsx instead of masquerading as a
+  // "product not found" 404.
+  const resolved = await resolveProductWithMeta(slug)
   if (!resolved) notFound()
 
   const product = toNewProduct(resolved)

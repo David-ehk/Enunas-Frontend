@@ -35,9 +35,9 @@ export default function UeberUnsPage() {
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-end">
           <h1
             className="text-[72px] lg:text-[96px] font-light leading-[0.95] m-0"
-            style={{ fontFamily: 'var(--font-cormorant)' }}
+            style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
           >
-            Wir sind<br /><em>Enunas</em>
+            Wir sind<br />Enunas
           </h1>
           <p className="text-[15px] lg:text-[17px] font-light leading-[1.6] text-[#2D2D2D] m-0">
             Der kuratierte Marktplatz für Designer- &amp; Streetwear — ein Ort, wo Mode auf
@@ -52,8 +52,9 @@ export default function UeberUnsPage() {
           src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1600&auto=format&fit=crop&q=80"
           alt="Enunas — Fashion editorial"
           fill
+          priority
           className="object-cover"
-          sizes="(max-width: 768px) 100vw, 100vw"
+          sizes="100vw"
         />
       </div>
 
@@ -66,9 +67,9 @@ export default function UeberUnsPage() {
           <div>
             <h2
               className="text-[40px] lg:text-[52px] font-light leading-[1.1] mb-7"
-              style={{ fontFamily: 'var(--font-cormorant)' }}
+              style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
             >
-              Mode als Medium —<br /><em>kuratiert mit Haltung</em>
+              Mode als Medium —<br />kuratiert mit Haltung
             </h2>
             <p className="text-[14px] lg:text-[15px] font-light leading-[1.65] text-[#2D2D2D] m-0 max-w-[640px]">
               Wir glauben, dass Mode mehr ist als Kleidung. Sie ist ein Ausdruck von Identität,
@@ -86,10 +87,15 @@ export default function UeberUnsPage() {
         <div className="grid md:grid-cols-3 gap-12">
           {values.map((v) => (
             <div key={v.n} className="border-t border-[#E8E8E8] pt-7">
-              <p className="text-[11px] tracking-[0.25em] text-[#370E4D] mb-4">{v.n}</p>
+              <p
+                className="text-[40px] lg:text-[44px] font-light italic text-[#370E4D] leading-none mb-4"
+                style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
+              >
+                {v.n}
+              </p>
               <h3
                 className="text-[32px] lg:text-[36px] font-light mb-4"
-                style={{ fontFamily: 'var(--font-cormorant)' }}
+                style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
               >
                 {v.title}
               </h3>
@@ -114,13 +120,13 @@ export default function UeberUnsPage() {
           <p className="text-[11px] uppercase tracking-[0.3em] opacity-70 mb-5">Die Geschichte</p>
           <h2
             className="text-[40px] lg:text-[52px] font-light leading-[1.1] mb-7"
-            style={{ fontFamily: 'var(--font-cormorant)' }}
+            style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
           >
-            Gegründet aus einer<br /><em>echten Lücke</em>
+            Gegründet aus einer<br />echten Lücke
           </h2>
           <p
             className="text-[17px] lg:text-[19px] font-light italic leading-[1.65] opacity-90 m-0"
-            style={{ fontFamily: 'var(--font-cormorant)' }}
+            style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
           >
             2023 entstand Enunas aus der Frustration über mangelnde Kuration im deutschen
             Streetwear-Markt. Unser Gründerteam wollte einen Ort schaffen, der Qualität, Design
@@ -132,14 +138,14 @@ export default function UeberUnsPage() {
       {/* Stats */}
       <section className="border-t border-[#E8E8E8] px-8 lg:px-16 py-16">
         <div className="grid grid-cols-2 lg:grid-cols-4">
-          {stats.map((s, i) => (
+          {stats.map((s) => (
             <div
               key={s.n}
-              className={`text-center py-4 ${i < stats.length - 1 ? 'border-r border-[#E8E8E8]' : ''}`}
+              className="text-center py-6 lg:py-4 border-[#E8E8E8] [&:nth-child(odd)]:border-r [&:nth-child(-n+2)]:border-b lg:border-r lg:border-b-0 lg:[&:last-child]:border-r-0"
             >
               <p
                 className="text-[48px] lg:text-[64px] font-light leading-none mb-2"
-                style={{ fontFamily: 'var(--font-cormorant)' }}
+                style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
               >
                 {s.n}
               </p>

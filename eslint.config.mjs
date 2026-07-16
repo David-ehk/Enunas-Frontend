@@ -15,6 +15,12 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
       ".playwright-mcp/**",
+      // Design-handoff / prototype blobs: standalone .jsx files that are NOT imported by any
+      // route (verified) and reference globals from their original bundle, so they produce
+      // hundreds of false-positive react/jsx-no-undef errors that drown out real lint signal.
+      "app/**/dashboards/*.jsx",
+      "app/**/brand_partner_v2/*.jsx",
+      "app/**/design_handoff_cart/**",
     ],
   },
 ];
