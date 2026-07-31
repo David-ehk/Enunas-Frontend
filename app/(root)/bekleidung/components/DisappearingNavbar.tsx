@@ -51,20 +51,24 @@ export default function DisappearingNavbar() {
 
   const BADGE = "absolute z-[2] top-[-6px] right-[-8px] bg-enunas-purple text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center"
 
+  // 44×44 tap target on touch devices; desktop layout unchanged. Mirrors
+  // TOUCH_HIT in app/Homepage/components/navbar.tsx.
+  const TOUCH_HIT = "relative pointer-coarse:after:content-[''] pointer-coarse:after:absolute pointer-coarse:after:-inset-3"
+
   return (
     <header className="sm:px-10 px-4 py-2 fixed z-50 w-full bg-white shadow-sm">
       <nav className="flex justify-between items-center max-w-screen xl:mx-auto z-50">
 
         {/* Left — Hamburger + mobile search */}
-        <div className="w-1/4 flex gap-3 md:gap-8">
-          <button onClick={() => setSidebarOpen(true)} aria-label="Menü öffnen">
+        <div className="w-1/4 flex gap-3 pointer-coarse:gap-6 md:gap-8">
+          <button onClick={() => setSidebarOpen(true)} aria-label="Menü öffnen" className={TOUCH_HIT}>
             <HamburgerIcon className="w-5 h-5 hover:text-enunas-purple" />
           </button>
           <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
           <div className="sm:hidden">
             <SearchBar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
-            <button onClick={() => setSearchOpen(true)} aria-label="Suche öffnen" className="bg-transparent border-none cursor-pointer">
+            <button onClick={() => setSearchOpen(true)} aria-label="Suche öffnen" className={`bg-transparent border-none cursor-pointer ${TOUCH_HIT}`}>
               <SearchIcon className="w-5 h-5 text-black/80 hover:text-enunas-purple" />
             </button>
           </div>
@@ -76,16 +80,16 @@ export default function DisappearingNavbar() {
         </Link>
 
         {/* Right — Search (desktop) / Account / Heart / Cart */}
-        <div className="flex gap-3 md:gap-8 mt-3 w-1/4 justify-end">
+        <div className="flex gap-3 pointer-coarse:gap-6 md:gap-8 mt-3 w-1/4 justify-end">
           <div className="hidden sm:block">
             <SearchBar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
-            <button onClick={() => setSearchOpen(true)} aria-label="Suche öffnen" className="bg-transparent border-none cursor-pointer">
+            <button onClick={() => setSearchOpen(true)} aria-label="Suche öffnen" className={`bg-transparent border-none cursor-pointer ${TOUCH_HIT}`}>
               <SearchIcon className="w-5 h-5 text-black/80 hover:text-enunas-purple" />
             </button>
           </div>
 
           <div className="relative">
-            <Link href="/account" aria-label="Mein Konto">
+            <Link href="/account" aria-label="Mein Konto" className={TOUCH_HIT}>
               <AccountIcon className="w-5 h-5 text-black/80 hover:text-enunas-purple" />
             </Link>
             {isAuthenticated && (
@@ -93,12 +97,12 @@ export default function DisappearingNavbar() {
             )}
           </div>
 
-          <Link href="/saved-lists" aria-label="Wunschliste">
+          <Link href="/saved-lists" aria-label="Wunschliste" className={TOUCH_HIT}>
             <HeartIcon className="w-5 h-5 text-black/80 hover:text-enunas-purple transition-colors duration-200" />
           </Link>
 
           <div>
-            <Link href="/cart" className="relative" aria-label={`Warenkorb mit ${itemCount} Artikeln`}>
+            <Link href="/cart" className={TOUCH_HIT} aria-label={`Warenkorb mit ${itemCount} Artikeln`}>
               <CartIcon className="w-5 h-5 text-black/80 hover:text-enunas-purple" />
               {itemCount > 0 && (
                 <span className={BADGE}>{itemCount > 99 ? '99+' : itemCount}</span>

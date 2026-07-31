@@ -114,8 +114,8 @@ export default function KategorieAuswahl() {
             onClick={() => goTo(idx - 1)}
             aria-label="Vorherige Kategorie"
             style={{
-              position: 'absolute', left: '6px', top: '50%', transform: 'translateY(-50%)',
-              background: 'none', border: 0, padding: '4px', cursor: idx === 0 ? 'default' : 'pointer',
+              position: 'absolute', left: '-5px', top: '50%', transform: 'translateY(-50%)',
+              background: 'none', border: 0, padding: '15px', cursor: idx === 0 ? 'default' : 'pointer',
               color: idx === 0 ? '#D8D8D8' : '#0A0A0A', transition: 'color 200ms ease',
             }}
           >
@@ -174,8 +174,8 @@ export default function KategorieAuswahl() {
             onClick={() => goTo(idx + 1)}
             aria-label="Nächste Kategorie"
             style={{
-              position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)',
-              background: 'none', border: 0, padding: '4px', cursor: idx === kategorie.length - 1 ? 'default' : 'pointer',
+              position: 'absolute', right: '-5px', top: '50%', transform: 'translateY(-50%)',
+              background: 'none', border: 0, padding: '15px', cursor: idx === kategorie.length - 1 ? 'default' : 'pointer',
               color: idx === kategorie.length - 1 ? '#D8D8D8' : '#0A0A0A', transition: 'color 200ms ease',
             }}
           >
@@ -191,16 +191,28 @@ export default function KategorieAuswahl() {
               onClick={() => goTo(i)}
               aria-label={`Zu ${kat.name}`}
               style={{
-                width: i === idx ? '22px' : '8px',
-                height: '2px',
-                borderRadius: '1px',
-                background: i === idx ? kat.colorHex : '#D8D8D4',
+                // Padding + matching negative margin: 44px tall tap target,
+                // while the visible line keeps its original 2px footprint.
+                display: 'flex',
+                alignItems: 'center',
+                padding: '21px 2px',
+                margin: '-21px 0',
+                background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                padding: 0,
-                transition: 'width 360ms cubic-bezier(0.16,1,0.3,1), background 300ms ease',
               }}
-            />
+            >
+              <span
+                style={{
+                  display: 'block',
+                  width: i === idx ? '22px' : '8px',
+                  height: '2px',
+                  borderRadius: '1px',
+                  background: i === idx ? kat.colorHex : '#D8D8D4',
+                  transition: 'width 360ms cubic-bezier(0.16,1,0.3,1), background 300ms ease',
+                }}
+              />
+            </button>
           ))}
         </div>
 

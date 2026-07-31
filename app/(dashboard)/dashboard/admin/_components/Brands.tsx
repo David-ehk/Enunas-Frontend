@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
-import { adminApi } from '@/lib/api'
+import { adminApi, FetchError } from '@/lib/api'
 import type { AdminBrand, AdminApiProduct, ApiOrder, AdminPayout } from '@/types/api'
 import { PageHeader, KPIGrid, KPICell, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, TH, TD, TableRow, fmt, fmtEur, dailyCounts, dailySumByKey, weekDeltaStr } from './shared'
 import { ChevronDown, ChevronUp, X, TrendingUp, ShoppingBag, Package, Banknote } from 'lucide-react'
@@ -417,7 +417,7 @@ function BrandFinancialPanel({
                           <TableRow key={payout.id}>
                             <TD>
                               <span className="font-mono text-[11px] text-[#6B6B6B]">
-                                #{payout.id.slice(-8).toUpperCase()}
+                                #{String(payout.id).slice(-8).toUpperCase()}
                               </span>
                             </TD>
                             <TD className="text-[#6B6B6B]">{fmt(payout.createdAt)}</TD>
@@ -474,6 +474,7 @@ export default function Brands() {
   const [search, setSearch]     = useState('')
   const [expanded, setExpanded] = useState<string | null>(null)
   const [acting, setActing]     = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
   const [editingPayout, setEditingPayout] = useState<string | null>(null)
   const [payoutDraft, setPayoutDraft] = useState<PayoutDraft>({ iban: '', bankAccountHolder: '' })
   const [savingPayout, setSavingPayout] = useState(false)
@@ -513,6 +514,10 @@ export default function Brands() {
   const productsByBrand = (brandName: string) => products.filter(p => p.brandName === brandName)
 
   const isApproved = (status: string) => status === 'APPROVED' || status === 'ACTIVE'
+  // Neue Marken kommen als PENDING_REVIEW ("In Prüfung") rein; je nach Backend-Flow
+  // auch PENDING oder VERIFIED. Alle drei warten auf die Admin-Freigabe.
+  const awaitingApproval = (status: string) =>
+    status === 'PENDING_REVIEW' || status === 'PENDING' || status === 'VERIFIED'
 
   const kpiData = useMemo(() => {
     const now = new Date()
@@ -542,7 +547,7 @@ export default function Brands() {
       payoutsMTD,
       payoutsDelta:   weekDeltaStr(payoutsMTD, payoutsPrev),
       payoutSpark:    dailySumByKey(payouts.filter(p => p.status === 'PAID' || p.status === 'APPROVED'), 'amount'),
-      pending:        brands.filter(b => b.status === 'PENDING').length,
+      pending:        brands.filter(b => awaitingApproval(b.status)).length,
       newMTD,
       newBrandsDelta: weekDeltaStr(newMTD, newPrev),
       brandSpark:     dailyCounts(brands.filter(b => !!b.createdAt) as { createdAt: string }[]),
@@ -554,17 +559,25 @@ export default function Brands() {
     const matchSearch = !q || b.brandName.toLowerCase().includes(q) || (b.email ?? b.userEmail ?? b.contactEmail ?? '').toLowerCase().includes(q)
     if (!matchSearch) return false
     if (filter === 'APPROVED') return isApproved(b.status)
+    if (filter === 'PENDING') return awaitingApproval(b.status)
     if (filter !== 'all') return b.status === filter
     return true
   })
 
   async function act(id: string, action: 'approve' | 'reject' | 'suspend') {
     setActing(id)
+    setActionError(null)
     try {
       await adminApi.brands[action](id)
       const nextStatus = action === 'approve' ? 'APPROVED' : action === 'reject' ? 'REJECTED' : 'SUSPENDED'
       setBrands(prev => prev.map(b => b.id === id ? { ...b, status: nextStatus as AdminBrand['status'] } : b))
-    } catch { /* silent */ } finally { setActing(null) }
+    } catch (err) {
+      const label = action === 'approve' ? 'Genehmigen' : action === 'reject' ? 'Ablehnen' : 'Sperren'
+      const reason = err instanceof FetchError
+        ? `${err.message} (${err.status})`
+        : 'Unbekannter Fehler — bitte erneut versuchen.'
+      setActionError(`${label} fehlgeschlagen: ${reason}`)
+    } finally { setActing(null) }
   }
 
   async function savePayoutProfile(brandId: string) {
@@ -657,7 +670,7 @@ export default function Brands() {
 
   const FILTERS: { id: Filter; label: string }[] = [
     { id: 'all',       label: 'Alle' },
-    { id: 'PENDING',   label: `Ausstehend (${brands.filter(b => b.status === 'PENDING').length})` },
+    { id: 'PENDING',   label: `Ausstehend (${brands.filter(b => awaitingApproval(b.status)).length})` },
     { id: 'APPROVED',  label: `Genehmigt (${brands.filter(b => isApproved(b.status)).length})` },
     { id: 'REJECTED',  label: `Abgelehnt (${brands.filter(b => b.status === 'REJECTED').length})` },
     { id: 'SUSPENDED', label: `Gesperrt (${brands.filter(b => b.status === 'SUSPENDED').length})` },
@@ -706,6 +719,16 @@ export default function Brands() {
           <SearchInput value={search} onChange={setSearch} placeholder="Marke oder E-Mail suchen…" />
         </div>
       </div>
+
+      {actionError && (
+        <div className="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3"
+          style={{ fontFamily: 'var(--font-league-spartan)' }}>
+          <p className="flex-1 text-[12px] text-rose-700 m-0">{actionError}</p>
+          <button onClick={() => setActionError(null)} className="text-rose-400 hover:text-rose-600 transition-colors">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       <SectionCard title="Marken" count={visible.length}>
         {loading ? <Loader /> : visible.length === 0 ? <EmptyState message="Keine Marken gefunden." /> : (
@@ -762,7 +785,7 @@ export default function Brands() {
                               ? <ChevronUp className="w-3.5 h-3.5" />
                               : <ChevronDown className="w-3.5 h-3.5" />}
                           </button>
-                          {brand.status === 'PENDING' && (
+                          {awaitingApproval(brand.status) && (
                             <>
                               <ActionBtn variant="success" disabled={acting === brand.id} onClick={() => act(brand.id, 'approve')}>
                                 Genehmigen
@@ -772,7 +795,7 @@ export default function Brands() {
                               </ActionBtn>
                             </>
                           )}
-                          {(isApproved(brand.status) || brand.status === 'VERIFIED') && (
+                          {isApproved(brand.status) && (
                             <ActionBtn variant="warning" disabled={acting === brand.id} onClick={() => act(brand.id, 'suspend')}>
                               Sperren
                             </ActionBtn>

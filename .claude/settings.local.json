@@ -124,7 +124,10 @@
       "Bash(node -e \"const p = require\\('./package.json'\\); console.log\\('next:', p.dependencies?.next || p.devDependencies?.next\\)\")",
       "Bash(size=3 2>&1)",
       "Bash(xargs grep -l \"discount\\\\|Rabatt\\\\|crossed\\\\|upsell\\\\|angebot\")",
-      "PowerShell(npm run *)"
+      "PowerShell(npm run *)",
+      "Bash(npx next *)",
+      "mcp__ide__getDiagnostics",
+      "Bash(node -e \"console.log\\(encodeURIComponent\\('https://eu.manieredevoir.com/cdn/shop/files/MDV_0030_MDV2_be0fab84-a04c-4251-adc9-1fefaa4175c4.jpg?v=1759502594'\\)\\)\")"
     ]
   }
 }

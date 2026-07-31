@@ -155,10 +155,20 @@ const css = `
 }
 @media (max-width: 620px) {
   .foot        { padding: 56px 24px 32px; }
-  .foot-cols   { grid-template-columns: repeat(2, 1fr); gap: 36px 20px; }
+  /* minmax(0,…) — without it the tracks refuse to shrink below the longest
+     link label and the grid overflows the footer padding. */
+  .foot-cols   { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 20px; }
   .foot-mark   { font-size: 44px; }
   .foot-utility { flex-direction: column; align-items: flex-start; gap: 20px; }
   .foot-legal  { flex-direction: column; align-items: flex-start; gap: 12px; }
+  /* Wide tracking eats the narrow 2-up columns — tighten it so the longest
+     labels ("Zahlungsarten", the SSL note) keep breathing room. */
+  .col-title   { letter-spacing: 0.12em; }
+  .pay-note    { letter-spacing: 0.1em; }
+}
+@media (max-width: 374px) {
+  /* Two tracks can no longer hold the longest labels — stack them. */
+  .foot-cols { grid-template-columns: 1fr; gap: 32px; }
 }
 `;
 

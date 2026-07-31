@@ -174,6 +174,11 @@ const Navbar = () => {
 
   const ICON_BADGE_CLASSES = "absolute z-2 top-[-6px] right-[-8px] bg-[#370E4D] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center"
 
+  // The 20px icons are far below the 44px minimum tap target. On touch devices
+  // an invisible pseudo-element extends the hit area to 44×44; layout and the
+  // desktop pointer experience are unchanged.
+  const TOUCH_HIT = "relative pointer-coarse:after:content-[''] pointer-coarse:after:absolute pointer-coarse:after:-inset-3"
+
   return (
     <header className={`sm:px-10 px-4 py-2 fixed z-50 w-full transition-all duration-300 ${
       scrolled ? 'bg-white shadow-sm' : 'bg-transparent border-b-gray-300/20 border-b-1'
@@ -181,11 +186,12 @@ const Navbar = () => {
       <nav className="flex justify-between items-center max-w-screen xl:mx-auto z-50">
 
         {/* Left — Hamburger + mobile search trigger */}
-        <div className="w-1/4 flex gap-3 md:gap-8">
+        <div className="w-1/4 flex gap-3 pointer-coarse:gap-6 md:gap-8">
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Menü öffnen"
             aria-expanded={sidebarOpen}
+            className={TOUCH_HIT}
           >
             <HamburgerIconSvg className="w-5 h-5 hover:text-[#370E4D]"/>
           </button>
@@ -211,7 +217,7 @@ const Navbar = () => {
             <button
               onClick={() => setSearch(true)}
               aria-label="Suche öffnen"
-              className="flex items-center gap-1.5 border-none bg-transparent cursor-pointer text-black hover:text-[#370E4D] transition duration-200"
+              className={`flex items-center gap-1.5 border-none bg-transparent cursor-pointer text-black hover:text-[#370E4D] transition duration-200 ${TOUCH_HIT}`}
             >
               <SearchIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]" />
             </button>
@@ -224,7 +230,7 @@ const Navbar = () => {
         </Link>
 
         {/* Right — Desktop search, account, wishlist, cart */}
-        <div className="flex gap-3 md:gap-8 mt-3 text-base w-1/4 justify-end">
+        <div className="flex gap-3 pointer-coarse:gap-6 md:gap-8 mt-3 text-base w-1/4 justify-end">
           <div className="hidden sm:block">
             <button
               onClick={() => setSearch(true)}
@@ -236,7 +242,7 @@ const Navbar = () => {
           </div>
 
           <div className="relative">
-            <Link href="/account" aria-label="Mein Konto">
+            <Link href="/account" aria-label="Mein Konto" className={TOUCH_HIT}>
               <AccountIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]"/>
             </Link>
             {isAuthenticated && (
@@ -245,7 +251,7 @@ const Navbar = () => {
           </div>
 
           <div>
-            <Link href="/saved-lists" className="relative cursor-pointer hidden sm:block" aria-label="Wunschliste">
+            <Link href="/saved-lists" className={`cursor-pointer hidden sm:block ${TOUCH_HIT}`} aria-label="Wunschliste">
               <HeartIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]"/>
             </Link>
           </div>
@@ -254,7 +260,7 @@ const Navbar = () => {
             <button
               onClick={openCart}
               aria-label={`Warenkorb mit ${itemCount} Artikeln`}
-              className="relative cursor-pointer bg-transparent border-0 p-0"
+              className={`cursor-pointer bg-transparent border-0 p-0 ${TOUCH_HIT}`}
             >
               <CartIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]"/>
               {itemCount > 0 && (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { brandApi } from '@/lib/api/modules/brandApi'
+import { FetchError } from '@/lib/api'
 import type { ApiBrandPartner } from '@/types/api'
 import { StatusBadge, SectionCard, fmt } from '../../admin/_components/shared'
 import { VPageHeader } from './vshared'
@@ -82,8 +83,12 @@ export default function SettingsTab({
       onUpdate(updated)
       setAddrSaved(true)
       setTimeout(() => setAddrSaved(false), 2500)
-    } catch {
-      setAddrError('Speichern fehlgeschlagen. Bitte erneut versuchen.')
+    } catch (err) {
+      setAddrError(
+        err instanceof FetchError
+          ? `Speichern fehlgeschlagen: ${err.message} (${err.status})`
+          : 'Speichern fehlgeschlagen. Bitte erneut versuchen.',
+      )
     } finally {
       setAddrSaving(false)
     }

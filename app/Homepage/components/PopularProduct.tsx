@@ -33,8 +33,8 @@ const PopularProduct = () => {
       >
         <div className="flex-1 h-[1px] bg-enunas-gray-light" />
         <h2
-          className="whitespace-nowrap font-cormorant"
-          style={{ fontSize: '40px', fontWeight: 300, letterSpacing: '0.08em', color: '#0A0A0A', lineHeight: 1 }}
+          className="text-center font-cormorant max-w-[75%]"
+          style={{ fontSize: 'clamp(1.75rem, 7vw, 2.5rem)', fontWeight: 300, letterSpacing: '0.08em', color: '#0A0A0A', lineHeight: 1.15 }}
         >
           Unsere Favoriten
         </h2>

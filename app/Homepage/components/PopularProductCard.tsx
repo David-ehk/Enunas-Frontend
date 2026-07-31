@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 
 interface ProductColour {
   hex: string;
@@ -51,22 +52,33 @@ const PopularProductCard = ({
   // Use catalogue if categories is empty
   const displayCategories = categories.length > 0 ? categories : catalogue;
   const [isHovered, setIsHovered] = useState(false);
+  // Touch devices fire mouseenter on tap but never mouseleave, which would leave
+  // the card flipped to sizes with the price hidden. Only arm the swap where
+  // hover actually exists.
+  const [canHover, setCanHover] = useState(false);
+  useEffect(() => {
+    setCanHover(window.matchMedia('(hover: hover)').matches);
+  }, []);
   const isNew = isNewProduct(createdAt);
 
   return (
     <div
       className="flex flex-1 flex-col w-full group"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => canHover && setIsHovered(true)}
+      onMouseLeave={() => canHover && setIsHovered(false)}
     >
       <Link href={href} className="block">
         {/* Image Container */}
         <div className="relative w-full aspect-[3/4] overflow-hidden bg-enunas-off-white">
-          <img
-            className="w-full h-full object-cover transition-transform duration-800 ease-out-expo group-hover:scale-105"
-            src={imgURL}
-            alt={productName}
-          />
+          {imgURL && (
+            <Image
+              className="object-cover transition-transform duration-800 ease-out-expo group-hover:scale-105"
+              src={imgURL}
+              alt={productName}
+              fill
+              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            />
+          )}
 
           {/* Subtle Overlay on Hover */}
           <div className="absolute inset-0 bg-enunas-purple/0 transition-colors duration-300 group-hover:bg-enunas-purple/5" />

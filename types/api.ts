@@ -1,5 +1,5 @@
 export type UserRole = 'CUSTOMER' | 'BRAND_PARTNER' | 'ADMIN';
-export type BrandStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'VERIFIED' | 'SUSPENDED';
+export type BrandStatus = 'PENDING' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'VERIFIED' | 'SUSPENDED';
 export type ProductStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 // Exact backend OrderStatus enum values — PROCESSING does not exist in the backend.

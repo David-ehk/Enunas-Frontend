@@ -219,7 +219,7 @@ export default function FeedPageContent({ basePath, HeroComponent }: Props) {
             <p style={{ fontSize: 10, color: '#9B9B9B', letterSpacing: '0.16em', textTransform: 'uppercase', margin: '0 0 32px' }}>
               {activeFilterCount > 0 || activeCat !== 'alle'
                 ? 'Passe deine Filter an'
-                : 'Bitte melde dich an, um die Kollektion zu sehen'}
+                : 'Zurzeit sind keine Artikel verfügbar'}
             </p>
             {(activeFilterCount > 0 || activeCat !== 'alle') && (
               <button onClick={() => { resetFilters(); setActiveCat('alle') }} style={{

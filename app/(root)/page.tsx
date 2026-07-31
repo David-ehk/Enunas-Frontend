@@ -9,6 +9,7 @@ import CatalogueAuswahl from "../Homepage/components/CatalogueAuswahl";
 import Footer from "../Homepage/components/footer";
 import Navbar from "../Homepage/components/navbar";
 import CuratedRecommendations from "@/components/CuratedRecommendations";
+import FounderQuote from "../Homepage/components/FounderQuote";
 
 
 export const metadata: Metadata = {
@@ -71,7 +72,10 @@ export default function Home() {
       <section className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <NewProducts />
       </section>
-      <CuratedRecommendations title="Das könnte dir auch gefallen" />
+      <FounderQuote />
+      <section className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <CuratedRecommendations title="Das könnte dir auch gefallen" variant="feed" />
+      </section>
       <section>
         <CategorySection />
       </section>
