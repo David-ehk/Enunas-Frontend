@@ -19,7 +19,7 @@ export default function FounderQuote() {
   return (
     <section
       ref={ref as React.RefObject<HTMLElement>}
-      className="px-6 lg:px-16 py-24 lg:py-32 min-h-[55vh] flex items-center overflow-hidden"
+      className="px-6 lg:px-16 py-14 sm:py-20 lg:py-32 flex items-center overflow-hidden"
     >
       <div className="max-w-[1800px] mx-auto w-full">
         <blockquote className="m-0">
