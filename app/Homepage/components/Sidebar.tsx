@@ -27,7 +27,6 @@ const CATEGORIES: Category[] = [
   {
     key: 'neu', label: 'Neu', title: 'Neu', kicker: 'Diese Woche · 48 Stücke', route: '/neu',
     sub: [
-      { label: 'Alle Neuheiten', href: '/neu' },
       { label: 'Damen',         href: '/neu', deep: true },
       { label: 'Herren',        href: '/neu', deep: true },
       { label: 'Schuhe',        href: '/neu' },

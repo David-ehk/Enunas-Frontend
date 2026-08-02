@@ -230,7 +230,7 @@ const Navbar = () => {
         </Link>
 
         {/* Right — Desktop search, account, wishlist, cart */}
-        <div className="flex gap-3 pointer-coarse:gap-6 md:gap-8 mt-3 text-base w-1/4 justify-end">
+        <div className="flex gap-3 pointer-coarse:gap-6 md:gap-8 text-base w-1/4 justify-end">
           <div className="hidden sm:block">
             <button
               onClick={() => setSearch(true)}
@@ -251,7 +251,7 @@ const Navbar = () => {
           </div>
 
           <div>
-            <Link href="/saved-lists" className={`cursor-pointer hidden sm:block ${TOUCH_HIT}`} aria-label="Wunschliste">
+            <Link href="/saved-lists" className={`cursor-pointer ${TOUCH_HIT}`} aria-label="Wunschliste">
               <HeartIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]"/>
             </Link>
           </div>
