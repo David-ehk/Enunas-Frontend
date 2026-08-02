@@ -165,6 +165,25 @@ const css = `
      labels ("Zahlungsarten", the SSL note) keep breathing room. */
   .col-title   { letter-spacing: 0.12em; }
   .pay-note    { letter-spacing: 0.1em; }
+
+  /* The bottom-left corner mark floats awkwardly on its own down by the
+     legal bar on narrow screens — move it to sit right under the tagline
+     instead, where it reads as a deliberate accent rather than stray. */
+  .foot-inner::after { display: none; }
+  .foot-tagline { position: relative; }
+  .foot-tagline::after {
+    content: "";
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    width: 15px;
+    height: 15px;
+    border: 0 solid var(--faint);
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    opacity: 0.7;
+    pointer-events: none;
+  }
 }
 @media (max-width: 374px) {
   /* Two tracks can no longer hold the longest labels — stack them. */

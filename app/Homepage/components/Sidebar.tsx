@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { productApi } from '@/lib/api'
 
 /* ─── Types ─────────────────────────────────────────────────── */
 interface TileData  { video?: boolean; kicker: string; name: string; img: string }
@@ -25,7 +26,7 @@ const IMG = {
 /* ─── Nav data ───────────────────────────────────────────────── */
 const CATEGORIES: Category[] = [
   {
-    key: 'neu', label: 'Neu', title: 'Neu', kicker: 'Diese Woche · 48 Stücke', route: '/neu',
+    key: 'neu', label: 'Neu', title: 'Neu', kicker: 'Neu eingetroffen', route: '/neu',
     sub: [
       { label: 'Damen',         href: '/neu', deep: true },
       { label: 'Herren',        href: '/neu', deep: true },
@@ -59,7 +60,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: 'catalogue', label: 'Catalogue', title: 'Katalog', kicker: '248 Stücke · 42 Marken', route: '/catalogue',
+    key: 'catalogue', label: 'Catalogue', title: 'Catalogue', kicker: 'Verschiedenste Auswahl', route: '/catalogue',
     sub: [
       { label: 'Streetwear',      href: '/bekleidung/streetwear', deep: true },
       { label: 'Experimental',    href: '/bekleidung/experimental', deep: true },
@@ -114,9 +115,8 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: 'women', label: 'Women', title: 'Damen', kicker: 'Damenmode entdecken', route: '/bekleidung?gender=damen',
+    key: 'women', label: 'Damen', title: 'Damen', kicker: 'Damenmode entdecken', route: '/bekleidung?gender=damen',
     sub: [
-      { label: 'Damenmode entdecken', href: '/bekleidung?gender=damen' },
       { label: 'Prêt-à-porter',       href: '/bekleidung?gender=damen', deep: true },
       { label: 'Taschen',             href: '/bekleidung?gender=damen&cat=accessoires', deep: true },
       { label: 'Accessoires',         href: '/bekleidung?gender=damen&cat=accessoires', deep: true },
@@ -131,9 +131,8 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: 'men', label: 'Men', title: 'Herren', kicker: 'Herrenmode entdecken', route: '/bekleidung?gender=herren',
+    key: 'men', label: 'Herren', title: 'Herren', kicker: 'Herrenmode entdecken', route: '/bekleidung?gender=herren',
     sub: [
-      { label: 'Herrenmode entdecken', href: '/bekleidung?gender=herren' },
       { label: 'Prêt-à-porter',        href: '/bekleidung?gender=herren', deep: true },
       { label: 'Taschen',              href: '/bekleidung?gender=herren&cat=accessoires', deep: true },
       { label: 'Accessoires',          href: '/bekleidung?gender=herren&cat=accessoires', deep: true },
@@ -149,9 +148,8 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    key: 'marken', label: 'Marken', title: 'Marken', kicker: '42 Ateliers · kuratiert', route: '/marken',
+    key: 'marken', label: 'Marken', title: 'Marken', kicker: 'Kuratiert', route: '/marken',
     sub: [
-      { label: 'Alle Marken',    href: '/marken' },
       { label: "World's End",    href: '/marken', deep: true },
       { label: 'Volt Atelier',   href: '/marken', deep: true },
       { label: 'Marin Studio',   href: '/marken', deep: true },
@@ -667,9 +665,27 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [tileKey,      setTileKey]     = useState(0)
   const [mobilePanel,  setMobilePanel] = useState<'rail' | 'sub'>('rail')
   const [expandedSub,  setExpandedSub]  = useState<string | null>(null)
+  const [neuCount,     setNeuCount]    = useState<number | null>(null)
+  const [markenInfo,   setMarkenInfo]  = useState<{ count: number; examples: string[] } | null>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => { setMounted(true) }, [])
+
+  // "Neu" kicker (current month + last-30-days count) and "Marken" kicker
+  // (real brand count + two example names) both read off the same product
+  // list, instead of hardcoded numbers that silently go stale.
+  useEffect(() => {
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
+    productApi.list({ size: 200 })
+      .then(r => {
+        const count = r.content.filter(p => new Date(p.createdAt).getTime() >= thirtyDaysAgo).length
+        setNeuCount(count)
+
+        const brands = [...new Set(r.content.map(p => p.brandName))].sort()
+        setMarkenInfo({ count: brands.length, examples: brands.slice(0, 2) })
+      })
+      .catch(() => {})
+  }, [])
 
   // On open: re-trigger tile animations, focus close button, reset mobile panel
   useEffect(() => {
@@ -705,6 +721,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   if (!mounted) return null
 
   const active = CATEGORIES.find(c => c.key === activeKey) ?? CATEGORIES[0]
+
+  const currentMonth = new Intl.DateTimeFormat('de-DE', { month: 'long' }).format(new Date())
+  const activeKicker = active.key === 'neu'
+    ? `${currentMonth} · ${neuCount === null ? '…' : `${neuCount} ${neuCount === 1 ? 'Stück' : 'Stücke'}`}`
+    : active.key === 'marken'
+    ? (markenInfo === null
+        ? 'Kuratiert'
+        : `${markenInfo.count} ${markenInfo.count === 1 ? 'Atelier' : 'Ateliers'}${markenInfo.examples.length ? ` · z. B. ${markenInfo.examples.join(', ')}` : ''} · kuratiert`)
+    : active.kicker
 
   const nav = (
     <>
@@ -772,7 +797,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="mn-sub-body" key={`sub-${activeKey}`}>
             <div className="mn-fade-enter">
               <div className="mn-sub-head">
-                <div className="mn-sub-kicker">{active.kicker}</div>
+                <div className="mn-sub-kicker">{activeKicker}</div>
                 <div className="mn-sub-title">{active.title}</div>
               </div>
 

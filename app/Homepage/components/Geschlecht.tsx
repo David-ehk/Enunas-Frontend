@@ -3,12 +3,12 @@ import React from 'react'
 
 const geschlecht = [
   {
-    title: "Women",
+    title: "Damen",
     image: "https://diorama.dam-broadcast.com/cdn-cgi/image/width=640,format=auto/pm_11872_1164_1164642-rw8ghfoty4-whr.jpg",
     link: "/women"
   },
   {
-    title: "Men",
+    title: "Herren",
     image: "https://amq-mcq.dam.kering.com/asset/e5ee7220-3680-49a9-a084-c5477140578b/Original-Ecom/McQUEEN-SS26-PRE-CO_HOLIDAY_1X1_1-16.jpg",
     link: "/men"
   }
