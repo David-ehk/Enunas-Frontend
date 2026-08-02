@@ -133,7 +133,11 @@
       "Bash(npx vitest *)",
       "Bash(grep -rn \"returnShipToAddress\\\\|order.returnNumber\\\\|returnReason\\\\b\\\\|returnDescription\\\\|returnRequestedAt\\\\|RETURN_APPROVED\\\\|RETURN_REQUESTED\\\\|RETURN_RECEIVED\\\\|orders/.*\\\\/return\\\\/\" app/ lib/ components/ --include=*.ts --include=*.tsx)",
       "Bash(python -)",
-      "PowerShell($c = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue; if \\($c\\) { $pid2 = \\($c | Select-Object -First 1\\).OwningProcess; $p = Get-Process -Id $pid2 -ErrorAction SilentlyContinue; \"PID $\\($p.Id\\) : $\\($p.ProcessName\\) : started $\\($p.StartTime\\)\" } else { \"nothing listening on 3000\" })"
+      "PowerShell($c = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue; if \\($c\\) { $pid2 = \\($c | Select-Object -First 1\\).OwningProcess; $p = Get-Process -Id $pid2 -ErrorAction SilentlyContinue; \"PID $\\($p.Id\\) : $\\($p.ProcessName\\) : started $\\($p.StartTime\\)\" } else { \"nothing listening on 3000\" })",
+      "Bash(node -e \"const p=require\\('./package.json'\\);console.log\\('packageManager:',p.packageManager\\);console.log\\('eslint:',\\(p.devDependencies||{}\\).eslint,'| eslint-config-next:',\\(p.devDependencies||{}\\)['eslint-config-next']\\);console.log\\('next:',\\(p.dependencies||{}\\).next\\)\")",
+      "Bash(git restore *)",
+      "Bash(xargs git log --oneline -1)",
+      "Bash(node -e \"let s='';process.stdin.on\\('data',d=>s+=d\\).on\\('end',\\(\\)=>{const p=JSON.parse\\(s\\);console.log\\('eslint:',\\(p.devDependencies||{}\\).eslint\\);console.log\\('eslint-config-next:',\\(p.devDependencies||{}\\)['eslint-config-next']\\);console.log\\('next:',\\(p.dependencies||{}\\).next\\)}\\)\")"
     ]
   }
 }
