@@ -638,6 +638,16 @@ const MEGA_CSS = `
   .mn-sub-body   { padding: 22px 24px 22px; }
   .mn-sub-title  { font-size: 32px; }
 
+  /* Highlights match the rest of the panel on mobile — the large italic
+     serif treatment reads as oversized/heavy in this narrow layout. */
+  .mn-sub-highlight {
+    font-family: var(--mn-sans);
+    font-style: normal;
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+  }
+
   /* Hide active-on-hover state — touch devices set active on tap only */
   .mn-rail-link:hover .mn-rl-label { letter-spacing: 0.24em; transform: none; }
 }
@@ -666,14 +676,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [mobilePanel,  setMobilePanel] = useState<'rail' | 'sub'>('rail')
   const [expandedSub,  setExpandedSub]  = useState<string | null>(null)
   const [neuCount,     setNeuCount]    = useState<number | null>(null)
-  const [markenInfo,   setMarkenInfo]  = useState<{ count: number; examples: string[] } | null>(null)
+  const [markenCount,  setMarkenCount] = useState<number | null>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => { setMounted(true) }, [])
 
   // "Neu" kicker (current month + last-30-days count) and "Marken" kicker
-  // (real brand count + two example names) both read off the same product
-  // list, instead of hardcoded numbers that silently go stale.
+  // (real distinct-brand count) both read off the same product list,
+  // instead of hardcoded numbers that silently go stale.
   useEffect(() => {
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
     productApi.list({ size: 200 })
@@ -681,8 +691,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         const count = r.content.filter(p => new Date(p.createdAt).getTime() >= thirtyDaysAgo).length
         setNeuCount(count)
 
-        const brands = [...new Set(r.content.map(p => p.brandName))].sort()
-        setMarkenInfo({ count: brands.length, examples: brands.slice(0, 2) })
+        const brandCount = new Set(r.content.map(p => p.brandName)).size
+        setMarkenCount(brandCount)
       })
       .catch(() => {})
   }, [])
@@ -726,9 +736,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const activeKicker = active.key === 'neu'
     ? `${currentMonth} · ${neuCount === null ? '…' : `${neuCount} ${neuCount === 1 ? 'Stück' : 'Stücke'}`}`
     : active.key === 'marken'
-    ? (markenInfo === null
+    ? (markenCount === null || markenCount <= 1
         ? 'Kuratiert'
-        : `${markenInfo.count} ${markenInfo.count === 1 ? 'Atelier' : 'Ateliers'}${markenInfo.examples.length ? ` · z. B. ${markenInfo.examples.join(', ')}` : ''} · kuratiert`)
+        : `${markenCount} Marken · kuratiert`)
     : active.kicker
 
   const nav = (
