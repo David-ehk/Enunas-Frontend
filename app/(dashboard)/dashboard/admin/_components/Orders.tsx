@@ -108,13 +108,6 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
     } catch { /* silent */ } finally { setActing(null) }
   }
 
-  async function approveReturn(orderId: string) {
-    setActing(orderId)
-    try {
-      const updated = await adminApi.orders.approveReturn(orderId)
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o))
-    } catch { /* silent */ } finally { setActing(null) }
-  }
 
   return (
     <div className="space-y-5">
@@ -289,16 +282,31 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
                             </ActionBtn>
                           )}
 
-                          {/* Refund läuft über den Rückgaben-Screen (approve → receive → refund) —
-                              das Backend erlaubt Refunds erst ab RETURN_RECEIVED */}
-                          {order.status === 'RETURN_REQUESTED' && (
-                            <>
-                              <ActionBtn variant="success" disabled={acting === order.id} onClick={() => approveReturn(order.id)}>
-                                <RotateCcw className="w-3 h-3" /> Rückgabe genehmigen
-                              </ActionBtn>
-                            </>
-                          )}
+                          {/* Retouren-Aktionen gehören zur einzelnen Retoure (pro Marke),
+                              nicht zur Bestellung — siehe Retouren-Screen. */}
                         </div>
+
+                        {(order.returns?.length ?? 0) > 0 && (
+                          <div className="mt-3 pt-3 border-t border-[#E8E8E8]">
+                            <p className="text-[9.5px] uppercase tracking-[0.18em] font-medium mb-1.5"
+                              style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
+                              Retouren
+                            </p>
+                            <div className="space-y-1">
+                              {order.returns!.map(r => (
+                                <p key={r.returnNumber} className="text-[11.5px]"
+                                  style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
+                                  <span style={{ color: '#370E4D' }}>{r.brandName}</span>
+                                  {' — '}{r.status}
+                                  <span style={{ color: '#9B9B9B' }}> · {r.returnNumber}</span>
+                                </p>
+                              ))}
+                            </div>
+                            <p className="text-[10.5px] mt-1.5" style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
+                              Bearbeitung erfolgt je Retoure im Retouren-Bereich.
+                            </p>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   )}

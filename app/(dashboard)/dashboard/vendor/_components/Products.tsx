@@ -13,6 +13,7 @@ import {
   Plus, Trash2, ChevronLeft, Check, X, Edit2,
   Package, ChevronDown, ChevronUp, ImagePlus,
 } from 'lucide-react'
+import { isProductLive } from '@/lib/product'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const CATALOGUE_OPTS = [
@@ -1916,7 +1917,7 @@ export default function Products() {
       <div className="flex items-center gap-4 text-[11px] text-[#9B9B9B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
         <span>{products.length} Produkte gesamt</span>
         <span>·</span>
-        <span className="text-[#1A5A3C]">{products.filter(p => p.status === 'APPROVED').length} genehmigt</span>
+        <span className="text-[#1A5A3C]">{products.filter(p => isProductLive(p.status)).length} genehmigt</span>
         <span>·</span>
         <span className="text-[#7A5C1E]">{products.filter(p => p.status === 'PENDING').length} ausstehend</span>
         <span>·</span>

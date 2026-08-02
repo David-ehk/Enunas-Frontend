@@ -1,6 +1,9 @@
 export type UserRole = 'CUSTOMER' | 'BRAND_PARTNER' | 'ADMIN';
 export type BrandStatus = 'PENDING' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'VERIFIED' | 'SUSPENDED';
-export type ProductStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+// The backend returns ACTIVE for a live product — APPROVED is a lifecycle event
+// (POST /admin/products/{id}/approve), not a resting state. Both are accepted
+// here; use isProductLive() rather than comparing to a single literal.
+export type ProductStatus = 'PENDING' | 'ACTIVE' | 'APPROVED' | 'REJECTED' | 'HIDDEN';
 
 // Exact backend OrderStatus enum values — PROCESSING does not exist in the backend.
 export type OrderStatus =
@@ -13,6 +16,55 @@ export type OrderStatus =
 export type ReturnReason =
   | 'WRONG_SIZE' | 'WRONG_COLOR' | 'DAMAGED' | 'DEFECTIVE'
   | 'NOT_AS_DESCRIBED' | 'NO_LONGER_WANTED' | 'OTHER';
+
+// ── Returns ──────────────────────────────────────────────────────────────────
+// A return belongs to a BRAND, not to an order. One order can carry several
+// returns — one per brand whose items are going back — each with its own
+// lifecycle, ship-to snapshot, approval and refund. There is no such thing as
+// "the order's return".
+//
+// Verified against backend source (controllers, DTOs, enums, migration V17).
+export type ReturnStatus = 'REQUESTED' | 'APPROVED' | 'RECEIVED' | 'REFUNDED';
+
+// Only PENDING and UPLOADED_BY_BRAND are currently reachable.
+export type ReturnLabelStatus = 'PENDING' | 'UPLOADED_BY_BRAND' | 'GENERATED' | 'FAILED';
+
+// Mirrors backend ReturnSummaryDto exactly.
+export interface ReturnSummary {
+  id: string;
+  returnNumber: string;
+  status: ReturnStatus;
+  brandId: string;
+  brandName: string;
+  reason?: ReturnReason | string;
+  description?: string;
+  // Frozen at request time. Read-only forever — it must keep showing the address
+  // that was current then, even after the brand edits its warehouse.
+  shipToAddress: string;
+  // Item IDs referencing OrderResponseDto.items — NOT embedded line items.
+  // Resolve against the parent order; see resolveReturnItems().
+  orderItemIds: string[];
+  refundAmount?: number;
+  requestedAt?: string;
+  approvedAt?: string;
+  receivedAt?: string;
+  refundedAt?: string;
+  labelStatus?: ReturnLabelStatus;
+  labelCarrier?: string;
+  labelTrackingNumber?: string;
+  labelUrl?: string;
+}
+
+// A ReturnSummary joined to its parent order's context. Components consume this
+// so they never reach back into the order to work out what a return contains.
+export interface ReturnWithOrder extends ReturnSummary {
+  orderId: string;
+  orderNumber?: string;
+  buyerEmail?: string;
+  currency: string;
+  // Resolved from orderItemIds against the parent order's items.
+  items: ApiOrderItem[];
+}
 
 // Spring Page<T> wrapper shape.
 export interface ApiPage<T> {
@@ -134,11 +186,19 @@ export interface ApiOrder {
   discountPercent?: number;
   notes?: string;
   checkoutUrl?: string;
-  // Return fields — present only when a return exists for this order.
+  // Canonical returns model: one entry per brand returning items on this order.
+  // Source of truth for ALL return UI.
+  returns?: ReturnSummary[];
+  /** @deprecated Backwards-compatibility scalars, populated by the backend only
+   *  when returns.length === 1. Never read these — use `returns[]`. */
   returnNumber?: string;
+  /** @deprecated use `returns[].reason` */
   returnReason?: string;
+  /** @deprecated use `returns[].description` */
   returnDescription?: string;
+  /** @deprecated use `returns[].requestedAt` */
   returnRequestedAt?: string;
+  /** @deprecated use `returns[].shipToAddress` — the frozen per-brand snapshot */
   returnShipToAddress?: string;
   // Legacy field — not returned by backend. Admin/vendor views using this see undefined.
   totalAmount?: number;
@@ -167,6 +227,15 @@ export interface ApiBrandPartner {
   vatId?: string;
   taxNumber?: string;
   updatedAt?: string;
+  // Return (warehouse) address — deliberately separate from the legal/company
+  // address above. When these are blank the platform falls back to the
+  // registered business address. UNVERIFIED field names.
+  returnRecipient?: string;
+  returnAddressStreet?: string;
+  returnAddressPostalCode?: string;
+  returnAddressCity?: string;
+  returnAddressCountry?: string;
+  returnInstructions?: string;
 }
 
 export interface BrandOrder {

@@ -5,6 +5,7 @@ import { adminApi, brandApi } from '@/lib/api'
 import type { AdminApiProduct, ApiOrder, ApiProductImage } from '@/types/api'
 import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, SelectFilter, TH, TD, TableRow, fmt, fmtEur } from './shared'
 import { Eye, EyeOff, Trash2, CheckCircle, XCircle, Flag, Pencil, RotateCcw, ImagePlus, X, Link2 } from 'lucide-react'
+import { isProductLive } from '@/lib/product'
 
 type Filter = 'all' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'DEACTIVATED'
 type Queue  = 'all' | 'moderation'
@@ -341,7 +342,7 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
   const STATUS_FILTERS: { id: Filter; label: string }[] = [
     { id: 'all',         label: 'Alle' },
     { id: 'PENDING',     label: `Ausstehend (${pending})` },
-    { id: 'APPROVED',    label: `Genehmigt (${products.filter(p => p.status === 'APPROVED').length})` },
+    { id: 'APPROVED',    label: `Genehmigt (${products.filter(p => isProductLive(p.status)).length})` },
     { id: 'REJECTED',    label: `Abgelehnt (${products.filter(p => p.status === 'REJECTED').length})` },
     { id: 'DEACTIVATED', label: `Deaktiviert (${products.filter(p => p.status === 'DEACTIVATED').length})` },
   ]
@@ -536,7 +537,7 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
                           </>
                         )}
                         {/* Hide */}
-                        {p.status === 'APPROVED' && (
+                        {isProductLive(p.status) && (
                           <button
                             onClick={() => act(p.id, 'hide')} disabled={acting === p.id}
                             className="p-1.5 rounded-lg text-[#6B6B6B] hover:bg-[#F5F5F0] transition-all duration-200 disabled:opacity-40"

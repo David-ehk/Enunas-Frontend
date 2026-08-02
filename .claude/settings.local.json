@@ -128,7 +128,12 @@
       "Bash(npx next *)",
       "mcp__ide__getDiagnostics",
       "Bash(node -e \"console.log\\(encodeURIComponent\\('https://eu.manieredevoir.com/cdn/shop/files/MDV_0030_MDV2_be0fab84-a04c-4251-adc9-1fefaa4175c4.jpg?v=1759502594'\\)\\)\")",
-      "Bash(echo \"tsc: $?\")"
+      "Bash(echo \"tsc: $?\")",
+      "Bash(echo \"=== tsc exit: $? ===\")",
+      "Bash(npx vitest *)",
+      "Bash(grep -rn \"returnShipToAddress\\\\|order.returnNumber\\\\|returnReason\\\\b\\\\|returnDescription\\\\|returnRequestedAt\\\\|RETURN_APPROVED\\\\|RETURN_REQUESTED\\\\|RETURN_RECEIVED\\\\|orders/.*\\\\/return\\\\/\" app/ lib/ components/ --include=*.ts --include=*.tsx)",
+      "Bash(python -)",
+      "PowerShell($c = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue; if \\($c\\) { $pid2 = \\($c | Select-Object -First 1\\).OwningProcess; $p = Get-Process -Id $pid2 -ErrorAction SilentlyContinue; \"PID $\\($p.Id\\) : $\\($p.ProcessName\\) : started $\\($p.StartTime\\)\" } else { \"nothing listening on 3000\" })"
     ]
   }
 }

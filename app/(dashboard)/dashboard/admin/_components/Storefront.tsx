@@ -5,6 +5,7 @@ import { getCuration, saveCuration, type CurationData, type Segment } from '@/li
 import type { AdminApiProduct } from '@/types/api'
 import { GripVertical, X, Plus, Check, Save, Trash2 } from 'lucide-react'
 import { PageHeader, SearchInput, SelectFilter } from './shared'
+import { isProductLive } from '@/lib/product'
 
 type SectionTab = 'trendy' | 'drops' | 'recommendations'
 type DragState =
@@ -174,7 +175,7 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
     setSearch(''); setBrand('all'); setCat('all')
   }, [section])
 
-  const approved = useMemo(() => products.filter(p => p.status === 'APPROVED'), [products])
+  const approved = useMemo(() => products.filter(p => isProductLive(p.status)), [products])
 
   const selectedIds = useMemo(() => getIds(curation, section, segment), [curation, section, segment])
 

@@ -54,6 +54,17 @@ export default function SettingsTab({
   const [addrSaved, setAddrSaved]           = useState(false)
   const [addrError, setAddrError]           = useState<string | null>(null)
 
+  // Return (warehouse) address — kept separate from the legal address above.
+  const [retRecipient, setRetRecipient]     = useState(brand?.returnRecipient ?? '')
+  const [retStreet, setRetStreet]           = useState(brand?.returnAddressStreet ?? '')
+  const [retPostalCode, setRetPostalCode]   = useState(brand?.returnAddressPostalCode ?? '')
+  const [retCity, setRetCity]               = useState(brand?.returnAddressCity ?? '')
+  const [retCountry, setRetCountry]         = useState(brand?.returnAddressCountry ?? 'DE')
+  const [retInstructions, setRetInstructions] = useState(brand?.returnInstructions ?? '')
+  const [retSaving, setRetSaving]           = useState(false)
+  const [retSaved, setRetSaved]             = useState(false)
+  const [retError, setRetError]             = useState<string | null>(null)
+
   useEffect(() => {
     if (brand) {
       setLegalName(brand.legalName ?? '')
@@ -63,6 +74,12 @@ export default function SettingsTab({
       setCountry(brand.addressCountry ?? 'DE')
       setVatId(brand.vatId ?? '')
       setTaxNumber(brand.taxNumber ?? '')
+      setRetRecipient(brand.returnRecipient ?? '')
+      setRetStreet(brand.returnAddressStreet ?? '')
+      setRetPostalCode(brand.returnAddressPostalCode ?? '')
+      setRetCity(brand.returnAddressCity ?? '')
+      setRetCountry(brand.returnAddressCountry ?? 'DE')
+      setRetInstructions(brand.returnInstructions ?? '')
     }
   }, [brand])
 
@@ -94,6 +111,32 @@ export default function SettingsTab({
     }
   }
 
+  async function saveReturnAddress() {
+    setRetSaving(true)
+    setRetError(null)
+    try {
+      const updated = await brandApi.updateMe({
+        returnRecipient: retRecipient.trim(),
+        returnAddressStreet: retStreet.trim(),
+        returnAddressPostalCode: retPostalCode.trim(),
+        returnAddressCity: retCity.trim(),
+        returnAddressCountry: retCountry,
+        returnInstructions: retInstructions.trim(),
+      })
+      onUpdate(updated)
+      setRetSaved(true)
+      setTimeout(() => setRetSaved(false), 2500)
+    } catch (err) {
+      setRetError(
+        err instanceof FetchError
+          ? `Speichern fehlgeschlagen: ${err.message} (${err.status})`
+          : 'Speichern fehlgeschlagen. Bitte erneut versuchen.',
+      )
+    } finally {
+      setRetSaving(false)
+    }
+  }
+
   const labelCls = 'text-[10px] uppercase tracking-[0.12em] text-[#6B6B6B] font-medium mb-1.5'
   const inputCls = 'w-full text-[13px] border border-[#E8E8E8] bg-white rounded-none px-3.5 py-2.5 focus:outline-none focus:border-[#370E4D]/50 focus:ring-2 focus:ring-[#370E4D]/8 transition-all duration-200'
 
@@ -105,6 +148,19 @@ export default function SettingsTab({
     country !== (brand?.addressCountry ?? 'DE') ||
     vatId !== (brand?.vatId ?? '') ||
     taxNumber !== (brand?.taxNumber ?? '')
+
+  const retDirty =
+    retRecipient !== (brand?.returnRecipient ?? '') ||
+    retStreet !== (brand?.returnAddressStreet ?? '') ||
+    retPostalCode !== (brand?.returnAddressPostalCode ?? '') ||
+    retCity !== (brand?.returnAddressCity ?? '') ||
+    retCountry !== (brand?.returnAddressCountry ?? 'DE') ||
+    retInstructions !== (brand?.returnInstructions ?? '')
+
+  // Blank return address ⇒ the platform falls back to the registered business address.
+  const hasReturnAddress = Boolean(
+    (brand?.returnAddressStreet ?? '').trim() && (brand?.returnAddressCity ?? '').trim(),
+  )
 
   return (
     <div className="max-w-xl space-y-5">
@@ -297,13 +353,139 @@ export default function SettingsTab({
         </div>
       </SectionCard>
 
+      {/* Return address — deliberately its own section, not part of the legal
+          company data above: this is a logistics address, not an identity one. */}
+      <SectionCard title="Retouren">
+        <div className="p-6 space-y-4">
+          <div
+            className="flex gap-2.5 p-3 border"
+            style={{ borderColor: hasReturnAddress ? '#E8E8E8' : '#FDBA74', background: hasReturnAddress ? '#FAFAF8' : '#FFF7ED' }}
+          >
+            <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: hasReturnAddress ? '#6B6B6B' : '#9A3412' }} />
+            <p className="text-[11px] leading-[1.6]" style={{ fontFamily: 'var(--font-league-spartan)', color: hasReturnAddress ? '#6B6B6B' : '#9A3412' }}>
+              {hasReturnAddress
+                ? 'Diese Adresse wird Kundinnen und Kunden bei einer Retoure angezeigt. Bereits erstellte Retouren behalten die damals gültige Adresse.'
+                : 'Keine Retourenadresse hinterlegt — Enunas verwendet deine registrierte Geschäftsadresse.'}
+            </p>
+          </div>
+
+          <div>
+            <p className={labelCls}>Retouren-Empfänger</p>
+            <input
+              type="text"
+              value={retRecipient}
+              onChange={e => setRetRecipient(e.target.value)}
+              placeholder={brand?.legalName ?? ''}
+              className={inputCls}
+              style={{ fontFamily: 'var(--font-league-spartan)' }}
+            />
+          </div>
+
+          <div>
+            <p className={labelCls}>Straße &amp; Hausnummer</p>
+            <input
+              type="text"
+              value={retStreet}
+              onChange={e => setRetStreet(e.target.value)}
+              placeholder={brand?.addressStreet ?? ''}
+              className={inputCls}
+              style={{ fontFamily: 'var(--font-league-spartan)' }}
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <p className={labelCls}>PLZ</p>
+              <input
+                type="text"
+                value={retPostalCode}
+                onChange={e => setRetPostalCode(e.target.value)}
+                placeholder={brand?.addressPostalCode ?? ''}
+                className={inputCls}
+                style={{ fontFamily: 'var(--font-league-spartan)' }}
+              />
+            </div>
+            <div className="col-span-2">
+              <p className={labelCls}>Stadt</p>
+              <input
+                type="text"
+                value={retCity}
+                onChange={e => setRetCity(e.target.value)}
+                placeholder={brand?.addressCity ?? ''}
+                className={inputCls}
+                style={{ fontFamily: 'var(--font-league-spartan)' }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <p className={labelCls}>Land</p>
+            <select
+              value={retCountry}
+              onChange={e => setRetCountry(e.target.value)}
+              className={inputCls}
+              style={{ fontFamily: 'var(--font-league-spartan)' }}
+            >
+              {COUNTRIES.map(c => (
+                <option key={c.code} value={c.code}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <p className={labelCls}>Hinweise zur Retoure</p>
+            <textarea
+              value={retInstructions}
+              onChange={e => setRetInstructions(e.target.value)}
+              rows={3}
+              placeholder="z. B. Rücksendung bitte mit Originalverpackung, Tor 3, Mo–Fr 8–16 Uhr"
+              className={inputCls}
+              style={{ fontFamily: 'var(--font-league-spartan)', resize: 'vertical' }}
+            />
+          </div>
+
+          {retError && (
+            <p className="text-[11px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+              {retError}
+            </p>
+          )}
+
+          <div className="flex items-center gap-3 pt-1">
+            <button
+              onClick={saveReturnAddress}
+              disabled={retSaving || !retDirty}
+              className="flex items-center gap-2 h-9 px-5 rounded-none text-[12px] font-medium text-white transition-all duration-200 disabled:opacity-40"
+              style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D' }}
+            >
+              {retSaving ? 'Speichert…' : retSaved ? <><Check className="w-3.5 h-3.5" /> Gespeichert</> : 'Speichern'}
+            </button>
+            {retDirty && !retSaving && (
+              <button
+                onClick={() => {
+                  setRetRecipient(brand?.returnRecipient ?? '')
+                  setRetStreet(brand?.returnAddressStreet ?? '')
+                  setRetPostalCode(brand?.returnAddressPostalCode ?? '')
+                  setRetCity(brand?.returnAddressCity ?? '')
+                  setRetCountry(brand?.returnAddressCountry ?? 'DE')
+                  setRetInstructions(brand?.returnInstructions ?? '')
+                }}
+                className="h-9 px-4 rounded-none text-[12px] text-[#6B6B6B] border border-[#E8E8E8] hover:bg-[#F5F5F0] transition-all duration-200"
+                style={{ fontFamily: 'var(--font-league-spartan)' }}
+              >
+                Abbrechen
+              </button>
+            )}
+          </div>
+        </div>
+      </SectionCard>
+
       {/* Account info */}
       <SectionCard title="Konto-Informationen">
         <div className="p-6 space-y-3">
           {[
             {
               title: 'Retourenadresse',
-              text:  'Genehmigte Retouren werden an deine oben hinterlegte Geschäftsadresse gesendet. Der Kunde erhält diese Adresse automatisch per E-Mail, sobald du (oder Enunas) die Rückgabe genehmigst. Halte die Adresse stets aktuell.',
+              text:  'Genehmigte Retouren gehen an die Adresse im Abschnitt „Retouren“ — ist dort nichts hinterlegt, an deine Geschäftsadresse. Jede Retoure speichert die zum Zeitpunkt der Anfrage gültige Adresse; spätere Änderungen gelten nur für neue Retouren.',
             },
             {
               title: 'Produkt-Genehmigungen',

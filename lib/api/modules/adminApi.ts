@@ -112,16 +112,9 @@ export const adminApi = {
         body: JSON.stringify({ reason, ...(note ? { note } : {}) }),
       });
     },
-    async approveReturn(orderId: string): Promise<ApiOrder> {
-      return fetcher<ApiOrder>(`/admin/orders/${orderId}/return/approve`, { method: 'POST' });
-    },
-    // Required between approve and refund: RETURN_APPROVED → RETURN_RECEIVED (restores stock)
-    async receiveReturn(orderId: string): Promise<ApiOrder> {
-      return fetcher<ApiOrder>(`/admin/orders/${orderId}/return/receive`, { method: 'POST' });
-    },
-    async refund(orderId: string, amount: number): Promise<ApiOrder> {
-      return fetcher<ApiOrder>(`/admin/orders/${orderId}/return/refund?refundAmount=${amount}`, { method: 'POST' });
-    },
+    // Order-scoped return actions have been removed. They are deprecated backend
+    // compatibility shims and cannot express "approve Brand A but not Brand B" on
+    // a multi-brand order. Use adminReturnsApi (scoped by returnNumber) instead.
   },
 
   payouts: {

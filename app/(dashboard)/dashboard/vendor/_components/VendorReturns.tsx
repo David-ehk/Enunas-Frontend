@@ -1,15 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { brandApi } from '@/lib/api/modules/brandApi'
-import type { ApiOrder, ApiBrandPartner } from '@/types/api'
+import { useVendorReturns } from '@/hooks/use-vendor-returns'
+import { RETURN_LIFECYCLE, returnStageIndex } from '@/lib/api/modules/returnsApi'
+import type { ReturnWithOrder, ReturnStatus } from '@/types/api'
 import {
   VPageHeader, VKPIGrid, VKPI, VCard,
-  VStatus, VTH, VTD, VTR, fmtEur, fmt, Loader, EmptyState,
-  SHOW_PREVIEW_DATA, Phase2Tile,
+  VStatus, fmtEur, fmt, Loader, EmptyState, Phase2Tile,
 } from './vshared'
-
-const RETURN_STATUSES = ['RETURN_REQUESTED', 'RETURN_APPROVED', 'RETURN_RECEIVED', 'REFUNDED']
 
 const REASON_LABELS: Record<string, string> = {
   WRONG_SIZE:        'Falsche Größe',
@@ -21,166 +18,227 @@ const REASON_LABELS: Record<string, string> = {
   OTHER:             'Sonstiges',
 }
 
-const MOCK_RETURN_ROWS = [
-  { id: 'RA1B2C3D4', item: 'Drop Hoodie Vol.1',             amount: 189, date: '21.05.26', status: 'RETURN_RECEIVED',  reason: 'WRONG_SIZE',       desc: '' },
-  { id: 'RE5F6G7H8', item: 'Worlds End Denim Boxer Jacket',  amount: 489, date: '19.05.26', status: 'REFUNDED',         reason: 'NOT_AS_DESCRIBED', desc: 'Farbe weicht vom Foto ab' },
-  { id: 'RI9J0K1L2', item: 'Atelier Overcoat, Crema',        amount: 749, date: '15.05.26', status: 'RETURN_REQUESTED', reason: 'WRONG_SIZE',       desc: '' },
-]
+const STATUS_META: Record<ReturnStatus, { label: string; tone: 'warn' | 'purple' | 'muted' }> = {
+  REQUESTED: { label: 'Beantragt',   tone: 'warn'   },
+  APPROVED:  { label: 'Genehmigt',   tone: 'purple' },
+  RECEIVED:  { label: 'Eingegangen', tone: 'purple' },
+  REFUNDED:  { label: 'Erstattet',   tone: 'muted'  },
+}
 
-function returnStatusMeta(s: string): { label: string; tone: 'warn' | 'purple' | 'muted' } {
-  switch (s) {
-    case 'RETURN_REQUESTED': return { label: 'Beantragt',   tone: 'warn'   }
-    case 'RETURN_APPROVED':  return { label: 'Genehmigt',   tone: 'purple' }
-    case 'RETURN_RECEIVED':  return { label: 'Eingegangen', tone: 'purple' }
-    case 'REFUNDED':         return { label: 'Erstattet',   tone: 'muted'  }
-    default:                 return { label: s,             tone: 'muted'  }
-  }
+const LIFECYCLE_LABELS: Record<string, string> = {
+  REQUESTED: 'Beantragt', APPROVED: 'Genehmigt', RECEIVED: 'Eingegangen', REFUNDED: 'Erstattet',
+}
+
+// A status alone does not tell a brand what to do. Approval and refund sit with
+// Enunas, so most states are genuinely "wait" — saying so explicitly is what
+// stops the page reading as a to-do list the brand is failing to action.
+const NEXT_STEP: Record<ReturnStatus, string | null> = {
+  REQUESTED: 'Enunas prüft die Anfrage — für dich ist aktuell nichts zu tun.',
+  APPROVED:  'Die Rücksendung geht an die gespeicherte Lieferadresse. Paket entgegennehmen und Zustand prüfen.',
+  RECEIVED:  'Wareneingang erfasst — Enunas veranlasst die Rückerstattung.',
+  REFUNDED:  null,
+}
+
+function statusMeta(s: ReturnStatus) {
+  return STATUS_META[s] ?? { label: String(s), tone: 'muted' as const }
+}
+
+function itemLabel(it: ReturnWithOrder['items'][number]): string {
+  const name = it.productName ?? it.name ?? 'Artikel'
+  const variant = [it.variantSize ?? it.size, it.variantColor ?? it.color].filter(Boolean).join(' · ')
+  return variant ? `${name} — ${variant}` : name
+}
+
+/** Per-return lifecycle. Each return advances independently of every other one. */
+function Timeline({ status }: { status: ReturnStatus }) {
+  const current = returnStageIndex(status)
+  return (
+    <div className="flex items-center gap-1.5">
+      {RETURN_LIFECYCLE.map((stage, i) => {
+        const done = current >= i
+        return (
+          <div key={stage} className="flex items-center gap-1.5">
+            <span
+              className="text-[9.5px] uppercase tracking-[0.14em]"
+              style={{
+                fontFamily: 'var(--font-league-spartan)',
+                color: done ? '#370E4D' : '#C9C9C9',
+                fontWeight: current === i ? 600 : 400,
+              }}
+            >
+              {LIFECYCLE_LABELS[stage]}
+            </span>
+            {i < RETURN_LIFECYCLE.length - 1 && (
+              <span className="w-4 h-[1px]" style={{ background: current > i ? '#370E4D' : '#E8E8E8' }} />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function ReturnCard({ r }: { r: ReturnWithOrder }) {
+  const { label, tone } = statusMeta(r.status)
+  const hasLabel = Boolean(r.labelUrl || r.labelCarrier || r.labelTrackingNumber)
+  const nextStep = NEXT_STEP[r.status] ?? null
+
+  return (
+    <div className="bg-white border border-[#E8E8E8]">
+      <div className="px-6 pt-4 pb-3 border-b border-[#E8E8E8]">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <p className="text-[13px] font-medium" style={{ fontFamily: 'var(--font-league-spartan)', color: '#0A0A0A' }}>
+              {r.returnNumber}
+            </p>
+            <p className="text-[11px] mt-0.5" style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
+              {r.orderNumber ? `Bestellung ${r.orderNumber}` : r.orderId ? `Bestellung #${String(r.orderId).slice(0, 8).toUpperCase()}` : '—'}
+              {r.requestedAt ? ` · ${fmt(r.requestedAt)}` : ''}
+            </p>
+          </div>
+          <VStatus tone={tone}>{label}</VStatus>
+        </div>
+        <div className="mt-3">
+          <Timeline status={r.status} />
+        </div>
+      </div>
+
+      {nextStep && (
+        <div className="px-6 py-3 border-b border-[#E8E8E8]" style={{ background: '#FAFAF8' }}>
+          <p className="text-[9.5px] uppercase tracking-[0.18em] font-medium mb-1"
+            style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
+            Nächster Schritt
+          </p>
+          <p className="text-[12px] leading-[1.6]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
+            {nextStep}
+          </p>
+        </div>
+      )}
+
+      <div className="px-6 py-4 grid md:grid-cols-2 gap-6">
+        <div>
+          <p className="text-[9.5px] uppercase tracking-[0.18em] font-medium mb-2"
+            style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
+            Artikel
+          </p>
+          {r.items.length === 0 ? (
+            <p className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#C9C9C9' }}>—</p>
+          ) : (
+            <ul className="space-y-1">
+              {r.items.map((it) => (
+                <li key={it.id} className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
+                  {it.quantity ? `${it.quantity}× ` : ''}{itemLabel(it)}
+                </li>
+              ))}
+            </ul>
+          )}
+          {r.reason && (
+            <div className="mt-3">
+              <p className="text-[9.5px] uppercase tracking-[0.18em] font-medium mb-1"
+                style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
+                Grund
+              </p>
+              <p className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
+                {REASON_LABELS[String(r.reason)] ?? r.reason}
+              </p>
+              {r.description && (
+                <p style={{ fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontWeight: 300, fontSize: 12, color: '#9B9B9B', marginTop: 2 }}>
+                  {r.description}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Frozen snapshot. Deliberately NOT the brand's live return address —
+            this must keep showing what was current when the return was created. */}
+        <div>
+          <div className="flex items-baseline gap-2 mb-2">
+            <p className="text-[9.5px] uppercase tracking-[0.18em] font-medium"
+              style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
+              Lieferadresse
+            </p>
+            <span className="text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 border"
+              style={{ fontFamily: 'var(--font-league-spartan)', color: '#6B6B6B', borderColor: '#E8E8E8', background: '#FAFAF8' }}>
+              Snapshot · schreibgeschützt
+            </span>
+          </div>
+          {r.shipToAddress ? (
+            <p className="text-[12px] whitespace-pre-line leading-[1.6]"
+              style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
+              {r.shipToAddress}
+            </p>
+          ) : (
+            <p className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#C9C9C9' }}>
+              Keine Adresse übermittelt.
+            </p>
+          )}
+          <p className="text-[10.5px] mt-2 leading-[1.6]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
+            Eingefroren bei Erstellung der Retoure. Änderungen an deiner Retourenadresse
+            wirken sich nur auf neue Retouren aus.
+          </p>
+
+          <div className="mt-4 pt-4 border-t border-[#E8E8E8]">
+            <p className="text-[9.5px] uppercase tracking-[0.18em] font-medium mb-2"
+              style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
+              Retourenlabel
+            </p>
+            {hasLabel ? (
+              <div className="space-y-0.5 text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
+                <p style={{ color: '#1A5A3C' }}>Label hochgeladen</p>
+                {r.labelCarrier && <p>Versanddienst: {r.labelCarrier}</p>}
+                {r.labelTrackingNumber && <p>Sendungsnummer: {r.labelTrackingNumber}</p>}
+              </div>
+            ) : (
+              <Phase2Tile label="Label-Upload" />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default function VendorReturns() {
-  const [orders, setOrders]   = useState<ApiOrder[]>([])
-  const [brand, setBrand]     = useState<ApiBrandPartner | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    Promise.all([
-      brandApi.orders.getAll().catch(() => [] as ApiOrder[]),
-      brandApi.getMe().catch(() => null),
-    ]).then(([o, b]) => { setOrders(o); setBrand(b) })
-      .finally(() => setLoading(false))
-  }, [])
+  const { returns, loading, error } = useVendorReturns()
 
   if (loading) return <Loader />
 
-  const returnOrders = orders.filter(o => RETURN_STATUSES.includes(o.status))
-  const useMock      = SHOW_PREVIEW_DATA && orders.length === 0
-  const returnCount  = useMock ? 18 : returnOrders.length
-  const refundedVal  = useMock ? 2340 : returnOrders
-    .filter(o => o.status === 'REFUNDED')
-    .reduce((s, o) => s + (o.totalAmount ?? 0), 0)
-
-  const returnAddress = brand
-    ? [brand.addressStreet, brand.addressPostalCode && brand.addressCity
-        ? `${brand.addressPostalCode} ${brand.addressCity}`
-        : brand.addressCity ?? brand.addressPostalCode,
-       brand.addressCountry]
-        .filter(Boolean).join(', ')
-    : null
+  const open     = returns.filter(r => r.status === 'REQUESTED' || r.status === 'APPROVED')
+  const refunded = returns.filter(r => r.status === 'REFUNDED')
+  const refundedValue = refunded.reduce((s, r) => s + (r.refundAmount ?? 0), 0)
 
   return (
     <div className="space-y-4">
       <VPageHeader
         eyebrow="Brand Portal"
         title="Retouren"
-        sub="Rückgaben und Rückerstattungen — live aus deinen Bestellungen."
+        sub="Jede Retoure gehört zu deiner Marke und hat ihren eigenen Ablauf."
       />
 
       <VKPIGrid cols={4}>
-        <VKPI label="Retouren"          value={returnCount}         delta="lfd. Monat"    deltaTone="muted" />
+        <VKPI label="Retouren"         value={returns.length}       delta="gesamt"        deltaTone="muted" />
+        <VKPI label="Offen"            value={open.length}          delta="in Bearbeitung" deltaTone="muted" />
+        <VKPI label="Rückerstattungen" value={fmtEur(refundedValue)} delta="abgeschlossen" deltaTone="muted" />
         <Phase2Tile label="Retourenquote" />
-        <VKPI label="Rückerstattungen"  value={fmtEur(refundedVal)} delta="abgeschlossen" deltaTone="muted" />
-        <Phase2Tile label="Wieder eingelagert" />
       </VKPIGrid>
 
-      {/* Return address info — shown once brand data is loaded */}
-      {returnAddress && (
-        <div className="bg-white border border-[#E8E8E8] px-6 py-4 flex items-start gap-4">
-          <div className="flex-1">
-            <p className="text-[9.5px] uppercase tracking-[0.18em] font-medium mb-1"
-              style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
-              Retourenadresse
-            </p>
-            <p style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 13, color: '#0A0A0A', fontWeight: 500 }}>
-              {brand?.legalName ?? brand?.brandName}
-            </p>
-            <p style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 12, color: '#6B6B6B', marginTop: 2 }}>
-              {returnAddress}
-            </p>
-          </div>
-          <p className="text-[11px] leading-relaxed max-w-xs text-right"
-            style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
-            Kunden senden genehmigte Retouren an diese Adresse. Adresse ändern unter Einstellungen.
-          </p>
+      {error && (
+        <div className="bg-white border px-6 py-4" style={{ borderColor: '#FDBA74', background: '#FFF7ED' }}>
+          <p className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#9A3412' }}>{error}</p>
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
-        <Phase2Tile label="Retourenquote — 6-Monats-Trend" />
-        <Phase2Tile label="Rückgabegründe-Analyse" />
-      </div>
 
-      <VCard eyebrow="Retouren-Auflistung" title="Rückgaben" flush>
-        {!useMock && returnOrders.length === 0 ? (
+      {returns.length === 0 ? (
+        <VCard eyebrow="Retouren-Auflistung" title="Rückgaben" flush>
           <EmptyState message="Keine Retouren vorhanden." />
-        ) : (
-          <table style={{ width: '100%' }}>
-            <thead>
-              <tr>
-                <VTH>Bestellung</VTH>
-                <VTH>Artikel</VTH>
-                <VTH>Grund</VTH>
-                <VTH right>Betrag</VTH>
-                <VTH>Datum</VTH>
-                <VTH>Status</VTH>
-              </tr>
-            </thead>
-            <tbody>
-              {useMock
-                ? MOCK_RETURN_ROWS.map(r => {
-                    const { label, tone } = returnStatusMeta(r.status)
-                    return (
-                      <VTR key={r.id}>
-                        <VTD mono>#{r.id}</VTD>
-                        <VTD><span style={{ color: '#0A0A0A', fontWeight: 500 }}>{r.item}</span></VTD>
-                        <VTD>
-                          <span style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 12, color: '#2D2D2D' }}>
-                            {REASON_LABELS[r.reason] ?? r.reason}
-                          </span>
-                          {r.desc && (
-                            <p style={{ fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontWeight: 300, fontSize: 12, color: '#9B9B9B', marginTop: 2 }}>
-                              {r.desc}
-                            </p>
-                          )}
-                        </VTD>
-                        <VTD right>{fmtEur(r.amount)}</VTD>
-                        <VTD muted>{r.date}</VTD>
-                        <VTD><VStatus tone={tone}>{label}</VStatus></VTD>
-                      </VTR>
-                    )
-                  })
-                : returnOrders.slice(0, 50).map(o => {
-                    const { label, tone } = returnStatusMeta(o.status)
-                    return (
-                      <VTR key={o.id}>
-                        <VTD mono>#{String(o.id).slice(0, 8).toUpperCase()}</VTD>
-                        <VTD><span style={{ color: '#0A0A0A', fontWeight: 500 }}>{(o.items ?? []).map(it => it.name).join(', ') || '—'}</span></VTD>
-                        <VTD>
-                          {o.returnReason ? (
-                            <>
-                              <span style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 12, color: '#2D2D2D' }}>
-                                {REASON_LABELS[o.returnReason] ?? o.returnReason}
-                              </span>
-                              {o.returnDescription && (
-                                <p style={{ fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontWeight: 300, fontSize: 12, color: '#9B9B9B', marginTop: 2 }}>
-                                  {o.returnDescription}
-                                </p>
-                              )}
-                            </>
-                          ) : (
-                            <span style={{ color: '#C9C9C9' }}>—</span>
-                          )}
-                        </VTD>
-                        <VTD right>{fmtEur(o.totalAmount ?? 0)}</VTD>
-                        <VTD muted>{fmt(o.updatedAt ?? o.createdAt)}</VTD>
-                        <VTD><VStatus tone={tone}>{label}</VStatus></VTD>
-                      </VTR>
-                    )
-                  })
-              }
-            </tbody>
-          </table>
-        )}
-      </VCard>
+        </VCard>
+      ) : (
+        <div className="space-y-3">
+          {returns.map(r => <ReturnCard key={r.returnNumber} r={r} />)}
+        </div>
+      )}
     </div>
   )
 }
@@ -198,12 +256,6 @@ const MOCK_REASONS = [
   { label: 'Falsch bestellt',       count: 8,  meta: ''                 },
   { label: 'Artikel beschädigt',    count: 6,  meta: ''                 },
 ]
-
-// KPI-Berechnungen:
-// const returnRate = orders.length > 0 ? (returnOrders.length / orders.length) * 100 : null
-// const restocked  = returnOrders.length > 0
-//   ? Math.round((returnOrders.filter(o => o.status !== 'RETURN_REQUESTED').length / returnOrders.length) * 100)
-//   : null
 
 // Trend + Gründe (Grid2):
 // import { VAreaChart, ReasonRow, Grid2 } from './vshared'

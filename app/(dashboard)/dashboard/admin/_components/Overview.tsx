@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageHeader, KPIGrid, KPICell, HealthBar, fmtEur, StatusBadge, MetricBadge } from './shared'
 import type { AdminBrand, AdminCustomer, AdminApiProduct, ApiOrder } from '@/types/api'
 import { TrendingUp, ShoppingBag, Store, Activity, Search, X } from 'lucide-react'
+import { isProductLive } from '@/lib/product'
 
 interface Props {
   orders: ApiOrder[]
@@ -107,7 +108,7 @@ export default function Overview({ orders, brands, products, customers }: Props)
   const activeBrands    = brands.filter(b => ['APPROVED', 'VERIFIED'].includes(b.status)).length
   const activeCustomers = customers.filter(c => c.status !== 'SUSPENDED' && c.status !== 'DEACTIVATED').length
   const aov = orders.length > 0 ? revenue / orders.length : 0
-  const approvedProducts = products.filter(p => p.status === 'APPROVED').length
+  const approvedProducts = products.filter(p => isProductLive(p.status)).length
   const deliveredOrders  = orders.filter(o => o.status === 'DELIVERED').length
   const orders30d        = orders.filter(o => inLast(o.createdAt, 30)).length
   const brandHealthPct   = brands.length   > 0 ? Math.round(activeBrands / brands.length * 100) : 0

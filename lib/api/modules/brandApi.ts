@@ -61,6 +61,15 @@ export type UpdateBrandPartnerDto = {
   addressCountry?: string
   vatId?: string
   taxNumber?: string
+  // Return (warehouse) address — separate from the legal address above. Blank
+  // values mean "fall back to the registered business address".
+  // UNVERIFIED field names; see lib/api/modules/returnsApi.ts.
+  returnRecipient?: string
+  returnAddressStreet?: string
+  returnAddressPostalCode?: string
+  returnAddressCity?: string
+  returnAddressCountry?: string
+  returnInstructions?: string
 }
 
 // Mirrors backend CreateListingDto — Listings sind PRO VARIANTE (variantId @NotNull).

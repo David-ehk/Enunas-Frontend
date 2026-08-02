@@ -1,35 +1,15 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
-import { adminApi } from '@/lib/api'
-import type { ApiOrder, AdminCustomer } from '@/types/api'
-import { PageHeader, KPIGrid, KPICell, SectionCard, StatusBadge, EmptyState, Loader, TH, TD, TableRow, fmt, fmtEur, dailyCounts, dailySumByKey, weekDeltaStr } from './shared'
-import { RotateCcw, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
-
-function ActionBtn({
-  onClick, disabled, variant, children,
-}: {
-  onClick: () => void
-  disabled?: boolean
-  variant: 'danger' | 'success' | 'purple'
-  children: React.ReactNode
-}) {
-  const styles = {
-    danger:  'border-rose-200 text-rose-600 hover:bg-rose-600 hover:text-white hover:border-rose-600',
-    success: 'border-emerald-200 text-emerald-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600',
-    purple:  'border-[#370E4D]/30 text-[#370E4D] hover:bg-[#370E4D] hover:text-white hover:border-[#370E4D]',
-  }
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-medium border transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed ${styles[variant]}`}
-      style={{ fontFamily: 'var(--font-league-spartan)' }}
-    >
-      {children}
-    </button>
-  )
-}
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import { adminReturnsApi, returnActionErrorMessage } from '@/lib/api/modules/adminReturnsApi'
+import { RETURN_LIFECYCLE, returnStageIndex, nextAction, type ReturnAction } from '@/lib/api/modules/returnsApi'
+import { FetchError } from '@/lib/api'
+import type { AdminCustomer, ReturnStatus, ReturnWithOrder } from '@/types/api'
+import {
+  PageHeader, KPIGrid, KPICell, SectionCard, EmptyState, Loader,
+  fmt, fmtEur, dailyCounts, weekDeltaStr,
+} from './shared'
+import { RotateCcw, CheckCircle, PackageCheck, Euro } from 'lucide-react'
 
 const REASON_LABELS: Record<string, string> = {
   WRONG_SIZE:        'Falsche Größe',
@@ -41,268 +21,344 @@ const REASON_LABELS: Record<string, string> = {
   OTHER:             'Sonstiges',
 }
 
-export default function Returns({ customers = [] }: { customers?: AdminCustomer[] }) {
-  const [orders, setOrders]     = useState<ApiOrder[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [expanded, setExpanded] = useState<string | null>(null)
-  const [acting, setActing]     = useState<string | null>(null)
-  const [refundingId, setRefundingId]   = useState<string | null>(null)
-  const [refundAmount, setRefundAmount] = useState('')
+const STATUS_LABELS: Record<ReturnStatus, string> = {
+  REQUESTED: 'Beantragt', APPROVED: 'Genehmigt', RECEIVED: 'Eingegangen', REFUNDED: 'Erstattet',
+}
 
-  function getCustomerLabel(userId?: string) {
-    if (!userId) return '—'
-    const c = customers.find(c => c.id === userId || c.userId === userId)
-    if (c) return [c.firstName, c.lastName].filter(Boolean).join(' ') || c.email
-    return String(userId).slice(0, 8)
+const LABEL_STATUS_LABELS: Record<string, string> = {
+  PENDING: 'Ausstehend', UPLOADED_BY_BRAND: 'Von Marke hochgeladen',
+  GENERATED: 'Generiert', FAILED: 'Fehlgeschlagen',
+}
+
+const ACTION_META: Record<Exclude<ReturnAction, null>, { label: string; icon: typeof CheckCircle }> = {
+  approve: { label: 'Retoure genehmigen', icon: CheckCircle },
+  receive: { label: 'Wareneingang buchen', icon: PackageCheck },
+  refund:  { label: 'Erstattung auslösen', icon: Euro },
+}
+
+function StatusPill({ status }: { status: ReturnStatus }) {
+  const tone: Record<ReturnStatus, { bg: string; fg: string }> = {
+    REQUESTED: { bg: '#FFF7ED', fg: '#9A3412' },
+    APPROVED:  { bg: '#F3EEF7', fg: '#370E4D' },
+    RECEIVED:  { bg: '#F3EEF7', fg: '#370E4D' },
+    REFUNDED:  { bg: '#F1F5F3', fg: '#1A5A3C' },
   }
+  const t = tone[status]
+  return (
+    <span className="text-[10px] uppercase tracking-[0.14em] px-2 py-1 rounded"
+      style={{ fontFamily: 'var(--font-league-spartan)', background: t.bg, color: t.fg }}>
+      {STATUS_LABELS[status]}
+    </span>
+  )
+}
 
-  useEffect(() => {
-    adminApi.orders.getAll().catch(() => [])
-      .then(all => setOrders(all.filter(o =>
-        ['RETURN_REQUESTED', 'RETURN_APPROVED', 'RETURN_RECEIVED', 'REFUNDED'].includes(o.status)
-      )))
+function Timeline({ status }: { status: ReturnStatus }) {
+  const current = returnStageIndex(status)
+  return (
+    <div className="flex items-center gap-1.5">
+      {RETURN_LIFECYCLE.map((stage, i) => (
+        <div key={stage} className="flex items-center gap-1.5">
+          <span className="text-[9.5px] uppercase tracking-[0.14em]"
+            style={{
+              fontFamily: 'var(--font-league-spartan)',
+              color: current >= i ? '#370E4D' : '#C9C9C9',
+              fontWeight: current === i ? 600 : 400,
+            }}>
+            {STATUS_LABELS[stage]}
+          </span>
+          {i < RETURN_LIFECYCLE.length - 1 && (
+            <span className="w-4 h-[1px]" style={{ background: current > i ? '#370E4D' : '#E8E8E8' }} />
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function ReturnRow({
+  r, customerLabel, onAction, busy, error,
+}: {
+  r: ReturnWithOrder
+  customerLabel: string
+  onAction: (r: ReturnWithOrder, action: Exclude<ReturnAction, null>, amount?: number) => void
+  busy: boolean
+  error: string | null
+}) {
+  const action = nextAction(r.status)
+  const [amount, setAmount] = useState('')
+
+  return (
+    <div className="bg-white border border-[#E8E8E8]">
+      <div className="px-5 pt-4 pb-3 border-b border-[#E8E8E8]">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <p className="text-[13px] font-medium" style={{ fontFamily: 'var(--font-league-spartan)', color: '#0A0A0A' }}>
+                {r.returnNumber}
+              </p>
+              <span className="text-[11px] px-2 py-0.5 border border-[#E8E8E8]"
+                style={{ fontFamily: 'var(--font-league-spartan)', color: '#370E4D', background: '#FAFAF8' }}>
+                {r.brandName}
+              </span>
+            </div>
+            <p className="text-[11px] mt-1" style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
+              Bestellung {r.orderNumber ?? `#${String(r.orderId).slice(0, 8).toUpperCase()}`}
+              {' · '}{customerLabel}
+              {r.requestedAt ? ` · ${fmt(r.requestedAt)}` : ''}
+            </p>
+          </div>
+          <StatusPill status={r.status} />
+        </div>
+        <div className="mt-3"><Timeline status={r.status} /></div>
+      </div>
+
+      <div className="px-5 py-4 grid md:grid-cols-2 gap-6">
+        <div>
+          <p className="text-[9.5px] uppercase tracking-[0.18em] font-medium mb-2"
+            style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>Artikel</p>
+          {r.items.length === 0 ? (
+            <p className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#C9C9C9' }}>
+              {r.orderItemIds?.length ? `${r.orderItemIds.length} Position(en) — Details nicht in der Bestellung gefunden` : '—'}
+            </p>
+          ) : (
+            <ul className="space-y-1">
+              {r.items.map(it => (
+                <li key={it.id} className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
+                  {it.quantity ? `${it.quantity}× ` : ''}{it.productName ?? it.name ?? 'Artikel'}
+                  {(it.variantSize || it.variantColor) ? ` — ${[it.variantSize, it.variantColor].filter(Boolean).join(' · ')}` : ''}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {r.reason && (
+            <div className="mt-3">
+              <p className="text-[9.5px] uppercase tracking-[0.18em] font-medium mb-1"
+                style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>Grund</p>
+              <p className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
+                {REASON_LABELS[String(r.reason)] ?? r.reason}
+              </p>
+              {r.description && (
+                <p style={{ fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontWeight: 300, fontSize: 12, color: '#9B9B9B', marginTop: 2 }}>
+                  {r.description}
+                </p>
+              )}
+            </div>
+          )}
+
+          {r.labelStatus && (
+            <div className="mt-3">
+              <p className="text-[9.5px] uppercase tracking-[0.18em] font-medium mb-1"
+                style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>Retourenlabel</p>
+              <p className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
+                {LABEL_STATUS_LABELS[r.labelStatus] ?? r.labelStatus}
+                {r.labelCarrier ? ` · ${r.labelCarrier}` : ''}
+                {r.labelTrackingNumber ? ` · ${r.labelTrackingNumber}` : ''}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div>
+          <div className="flex items-baseline gap-2 mb-2">
+            <p className="text-[9.5px] uppercase tracking-[0.18em] font-medium"
+              style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>Zieladresse</p>
+            <span className="text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 border"
+              style={{ fontFamily: 'var(--font-league-spartan)', color: '#6B6B6B', borderColor: '#E8E8E8', background: '#FAFAF8' }}>
+              Snapshot · schreibgeschützt
+            </span>
+          </div>
+          <p className="text-[12px] whitespace-pre-line leading-[1.6]"
+            style={{ fontFamily: 'var(--font-league-spartan)', color: r.shipToAddress ? '#2D2D2D' : '#C9C9C9' }}>
+            {r.shipToAddress || 'Keine Adresse übermittelt.'}
+          </p>
+
+          {r.refundAmount != null && (
+            <p className="text-[12px] mt-3" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
+              Erstattet: <strong>{fmtEur(r.refundAmount)}</strong>
+            </p>
+          )}
+
+          <div className="mt-4 pt-4 border-t border-[#E8E8E8]">
+            {action === null ? (
+              <p className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#1A5A3C' }}>
+                Abgeschlossen — keine weitere Aktion.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {action === 'refund' && (
+                  <div>
+                    <p className="text-[9.5px] uppercase tracking-[0.18em] font-medium mb-1"
+                      style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
+                      Betrag (optional)
+                    </p>
+                    <input
+                      type="number" step="0.01" min="0" value={amount}
+                      onChange={e => setAmount(e.target.value)}
+                      placeholder="Leer = voller offener Betrag dieser Marke"
+                      className="w-full text-[12px] border border-[#E8E8E8] px-2.5 py-2 focus:outline-none focus:border-[#370E4D]/50"
+                      style={{ fontFamily: 'var(--font-league-spartan)' }}
+                    />
+                  </div>
+                )}
+                <button
+                  onClick={() => onAction(r, action, action === 'refund' && amount.trim() ? Number(amount) : undefined)}
+                  disabled={busy}
+                  className="inline-flex items-center gap-1.5 h-8 px-3 text-[11px] font-medium border transition-all duration-200 disabled:opacity-40"
+                  style={{ fontFamily: 'var(--font-league-spartan)', borderColor: '#370E4D', color: '#370E4D' }}
+                >
+                  {React.createElement(ACTION_META[action].icon, { className: 'w-3.5 h-3.5' })}
+                  {busy ? 'Wird ausgeführt…' : ACTION_META[action].label}
+                </button>
+              </div>
+            )}
+            {error && (
+              <p className="text-[11px] mt-2 leading-[1.5]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#8B1E3F' }}>
+                {error}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function Returns({ customers = [] }: { customers?: AdminCustomer[] }) {
+  const [returns, setReturns] = useState<ReturnWithOrder[]>([])
+  const [loading, setLoading] = useState(true)
+  const [busy, setBusy] = useState<string | null>(null)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [filter, setFilter] = useState<ReturnStatus | 'ALL'>('ALL')
+
+  const getCustomerLabel = useCallback((buyerEmail?: string) => {
+    if (!buyerEmail) return '—'
+    const c = customers.find(c => c.email === buyerEmail)
+    return c ? ([c.firstName, c.lastName].filter(Boolean).join(' ') || c.email) : buyerEmail
+  }, [customers])
+
+  const load = useCallback(() => {
+    setLoading(true)
+    adminReturnsApi.getAdminReturns()
+      .then(setReturns)
+      .catch(() => setReturns([]))
       .finally(() => setLoading(false))
   }, [])
 
-  const requested = orders.filter(o => o.status === 'RETURN_REQUESTED')
-  const approved  = orders.filter(o => o.status === 'RETURN_APPROVED')
-  const refunded  = orders.filter(o => o.status === 'REFUNDED')
+  useEffect(() => { load() }, [load])
 
-  const kpiData = useMemo(() => {
-    const now = Date.now()
-    const w7  = 7 * 86400000
-    const w14 = 14 * 86400000
-    const inW7  = (s: string) => now - new Date(s).getTime() < w7
-    const inW14 = (s: string) => { const t = now - new Date(s).getTime(); return t >= w7 && t < w14 }
-    const req = orders.filter(o => o.status === 'RETURN_REQUESTED')
-    const appr = orders.filter(o => o.status === 'RETURN_APPROVED')
-    const ref  = orders.filter(o => o.status === 'REFUNDED')
-    return {
-      requestedSpark: dailyCounts(req),
-      approvedSpark:  dailyCounts(appr),
-      refundedSpark:  dailySumByKey(ref, 'totalAmount'),
-      allSpark:       dailyCounts(orders),
-      requestedDelta: weekDeltaStr(req.filter(o => inW7(o.createdAt)).length, req.filter(o => inW14(o.createdAt)).length),
-      refundedDelta:  weekDeltaStr(ref.filter(o => inW7(o.createdAt)).length, ref.filter(o => inW14(o.createdAt)).length),
+  /**
+   * Applies one action to ONE return. The backend answers with the updated
+   * order, so we re-derive only the returns belonging to that order — every
+   * other brand's return is left exactly as it was.
+   */
+  async function runAction(r: ReturnWithOrder, action: Exclude<ReturnAction, null>, amount?: number) {
+    setBusy(r.returnNumber)
+    setErrors(e => ({ ...e, [r.returnNumber]: '' }))
+    try {
+      const updated =
+        action === 'approve' ? await adminReturnsApi.approveReturn(r.returnNumber)
+        : action === 'receive' ? await adminReturnsApi.receiveReturn(r.returnNumber)
+        : await adminReturnsApi.refundReturn(r.returnNumber, amount)
+
+      const fresh = (updated.returns ?? []).reduce<Record<string, ReturnWithOrder['status']>>((acc, x) => {
+        acc[x.returnNumber] = x.status
+        return acc
+      }, {})
+      setReturns(prev => prev.map(x => {
+        const next = updated.returns?.find(u => u.returnNumber === x.returnNumber)
+        // Only returns present on the updated order are touched; and within that
+        // order only the fields the backend actually returned.
+        return next && x.orderId === updated.id
+          ? { ...x, ...next, items: x.items, orderId: x.orderId, orderNumber: x.orderNumber, currency: x.currency }
+          : x
+      }))
+      if (!Object.keys(fresh).length) load()
+    } catch (err) {
+      const msg = err instanceof FetchError
+        ? returnActionErrorMessage(err.status, err.message)
+        : 'Aktion fehlgeschlagen.'
+      setErrors(e => ({ ...e, [r.returnNumber]: msg }))
+    } finally {
+      setBusy(null)
     }
-  }, [orders])
-
-  async function approveReturn(orderId: string) {
-    setActing(orderId)
-    try {
-      const updated = await adminApi.orders.approveReturn(orderId)
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o))
-    } catch { /* silent */ } finally { setActing(null) }
   }
 
-  // Backend flow: RETURN_APPROVED → receive (stock restored) → RETURN_RECEIVED → refund
-  async function receiveReturn(orderId: string) {
-    setActing(orderId)
-    try {
-      const updated = await adminApi.orders.receiveReturn(orderId)
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o))
-    } catch { /* silent */ } finally { setActing(null) }
-  }
+  const kpi = useMemo(() => {
+    const req = returns.filter(r => r.status === 'REQUESTED')
+    const app = returns.filter(r => r.status === 'APPROVED')
+    const rec = returns.filter(r => r.status === 'RECEIVED')
+    const ref = returns.filter(r => r.status === 'REFUNDED')
+    const refundedSum = ref.reduce((s, r) => s + (r.refundAmount ?? 0), 0)
+    const dates = (xs: ReturnWithOrder[]) => xs.map(x => ({ createdAt: x.requestedAt ?? '' })).filter(x => x.createdAt)
+    return {
+      requested: req.length, approved: app.length, received: rec.length,
+      refunded: ref.length, refundedSum,
+      spark: dailyCounts(dates(returns) as never),
+      delta: weekDeltaStr(req.length, app.length),
+    }
+  }, [returns])
 
-  async function refund(orderId: string, amount: number) {
-    setActing(orderId)
-    try {
-      const updated = await adminApi.orders.refund(orderId, amount)
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o))
-    } catch { /* silent */ } finally { setActing(null) }
-  }
+  if (loading) return <Loader />
 
-  async function reject(orderId: string) {
-    setActing(orderId)
-    try {
-      await adminApi.orders.updateStatus(orderId, 'DELIVERED')
-      setOrders(prev => prev.filter(o => o.id !== orderId))
-    } catch { /* silent */ } finally { setActing(null) }
-  }
+  const visible = filter === 'ALL' ? returns : returns.filter(r => r.status === filter)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader
-        eyebrow="Finanzen"
-        title="Rückgaben &"
-        italicTitle="Erstattungen."
+        title="Rückgaben"
+        sub="Jede Marke einer Bestellung hat ihre eigene Rückgabe — Aktionen gelten immer genau einer Rückgabe."
       />
 
       <KPIGrid>
-        <KPICell accent
-          label="Angefragt"
-          value={requested.length}
-          sub="Warten auf Prüfung"
-          delta={kpiData.requestedDelta}
-          period="vs. Vorwoche"
-          spark={kpiData.requestedSpark}
-          inverseTrend
-        />
-        <KPICell
-          label="Genehmigt"
-          value={approved.length}
-          sub="Rückgabe bestätigt"
-          spark={kpiData.approvedSpark}
-        />
-        <KPICell
-          label="Erstattet"
-          value={refunded.length}
-          sub={fmtEur(refunded.reduce((s, o) => s + (o.total ?? o.totalAmount ?? 0), 0))}
-          delta={kpiData.refundedDelta}
-          period="vs. Vorwoche"
-          spark={kpiData.refundedSpark}
-          inverseTrend
-        />
-        <KPICell
-          label="Gesamt"
-          value={orders.length}
-          sub="Alle Vorgänge"
-          spark={kpiData.allSpark}
-        />
+        <KPICell label="Beantragt"   value={kpi.requested} spark={kpi.spark} />
+        <KPICell label="Genehmigt"   value={kpi.approved} />
+        <KPICell label="Eingegangen" value={kpi.received} />
+        <KPICell label="Erstattet"   value={`${kpi.refunded} · ${fmtEur(kpi.refundedSum)}`} />
       </KPIGrid>
 
-      <SectionCard title="Rückgabeanfragen" count={orders.length}>
-        {loading ? <Loader /> : orders.length === 0 ? <EmptyState message="Keine Rückgabeanfragen." /> : (
-          <table className="w-full">
-            <thead>
-              <tr>
-                <TH>Bestellung</TH>
-                <TH>Kunde</TH>
-                <TH>Grund</TH>
-                <TH>Datum</TH>
-                <TH>Betrag</TH>
-                <TH>Status</TH>
-                <TH>Aktionen</TH>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map(order => (
-                <React.Fragment key={order.id}>
-                  <TableRow>
-                    <TD className="font-mono font-semibold text-[#0A0A0A]">#{String(order.id).slice(0, 8).toUpperCase()}</TD>
-                    <TD className="text-[#6B6B6B]">{getCustomerLabel(order.userId)}</TD>
-                    <TD>
-                      {order.returnReason ? (
-                        <span className="text-[11px] text-[#2D2D2D]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                          {REASON_LABELS[order.returnReason] ?? order.returnReason}
-                        </span>
-                      ) : <span className="text-[#C9C9C9]">—</span>}
-                    </TD>
-                    <TD className="text-[#6B6B6B]">{fmt(order.createdAt)}</TD>
-                    <TD className="font-medium text-[#0A0A0A]">{fmtEur(order.totalAmount)}</TD>
-                    <TD><StatusBadge status={order.status} /></TD>
-                    <TD>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => setExpanded(expanded === order.id ? null : order.id)}
-                          className="p-1.5 rounded-lg hover:bg-[#F5F5F0] text-[#9B9B9B] hover:text-[#6B6B6B] transition-all duration-200"
-                        >
-                          {expanded === order.id
-                            ? <ChevronUp className="w-3.5 h-3.5" />
-                            : <ChevronDown className="w-3.5 h-3.5" />}
-                        </button>
-                        {order.status === 'RETURN_REQUESTED' && (
-                          <>
-                            <ActionBtn variant="success" disabled={acting === order.id} onClick={() => approveReturn(order.id)}>
-                              <CheckCircle className="w-3 h-3" /> Genehmigen
-                            </ActionBtn>
-                            <ActionBtn variant="danger" disabled={acting === order.id} onClick={() => reject(order.id)}>
-                              <XCircle className="w-3 h-3" /> Ablehnen
-                            </ActionBtn>
-                          </>
-                        )}
-                        {order.status === 'RETURN_APPROVED' && (
-                          <ActionBtn variant="success" disabled={acting === order.id} onClick={() => receiveReturn(order.id)}>
-                            <CheckCircle className="w-3 h-3" /> Wareneingang bestätigen
-                          </ActionBtn>
-                        )}
-                        {order.status === 'RETURN_RECEIVED' && (
-                          refundingId !== order.id ? (
-                            <ActionBtn variant="purple" disabled={acting === order.id} onClick={() => { setRefundingId(order.id); setRefundAmount(String(order.total ?? order.totalAmount ?? 0)) }}>
-                              <RotateCcw className="w-3 h-3" /> Refund ({fmtEur(order.total ?? order.totalAmount)})
-                            </ActionBtn>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <input
-                                autoFocus
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={refundAmount}
-                                onChange={e => setRefundAmount(e.target.value)}
-                                onKeyDown={e => e.key === 'Enter' && (refund(order.id, parseFloat(refundAmount) || 0), setRefundingId(null))}
-                                className="text-[11px] border border-[#370E4D]/30 bg-white rounded-lg px-2.5 py-1 focus:outline-none focus:border-[#370E4D]/40 w-28 tabular-nums transition-all duration-200"
-                                style={{ fontFamily: 'var(--font-league-spartan)' }}
-                              />
-                              <button
-                                onClick={() => { refund(order.id, parseFloat(refundAmount) || 0); setRefundingId(null) }}
-                                disabled={acting === order.id}
-                                className="inline-flex items-center h-7 px-3 rounded-lg text-[11px] font-medium text-white transition-all duration-200 disabled:opacity-40"
-                                style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D' }}
-                              >
-                                Bestätigen
-                              </button>
-                              <button
-                                onClick={() => setRefundingId(null)}
-                                className="inline-flex items-center h-7 px-2.5 rounded-lg text-[11px] font-medium text-[#6B6B6B] hover:text-[#0A0A0A] transition-all duration-200"
-                                style={{ fontFamily: 'var(--font-league-spartan)' }}
-                              >
-                                Abbrechen
-                              </button>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </TD>
-                  </TableRow>
+      <div className="flex items-center gap-2 flex-wrap">
+        {(['ALL', ...RETURN_LIFECYCLE] as const).map(f => (
+          <button
+            key={f}
+            onClick={() => setFilter(f as ReturnStatus | 'ALL')}
+            className="text-[11px] px-3 h-7 border transition-all duration-200"
+            style={{
+              fontFamily: 'var(--font-league-spartan)',
+              borderColor: filter === f ? '#370E4D' : '#E8E8E8',
+              color: filter === f ? '#fff' : '#6B6B6B',
+              background: filter === f ? '#370E4D' : 'transparent',
+            }}
+          >
+            {f === 'ALL' ? `Alle (${returns.length})` : `${STATUS_LABELS[f as ReturnStatus]} (${returns.filter(r => r.status === f).length})`}
+          </button>
+        ))}
+      </div>
 
-                  {expanded === order.id && (
-                    <tr className="border-b border-[#F0F0EB]" style={{ background: '#F8F8F5' }}>
-                      <td colSpan={7} className="px-6 py-5">
-                        <div className="grid grid-cols-3 gap-6">
-                          <div>
-                            <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-2">Artikel</p>
-                            {order.items?.map(item => (
-                              <div key={item.id} className="text-[12px] text-[#0A0A0A]">
-                                {item.name} × {item.quantity} — <span className="text-[#6B6B6B]">{fmtEur(item.price)}</span>
-                              </div>
-                            ))}
-                          </div>
-                          <div>
-                            <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-2">Rückgabegrund</p>
-                            {order.returnReason ? (
-                              <div className="text-[12px] text-[#0A0A0A]">
-                                <p className="font-medium">{REASON_LABELS[order.returnReason] ?? order.returnReason}</p>
-                                {order.returnDescription && (
-                                  <p className="text-[#6B6B6B] mt-1 italic" style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 300 }}>
-                                    &ldquo;{order.returnDescription}&rdquo;
-                                  </p>
-                                )}
-                                {order.returnNumber && (
-                                  <p className="text-[10px] font-mono text-[#9B9B9B] mt-1">{order.returnNumber}</p>
-                                )}
-                              </div>
-                            ) : <p className="text-[11px] text-[#9B9B9B]">—</p>}
-                          </div>
-                          <div>
-                            <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-2">Lieferadresse</p>
-                            {order.shippingAddress ? (
-                              <div className="text-[12px] text-[#0A0A0A] space-y-0.5">
-                                <p>{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
-                                <p className="text-[#6B6B6B]">{order.shippingAddress.street}, {order.shippingAddress.postalCode} {order.shippingAddress.city}</p>
-                              </div>
-                            ) : <p className="text-[11px] text-[#9B9B9B]">—</p>}
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </SectionCard>
+      {visible.length === 0 ? (
+        <SectionCard title="Retouren">
+          <EmptyState message="Keine Retouren vorhanden." />
+        </SectionCard>
+      ) : (
+        <div className="space-y-3">
+          {visible.map(r => (
+            <ReturnRow
+              key={r.returnNumber}
+              r={r}
+              customerLabel={getCustomerLabel(r.buyerEmail)}
+              onAction={runAction}
+              busy={busy === r.returnNumber}
+              error={errors[r.returnNumber] || null}
+            />
+          ))}
+        </div>
+      )}
+
+      <p className="text-[10.5px] flex items-center gap-1.5"
+        style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
+        <RotateCcw className="w-3 h-3" />
+        Aktionen wirken ausschließlich auf die gewählte Retoure — andere Marken derselben Bestellung bleiben unberührt.
+      </p>
     </div>
   )
 }

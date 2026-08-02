@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import Navbar from '@/app/Homepage/components/navbar'
 import Footer from '@/app/Homepage/components/footer'
@@ -8,6 +8,7 @@ import { useAuth } from '@/app/context/AuthContext'
 import { wardrobeApi, apiProductToCardShape } from '@/lib/api'
 import type { ProductCardShape } from '@/lib/api'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
+import { segmentBreakdown } from '@/lib/product'
 import type { ApiWardrobeItem } from '@/types/api'
 
 export default function SavedListsPage() {
@@ -25,6 +26,10 @@ export default function SavedListsPage() {
       .catch(() => setItems([]))
       .finally(() => setLoading(false))
   }, [isAuthenticated])
+
+  // Which catalogues the list leans towards. A product counts once per segment,
+  // so the totals can exceed items.length when a piece sits in two catalogues.
+  const breakdown = useMemo(() => segmentBreakdown(items.map(i => i.product)), [items])
 
   async function handleRemove(id: string) {
     try {
@@ -101,6 +106,28 @@ export default function SavedListsPage() {
           <p className="font-league-spartan text-[10px] uppercase tracking-[0.2em] text-enunas-gray-medium mt-4">
             {items.length} {items.length === 1 ? 'Artikel' : 'Artikel'}
           </p>
+
+          {breakdown.length > 0 && (
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5">
+              {breakdown.map((s, i) => (
+                <span
+                  key={s.segment}
+                  className="font-league-spartan text-[10px] uppercase tracking-[0.16em]"
+                  style={{
+                    // The leading catalogue is the answer to "what do I save most?" —
+                    // everything else stays quiet so the ranking reads at a glance.
+                    color: i === 0 ? '#370E4D' : '#6B6B6B',
+                    fontWeight: i === 0 ? 500 : 400,
+                  }}
+                >
+                  {s.label} <span style={{ fontVariantNumeric: 'tabular-nums' }}>{s.count}</span>
+                  {i < breakdown.length - 1 && (
+                    <span className="ml-3" style={{ color: '#E8E8E8' }}>·</span>
+                  )}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <section className="px-4 lg:px-8 xl:px-12">
