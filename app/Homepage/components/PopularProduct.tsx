@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { useScrollAnimation } from '@/hooks/use-scroll-animation'
 import { cn } from '@/lib/utils'
 import PopularProductCard from "./PopularProductCard"
@@ -75,8 +76,9 @@ const PopularProduct = () => {
 
       {/* Button */}
       <div className="py-2 mt-6 flex justify-center items-center">
-        <button
-          className="group relative w-full overflow-hidden"
+        <Link
+          href="/trendy"
+          className="group relative block w-full overflow-hidden text-center"
           style={{
             padding: '18px 32px',
             background: '#F5F5F0',
@@ -92,7 +94,7 @@ const PopularProduct = () => {
           <span className="absolute left-1/2 -translate-x-1/2 top-[12%] w-full h-[1px] bg-black/30 transition-all duration-500 ease-out-expo group-hover:w-[75%]" />
           <span className="relative z-10">Mehr entdecken</span>
           <span className="absolute left-1/2 -translate-x-1/2 bottom-[12%] w-full h-[1px] bg-black/30 transition-all duration-500 ease-out-expo group-hover:w-[75%]" />
-        </button>
+        </Link>
       </div>
     </section>
   )

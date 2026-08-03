@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 
-// Backend GET /products has no gender filter — redirect to catalog without fake param.
 export default function WomenPage() {
-  redirect('/bekleidung')
+  redirect('/bekleidung?gender=damen')
 }

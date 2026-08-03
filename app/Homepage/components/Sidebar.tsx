@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { productApi } from '@/lib/api'
+import { useAuth } from '@/app/context/AuthContext'
 
 /* ─── Types ─────────────────────────────────────────────────── */
 interface TileData  { video?: boolean; kicker: string; name: string; img: string }
@@ -638,16 +639,6 @@ const MEGA_CSS = `
   .mn-sub-body   { padding: 22px 24px 22px; }
   .mn-sub-title  { font-size: 32px; }
 
-  /* Highlights match the rest of the panel on mobile — the large italic
-     serif treatment reads as oversized/heavy in this narrow layout. */
-  .mn-sub-highlight {
-    font-family: var(--mn-sans);
-    font-style: normal;
-    font-weight: 400;
-    font-size: 13px;
-    letter-spacing: 0.05em;
-  }
-
   /* Hide active-on-hover state — touch devices set active on tap only */
   .mn-rail-link:hover .mn-rl-label { letter-spacing: 0.24em; transform: none; }
 }
@@ -670,6 +661,7 @@ interface SidebarProps {
 function pad(n: number) { return String(n).padStart(2, '0') }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const { isAuthenticated, customer, user } = useAuth()
   const [mounted,      setMounted]     = useState(false)
   const [activeKey,    setActiveKey]   = useState('women')
   const [tileKey,      setTileKey]     = useState(0)
@@ -785,8 +777,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
           <div className="mn-rail-foot">
             <div className="mn-foot-row">
-              <a href="#">Anmelden</a>
-              <a href="#">Hilfe &amp; Kontakt</a>
+              <a href="/account">{isAuthenticated ? (customer?.firstName ?? user?.email) : 'Anmelden'}</a>
+              <a href="/faqs">Hilfe &amp; Kontakt</a>
             </div>
             <a className="mn-locale" href="#">DE / EUR</a>
           </div>
