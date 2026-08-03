@@ -86,7 +86,7 @@ const Subscribe = () => {
         {/* Rechte Seite mit Logo - BEGRENZTE HÖHE */}
         <div className="relative h-[400px] md:h-[450px] lg:h-[400px] overflow-hidden flex items-center justify-center pt-5">
           <video 
-            src="/assets/videos/3DLogo20sec.mp4" 
+            src="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbAKylyM1QupCLYd3cO7264E8yxM5iFaTvjNgG"
             autoPlay 
             loop 
             muted 

@@ -12,7 +12,7 @@ const Hero = () => {
   return (
     <section id="home" className="w-full min-h-screen relative">
       <video
-        src="/assets/videos/Version2Enunas.mp4"
+        src="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWb5ezDfSckFBwi6nOgty0VquJsRoKMNzL9PZxC"
         autoPlay
         loop
         muted
