@@ -186,7 +186,7 @@ const Navbar = () => {
       <nav className="flex justify-between items-center max-w-screen xl:mx-auto z-50">
 
         {/* Left — Hamburger + mobile search trigger */}
-        <div className="w-1/4 flex items-center gap-3 pointer-coarse:gap-4 md:gap-8">
+        <div className="w-1/4 flex items-center gap-3 pointer-coarse:gap-2 md:gap-8">
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Menü öffnen"
@@ -230,7 +230,7 @@ const Navbar = () => {
         </Link>
 
         {/* Right — Desktop search, account, wishlist, cart */}
-        <div className="flex items-center gap-3 pointer-coarse:gap-4 md:gap-8 w-1/4 justify-end">
+        <div className="flex items-center gap-3 pointer-coarse:gap-2 md:gap-8 w-1/4 justify-end">
           <div className="hidden sm:block">
             <button
               onClick={() => setSearch(true)}

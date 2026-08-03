@@ -60,7 +60,7 @@ export default function DisappearingNavbar() {
       <nav className="flex justify-between items-center max-w-screen xl:mx-auto z-50">
 
         {/* Left — Hamburger + mobile search */}
-        <div className="w-1/4 flex gap-3 pointer-coarse:gap-4 md:gap-8">
+        <div className="w-1/4 flex gap-3 pointer-coarse:gap-2 md:gap-8">
           <button onClick={() => setSidebarOpen(true)} aria-label="Menü öffnen" className={TOUCH_HIT}>
             <HamburgerIcon className="w-5 h-5 hover:text-enunas-purple" />
           </button>
@@ -80,7 +80,7 @@ export default function DisappearingNavbar() {
         </Link>
 
         {/* Right — Search (desktop) / Account / Heart / Cart */}
-        <div className="flex items-center gap-3 pointer-coarse:gap-4 md:gap-8 w-1/4 justify-end">
+        <div className="flex items-center gap-3 pointer-coarse:gap-2 md:gap-8 w-1/4 justify-end">
           <div className="hidden sm:block">
             <button onClick={() => setSearchOpen(true)} aria-label="Suche öffnen" className={`flex items-center bg-transparent border-none cursor-pointer ${TOUCH_HIT}`}>
               <SearchIcon className="w-5 h-5 text-black/80 hover:text-enunas-purple" />
