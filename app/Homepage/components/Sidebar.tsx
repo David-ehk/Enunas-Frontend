@@ -106,6 +106,7 @@ const CATEGORIES: Category[] = [
           { label: 'Jacken',         href: '/bekleidung?cat=jacken' },
         ],
       },
+      { label: 'Accessoires', href: '/bekleidung?cat=accessoires' },
     ],
     highlights: [{ label: 'Die Hosen-Edit' }, { label: 'Leichte Jacken' }, { label: 'Basics neu gedacht' }],
     tiles: [

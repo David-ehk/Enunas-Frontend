@@ -11,7 +11,7 @@ const categories = [
   {
     title: "Accessoires",
     image: "https://amq-mcq.dam.kering.com/asset/a20b4d87-9d8e-46de-a25f-7a6921c8929e/Original-Ecom/McQUEEN-SS26-PRE-CO_STILL-LIFE-HOLIDAY_16X9-2.jpg",
-    link: "/accessoires"
+    link: "/bekleidung?cat=accessoires"
   }
 ]
 

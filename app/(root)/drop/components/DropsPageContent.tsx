@@ -201,7 +201,7 @@ function DropPanel({ open, drop, onClose }: { open: boolean; drop: Drop | null; 
       {/* Panel */}
       <div style={{
         position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 999,
-        width: 480, background: '#0C0C0C',
+        width: 'min(480px, 100vw)', background: '#0C0C0C',
         display: 'flex', flexDirection: 'column',
         transform: open ? 'translateX(0)' : 'translateX(100%)',
         transition: 'transform 620ms cubic-bezier(0.16,1,0.3,1)',
@@ -213,7 +213,7 @@ function DropPanel({ open, drop, onClose }: { open: boolean; drop: Drop | null; 
             {/* Header */}
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '24px 32px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0,
+              padding: '24px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0,
             }}>
               <div>
                 <p style={{ fontSize: 8, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(245,245,240,0.3)', margin: '0 0 5px' }}>
@@ -234,10 +234,10 @@ function DropPanel({ open, drop, onClose }: { open: boolean; drop: Drop | null; 
             </div>
 
             {/* Body */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '0 32px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px' }}>
 
               {/* Hero image */}
-              <div style={{ margin: '24px -32px 0', aspectRatio: '16/9', overflow: 'hidden' }}>
+              <div style={{ margin: '24px -24px 0', aspectRatio: '16/9', overflow: 'hidden' }}>
                 <img src={drop.imgDetail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.65)' }} />
               </div>
 
@@ -309,7 +309,7 @@ function DropPanel({ open, drop, onClose }: { open: boolean; drop: Drop | null; 
             </div>
 
             {/* Footer CTA */}
-            <div style={{ padding: '20px 32px 24px', borderTop: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
+            <div style={{ padding: '20px 24px 24px', borderTop: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
               {drop.status === 'live' && (
                 <>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14 }}>
@@ -462,7 +462,7 @@ export default function DropsPageContent() {
 
         <div style={{
           position: 'relative', height: '100%', maxWidth: 1440,
-          margin: '0 auto', padding: '0 72px',
+          margin: '0 auto', padding: '0 clamp(20px, 6vw, 72px)',
           display: 'flex', flexDirection: 'column', justifyContent: 'center',
           paddingTop: 72,
         }}>
@@ -470,7 +470,7 @@ export default function DropsPageContent() {
 
           <h1 style={{
             fontFamily: "'Cormorant Garamond', serif",
-            fontSize: 96, fontWeight: 300, fontStyle: 'italic',
+            fontSize: 'clamp(2.75rem, 11vw, 6rem)', fontWeight: 300, fontStyle: 'italic',
             lineHeight: 0.92, letterSpacing: '-0.01em',
             color: '#F5F5F0', margin: '0 0 22px', whiteSpace: 'pre-line',
           }}>{DROPS[0].title}</h1>
@@ -481,7 +481,7 @@ export default function DropsPageContent() {
           }}>{DROPS[0].subtitle}</p>
 
           {/* Status + countdown */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 32, marginBottom: 40 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 'clamp(12px, 4vw, 32px)', marginBottom: 40 }}>
             <span style={{
               fontSize: 8, letterSpacing: '0.28em', textTransform: 'uppercase',
               background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.14)',
@@ -514,7 +514,7 @@ export default function DropsPageContent() {
           </div>
 
           {/* CTA row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 20 }}>
             <button
               onClick={() => { setActiveDrop(DROPS[0]); setPanelOpen(true) }}
               style={{
@@ -538,7 +538,7 @@ export default function DropsPageContent() {
       </section>
 
       {/* ══════════════════════ GRID ══════════════════════ */}
-      <section style={{ padding: '72px 48px 112px', maxWidth: 1440, margin: '0 auto' }}>
+      <section style={{ padding: 'clamp(48px, 8vw, 72px) clamp(16px, 5vw, 48px) clamp(64px, 10vw, 112px)', maxWidth: 1440, margin: '0 auto' }}>
 
         <div style={{
           display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
@@ -549,7 +549,7 @@ export default function DropsPageContent() {
           <span style={{ ...lbl(0.2), fontSize: 10 }}>Season 01 — 2026</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 2 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 2 }}>
           {DROPS.map(drop => (
             <DropCard
               key={drop.id}

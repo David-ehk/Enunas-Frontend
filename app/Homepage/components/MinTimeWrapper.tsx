@@ -1,12 +1,5 @@
-// ==========================================
-// LÖSUNG 1: CartProvider in MinTimeWrapper (EMPFOHLEN)
-// ==========================================
-// MinTimeWrapper.tsx
-
 'use client'
 import { ReactNode, useEffect, useState } from 'react'
-import { CartProvider } from '@/app/context/CartContext'
-import CartSidebar from '@/app/(root)/cart/components/CartSidebar'
 
 export default function MinTimeWrapper({
   navbar, 
@@ -35,11 +28,10 @@ export default function MinTimeWrapper({
   }
 
   return (
-    <CartProvider>
+    <>
       {navbar}
       {children}
       {footer}
-      <CartSidebar />
-    </CartProvider>
+    </>
   )
 }
