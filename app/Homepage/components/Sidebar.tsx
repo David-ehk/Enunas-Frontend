@@ -503,8 +503,8 @@ const MEGA_CSS = `
 .mn-sub-highlights { display: flex; flex-direction: column; gap: 10px; }
 .mn-sub-highlight {
   background: none; border: 0; text-align: left; padding: 0; cursor: pointer;
-  font-family: var(--mn-serif); font-style: italic; font-weight: 300; font-size: 18px;
-  color: var(--mn-pane-fg); width: fit-content; line-height: 1.1;
+  font-family: var(--mn-serif); font-style: italic; font-weight: 400; font-size: 18px;
+  color: var(--mn-pane-muted); width: fit-content; line-height: 1.1;
   transition: color 240ms cubic-bezier(0.25,1,0.5,1);
 }
 .mn-sub-highlight::after {
