@@ -20,7 +20,7 @@ export const FeaturedBrandCard: React.FC<FeaturedBrandCardProps> = ({ brand }) =
   const hasRealImage = brand.image && brand.image !== '...' && brand.image.startsWith('http');
 
   return (
-    <Link href={`/bekleidung/${brandSlug}`} className="group cursor-pointer">
+    <Link href={`/marken/${brandSlug}`} className="group cursor-pointer">
       <div className="relative aspect-square mb-3 overflow-hidden bg-[#F5F5F0]">
         {hasRealImage ? (
           <Image

@@ -6,6 +6,7 @@ import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 import { productApi, apiProductToCardShape } from '@/lib/api'
 import type { ProductCardShape } from '@/lib/api'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { generateSlug } from '@/lib/product'
 import FilterSidebar, { FilterState, CATEGORIES, catMatchesProduct, parsePriceNum, genderMatchesProduct } from './FilterSidebar'
 import SortDropdown from './SortDropdown'
 import BlurFilterBar from './BlurFilterBar'
@@ -14,6 +15,12 @@ import CategoryNavigation from './CategoryNavigation'
 interface Props {
   basePath: string
   HeroComponent: React.ComponentType<{ count: number; loading: boolean }>
+  /** Restrict the feed to a single brand (matched via generateSlug), e.g. for /marken/[brand]. */
+  brandFilter?: string
+  /** Overrides the "Zurzeit sind keine Artikel verfügbar" copy shown when the
+   *  brand/feed genuinely has zero products (not just zero matches for the
+   *  current filter selection). */
+  emptyStateMessage?: string
 }
 
 function ProductSkeleton() {
@@ -27,7 +34,7 @@ function ProductSkeleton() {
   )
 }
 
-export default function FeedPageContent({ basePath, HeroComponent }: Props) {
+export default function FeedPageContent({ basePath, HeroComponent, brandFilter, emptyStateMessage }: Props) {
   const searchParams = useSearchParams()
   const isMobile     = useIsMobile()
   const filterBarRef = useRef<HTMLDivElement>(null)
@@ -73,13 +80,20 @@ export default function FeedPageContent({ basePath, HeroComponent }: Props) {
     return () => { document.body.style.overflow = '' }
   }, [filterOpen])
 
+  // When scoped to a single brand (e.g. /marken/[brand]), every other filter
+  // operates within that brand's products only — never across the whole catalogue.
+  const brandScopedProducts = useMemo(
+    () => brandFilter ? allProducts.filter(p => generateSlug(p.brandName) === brandFilter) : allProducts,
+    [allProducts, brandFilter]
+  )
+
   const availableMarken = useMemo(
-    () => [...new Set(allProducts.map(p => p.brandName))].sort(),
-    [allProducts]
+    () => [...new Set(brandScopedProducts.map(p => p.brandName))].sort(),
+    [brandScopedProducts]
   )
 
   const visibleProducts = useMemo(() => {
-    let r = allProducts
+    let r = brandScopedProducts
     if (activeCat !== 'alle')           r = r.filter(p => catMatchesProduct(activeCat, p))
     if (gender.length > 0)              r = r.filter(p => genderMatchesProduct(gender, p))
     if (filters.kategorien.length > 0)  r = r.filter(p => filters.kategorien.some(k => catMatchesProduct(k, p)))
@@ -95,7 +109,7 @@ export default function FeedPageContent({ basePath, HeroComponent }: Props) {
     if (filters.sortieren === 'preis-ab')  return [...r].sort((a, b) => parsePriceNum(b.price) - parsePriceNum(a.price))
     if (filters.sortieren === 'name')      return [...r].sort((a, b) => a.productName.localeCompare(b.productName))
     return r
-  }, [allProducts, activeCat, gender, filters])
+  }, [brandScopedProducts, activeCat, gender, filters])
 
   const activeFilterCount = filters.kategorien.length + filters.farben.length + filters.groessen.length + filters.marken.length
 
@@ -209,18 +223,30 @@ export default function FeedPageContent({ basePath, HeroComponent }: Props) {
           </div>
         ) : visibleProducts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '100px 0 140px' }}>
-            <p style={{
-              fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic',
-              fontSize: 30, fontWeight: 300, color: '#0A0A0A',
-              margin: '0 0 12px', letterSpacing: '0.01em',
-            }}>
-              Keine Artikel gefunden
-            </p>
-            <p style={{ fontSize: 10, color: '#9B9B9B', letterSpacing: '0.16em', textTransform: 'uppercase', margin: '0 0 32px' }}>
-              {activeFilterCount > 0 || activeCat !== 'alle'
-                ? 'Passe deine Filter an'
-                : 'Zurzeit sind keine Artikel verfügbar'}
-            </p>
+            {emptyStateMessage && activeFilterCount === 0 && activeCat === 'alle' && gender.length === 0 ? (
+              <p style={{
+                fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic',
+                fontSize: 26, fontWeight: 300, color: '#0A0A0A',
+                margin: '0 0 32px', letterSpacing: '0.01em', maxWidth: 420, marginLeft: 'auto', marginRight: 'auto',
+              }}>
+                {emptyStateMessage}
+              </p>
+            ) : (
+              <>
+                <p style={{
+                  fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic',
+                  fontSize: 30, fontWeight: 300, color: '#0A0A0A',
+                  margin: '0 0 12px', letterSpacing: '0.01em',
+                }}>
+                  Keine Artikel gefunden
+                </p>
+                <p style={{ fontSize: 10, color: '#9B9B9B', letterSpacing: '0.16em', textTransform: 'uppercase', margin: '0 0 32px' }}>
+                  {activeFilterCount > 0 || activeCat !== 'alle'
+                    ? 'Passe deine Filter an'
+                    : 'Zurzeit sind keine Artikel verfügbar'}
+                </p>
+              </>
+            )}
             {(activeFilterCount > 0 || activeCat !== 'alle') && (
               <button onClick={() => { resetFilters(); setActiveCat('alle') }} style={{
                 background: 'transparent', border: 'none', cursor: 'pointer',

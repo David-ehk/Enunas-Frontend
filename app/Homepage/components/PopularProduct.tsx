@@ -57,6 +57,7 @@ const PopularProduct = () => {
                 style={{ transitionDelay: isVisible ? `${index * 100}ms` : '0ms' }}
               >
                 <PopularProductCard
+                  id={product.id}
                   imgURL={product.imgURL}
                   brandName={product.brandName}
                   productName={product.productName}

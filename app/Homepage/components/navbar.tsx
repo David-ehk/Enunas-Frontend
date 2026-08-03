@@ -139,9 +139,9 @@ const Navbar = () => {
 
   const HamburgerIconSvg = (props: React.SVGProps<SVGSVGElement>) => (
     <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <path d="M4 6H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M4 3H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M4 18H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M4 21H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   )
 
@@ -186,7 +186,7 @@ const Navbar = () => {
       <nav className="flex justify-between items-center max-w-screen xl:mx-auto z-50">
 
         {/* Left — Hamburger + mobile search trigger */}
-        <div className="w-1/4 flex gap-3 pointer-coarse:gap-6 md:gap-8">
+        <div className="w-1/4 flex items-center gap-3 pointer-coarse:gap-4 md:gap-8">
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Menü öffnen"
@@ -230,7 +230,7 @@ const Navbar = () => {
         </Link>
 
         {/* Right — Desktop search, account, wishlist, cart */}
-        <div className="flex gap-3 pointer-coarse:gap-6 md:gap-8 text-base w-1/4 justify-end">
+        <div className="flex items-center gap-3 pointer-coarse:gap-4 md:gap-8 w-1/4 justify-end">
           <div className="hidden sm:block">
             <button
               onClick={() => setSearch(true)}
@@ -260,7 +260,7 @@ const Navbar = () => {
             <button
               onClick={openCart}
               aria-label={`Warenkorb mit ${itemCount} Artikeln`}
-              className={`cursor-pointer bg-transparent border-0 p-0 ${TOUCH_HIT}`}
+              className={`flex items-center cursor-pointer bg-transparent border-0 p-0 ${TOUCH_HIT}`}
             >
               <CartIconSvg className="w-5 h-5 text-black/80 hover:text-[#370E4D]"/>
               {itemCount > 0 && (

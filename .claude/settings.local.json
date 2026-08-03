@@ -139,7 +139,8 @@
       "Bash(xargs git log --oneline -1)",
       "Bash(node -e \"let s='';process.stdin.on\\('data',d=>s+=d\\).on\\('end',\\(\\)=>{const p=JSON.parse\\(s\\);console.log\\('eslint:',\\(p.devDependencies||{}\\).eslint\\);console.log\\('eslint-config-next:',\\(p.devDependencies||{}\\)['eslint-config-next']\\);console.log\\('next:',\\(p.dependencies||{}\\).next\\)}\\)\")",
       "mcp__chrome-devtools__wait_for",
-      "PowerShell(Get-NetTCPConnection *)"
+      "PowerShell(Get-NetTCPConnection *)",
+      "Bash(grep -o 'href=\\\\\\\\*\"[^\"]*marken[^\"]*\\\\\\\\*\"')"
     ]
   }
 }

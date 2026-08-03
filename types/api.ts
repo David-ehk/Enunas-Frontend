@@ -227,6 +227,14 @@ export interface ApiBrandPartner {
   vatId?: string;
   taxNumber?: string;
   updatedAt?: string;
+  // Public-facing brand profile — shown wherever the storefront surfaces the
+  // brand (marken pages, brand hero). Editable via PATCH /brandpartner/me.
+  description?: string;
+  logoUrl?: string;
+  websiteUrl?: string;
+  instagramHandle?: string;
+  tiktokHandle?: string;
+  contactEmail?: string;
   // Return (warehouse) address — deliberately separate from the legal/company
   // address above. When these are blank the platform falls back to the
   // registered business address. UNVERIFIED field names.

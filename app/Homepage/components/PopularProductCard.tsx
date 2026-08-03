@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { useAuth } from "@/app/context/AuthContext"
+import { useWishlist } from "@/app/context/WishlistContext"
 
 interface ProductColour {
   hex: string;
@@ -38,6 +41,7 @@ const sortSizes = (sizes: string[]): string[] =>
   });
 
 interface PopularProductCardProps {
+  id?: string;
   imgURL: string;
   brandName: string;
   productName: string;
@@ -58,6 +62,7 @@ const isNewProduct = (createdAt: Date | string): boolean => {
 };
 
 const PopularProductCard = ({
+  id,
   imgURL,
   brandName,
   productName,
@@ -80,6 +85,22 @@ const PopularProductCard = ({
     setCanHover(window.matchMedia('(hover: hover)').matches);
   }, []);
   const isNew = isNewProduct(createdAt);
+
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const { isSaved, toggle } = useWishlist();
+  const saved = id ? isSaved(id) : false;
+
+  function handleToggleSaved(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!id) return;
+    if (!isAuthenticated) {
+      router.push('/account');
+      return;
+    }
+    toggle(id);
+  }
 
   return (
     <div
@@ -105,15 +126,16 @@ const PopularProductCard = ({
 
           {/* Favorite Icon */}
           <button
-            className="absolute top-3 right-3 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
+            className={`absolute top-3 right-3 p-2 transition-opacity duration-300 ${
+              canHover ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
+            }`}
+            onClick={handleToggleSaved}
+            aria-label={saved ? 'Von Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
+            aria-pressed={saved}
           >
             <svg
-              className="w-5 h-5 text-enunas-black hover:text-enunas-purple transition-colors"
-              fill="none"
+              className={`w-5 h-5 transition-colors ${saved ? 'text-enunas-purple' : 'text-enunas-black hover:text-enunas-purple'}`}
+              fill={saved ? 'currentColor' : 'none'}
               stroke="currentColor"
               viewBox="0 0 24 24"
             >

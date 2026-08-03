@@ -170,7 +170,7 @@ export default function ProductDetails({
                 <li className="text-enunas-gray-light">/</li>
                 <li><Link href="/bekleidung" className="hover:text-enunas-black transition-colors duration-200">Bekleidung</Link></li>
                 <li className="text-enunas-gray-light">/</li>
-                <li><Link href={`/bekleidung/${brandSlug}`} className="hover:text-enunas-black transition-colors duration-200">{product.brandName}</Link></li>
+                <li><Link href={`/marken/${brandSlug}`} className="hover:text-enunas-black transition-colors duration-200">{product.brandName}</Link></li>
                 <li className="text-enunas-gray-light">/</li>
                 <li className="text-enunas-black font-medium">{product.name}</li>
               </ol>

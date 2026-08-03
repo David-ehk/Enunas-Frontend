@@ -598,6 +598,25 @@ export default function CartSidebar() {
             </div>
           </div>
         )}
+
+        {/* Corner bracket — top-right */}
+        <span
+          className="absolute pointer-events-none"
+          style={{
+            top: 16, right: 16, width: 14, height: 14,
+            borderTop: '1px solid rgba(10,10,10,0.3)',
+            borderRight: '1px solid rgba(10,10,10,0.3)',
+          }}
+        />
+        {/* Corner bracket — bottom-left */}
+        <span
+          className="absolute pointer-events-none"
+          style={{
+            bottom: 16, left: 16, width: 14, height: 14,
+            borderBottom: '1px solid rgba(10,10,10,0.3)',
+            borderLeft: '1px solid rgba(10,10,10,0.3)',
+          }}
+        />
       </aside>
     </>
   )

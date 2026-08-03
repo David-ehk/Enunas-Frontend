@@ -15,9 +15,9 @@ const DropNavbar = () => {
 
   const HamburgerIconSvg = (props: React.SVGProps<SVGSVGElement>) => (
     <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <path d="M4 6H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M4 3H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M4 18H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M4 21H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   )
 
@@ -55,15 +55,15 @@ const DropNavbar = () => {
       <nav className="flex justify-between items-center max-w-screen xl:mx-auto z-50">
 
         {/* Left — hamburger + mobile search */}
-        <div className="w-1/4 flex gap-3 md:gap-8">
+        <div className="w-1/4 flex gap-3 pointer-coarse:gap-4 md:gap-8">
           <button onClick={() => setSidebarOpen(true)} aria-label="Menü öffnen" aria-expanded={sidebarOpen}>
             <HamburgerIconSvg className="w-5 h-5 text-white hover:text-white/60 transition-colors duration-200" />
           </button>
 
           <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+          <SearchBar isOpen={searchOpen} onClose={() => setSearch(false)} />
 
           <div className="sm:hidden">
-            <SearchBar isOpen={searchOpen} onClose={() => setSearch(false)} />
             <button
               onClick={() => setSearch(true)}
               aria-label="Suche öffnen"
@@ -80,9 +80,8 @@ const DropNavbar = () => {
         </Link>
 
         {/* Right — search + account + heart + cart */}
-        <div className="flex gap-3 md:gap-8 mt-3 text-base w-1/4 justify-end">
+        <div className="flex items-center gap-3 pointer-coarse:gap-4 md:gap-8 text-base w-1/4 justify-end">
           <div className="hidden sm:block">
-            <SearchBar isOpen={searchOpen} onClose={() => setSearch(false)} />
             <button
               onClick={() => setSearch(true)}
               aria-label="Suche öffnen"
@@ -101,8 +100,8 @@ const DropNavbar = () => {
             )}
           </div>
 
-          <div>
-            <Link href="/saved-lists" className="relative cursor-pointer hidden sm:block" aria-label="Wunschliste">
+          <div className="hidden sm:block">
+            <Link href="/saved-lists" className="relative cursor-pointer" aria-label="Wunschliste">
               <HeartIconSvg className="w-5 h-5 text-white hover:text-white/60 transition-colors duration-200" />
             </Link>
           </div>

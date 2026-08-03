@@ -28,6 +28,7 @@ function RelatedProducts({ currentProduct, relatedProducts }: RelatedProductsPro
           {related.map(p => (
             <PopularProductCard
               key={p.id}
+              id={p.id}
               imgURL={p.images[0]}
               brandName={p.brand}
               productName={p.name}

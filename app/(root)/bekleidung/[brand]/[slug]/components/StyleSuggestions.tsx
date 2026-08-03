@@ -31,6 +31,7 @@ function StyleSuggestions({ currentProduct, suggestions, excludeIds }: StyleSugg
           {filtered.map(p => (
             <PopularProductCard
               key={p.id}
+              id={p.id}
               imgURL={p.images[0]}
               brandName={p.brand}
               productName={p.name}

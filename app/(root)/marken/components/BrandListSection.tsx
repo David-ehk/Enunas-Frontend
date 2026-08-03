@@ -23,7 +23,7 @@ export const BrandListSection: React.FC<BrandListSectionProps> = ({ letter, bran
         {brands.map((brand) => (
           <Link
             key={brand.id}
-            href={`/bekleidung/${generateSlug(brand.name)}`}
+            href={`/marken/${generateSlug(brand.name)}`}
             className="text-sm text-gray-700 hover:text-black transition-colors"
           >
             {brand.name}

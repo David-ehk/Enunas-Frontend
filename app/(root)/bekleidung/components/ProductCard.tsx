@@ -11,6 +11,7 @@ function ProductCard() {
         {products.map((product) => (
           <PopularProductCard
             key={product.id}
+            id={product.id}
             imgURL={product.imgURL}
             brandName={product.brandName}
             productName={product.productName}

@@ -43,6 +43,16 @@ export default function SettingsTab({
   brand: ApiBrandPartner | null
   onUpdate: (b: ApiBrandPartner) => void
 }) {
+  const [description, setDescription]       = useState(brand?.description ?? '')
+  const [logoUrl, setLogoUrl]               = useState(brand?.logoUrl ?? '')
+  const [websiteUrl, setWebsiteUrl]         = useState(brand?.websiteUrl ?? '')
+  const [instagramHandle, setInstagramHandle] = useState(brand?.instagramHandle ?? '')
+  const [tiktokHandle, setTiktokHandle]     = useState(brand?.tiktokHandle ?? '')
+  const [contactEmail, setContactEmail]     = useState(brand?.contactEmail ?? '')
+  const [profileSaving, setProfileSaving]   = useState(false)
+  const [profileSaved, setProfileSaved]     = useState(false)
+  const [profileError, setProfileError]     = useState<string | null>(null)
+
   const [legalName, setLegalName]           = useState(brand?.legalName ?? '')
   const [street, setStreet]                 = useState(brand?.addressStreet ?? '')
   const [postalCode, setPostalCode]         = useState(brand?.addressPostalCode ?? '')
@@ -67,6 +77,12 @@ export default function SettingsTab({
 
   useEffect(() => {
     if (brand) {
+      setDescription(brand.description ?? '')
+      setLogoUrl(brand.logoUrl ?? '')
+      setWebsiteUrl(brand.websiteUrl ?? '')
+      setInstagramHandle(brand.instagramHandle ?? '')
+      setTiktokHandle(brand.tiktokHandle ?? '')
+      setContactEmail(brand.contactEmail ?? '')
       setLegalName(brand.legalName ?? '')
       setStreet(brand.addressStreet ?? '')
       setPostalCode(brand.addressPostalCode ?? '')
@@ -82,6 +98,32 @@ export default function SettingsTab({
       setRetInstructions(brand.returnInstructions ?? '')
     }
   }, [brand])
+
+  async function saveProfile() {
+    setProfileSaving(true)
+    setProfileError(null)
+    try {
+      const updated = await brandApi.updateMe({
+        description: description.trim(),
+        logoUrl: logoUrl.trim(),
+        websiteUrl: websiteUrl.trim(),
+        instagramHandle: instagramHandle.trim(),
+        tiktokHandle: tiktokHandle.trim(),
+        contactEmail: contactEmail.trim(),
+      })
+      onUpdate(updated)
+      setProfileSaved(true)
+      setTimeout(() => setProfileSaved(false), 2500)
+    } catch (err) {
+      setProfileError(
+        err instanceof FetchError
+          ? `Speichern fehlgeschlagen: ${err.message} (${err.status})`
+          : 'Speichern fehlgeschlagen. Bitte erneut versuchen.',
+      )
+    } finally {
+      setProfileSaving(false)
+    }
+  }
 
   async function saveAddress() {
     if (!legalName.trim() || !street.trim() || !postalCode.trim() || !city.trim()) return
@@ -139,6 +181,14 @@ export default function SettingsTab({
 
   const labelCls = 'text-[10px] uppercase tracking-[0.12em] text-[#6B6B6B] font-medium mb-1.5'
   const inputCls = 'w-full text-[13px] border border-[#E8E8E8] bg-white rounded-none px-3.5 py-2.5 focus:outline-none focus:border-[#370E4D]/50 focus:ring-2 focus:ring-[#370E4D]/8 transition-all duration-200'
+
+  const profileDirty =
+    description !== (brand?.description ?? '') ||
+    logoUrl !== (brand?.logoUrl ?? '') ||
+    websiteUrl !== (brand?.websiteUrl ?? '') ||
+    instagramHandle !== (brand?.instagramHandle ?? '') ||
+    tiktokHandle !== (brand?.tiktokHandle ?? '') ||
+    contactEmail !== (brand?.contactEmail ?? '')
 
   const addrDirty =
     legalName !== (brand?.legalName ?? '') ||
@@ -204,6 +254,118 @@ export default function SettingsTab({
             </p>
           </div>
 
+        </div>
+      </SectionCard>
+
+      {/* Öffentliches Profil — wird auf marken/[brand] und überall sonst gezeigt,
+          wo der Shop diese Marke im Storefront darstellt. */}
+      <SectionCard title="Öffentliches Profil">
+        <div className="p-6 space-y-5">
+          <div>
+            <p className={labelCls} style={{ fontFamily: 'var(--font-league-spartan)' }}>Beschreibung</p>
+            <textarea
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              rows={4}
+              placeholder="Kurzer Text über deine Marke — erscheint auf deiner öffentlichen Markenseite."
+              className={inputCls}
+              style={{ fontFamily: 'var(--font-league-spartan)', resize: 'vertical' }}
+            />
+          </div>
+
+          <div>
+            <p className={labelCls} style={{ fontFamily: 'var(--font-league-spartan)' }}>Logo-URL</p>
+            <input
+              type="text"
+              value={logoUrl}
+              onChange={e => setLogoUrl(e.target.value)}
+              placeholder="https://…"
+              className={inputCls}
+              style={{ fontFamily: 'var(--font-league-spartan)' }}
+            />
+          </div>
+
+          <div>
+            <p className={labelCls} style={{ fontFamily: 'var(--font-league-spartan)' }}>Website</p>
+            <input
+              type="text"
+              value={websiteUrl}
+              onChange={e => setWebsiteUrl(e.target.value)}
+              placeholder="https://…"
+              className={inputCls}
+              style={{ fontFamily: 'var(--font-league-spartan)' }}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className={labelCls} style={{ fontFamily: 'var(--font-league-spartan)' }}>Instagram</p>
+              <input
+                type="text"
+                value={instagramHandle}
+                onChange={e => setInstagramHandle(e.target.value)}
+                placeholder="@marke"
+                className={inputCls}
+                style={{ fontFamily: 'var(--font-league-spartan)' }}
+              />
+            </div>
+            <div>
+              <p className={labelCls} style={{ fontFamily: 'var(--font-league-spartan)' }}>TikTok</p>
+              <input
+                type="text"
+                value={tiktokHandle}
+                onChange={e => setTiktokHandle(e.target.value)}
+                placeholder="@marke"
+                className={inputCls}
+                style={{ fontFamily: 'var(--font-league-spartan)' }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <p className={labelCls} style={{ fontFamily: 'var(--font-league-spartan)' }}>Kontakt-E-Mail <span className="normal-case text-[10px] tracking-[0.04em] text-[#9B9B9B]">(optional, abweichend vom Login)</span></p>
+            <input
+              type="email"
+              value={contactEmail}
+              onChange={e => setContactEmail(e.target.value)}
+              placeholder={brand?.email ?? ''}
+              className={inputCls}
+              style={{ fontFamily: 'var(--font-league-spartan)' }}
+            />
+          </div>
+
+          {profileError && (
+            <p className="text-[11px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+              {profileError}
+            </p>
+          )}
+
+          <div className="flex items-center gap-3 pt-1">
+            <button
+              onClick={saveProfile}
+              disabled={profileSaving || !profileDirty}
+              className="flex items-center gap-2 h-9 px-5 rounded-none text-[12px] font-medium text-white transition-all duration-200 disabled:opacity-40"
+              style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D' }}
+            >
+              {profileSaving ? 'Speichert…' : profileSaved ? <><Check className="w-3.5 h-3.5" /> Gespeichert</> : 'Speichern'}
+            </button>
+            {profileDirty && !profileSaving && (
+              <button
+                onClick={() => {
+                  setDescription(brand?.description ?? '')
+                  setLogoUrl(brand?.logoUrl ?? '')
+                  setWebsiteUrl(brand?.websiteUrl ?? '')
+                  setInstagramHandle(brand?.instagramHandle ?? '')
+                  setTiktokHandle(brand?.tiktokHandle ?? '')
+                  setContactEmail(brand?.contactEmail ?? '')
+                }}
+                className="h-9 px-4 rounded-none text-[12px] text-[#6B6B6B] border border-[#E8E8E8] hover:bg-[#F5F5F0] transition-all duration-200"
+                style={{ fontFamily: 'var(--font-league-spartan)' }}
+              >
+                Abbrechen
+              </button>
+            )}
+          </div>
         </div>
       </SectionCard>
 

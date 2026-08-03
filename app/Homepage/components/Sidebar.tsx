@@ -464,7 +464,7 @@ const MEGA_CSS = `
   border-top: 1px solid var(--mn-pane-hair);
 }
 .mn-sub-item {
-  background: none; border: 0; text-align: left; cursor: pointer;
+  background: none; border: 0; text-align: left; cursor: pointer; width: 100%;
   padding: 11px 0; border-bottom: 1px solid var(--mn-pane-hair);
   font-size: 13px; letter-spacing: 0.05em; color: var(--mn-pane-fg);
   display: flex; align-items: center; justify-content: space-between;

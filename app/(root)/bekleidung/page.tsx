@@ -145,7 +145,7 @@ function BekleidungContent() {
             margin: '0 0 16px',
             fontWeight: 400,
           }}>
-            Neue Kollektion 2026
+            Neue Kollektionen 2026
           </p>
         )}
         <h1 style={{
