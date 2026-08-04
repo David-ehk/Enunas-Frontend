@@ -346,7 +346,7 @@ function BestaetiguungContent() {
     return (
       <>
         <CheckoutNavbar />
-        <div className="min-h-screen bg-white pb-24 px-4 sm:px-8 lg:px-16" style={{ paddingTop: '64px' }}>
+        <div className="min-h-screen bg-white pb-24 px-4 sm:px-8 lg:px-16" style={{ paddingTop: '42px' }}>
           <div className="max-w-[1440px] mx-auto">
 
             {/* Compact confirmation header */}
@@ -424,7 +424,7 @@ function BestaetiguungContent() {
   return (
     <>
       <CheckoutNavbar />
-      <div className="min-h-screen bg-white pb-24 px-4 sm:px-8 lg:px-16" style={{ paddingTop: '64px' }}>
+      <div className="min-h-screen bg-white pb-24 px-4 sm:px-8 lg:px-16" style={{ paddingTop: '42px' }}>
         <div className="max-w-[580px] mx-auto">
 
           {/* Hero */}
@@ -488,7 +488,7 @@ function BestaetiguungContent() {
 export default function BestaetiguungPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center" style={{ paddingTop: '64px' }}>
+      <div className="min-h-screen bg-white flex items-center justify-center" style={{ paddingTop: '42px' }}>
         <div className="w-8 h-8 border-2 border-enunas-gray-light border-t-enunas-purple rounded-full animate-spin" />
       </div>
     }>

@@ -142,7 +142,15 @@
       "PowerShell(Get-NetTCPConnection *)",
       "Bash(grep -o 'href=\\\\\\\\*\"[^\"]*marken[^\"]*\\\\\\\\*\"')",
       "mcp__chrome-devtools__list_network_requests",
-      "mcp__chrome-devtools__fill_form"
+      "mcp__chrome-devtools__fill_form",
+      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object -First 1\")",
+      "mcp__chrome-devtools__fill",
+      "Bash(git add *)",
+      "Bash(git push *)",
+      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object State, OwningProcess -Unique\")",
+      "Bash(powershell -Command \"Get-CimInstance Win32_Process -Filter \\\\\"Name='node.exe'\\\\\" | Select-Object ProcessId, CommandLine | Format-List\")",
+      "Bash(disown)",
+      "Read(//c/Users/david/AppData/Local/Temp/claude/C--dev-enunas/34aee630-c927-48dc-9d3c-ee2ffc434042/scratchpad/**)"
     ]
   }
 }

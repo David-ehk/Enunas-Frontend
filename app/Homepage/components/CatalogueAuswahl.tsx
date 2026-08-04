@@ -159,9 +159,9 @@ export default function KategorieAuswahl() {
     <section className="w-full">
 
       {/* ═══════════════════════════════════════════════════════════
-          MOBILE — Moncler-inspired carousel
+          MOBILE + TABLET — Moncler-inspired carousel
           ═══════════════════════════════════════════════════════════ */}
-      <div className="block sm:hidden" style={{ background: '#FFFFFF' }}>
+      <div className="block lg:hidden" style={{ background: '#FFFFFF' }}>
 
         {/* Top bar */}
         <div style={{ padding: '12px 20px 10px', borderBottom: '1px solid #ECECEA', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -370,7 +370,7 @@ export default function KategorieAuswahl() {
       {/* ═══════════════════════════════════════════════════════════
           DESKTOP — original layout
           ═══════════════════════════════════════════════════════════ */}
-      <div className="hidden sm:block px-8 sm:px-16 sm:py-8">
+      <div className="hidden lg:block px-8 sm:px-16 sm:py-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 gap-12 items-center">
 

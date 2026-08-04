@@ -20,16 +20,16 @@ const CategorySection = () => {
 
   <div >
         {/* GRID mit 2 oder 4 Spalten */}
-     <div className="grid grid-cols-2  gap-0">
+     <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
          {categories.map((cat, idx) => (
 
            /* RELATIVE Container - Gibt Scroll-Raum */
-          <div key={idx} className="relative group" style={{ height: '100vh' }}>
+          <div key={idx} className="relative group aspect-[2/3] md:aspect-auto md:h-screen">
             <Link  href={cat.link}>
 
               {/* STICKY Titel - Bleibt OBEN im Container */}
               <div className="sticky top-0 z-10 p-6 pt-5">
-                <h2 className="text-3xl sm:text-4xl md:text-5xl tracking-wider text-white pt-20 z-10 transition-all duration-500 group-hover:tracking-[0.08em]">
+                <h2 className="text-3xl sm:text-4xl md:text-3xl lg:text-5xl tracking-wider text-white pt-20 z-10 transition-all duration-500 group-hover:tracking-[0.08em]">
                   {cat.title.toUpperCase()}
                 </h2>
               </div>

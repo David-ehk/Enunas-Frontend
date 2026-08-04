@@ -149,7 +149,7 @@ export default function CheckoutPage() {
     return (
       <>
         <CheckoutNavbar />
-        <div className="min-h-screen pb-20 flex items-center justify-center px-4" style={{ paddingTop: '64px' }}>
+        <div className="min-h-screen pb-20 flex items-center justify-center px-4" style={{ paddingTop: '42px' }}>
           <div className="text-center">
             <h1
               className="text-3xl text-enunas-black font-light mb-4"
@@ -175,7 +175,7 @@ export default function CheckoutPage() {
   return (
     <>
       <CheckoutNavbar />
-      <div className="min-h-screen pb-20 px-4 sm:px-8 lg:px-16 bg-white" style={{ paddingTop: '64px' }}>
+      <div className="min-h-screen pb-20 px-4 sm:px-8 lg:px-16 bg-white" style={{ paddingTop: '42px' }}>
         <div className="max-w-6xl mx-auto">
 
           {/* Breadcrumb + heading */}

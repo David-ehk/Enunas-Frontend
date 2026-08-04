@@ -20,13 +20,13 @@ const geschlecht = [
       <div className="grid grid-cols-2 gap-0">
         {geschlecht.map((ges,idx)=>(
 
-          <div className="relative group" key={idx} style={{height: "100vh"}}>
+          <div className="relative group aspect-[2/3] md:aspect-auto md:h-screen" key={idx}>
 
             <Link href={ges.link}>
 
 
              <div className="sticky flex justify-center top-0 z-10 p-6 sm:pt-5">
-               <h2 className="text-3xl sm:text-4xl md:text-5xl tracking-wider text-white mt-20 z-10 transition-all duration-500 group-hover:tracking-[0.08em]">
+               <h2 className="text-3xl sm:text-4xl md:text-3xl lg:text-5xl tracking-wider text-white mt-20 z-10 transition-all duration-500 group-hover:tracking-[0.08em]">
                 {ges.title.toUpperCase()}
               </h2>
             </div>

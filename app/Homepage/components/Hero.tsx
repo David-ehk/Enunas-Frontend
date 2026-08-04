@@ -9,6 +9,16 @@ const Hero = () => {
     return () => clearTimeout(timer)
   }, [])
 
+  // The homepage should always open on the hero video, not wherever the
+  // browser's native scroll restoration (e.g. after using the back button)
+  // last left the page.
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual'
+    }
+    window.scrollTo(0, 0)
+  }, [])
+
   return (
     <section id="home" className="w-full min-h-screen relative">
       <video

@@ -34,6 +34,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "eu.manieredevoir.com" },
       { protocol: "https", hostname: "www.manieredevoir.com" },
       { protocol: "https", hostname: "www.viviennewestwood.com" },
+      { protocol: "https", hostname: "**.ufs.sh" },
 
       // ── Demo/mock-data only (designer CDNs). Remove once mock data is gone. ──
       { protocol: "https", hostname: "amq-mcq.dam.kering.com" },

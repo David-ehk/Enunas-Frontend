@@ -11,18 +11,18 @@ const values = [
     title: 'Gemeinschaft',
     body: 'Enunas ist mehr als ein Marktplatz. Wir bauen eine Gemeinschaft auf, die Mode als Sprache versteht und gemeinsam neue Ausdrucksweisen entdeckt.',
   },
-  {
+ /* {
     n: '03',
     title: 'Verantwortung',
     body: 'Nachhaltigkeit und ethische Produktion sind keine Optionen — sie sind Grundvoraussetzung für alle Marken auf unserer Plattform.',
-  },
+  }, */
 ]
 
 const stats = [
-  { n: '150+',    label: 'Marken & Designer' },
-  { n: '12.000+', label: 'Produkte' },
-  { n: '80.000+', label: 'Kund:innen' },
-  { n: '2023',    label: 'Gegründet' },
+  { n: '10+',    label: 'Marken & Designer' },
+  { n: '2.000+', label: 'Produkte' },
+  { n: '10.000+', label: 'Kund:innen' },
+  { n: '2026',    label: 'Gegründet' },
 ]
 
 export default function UeberUnsPage() {
@@ -49,11 +49,11 @@ export default function UeberUnsPage() {
       {/* Banner image */}
       <div className="mx-8 lg:mx-16 h-[300px] lg:h-[460px] overflow-hidden relative">
         <Image
-          src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1600&auto=format&fit=crop&q=80"
+          src="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbwvgYFfeasfCTE4YZSIlyMR6HrLXdq5AVepFt"
           alt="Enunas — Fashion editorial"
           fill
           priority
-          className="object-cover"
+          className="object-contain"
           sizes="100vw"
         />
       </div>
@@ -84,7 +84,7 @@ export default function UeberUnsPage() {
       {/* Values */}
       <section className="bg-[#F5F5F0] px-8 lg:px-16 py-24">
         <p className="text-[11px] uppercase tracking-[0.3em] text-[#6B6B6B] mb-8">Unsere Werte</p>
-        <div className="grid md:grid-cols-3 gap-12">
+        <div className="grid md:grid-cols-2 gap-12 max-w-3xl">
           {values.map((v) => (
             <div key={v.n} className="border-t border-[#E8E8E8] pt-7">
               <p
