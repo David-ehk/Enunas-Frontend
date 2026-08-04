@@ -1,10 +1,10 @@
 import Footer from "@/app/Homepage/components/footer";
-import DisappearingNavbar from "./components/DisappearingNavbar";
+import Navbar from "@/app/Homepage/components/navbar";
 
 export default function BekleidungLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <>
-      <DisappearingNavbar />
+      <Navbar />
       <div className="h-[54px] sm:h-[70px]" />
       {children}
       <Footer />

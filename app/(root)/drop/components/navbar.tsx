@@ -1,17 +1,125 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import Sidebar from '../../../Homepage/components/Sidebar'
-import SearchBar from '../../../Homepage/components/Suchleiste'
+import Searchbar, { type SearchResult } from '../../../Homepage/components/Searchbar'
 import Link from 'next/link'
 import { useCart } from '@/app/context/CartContext'
 import { useAuth } from '@/app/context/AuthContext'
+import { productApi } from '@/lib/api'
+import { generateSlug } from '@/lib/product'
+
+const STORAGE_KEY = 'enunas_recent_searches'
+const MAX_RECENT  = 6
+
+const SEARCH_HIGHLIGHTS = [
+  { label: 'Neue Arrivals',    href: '/neu' },
+  { label: 'Trendy',          href: '/trendy' },
+  { label: 'Drops',           href: '/drop' },
+  { label: 'Alle Bekleidung', href: '/bekleidung' },
+  { label: 'Catalogue',       href: '/catalogue' },
+]
 
 const DropNavbar = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [searchOpen, setSearch]       = useState(false)
+  const [sidebarOpen, setSidebarOpen]     = useState(false)
+  const [searchOpen, setSearch]           = useState(false)
+  const [searchResults, setSearchResults] = useState<SearchResult[] | null>(null)
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const router = useRouter()
   const { itemCount }      = useCart()
   const { isAuthenticated } = useAuth()
+
+  // Load recents from localStorage — seed demo data if empty
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as string[]
+      if (stored.length === 0) {
+        const demo = ['Vivienne Westwood', 'Jacken', 'Sneaker']
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(demo))
+        setRecentSearches(demo)
+      } else {
+        setRecentSearches(stored)
+      }
+    } catch {}
+  }, [])
+
+  // ⌘K / Ctrl+K to toggle search
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setSearch(open => !open)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
+  const addRecentSearch = useCallback((q: string) => {
+    setRecentSearches(prev => {
+      const updated = [q, ...prev.filter(s => s !== q)].slice(0, MAX_RECENT)
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)) } catch {}
+      return updated
+    })
+  }, [])
+
+  const handleQueryChange = useCallback((q: string) => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    if (!q.trim()) {
+      setSearchResults(null)
+      setSearchLoading(false)
+      return
+    }
+    setSearchLoading(true)
+    searchTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await productApi.search(q.trim())
+        const results: SearchResult[] = res.content.slice(0, 6).map(p => ({
+          id: p.id,
+          type: 'product' as const,
+          title: p.name,
+          subtitle: p.brandName,
+          meta: p.price != null
+            ? `€ ${p.price.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`
+            : undefined,
+          imageUrl: p.images?.[0],
+          href: `/bekleidung/${generateSlug(p.brandName)}/${p.slug}`,
+        }))
+        setSearchResults(results)
+      } catch {
+        setSearchResults([])
+      } finally {
+        setSearchLoading(false)
+      }
+    }, 300)
+  }, [])
+
+  const handleSearch = useCallback((q: string) => {
+    addRecentSearch(q)
+    router.push(`/bekleidung?q=${encodeURIComponent(q)}`)
+    setSearch(false)
+    setSearchResults(null)
+  }, [addRecentSearch, router])
+
+  const handleResultSelect = useCallback((result: SearchResult) => {
+    if (result.href) {
+      addRecentSearch(result.title)
+      router.push(result.href)
+    }
+    setSearch(false)
+    setSearchResults(null)
+  }, [addRecentSearch, router])
+
+  const handleSearchClose = useCallback(() => {
+    setSearch(false)
+    setSearchResults(null)
+    setSearchLoading(false)
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+  }, [])
 
   const HamburgerIconSvg = (props: React.SVGProps<SVGSVGElement>) => (
     <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -60,7 +168,20 @@ const DropNavbar = () => {
           </button>
 
           <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-          <SearchBar isOpen={searchOpen} onClose={() => setSearch(false)} />
+
+          {/* Single Searchbar instance — portals to body */}
+          <Searchbar
+            variant="sidebar"
+            isOpen={searchOpen}
+            onClose={handleSearchClose}
+            highlights={SEARCH_HIGHLIGHTS}
+            recentSearches={recentSearches}
+            results={searchResults}
+            loading={searchLoading}
+            onQueryChange={handleQueryChange}
+            onSearch={handleSearch}
+            onResultSelect={handleResultSelect}
+          />
 
           <div className="sm:hidden">
             <button
