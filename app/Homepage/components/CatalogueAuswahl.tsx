@@ -24,8 +24,8 @@ export default function KategorieAuswahl() {
   ]
 
   // Mobile carousel state
-  const [idx, setIdx] = useState(1)       // default: Experimental
-  const [centeredSlot, setCenteredSlot] = useState(HOME_COPY * kategorie.length + 1)
+  const [idx, setIdx] = useState(0)       // default: Streetwear
+  const [centeredSlot, setCenteredSlot] = useState(HOME_COPY * kategorie.length)
   const railRef = useRef<HTMLDivElement>(null)
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
 
@@ -199,10 +199,22 @@ export default function KategorieAuswahl() {
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60px', background: 'linear-gradient(to top, #fff 0%, transparent 100%)', pointerEvents: 'none' }} />
         </Link>
 
-        {/* Category name */}
-        <Link href={current.link} style={{ display: 'block', padding: '12px 20px 14px', textAlign: 'center', textDecoration: 'none' }}>
-          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '28px', fontWeight: 300, fontStyle: 'normal', color: '#0A0A0A', letterSpacing: '0.01em' }}>
-            {current.name}
+        {/* Category name — neumorphic pill (soft dual shadow, no border), signals it's a link to the category page */}
+        <Link href={current.link} style={{ display: 'flex', justifyContent: 'center', padding: '14px 20px 18px', textDecoration: 'none' }}>
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '12px 28px',
+              borderRadius: '999px',
+              background: `color-mix(in srgb, ${current.colorHex} 8%, #F5F5F0)`,
+              boxShadow: `-6px -6px 14px rgba(255,255,255,0.9), 6px 6px 14px color-mix(in srgb, ${current.colorHex} 35%, #AEAEC0)`,
+              transition: 'background 300ms ease, box-shadow 300ms ease',
+            }}
+          >
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '26px', fontWeight: 300, fontStyle: 'normal', color: '#0A0A0A', letterSpacing: '0.01em' }}>
+              {current.name}
+            </span>
           </span>
         </Link>
 
@@ -299,37 +311,52 @@ export default function KategorieAuswahl() {
           </button>
         </div>
 
-        {/* Progress lines */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', padding: '12px 0 20px' }}>
-          {kategorie.map((kat, i) => (
-            <button
-              key={kat.id}
-              onClick={() => goTo(i)}
-              aria-label={`Zu ${kat.name}`}
-              style={{
-                // Padding + matching negative margin: 44px tall tap target,
-                // while the visible line keeps its original 2px footprint.
-                display: 'flex',
-                alignItems: 'center',
-                padding: '21px 2px',
-                margin: '-21px 0',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              <span
+        {/* Progress pills — glassmorphism/neumorphism look */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', padding: '12px 0 20px' }}>
+          {kategorie.map((kat, i) => {
+            const isActive = i === idx
+            return (
+              <button
+                key={kat.id}
+                onClick={() => goTo(i)}
+                aria-label={`Zu ${kat.name}`}
                 style={{
-                  display: 'block',
-                  width: i === idx ? '22px' : '8px',
-                  height: '2px',
-                  borderRadius: '1px',
-                  background: i === idx ? kat.colorHex : '#D8D8D4',
-                  transition: 'width 360ms cubic-bezier(0.16,1,0.3,1), background 300ms ease',
+                  // Padding + matching negative margin: 44px tall tap target,
+                  // while the visible pill keeps its own compact footprint.
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '12px 4px',
+                  margin: '-12px 0',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
                 }}
-              />
-            </button>
-          ))}
+              >
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: isActive ? '30px' : '18px',
+                    height: '18px',
+                    borderRadius: '999px',
+                    background: isActive ? 'rgba(255,255,255,0.65)' : 'rgba(245,245,240,0.55)',
+                    backdropFilter: 'blur(6px)',
+                    WebkitBackdropFilter: 'blur(6px)',
+                    border: `1px solid ${isActive ? kat.colorHex : 'rgba(10,10,10,0.12)'}`,
+                    boxShadow: isActive
+                      ? '3px 3px 6px rgba(0,0,0,0.08), -2px -2px 5px rgba(255,255,255,0.85)'
+                      : '2px 2px 4px rgba(0,0,0,0.05), -1px -1px 3px rgba(255,255,255,0.65)',
+                    transition: 'width 360ms cubic-bezier(0.16,1,0.3,1), background 300ms ease, border-color 300ms ease, box-shadow 300ms ease',
+                  }}
+                >
+                  {isActive && (
+                    <span style={{ width: '6px', height: '6px', borderRadius: '999px', background: kat.colorHex }} />
+                  )}
+                </span>
+              </button>
+            )
+          })}
         </div>
 
         <style jsx>{`
