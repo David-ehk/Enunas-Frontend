@@ -3,8 +3,8 @@ import { useScrollAnimation } from '@/hooks/use-scroll-animation'
 import { cn } from '@/lib/utils'
 
 const LINES = [
-  'Die schönsten Outfits entstehen dort,',
-  'wo Persönlichkeit auf Kleidung trifft.',
+  'Die besten Fits entstehen, wenn Kleidung',
+  ' deine Persönlichkeit widerspiegelt.',
 ]
 
 export default function FounderQuote() {
