@@ -16,6 +16,7 @@ import Einstellungen from './components/Einstellungen'
 import { orderApi } from '@/lib/api/modules/orderApi'
 import { wardrobeApi } from '@/lib/api/modules/wardrobeApi'
 import { authApi } from '@/lib/api/modules/authApi'
+import GoogleLoginButton from '@/components/auth/GoogleLoginButton'
 import type { ApiOrder, ApiWardrobeItem } from '@/types/api'
 import type { WishlistEntry } from '@/lib/account'
 
@@ -111,6 +112,8 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
       </div>
 
       {tab === 'login' ? (
+        <>
+        <GoogleLoginButton context="login" onError={setError} onSuccess={onSuccess} />
         <form onSubmit={handleLogin} className="space-y-4">
           <input type="email" placeholder="E-Mail" value={form.email} onChange={set('email')} required className={inputClass} />
           <input type="password" placeholder="Passwort" value={form.password} onChange={set('password')} required className={inputClass} />
@@ -139,7 +142,10 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
             <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
           </button>
         </form>
+        </>
       ) : (
+        <>
+        <GoogleLoginButton context="register" onError={setError} onSuccess={onSuccess} />
         <form onSubmit={handleRegister} className="space-y-4">
           <input type="email" placeholder="E-Mail" value={form.email} onChange={set('email')} required className={inputClass} />
           <input type="password" placeholder="Passwort (mind. 8 Zeichen)" value={form.password} onChange={set('password')} required minLength={8} className={inputClass} />
@@ -171,6 +177,7 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
             <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
           </button>
         </form>
+        </>
       )}
     </div>
   )

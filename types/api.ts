@@ -106,6 +106,25 @@ export interface ApiCustomer {
   createdAt?: string;
 }
 
+// Mirrors backend UserAddressResponseDto. No `phone` — the address book does not carry one;
+// only the ad-hoc ShippingAddressDto embedded in an order does. See lib/api/modules/orderApi.ts.
+export interface ApiUserAddress {
+  id: number;
+  firstName: string;
+  lastName: string;
+  street: string;
+  houseNumber: string;
+  addressLine2?: string;
+  postalCode: string;
+  city: string;
+  country: string;
+  // Wire key is literally "isDefault" — backend pins this via an explicit @JsonProperty
+  // to avoid Jackson double-serializing a boolean field named "isDefault"/"defaultAddress".
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ApiProduct {
   id: string;
   name: string;

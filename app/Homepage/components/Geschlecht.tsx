@@ -4,7 +4,7 @@ import React from 'react'
 const geschlecht = [
   {
     title: "Damen",
-    image: "https://diorama.dam-broadcast.com/cdn-cgi/image/width=640,format=auto/pm_11872_1164_1164642-rw8ghfoty4-whr.jpg",
+    image: "https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbJdaPNXVC54ToW7vIHDNR1LYzpSrVUAuykKba",
     link: "/women"
   },
   {
@@ -20,7 +20,7 @@ const geschlecht = [
       <div className="grid grid-cols-2 gap-0">
         {geschlecht.map((ges,idx)=>(
 
-          <div className="relative group h-[55vh] md:h-screen" key={idx}>
+          <div className="relative group h-[600px] md:h-screen" key={idx}>
 
             <Link href={ges.link}>
 

@@ -12,7 +12,7 @@ export default function ExperimentalPage() {
       config={{
         name: 'Experimental',
         slug: 'experimental',
-        tagline: 'Grenzen werden neu gedacht.',
+        tagline: 'Nicht für alle. Für dich.',
         color: '#6C169C',
       }}
     />

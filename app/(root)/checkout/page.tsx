@@ -7,50 +7,26 @@ import { useCart } from '@/app/context/CartContext'
 import { useAuth } from '@/app/context/AuthContext'
 import CheckoutNavbar from '@/app/(root)/cart/components/CheckoutNavbar'
 import CartFooter from '@/app/(root)/cart/components/CartFooter'
-import { orderApi, authApi, FetchError } from '@/lib/api'
+import CheckoutAuthGate from './components/CheckoutAuthGate'
+import SavedAddressSelector from './components/SavedAddressSelector'
+import { orderApi, FetchError } from '@/lib/api'
 import { calcShipping, calcUpsellDiscount, calcFinalTotal } from '@/lib/pricing'
-
-interface ShippingForm {
-  firstName: string
-  lastName: string
-  email: string
-  street: string
-  city: string
-  postalCode: string
-  country: string
-  phone: string
-}
-
-const COUNTRIES = [
-  { value: 'DE', label: 'Deutschland' },
-  { value: 'AT', label: 'Österreich' },
-  { value: 'CH', label: 'Schweiz' },
-  { value: 'NL', label: 'Niederlande' },
-  { value: 'BE', label: 'Belgien' },
-  { value: 'FR', label: 'Frankreich' },
-]
+import { toShippingAddressDto, type AddressSelection } from '@/lib/address'
 
 export default function CheckoutPage() {
   const { cartItems, totalPrice, clearCart } = useCart()
-  const { isAuthenticated, user, refreshUser } = useAuth()
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth()
 
   const shippingCost = calcShipping(totalPrice)
 
-  const [form, setForm] = useState<ShippingForm>({
-    firstName: '',
-    lastName: '',
-    email: user?.email ?? '',
-    street: '',
-    city: '',
-    postalCode: '',
-    country: 'DE',
-    phone: '',
-  })
+  const [email, setEmail] = useState(user?.email ?? '')
+  const [addressSelection, setAddressSelection] = useState<AddressSelection | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [showLogin, setShowLogin] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'applepay' | 'klarna' | 'card'>('paypal')
   const [promoCode, setPromoCode] = useState('')
+  const [couponInput, setCouponInput] = useState('')
+  const [couponMessage, setCouponMessage] = useState<{ type: 'success' | 'info'; text: string } | null>(null)
 
   // Auto-apply discount code passed from the upsell confirmation flow
   useEffect(() => {
@@ -60,32 +36,34 @@ export default function CheckoutPage() {
     }
   }, [])
 
-  const [loginEmail, setLoginEmail] = useState('')
-  const [loginPassword, setLoginPassword] = useState('')
-  const [loginError, setLoginError] = useState<string | null>(null)
-  const [loginLoading, setLoginLoading] = useState(false)
+  // Keeps the visible input in sync when a code was auto-applied above, without fighting the
+  // user's own typing — this only fires when promoCode itself changes, not on every render.
+  useEffect(() => {
+    if (promoCode) setCouponInput(promoCode)
+  }, [promoCode])
+
+  useEffect(() => {
+    if (user?.email) setEmail(user.email)
+  }, [user?.email])
 
   const upsellDiscount = calcUpsellDiscount(totalPrice, promoCode)
   const finalTotal = calcFinalTotal(totalPrice, shippingCost, upsellDiscount)
 
-  function update(field: keyof ShippingForm) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-      setForm(prev => ({ ...prev, [field]: e.target.value }))
-  }
-
-  async function handleLogin() {
-    setLoginError(null)
-    setLoginLoading(true)
-    try {
-      await authApi.login({ email: loginEmail, password: loginPassword })
-      await refreshUser()
-      setShowLogin(false)
-    } catch (err) {
-      setLoginError(
-        err instanceof FetchError ? err.message : 'Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Daten.'
-      )
-    } finally {
-      setLoginLoading(false)
+  // There is no backend endpoint to pre-validate a discount code — only /orders itself applies
+  // and returns the real discount at creation time (see lib/pricing.ts's own note on this). So
+  // this never fabricates a discount preview for a code it can't verify: UPSELL10 is the one
+  // code the client recognizes and can show feedback for immediately; anything else is simply
+  // carried through to order submission, where the backend is the actual authority.
+  function handleApplyCoupon(e: React.FormEvent) {
+    e.preventDefault()
+    const code = couponInput.trim()
+    setPromoCode(code)
+    if (!code) {
+      setCouponMessage(null)
+    } else if (calcUpsellDiscount(totalPrice, code) > 0) {
+      setCouponMessage({ type: 'success', text: '✓ Rabatt angewendet' })
+    } else {
+      setCouponMessage({ type: 'info', text: 'Wird bei der Bestellung geprüft.' })
     }
   }
 
@@ -93,6 +71,10 @@ export default function CheckoutPage() {
     e.preventDefault()
     if (!isAuthenticated) {
       setError('Bitte melden Sie sich an, um fortzufahren.')
+      return
+    }
+    if (!addressSelection) {
+      setError('Bitte wähle oder gib eine Lieferadresse ein.')
       return
     }
     setError(null)
@@ -107,19 +89,16 @@ export default function CheckoutPage() {
         return
       }
 
+      // Exactly one of savedAddressId / shippingAddress — never both, never neither. See
+      // docs/superpowers/specs/2026-08-05-checkout-address-design.md §2.
       const order = await orderApi.create({
         items: cartItems.map((item) => ({
           listingId: Number(item.defaultListingId!),
           quantity: item.quantity,
         })),
-        shippingAddress: {
-          fullName: `${form.firstName} ${form.lastName}`,
-          street: form.street,
-          city: form.city,
-          postalCode: form.postalCode,
-          country: form.country,
-          phone: form.phone || undefined,
-        },
+        ...(addressSelection.mode === 'saved'
+          ? { savedAddressId: addressSelection.id }
+          : { shippingAddress: toShippingAddressDto(addressSelection.address) }),
         discountCode: promoCode.trim() || undefined,
       })
 
@@ -172,6 +151,34 @@ export default function CheckoutPage() {
     )
   }
 
+  // Checkout requires an authenticated user — the address book and order creation both need
+  // one. Waits for the auth check to resolve first so an actually-logged-in visitor never
+  // flashes the gate. Cart items already live in CartContext/localStorage, so nothing is lost
+  // while they log in or register inline below.
+  if (authLoading) {
+    return (
+      <>
+        <CheckoutNavbar />
+        <div className="min-h-screen flex items-center justify-center" style={{ paddingTop: '42px' }}>
+          <div className="w-8 h-8 border-2 border-enunas-gray-light border-t-enunas-purple rounded-full animate-spin" />
+        </div>
+        <CartFooter />
+      </>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <>
+        <CheckoutNavbar />
+        <div className="min-h-screen pb-20 px-4" style={{ paddingTop: '42px' }}>
+          <CheckoutAuthGate />
+        </div>
+        <CartFooter />
+      </>
+    )
+  }
+
   return (
     <>
       <CheckoutNavbar />
@@ -205,65 +212,13 @@ export default function CheckoutPage() {
                 <h2 className="font-league-spartan text-xs uppercase tracking-[0.15em] text-enunas-gray-medium mb-4">
                   Kontakt
                 </h2>
-                {!isAuthenticated && (
-                  <div className="bg-enunas-off-white border border-enunas-gray-light mb-4">
-                    <button
-                      type="button"
-                      onClick={() => setShowLogin(v => !v)}
-                      className="w-full flex items-center justify-between px-4 py-3 font-league-spartan text-xs text-enunas-gray-dark hover:text-enunas-black transition-colors duration-200"
-                    >
-                      <span>
-                        <span className="text-enunas-purple font-medium">Anmelden</span>
-                        {' '}für schnelleres Auschecken
-                      </span>
-                      <span
-                        className="text-enunas-gray-medium transition-transform duration-200"
-                        style={{ transform: showLogin ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                        aria-hidden
-                      >
-                        ▾
-                      </span>
-                    </button>
-
-                    {showLogin && (
-                      <div className="px-4 pb-4 space-y-3 border-t border-enunas-gray-light pt-3">
-                        <input
-                          type="email"
-                          placeholder="E-Mail-Adresse"
-                          value={loginEmail}
-                          onChange={e => setLoginEmail(e.target.value)}
-                          className={inputClass}
-                        />
-                        <input
-                          type="password"
-                          placeholder="Passwort"
-                          value={loginPassword}
-                          onChange={e => setLoginPassword(e.target.value)}
-                          onKeyDown={e => { if (e.key === 'Enter') handleLogin() }}
-                          className={inputClass}
-                        />
-                        {loginError && (
-                          <p className="font-league-spartan text-[11px] text-enunas-error">{loginError}</p>
-                        )}
-                        <button
-                          type="button"
-                          onClick={handleLogin}
-                          disabled={loginLoading}
-                          className="group relative w-full overflow-hidden bg-enunas-purple text-white py-3 hover:bg-enunas-purple-dark transition-colors duration-300 ease-out-expo disabled:opacity-60 disabled:cursor-not-allowed"
-                        >
-                          <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
-                          <span className="relative z-10 font-cormorant text-[18px] tracking-[0.06em]">{loginLoading ? 'Bitte warten…' : 'Anmelden'}</span>
-                          <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
                 <input
                   type="email"
+                  name="email"
+                  autoComplete="email"
                   placeholder="E-Mail-Adresse"
-                  value={form.email}
-                  onChange={update('email')}
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
                   required
                   className={inputClass}
                 />
@@ -274,68 +229,7 @@ export default function CheckoutPage() {
                 <h2 className="font-league-spartan text-xs uppercase tracking-[0.15em] text-enunas-gray-medium mb-4">
                   Lieferadresse
                 </h2>
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="Vorname"
-                      value={form.firstName}
-                      onChange={update('firstName')}
-                      required
-                      className={inputClass}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Nachname"
-                      value={form.lastName}
-                      onChange={update('lastName')}
-                      required
-                      className={inputClass}
-                    />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Straße und Hausnummer"
-                    value={form.street}
-                    onChange={update('street')}
-                    required
-                    className={inputClass}
-                  />
-                  <div className="grid grid-cols-5 gap-3">
-                    <input
-                      type="text"
-                      placeholder="PLZ"
-                      value={form.postalCode}
-                      onChange={update('postalCode')}
-                      required
-                      className={`${inputClass} col-span-2`}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Stadt"
-                      value={form.city}
-                      onChange={update('city')}
-                      required
-                      className={`${inputClass} col-span-3`}
-                    />
-                  </div>
-                  <select
-                    value={form.country}
-                    onChange={update('country')}
-                    className={inputClass}
-                  >
-                    {COUNTRIES.map(c => (
-                      <option key={c.value} value={c.value}>{c.label}</option>
-                    ))}
-                  </select>
-                  <input
-                    type="tel"
-                    placeholder="Telefonnummer (optional)"
-                    value={form.phone}
-                    onChange={update('phone')}
-                    className={inputClass}
-                  />
-                </div>
+                <SavedAddressSelector onChange={setAddressSelection} />
               </section>
 
               {/* Payment method */}
@@ -418,7 +312,7 @@ export default function CheckoutPage() {
               <div className="space-y-3">
                 <button
                   type="submit"
-                  disabled={loading || !isAuthenticated}
+                  disabled={loading || !addressSelection}
                   className="group relative w-full overflow-hidden bg-enunas-purple text-white py-5 hover:bg-enunas-purple-dark transition-colors duration-300 ease-out-expo disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {/* Diagonal shimmer sweep */}
@@ -431,20 +325,6 @@ export default function CheckoutPage() {
                   <span className="relative z-10 font-cormorant text-[20px] tracking-[0.06em]">{loading ? 'Bitte warten…' : 'Zur Zahlung'}</span>
                   <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
                 </button>
-
-                {!isAuthenticated && (
-                  <p className="font-league-spartan text-xs text-enunas-gray-medium text-center">
-                    Bitte{' '}
-                    <button
-                      type="button"
-                      onClick={() => { setShowLogin(true); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                      className="text-enunas-purple underline hover:no-underline"
-                    >
-                      melden Sie sich an
-                    </button>
-                    , um Ihre Bestellung abzuschließen.
-                  </p>
-                )}
 
                 <p className="font-league-spartan text-[10px] text-enunas-gray-medium text-center leading-relaxed">
                   Mit Ihrer Bestellung stimmen Sie unseren{' '}
@@ -525,13 +405,33 @@ export default function CheckoutPage() {
                   </p>
                 </div>
 
-                {/*
-                  Promo-code field intentionally removed. The only working code (UPSELL10) is
-                  auto-attached invisibly via localStorage on the upsell path. A manual entry
-                  field would either be a no-op (the old "Anwenden" TODO) or require validating
-                  discount codes client-side — i.e. letting the client decide the price. If a
-                  visible promo field is wanted later it must validate against the backend.
-                */}
+                {/* Coupon code — see handleApplyCoupon above for why this never fabricates a
+                    discount preview for codes the frontend can't actually verify. */}
+                <form onSubmit={handleApplyCoupon} className="flex gap-2 pt-4 mt-4 border-t border-enunas-gray-light">
+                  <input
+                    type="text"
+                    name="coupon"
+                    placeholder="Gutscheincode"
+                    value={couponInput}
+                    onChange={e => setCouponInput(e.target.value)}
+                    className="flex-1 min-w-0 border border-enunas-gray-light px-3 py-2.5 font-league-spartan text-xs text-enunas-black bg-white focus:outline-none focus:border-enunas-purple transition-colors duration-200"
+                  />
+                  <button
+                    type="submit"
+                    className="flex-shrink-0 font-league-spartan text-[11px] uppercase tracking-[0.15em] text-enunas-purple border border-enunas-purple px-4 hover:bg-enunas-purple hover:text-white transition-colors duration-200"
+                  >
+                    Anwenden
+                  </button>
+                </form>
+                {couponMessage && (
+                  <p
+                    className={`font-league-spartan text-[11px] mt-2 ${
+                      couponMessage.type === 'success' ? 'text-enunas-success' : 'text-enunas-gray-medium'
+                    }`}
+                  >
+                    {couponMessage.text}
+                  </p>
+                )}
               </div>
             </aside>
 

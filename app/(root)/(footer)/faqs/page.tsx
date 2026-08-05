@@ -10,11 +10,11 @@ const faqs = [
     items: [
       {
         q: 'Wie gebe ich eine Bestellung auf?',
-        a: 'Wählen Sie Ihre gewünschten Artikel aus, fügen Sie diese dem Warenkorb hinzu und folgen Sie dem Checkout-Prozess. Sie können als Gast oder mit einem Konto bestellen.',
+        a: 'Wählen Sie Ihre gewünschten Artikel aus, fügen Sie diese dem Warenkorb hinzu und folgen Sie dem Checkout-Prozess. Sie können mit einem Konto bestellen.',
       },
       {
         q: 'Kann ich meine Bestellung nach der Aufgabe ändern?',
-        a: 'Bestellungen können nur geändert oder storniert werden, solange sie noch nicht versendet wurden. Kontaktieren Sie bitte umgehend unseren Kundenservice.',
+        a: 'Achtung: Sobald deine Bestellung versendet wurde, können wir sie nicht mehr ändern oder stornieren. Kontaktieren Sie bitte umgehend unseren Kundenservice.',
       },
       {
         q: 'Welche Größen sind verfügbar?',
@@ -32,11 +32,11 @@ const faqs = [
       },
       {
         q: 'Wann wird meine Zahlung abgebucht?',
-        a: 'Die Zahlung wird zum Zeitpunkt der Bestellaufgabe autorisiert und nach dem Versand Ihres Pakets abgebucht.',
+        a: 'Bei den meisten Zahlungsmethoden wird Ihre Karte oder Ihr Konto zum Zeitpunkt der Bestellung autorisiert. Die endgültige Abbuchung erfolgt jedoch erst mit dem Versand Ihrer Bestellung. Bitte beachten Sie, dass bei einigen Zahlungsarten (z.B. SEPA-Lastschrift) eine Abbuchung auch nach der Autorisierung noch fehlschlagen kann.',
       },
       {
         q: 'Ist meine Zahlung sicher?',
-        a: 'Alle Transaktionen sind SSL-verschlüsselt. Wir speichern keine Kreditkartendaten auf unseren Servern.',
+        a: 'Deine Sicherheit hat für uns oberste Priorität. Deine Zahlung wird über den europäischen Zahlungsdienstleister Mollie verarbeitet, der nach dem strengen PCI DSS Level 1 zertifiziert ist. Alle Daten werden dabei durch eine SSL-Verschlüsselung geschützt. Deine sensiblen Kartendaten landen bei uns nicht auf dem Server – sie werden direkt und sicher von Mollie verarbeitet. So bleibst du bei jedem Einkauf auf der sicheren Seite.',
       },
     ],
   },
@@ -44,13 +44,17 @@ const faqs = [
     id: 'versand',
     category: 'Versand',
     items: [
+       {
+        q: 'Wohin liefern wir?',
+        a: 'Aktuell liefern wir innerhalb Deutschlands. Die EU folgt in Kürze – bleib dran!',
+      },
       {
         q: 'Wie lange dauert die Lieferung?',
-        a: 'Innerhalb Deutschlands liefern wir in 2–4 Werktagen, in die EU in 4–8 Werktagen. Eine detaillierte Übersicht finden Sie auf unserer Lieferseite.',
+        a: 'Die Lieferzeit hängt vom jeweiligen Brandpartner ab. In der Regel rechnen wir mit 2–7 Werktagen innerhalb Deutschlands. Bei einzelnen Partnern kann es auch etwas länger dauern. Sollte es zu Verzögerungen oder Komplikationen kommen, informieren wir dich selbstverständlich sofort.',
       },
       {
         q: 'Wie viel kostet der Versand?',
-        a: 'Ab einem Bestellwert von 50 € ist der Versand kostenlos. Darunter berechnen wir eine Pauschale von 4,99 €.',
+        a: 'Ab einem Bestellwert von 250 € ist der Versand kostenlos. Darunter berechnen wir eine Pauschale von 4,99 €.',
       },
       {
         q: 'Kann ich meine Bestellung verfolgen?',
@@ -82,7 +86,7 @@ const faqs = [
     items: [
       {
         q: 'Wie initiiere ich eine Rücksendung?',
-        a: 'Melden Sie sich in Ihrem Konto an, wählen Sie die betreffende Bestellung und klicken Sie auf „Rücksendung einleiten". Sie erhalten ein vorfrankiertes Etikett per E-Mail.',
+        a: 'Melden Sie sich in Ihrem Konto an, wählen Sie die betreffende Bestellung und klicken Sie auf „Rücksendung einleiten". Sie erhalten dann alle weiteren Informationen zur Rücksendung per E-Mail.',
       },
       {
         q: 'Wie lange habe ich Zeit für eine Rücksendung?',

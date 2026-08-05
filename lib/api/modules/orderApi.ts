@@ -7,22 +7,26 @@ interface CreateOrderItemDto {
   quantity: number;
 }
 
-// Mirrors backend ShippingAddressDto
-interface ShippingAddressDto {
-  fullName: string;
+// Mirrors backend ShippingAddressDto exactly — same fields as UserAddressDto (see addressApi.ts)
+// plus an optional phone. Not the saved-address shape: this is the ad-hoc, one-time-entry path.
+export interface ShippingAddressDto {
+  firstName: string;
+  lastName: string;
   street: string;
-  street2?: string;
-  city: string;
+  houseNumber: string;
+  addressLine2?: string;
   postalCode: string;
+  city: string;
   country: string;
-  state?: string;
   phone?: string;
 }
 
-// Mirrors backend CreateOrderDto
+// Mirrors backend CreateOrderDto. @ExactlyOneAddressSource on the backend enforces exactly one
+// of shippingAddress / savedAddressId — never both, never neither.
 export interface CreateOrderDto {
   items: CreateOrderItemDto[];
-  shippingAddress: ShippingAddressDto;
+  shippingAddress?: ShippingAddressDto;
+  savedAddressId?: number;
   notes?: string;
   discountCode?: string;
 }

@@ -12,7 +12,7 @@ export default function StarPage() {
       config={{
         name: 'Star',
         slug: 'star',
-        tagline: 'Für die, die im Mittelpunkt stehen.',
+        tagline: 'Oben ankommen. Auf deine Art.',
         color: '#0A0A0A',
       }}
     />

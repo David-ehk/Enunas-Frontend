@@ -27,7 +27,7 @@ const CatalogueHero = () => {
             Finde deine Kategorie
           </p>
           <p className="font-league-spartan text-sm font-semibold tracking-[0.05em] text-enunas-black mb-2">
-            5 Kategorien. Eine ist für dich.
+            5 Welten. In welche erkennst du dich wieder
           </p>
           <Link
             href="/bekleidung"

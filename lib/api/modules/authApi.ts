@@ -7,10 +7,25 @@ interface LoginRequest { email: string; password: string }
 interface LoginResponse { token: string; expiresIn: number }
 // Backend RegisterUserDto: { email, password } only — no firstName/lastName/role.
 interface SignupRequest { email: string; password: string }
+// Backend GoogleAuthDto: { idToken } only — the frontend never sends user info manually, the
+// backend derives everything from the verified Google token itself.
+interface GoogleAuthRequest { idToken: string }
 
 export const authApi = {
   async login(data: LoginRequest): Promise<void> {
     const res = await fetcher<LoginResponse>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      auth: false,
+    });
+    setToken(res.token);
+  },
+
+  // Mirrors login() exactly — same response shape (LoginResponseDto), same token storage. The
+  // rest of the app (AuthContext, protected routes, logout) never needs to know which method
+  // produced the token.
+  async loginWithGoogle(data: GoogleAuthRequest): Promise<void> {
+    const res = await fetcher<LoginResponse>('/auth/google', {
       method: 'POST',
       body: JSON.stringify(data),
       auth: false,

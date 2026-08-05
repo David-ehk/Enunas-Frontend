@@ -5,7 +5,7 @@ const categories = [
 
   {
     title: "Marken",
-    image: "https://amq-mcq.dam.kering.com/asset/fed593c2-f470-4c31-ba1d-f785e81a065b/Original-Ecom/WEBSITE-DESKTOP2.jpg",
+    image: "https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbCgz4ViX2F4izT8Pb0mBSqCJruKUGf7hogwct",
     link: "/marken"
   },
   {

@@ -12,7 +12,7 @@ export default function StreetwarePage() {
       config={{
         name: 'Streetwear',
         slug: 'streetwear',
-        tagline: 'Ikonische Architektur. Mutige Schnitte.',
+        tagline: 'Immer du selbst. Immer im Stil.',
         color: '#0011A5',
       }}
     />

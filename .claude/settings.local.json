@@ -150,7 +150,18 @@
       "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object State, OwningProcess -Unique\")",
       "Bash(powershell -Command \"Get-CimInstance Win32_Process -Filter \\\\\"Name='node.exe'\\\\\" | Select-Object ProcessId, CommandLine | Format-List\")",
       "Bash(disown)",
-      "Read(//c/Users/david/AppData/Local/Temp/claude/C--dev-enunas/34aee630-c927-48dc-9d3c-ee2ffc434042/scratchpad/**)"
+      "Read(//c/Users/david/AppData/Local/Temp/claude/C--dev-enunas/34aee630-c927-48dc-9d3c-ee2ffc434042/scratchpad/**)",
+      "Bash(git commit -m 'Add checkout address experience design spec *)",
+      "Bash(grep -n \"checkout\\\\\\\\\\\\\\\\components\\\\|lib\\\\\\\\\\\\\\\\address.ts\\\\|lib\\\\\\\\\\\\\\\\googleMaps.ts\\\\|addressApi.ts\\\\|types\\\\\\\\\\\\\\\\google-maps\\\\|checkout\\\\\\\\\\\\\\\\page.tsx\" /tmp/lint_out.txt)",
+      "Bash(powershell -NoProfile -Command \"Get-Process node -ErrorAction SilentlyContinue | Select-Object Id,StartTime,Path\")",
+      "Bash(powershell -NoProfile -Command \"Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object OwningProcess\")",
+      "Bash(powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter \\\\\"ProcessId=89412\\\\\" | Select-Object ProcessId,CommandLine | Format-List\")",
+      "Bash(powershell -NoProfile -Command \"Stop-Process -Id 89412 -Force\")",
+      "mcp__chrome-devtools__get_network_request",
+      "Bash(git commit -m 'Add Google OAuth login design spec *)",
+      "Bash(pnpm --version)",
+      "Bash(pnpm run *)",
+      "Bash(grep -rn \"AIza\\\\|GOCSPX\\\\|GOOGLE.*KEY.*=.*['\\\\\"][A-Za-z0-9_-]\\\\{15,\\\\}\\\\|GOOGLE.*ID.*=.*['\\\\\"][0-9]\\\\{10,\\\\}\" --include=\"*.ts\" --include=\"*.tsx\" --include=\"*.js\" .)"
     ]
   }
 }
