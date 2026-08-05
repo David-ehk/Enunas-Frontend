@@ -16,11 +16,11 @@ export default function KategorieAuswahl() {
   const [isImageLoading, setIsImageLoading] = useState(false)
 
   const kategorie = [
-    { id: 'kategorie1', name: 'Streetwear',   image: '/assets/images/Test1.WebP',  color: 'bg-[#0011A5]', colorHex: '#0011A5', link: '/bekleidung/streetwear'   },
-    { id: 'kategorie2', name: 'Experimental', image: 'https://cdn.rickowens.eu/products/205600/large/RL02E1719_CTW_09_01.jpg?1757411991', color: 'bg-[#6C169C]', colorHex: '#6C169C', link: '/bekleidung/experimental' },
+    { id: 'kategorie1', name: 'Streetwear',   image: 'https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbAKhCpMQupCLYd3cO7264E8yxM5iFaTvjNgGX',  color: 'bg-[#0011A5]', colorHex: '#0011A5', link: '/bekleidung/streetwear'   },
+    { id: 'kategorie2', name: 'Experimental', image: '/assets/images/Test2.WebP', color: 'bg-[#6C169C]', colorHex: '#6C169C', link: '/bekleidung/experimental' },
     { id: 'kategorie3', name: 'Athleisure',   image: '/assets/images/Test3.WebP',  color: 'bg-[#C01B1B]', colorHex: '#C01B1B', link: '/bekleidung/athleisure'  },
     { id: 'kategorie4', name: 'Cultural',     image: '/assets/images/Test4.WebP',  color: 'bg-[#EA9575]', colorHex: '#EA9575', link: '/bekleidung/cultural'    },
-    { id: 'kategorie5', name: 'Star',         image: '/assets/images/Test1.WebP',  color: 'bg-black',     colorHex: '#000000', link: '/bekleidung/star'        },
+    { id: 'kategorie5', name: 'Star',         image: '/assets/images/Test4.WebP',  color: 'bg-black',     colorHex: '#000000', link: '/bekleidung/star'        },
   ]
 
   // Mobile carousel state
