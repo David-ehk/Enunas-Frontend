@@ -163,7 +163,9 @@
       "Bash(pnpm run *)",
       "Bash(grep -rn \"AIza\\\\|GOCSPX\\\\|GOOGLE.*KEY.*=.*['\\\\\"][A-Za-z0-9_-]\\\\{15,\\\\}\\\\|GOOGLE.*ID.*=.*['\\\\\"][0-9]\\\\{10,\\\\}\" --include=\"*.ts\" --include=\"*.tsx\" --include=\"*.js\" .)",
       "Bash(git check-ignore *)",
-      "Bash(echo \"exit:$?\")"
+      "Bash(echo \"exit:$?\")",
+      "Bash(git rev-list *)",
+      "Bash(git fetch *)"
     ]
   }
 }

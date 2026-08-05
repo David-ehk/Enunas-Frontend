@@ -40,6 +40,24 @@ const Hero = () => {
     }
   }, [])
 
+  // Some mobile browsers (iOS Low Power Mode, Android Chrome Data Saver) reject
+  // muted autoplay outright as a policy decision, not because the video hasn't
+  // buffered yet — so the canplaythrough retry above never fires and the video
+  // sits on a native "tap to play" state. Starting playback on the very first
+  // touch/scroll/click anywhere on the page (not just on the video itself)
+  // means it starts the instant the visitor does anything, rather than
+  // requiring them to find and press a play button.
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    const tryPlay = () => { video.play().catch(() => {}) }
+    const events: Array<keyof DocumentEventMap> = ['touchstart', 'pointerdown', 'click', 'scroll']
+    events.forEach(event => document.addEventListener(event, tryPlay, { once: true, passive: true }))
+    return () => {
+      events.forEach(event => document.removeEventListener(event, tryPlay))
+    }
+  }, [])
+
   return (
     <section id="home" className="w-full min-h-screen relative">
       <video
