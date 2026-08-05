@@ -256,8 +256,6 @@ const SOCIAL_LIST = [
     Icon: () => (
       <a
         href="https://www.instagram.com/enunas_munich/"
-        target="_blank"
-        rel="noopener noreferrer"
         aria-label="Instagram"
       >
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -275,8 +273,6 @@ const SOCIAL_LIST = [
     Icon: () => (
       <a
         href="https://www.tiktok.com/@enunas_munich"
-        target="_blank"
-        rel="noopener noreferrer"
         aria-label="TikTok"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -288,12 +284,11 @@ const SOCIAL_LIST = [
   {
     key: "pinterest",
     label: "Pinterest",
-    url: "https://www.pinterest.com/enunas_munich/",
+    url: "/",
     Icon: () => (
       <a
-        href="https://www.pinterest.com/enunas_munich/"
-        target="_blank"
-        rel="noopener noreferrer"
+        href="/"
+       
         aria-label="Pinterest"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
