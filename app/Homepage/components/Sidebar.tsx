@@ -504,7 +504,13 @@ const MEGA_CSS = `
 .mn-sub-highlights { display: flex; flex-direction: column; gap: 10px; }
 .mn-sub-highlight {
   background: none; border: 0; text-align: left; padding: 0; cursor: pointer;
-  font-family: var(--mn-serif); font-style: italic; font-weight: 400; font-size: 18px;
+  /* var(--mn-serif)'s literal 'Cormorant Garamond' string doesn't match the internal family
+     name Next's local-font loader actually registers, so it was silently falling through to
+     the system's installed "Garamond" — visibly heavier/larger than the real webfont used
+     everywhere else (e.g. Subscribe.tsx's font-cormorant). var(--font-Cormorant-Garamond) is
+     the same variable Subscribe.tsx resolves through; --text-lg matches its actual rendered
+     size (a fluid clamp, not a flat 18px). */
+  font-family: var(--font-Cormorant-Garamond, var(--mn-serif)); font-style: italic; font-weight: 400; font-size: var(--text-lg);
   color: var(--mn-pane-muted); width: fit-content; line-height: 1.1;
   transition: color 240ms cubic-bezier(0.25,1,0.5,1);
 }
@@ -642,6 +648,9 @@ const MEGA_CSS = `
 
   /* Hide active-on-hover state — touch devices set active on tap only */
   .mn-rail-link:hover .mn-rl-label { letter-spacing: 0.24em; transform: none; }
+
+  /* Icon-only close on mobile — the "Schließen" label is redundant next to a plain X. */
+  .mn-close-label { display: none; }
 }
 
 /* ── Reduced motion ── */
@@ -753,8 +762,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="mn-rail">
           <div className="mn-rail-head">
             <span className="mn-mark">Enunas</span>
-            <button ref={closeRef} className="mn-rail-close" onClick={onClose}>
-              <IClose /> Schließen
+            <button ref={closeRef} className="mn-rail-close" onClick={onClose} aria-label="Schließen">
+              <IClose /> <span className="mn-close-label">Schließen</span>
             </button>
           </div>
 
@@ -792,8 +801,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <button className="mn-mobile-back" onClick={() => setMobilePanel('rail')}>
               <IChevL /> {active.label}
             </button>
-            <button className="mn-sub-mobile-close" onClick={onClose}>
-              <IClose /> Schließen
+            <button className="mn-sub-mobile-close" onClick={onClose} aria-label="Schließen">
+              <IClose /> <span className="mn-close-label">Schließen</span>
             </button>
           </div>
 

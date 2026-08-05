@@ -75,6 +75,14 @@ const Navbar = () => {
     })
   }, [])
 
+  const removeRecentSearch = useCallback((q: string) => {
+    setRecentSearches(prev => {
+      const updated = prev.filter(s => s !== q)
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)) } catch {}
+      return updated
+    })
+  }, [])
+
   // Debounced live search against the real product API.
   // Note: GET /products/search shares the /products/** auth gate. If the backend requires
   // auth there, a logged-out visitor's request 401s — we degrade gracefully to an empty
@@ -209,6 +217,7 @@ const Navbar = () => {
             onQueryChange={handleQueryChange}
             onSearch={handleSearch}
             onResultSelect={handleResultSelect}
+            onRemoveRecent={removeRecentSearch}
           />
 
           {/* Mobile search trigger */}

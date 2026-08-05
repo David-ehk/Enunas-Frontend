@@ -35,6 +35,7 @@ export interface SearchbarProps {
   results?: SearchResult[] | null;
   loading?: boolean;
   recentSearches?: string[];
+  onRemoveRecent?: (query: string) => void;
   variant?: 'bar' | 'overlay' | 'sidebar';
   highlights?: SearchHighlight[];
   isOpen?: boolean;
@@ -195,6 +196,7 @@ function SearchSidebar({
   onQueryChange,
   onSearch,
   onResultSelect,
+  onRemoveRecent,
   onClose,
   placeholder = 'Suchen',
 }: Omit<SearchbarProps, 'variant'>) {
@@ -367,18 +369,29 @@ function SearchSidebar({
               <SectionLabel>Zuletzt gesucht</SectionLabel>
               <div className="flex flex-col">
                 {recentSearches.slice(0, 6).map((s, i) => (
-                  <button
+                  <div
                     key={i}
-                    type="button"
-                    onClick={() => { setQuery(s); onQueryChange?.(s); }}
-                    className="flex items-center gap-3 py-[14px] border-b border-enunas-gray-light last:border-b-0
-                               text-left group hover:text-enunas-purple transition-colors duration-150 focus:outline-none w-full"
+                    className="flex items-center gap-3 py-[14px] border-b border-enunas-gray-light last:border-b-0 group w-full"
                   >
-                    <ClockIcon className="flex-none text-enunas-gray-medium shrink-0" />
-                    <span className="font-league-spartan text-[13px] text-enunas-black group-hover:text-enunas-purple transition-colors duration-150 flex-1">
-                      {s}
-                    </span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => { setQuery(s); onQueryChange?.(s); }}
+                      className="flex items-center gap-3 flex-1 min-w-0 text-left hover:text-enunas-purple transition-colors duration-150 focus:outline-none"
+                    >
+                      <ClockIcon className="flex-none text-enunas-gray-medium shrink-0" />
+                      <span className="font-league-spartan text-[13px] text-enunas-black group-hover:text-enunas-purple transition-colors duration-150 truncate">
+                        {s}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onRemoveRecent?.(s)}
+                      aria-label={`„${s}" aus zuletzt gesucht entfernen`}
+                      className="flex-none p-1 text-enunas-gray-medium hover:text-enunas-black transition-colors duration-150 focus:outline-none"
+                    >
+                      <ClearIcon />
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>

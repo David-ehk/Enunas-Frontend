@@ -67,6 +67,14 @@ const DropNavbar = () => {
     })
   }, [])
 
+  const removeRecentSearch = useCallback((q: string) => {
+    setRecentSearches(prev => {
+      const updated = prev.filter(s => s !== q)
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)) } catch {}
+      return updated
+    })
+  }, [])
+
   const handleQueryChange = useCallback((q: string) => {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
     if (!q.trim()) {
@@ -181,6 +189,7 @@ const DropNavbar = () => {
             onQueryChange={handleQueryChange}
             onSearch={handleSearch}
             onResultSelect={handleResultSelect}
+            onRemoveRecent={removeRecentSearch}
           />
 
           <div className="sm:hidden">

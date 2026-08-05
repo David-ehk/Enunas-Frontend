@@ -161,6 +161,7 @@ const css = `
   .foot-mark   { font-size: 44px; }
   .foot-utility { flex-direction: column; align-items: flex-start; gap: 20px; }
   .foot-legal  { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .foot-legal .to-top { display: none; }
   /* Wide tracking eats the narrow 2-up columns — tighten it so the longest
      labels ("Zahlungsarten", the SSL note) keep breathing room. */
   .col-title   { letter-spacing: 0.12em; }
