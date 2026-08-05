@@ -20,7 +20,7 @@ const geschlecht = [
       <div className="grid grid-cols-2 gap-0">
         {geschlecht.map((ges,idx)=>(
 
-          <div className="relative group aspect-[2/3] md:aspect-auto md:h-screen" key={idx}>
+          <div className="relative group h-[55vh] md:h-screen" key={idx}>
 
             <Link href={ges.link}>
 
