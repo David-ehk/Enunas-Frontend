@@ -20,7 +20,7 @@ export default function KategorieAuswahl() {
     { id: 'kategorie2', name: 'Experimental', image: '/assets/images/Test2.WebP', color: 'bg-[#6C169C]', colorHex: '#6C169C', link: '/bekleidung/experimental' },
     { id: 'kategorie3', name: 'Athleisure',   image: '/assets/images/Test3.WebP',  color: 'bg-[#C01B1B]', colorHex: '#C01B1B', link: '/bekleidung/athleisure'  },
     { id: 'kategorie4', name: 'Cultural',     image: '/assets/images/Test4.WebP',  color: 'bg-[#EA9575]', colorHex: '#EA9575', link: '/bekleidung/cultural'    },
-    { id: 'kategorie5', name: 'Star',         image: '/assets/images/Test4.WebP',  color: 'bg-black',     colorHex: '#000000', link: '/bekleidung/star'        },
+    { id: 'kategorie5', name: 'Star',         image: '/assets/images/Test5.WebP',  color: 'bg-black',     colorHex: '#000000', link: '/bekleidung/star'        },
   ]
 
   // Mobile carousel state
