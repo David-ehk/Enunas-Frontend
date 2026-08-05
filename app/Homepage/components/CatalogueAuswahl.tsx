@@ -16,7 +16,7 @@ export default function KategorieAuswahl() {
   const [isImageLoading, setIsImageLoading] = useState(false)
 
   const kategorie = [
-    { id: 'kategorie1', name: 'Streetwear',   image: '/assets/images/Test2.WebP',  color: 'bg-[#0011A5]', colorHex: '#0011A5', link: '/bekleidung/streetwear'   },
+    { id: 'kategorie1', name: 'Streetwear',   image: '/assets/images/Test6.WebP',  color: 'bg-[#0011A5]', colorHex: '#0011A5', link: '/bekleidung/streetwear'   },
     { id: 'kategorie2', name: 'Experimental', image: '/assets/images/Test2.WebP', color: 'bg-[#6C169C]', colorHex: '#6C169C', link: '/bekleidung/experimental' },
     { id: 'kategorie3', name: 'Athleisure',   image: '/assets/images/Test3.WebP',  color: 'bg-[#C01B1B]', colorHex: '#C01B1B', link: '/bekleidung/athleisure'  },
     { id: 'kategorie4', name: 'Cultural',     image: '/assets/images/Test4.WebP',  color: 'bg-[#EA9575]', colorHex: '#EA9575', link: '/bekleidung/cultural'    },
