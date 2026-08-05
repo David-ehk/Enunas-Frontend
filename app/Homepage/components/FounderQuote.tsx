@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 
 const LINES = [
   'Die besten Fits entstehen, wenn Kleidung',
-  ' deine Persönlichkeit widerspiegelt.',
+  ' deine Persönlichkeit matcht.',
 ]
 
 export default function FounderQuote() {
