@@ -51,8 +51,18 @@ export default function KategorieAuswahl() {
   }, [])
 
   // Centre the initially active thumbnail without an animated jump on mount.
+  // Deliberately NOT scrollIntoView: on first load this section sits below the
+  // full-viewport Hero, so the browser treats the thumbnail as "out of view"
+  // and scrolls the whole page down to it — hijacking the homepage away from
+  // the Hero video. Setting the rail's own scrollLeft only ever moves the
+  // horizontal carousel, never the page.
   useEffect(() => {
-    itemRefs.current[centeredSlot]?.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' })
+    const el = itemRefs.current[centeredSlot]
+    const rail = railRef.current
+    if (!el || !rail) return
+    const elRect = el.getBoundingClientRect()
+    const railRect = rail.getBoundingClientRect()
+    rail.scrollLeft += (elRect.left + elRect.width / 2) - (railRect.left + railRect.width / 2)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
