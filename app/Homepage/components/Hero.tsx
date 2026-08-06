@@ -10,16 +10,6 @@ const Hero = () => {
     return () => clearTimeout(timer)
   }, [])
 
-  // The homepage should always open on the hero video, not wherever the
-  // browser's native scroll restoration (e.g. after using the back button)
-  // last left the page.
-  useEffect(() => {
-    if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual'
-    }
-    window.scrollTo(0, 0)
-  }, [])
-
   // Chrome (and other browsers) can fail to honor the muted/autoPlay JSX attributes on first
   // paint — React sets them as DOM attributes, but the browser's autoplay gate checks the live
   // `.muted` PROPERTY at the exact moment it decides whether to play, and that property isn't

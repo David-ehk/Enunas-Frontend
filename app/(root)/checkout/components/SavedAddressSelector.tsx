@@ -13,20 +13,24 @@ import CheckoutAddressForm from './CheckoutAddressForm'
 
 interface SavedAddressSelectorProps {
   onChange: (selection: AddressSelection | null) => void
+  // The address book endpoint requires auth — a guest has no saved addresses to fetch, so this
+  // skips that call entirely and drops straight into the manual entry form below instead of
+  // surfacing a misleading "Adressen konnten nicht geladen werden" error.
+  isAuthenticated: boolean
 }
 
 // Address entry/editing happens inline in the page flow, not in a popup dialog — matches the
 // familiar Shopify-style checkout pattern rather than a modal interrupting the page.
 type View = 'list' | 'form'
 
-export default function SavedAddressSelector({ onChange }: SavedAddressSelectorProps) {
+export default function SavedAddressSelector({ onChange, isAuthenticated }: SavedAddressSelectorProps) {
   const [addresses, setAddresses] = useState<ApiUserAddress[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(isAuthenticated)
   const [loadError, setLoadError] = useState<string | null>(null)
 
   const [selection, setSelection] = useState<AddressSelection | null>(null)
 
-  const [view, setView] = useState<View>('list')
+  const [view, setView] = useState<View>(isAuthenticated ? 'list' : 'form')
   const [formMode, setFormMode] = useState<'new' | 'edit'>('new')
   const [editingAddress, setEditingAddress] = useState<ApiUserAddress | null>(null)
   const [formSubmitting, setFormSubmitting] = useState(false)
@@ -61,7 +65,12 @@ export default function SavedAddressSelector({ onChange }: SavedAddressSelectorP
     }
   }, [])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    if (isAuthenticated) load()
+    // Guests skip the fetch entirely — `loading`/`view` above already default to the manual
+    // entry form for them, so there's nothing to do here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated])
 
   // Reports the resolved selection up to the checkout page. Does not run on every render — only
   // when `selection` itself changes, which never happens from an unrelated parent re-render since

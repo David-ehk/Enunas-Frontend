@@ -1,20 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCart } from '@/app/context/CartContext'
 import { useAuth } from '@/app/context/AuthContext'
 import CheckoutNavbar from '@/app/(root)/cart/components/CheckoutNavbar'
 import CartFooter from '@/app/(root)/cart/components/CartFooter'
-import CheckoutAuthGate from './components/CheckoutAuthGate'
+import CheckoutAuthModal from './components/CheckoutAuthModal'
 import SavedAddressSelector from './components/SavedAddressSelector'
 import { orderApi, FetchError } from '@/lib/api'
 import { calcShipping, calcUpsellDiscount, calcFinalTotal } from '@/lib/pricing'
 import { toShippingAddressDto, type AddressSelection } from '@/lib/address'
 
 export default function CheckoutPage() {
-  const { cartItems, totalPrice, clearCart } = useCart()
+  const { cartItems, itemCount, totalPrice, clearCart } = useCart()
   const { isAuthenticated, isLoading: authLoading, user } = useAuth()
 
   const shippingCost = calcShipping(totalPrice)
@@ -27,6 +27,10 @@ export default function CheckoutPage() {
   const [promoCode, setPromoCode] = useState('')
   const [couponInput, setCouponInput] = useState('')
   const [couponMessage, setCouponMessage] = useState<{ type: 'success' | 'info'; text: string } | null>(null)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [summaryOpen, setSummaryOpen] = useState(false)
+  const [focusCouponSignal, setFocusCouponSignal] = useState(0)
+  const couponInputRef = useRef<HTMLInputElement>(null)
 
   // Auto-apply discount code passed from the upsell confirmation flow
   useEffect(() => {
@@ -54,6 +58,24 @@ export default function CheckoutPage() {
   // this never fabricates a discount preview for a code it can't verify: UPSELL10 is the one
   // code the client recognizes and can show feedback for immediately; anything else is simply
   // carried through to order submission, where the backend is the actual authority.
+  // "Rabatt hinzufügen" opens the (possibly still-collapsed) order summary accordion and jumps
+  // straight to the coupon field — the signal counter (rather than watching summaryOpen itself)
+  // means clicking it again while already open still re-focuses/re-scrolls, and the effect only
+  // ever runs after the coupon input has actually mounted for this click.
+  function handleAddDiscountClick() {
+    setSummaryOpen(true)
+    setFocusCouponSignal((s) => s + 1)
+  }
+
+  useEffect(() => {
+    if (focusCouponSignal === 0) return
+    const frame = requestAnimationFrame(() => {
+      couponInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      couponInputRef.current?.focus()
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [focusCouponSignal])
+
   function handleApplyCoupon(e: React.FormEvent) {
     e.preventDefault()
     const code = couponInput.trim()
@@ -151,10 +173,8 @@ export default function CheckoutPage() {
     )
   }
 
-  // Checkout requires an authenticated user — the address book and order creation both need
-  // one. Waits for the auth check to resolve first so an actually-logged-in visitor never
-  // flashes the gate. Cart items already live in CartContext/localStorage, so nothing is lost
-  // while they log in or register inline below.
+  // Waits for the auth check to resolve first so an actually-logged-in visitor never flashes a
+  // sign-in prompt they don't need.
   if (authLoading) {
     return (
       <>
@@ -167,18 +187,11 @@ export default function CheckoutPage() {
     )
   }
 
-  if (!isAuthenticated) {
-    return (
-      <>
-        <CheckoutNavbar />
-        <div className="min-h-screen pb-20 px-4" style={{ paddingTop: '42px' }}>
-          <CheckoutAuthGate />
-        </div>
-        <CartFooter />
-      </>
-    )
-  }
-
+  // Order creation still requires an authenticated user (guarded in handleSubmit below), but the
+  // page itself is never gated behind a full-screen sign-in wall — a guest should see the same
+  // order summary, address entry and payment options everyone else does, and only discover they
+  // need to sign in via the notice at the top, not by being blocked outright. Cart items already
+  // live in CartContext/localStorage, so nothing is lost while they log in or register inline.
   return (
     <>
       <CheckoutNavbar />
@@ -202,10 +215,31 @@ export default function CheckoutPage() {
             </h1>
           </div>
 
+          {/* Non-blocking sign-in notice — guests see the full checkout page (summary, address,
+              payment) below just like everyone else, and only discover here that placing the
+              order needs an account, instead of being walled off from the page outright. The
+              actual sign-in/register form opens in CheckoutAuthModal, not inline. */}
+          {!isAuthenticated && (
+            <div className="mb-10 flex items-center gap-3 border-l-2 border-enunas-purple bg-enunas-purple-muted px-4 py-2.5">
+              <p className="font-league-spartan text-[11px] text-enunas-black">
+                Für die Bestellung ist eine Anmeldung erforderlich.
+              </p>
+              <button
+                type="button"
+                onClick={() => setAuthModalOpen(true)}
+                className="flex-shrink-0 font-league-spartan text-[11px] uppercase tracking-[0.15em] text-enunas-purple underline hover:no-underline transition-colors duration-200"
+              >
+                Jetzt anmelden
+              </button>
+            </div>
+          )}
+
+          <CheckoutAuthModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16">
 
             {/* ── Left: form ──────────────────────────────── */}
-            <form onSubmit={handleSubmit} className="lg:col-span-3 space-y-10">
+            <form id="checkout-form" onSubmit={handleSubmit} className="lg:col-span-3 space-y-10">
 
               {/* Contact */}
               <section>
@@ -229,7 +263,7 @@ export default function CheckoutPage() {
                 <h2 className="font-league-spartan text-xs uppercase tracking-[0.15em] text-enunas-gray-medium mb-4">
                   Lieferadresse
                 </h2>
-                <SavedAddressSelector onChange={setAddressSelection} />
+                <SavedAddressSelector onChange={setAddressSelection} isAuthenticated={isAuthenticated} />
               </section>
 
               {/* Payment method */}
@@ -308,8 +342,11 @@ export default function CheckoutPage() {
                 <p className="font-league-spartan text-xs text-enunas-error">{error}</p>
               )}
 
-              {/* Submit */}
-              <div className="space-y-3">
+              {/* Submit — hidden here on mobile/tablet; a duplicate below the order summary
+                  (same form via the `form` attribute) takes over there instead, so the summary
+                  a visitor is actually paying attention to comes before the button that commits
+                  to it. Desktop keeps it right where the form naturally ends. */}
+              <div className="hidden lg:block space-y-3">
                 <button
                   type="submit"
                   disabled={loading || !addressSelection}
@@ -337,103 +374,182 @@ export default function CheckoutPage() {
               </div>
             </form>
 
-            {/* ── Right: order summary ─────────────────────── */}
+            {/* ── Right: order summary — accordion ─────────── */}
             <aside className="lg:col-span-2">
-              <div className="bg-enunas-off-white p-6 sticky top-24">
-                <h2 className="font-league-spartan text-xs uppercase tracking-[0.15em] text-enunas-gray-medium mb-6">
-                  Bestellübersicht
-                </h2>
+              <div className="bg-enunas-off-white p-6 lg:sticky lg:top-24">
 
-                {/* Items */}
-                <div className="space-y-5 mb-6">
-                  {cartItems.map(item => (
-                    <div key={item.id} className="flex gap-3 items-start">
-                      <div className="relative w-16 h-20 flex-shrink-0 bg-white border border-enunas-gray-light">
-                        {item.image && (
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            fill
-                            className="object-cover"
-                          />
-                        )}
-                        <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-enunas-purple text-white text-[10px] flex items-center justify-center leading-none">
-                          {item.quantity}
-                        </span>
+                {/* Rabatt hinzufügen — always visible; opens the accordion (if collapsed) and
+                    jumps straight to the Gutscheincode field below. */}
+                <button
+                  type="button"
+                  onClick={handleAddDiscountClick}
+                  className="w-full flex items-center gap-1.5 font-league-spartan text-[11px] uppercase tracking-[0.15em] text-enunas-purple pb-4 mb-4 border-b border-enunas-gray-light hover:text-enunas-purple-light transition-colors duration-200"
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  Rabatt hinzufügen
+                </button>
+
+                {/* Accordion header — first item's image, item count, total, toggle. This row
+                    alone is the entire collapsed state; everything else only mounts when open. */}
+                <button
+                  type="button"
+                  onClick={() => setSummaryOpen((o) => !o)}
+                  aria-expanded={summaryOpen}
+                  className="w-full flex items-center justify-between gap-4"
+                >
+                  <span className="flex items-center gap-3 min-w-0">
+                    <span className="relative w-12 h-14 flex-shrink-0 bg-white border border-enunas-gray-light">
+                      {cartItems[0]?.image && (
+                        <Image src={cartItems[0].image} alt={cartItems[0].name} fill className="object-cover" />
+                      )}
+                    </span>
+                    <span className="font-league-spartan text-xs text-enunas-gray-medium text-left">
+                      {itemCount} {itemCount === 1 ? 'Artikel' : 'Artikel'}
+                    </span>
+                  </span>
+                  <span className="flex items-center gap-2 flex-shrink-0">
+                    <span className="font-league-spartan text-sm text-enunas-black font-medium">
+                      €{finalTotal.toFixed(2)}
+                    </span>
+                    <svg
+                      width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                      className={`text-enunas-gray-medium transition-transform duration-300 ease-out-expo ${summaryOpen ? 'rotate-180' : ''}`}
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </span>
+                </button>
+
+                {summaryOpen && (
+                  <div className="mt-6 animate-fade-in">
+                    <h2 className="font-league-spartan text-xs uppercase tracking-[0.15em] text-enunas-gray-medium mb-6">
+                      Bestellübersicht
+                    </h2>
+
+                    {/* Items */}
+                    <div className="space-y-5 mb-6">
+                      {cartItems.map(item => (
+                        <div key={item.id} className="flex gap-3 items-start">
+                          <div className="relative w-16 h-20 flex-shrink-0 bg-white border border-enunas-gray-light">
+                            {item.image && (
+                              <Image
+                                src={item.image}
+                                alt={item.name}
+                                fill
+                                className="object-cover"
+                              />
+                            )}
+                            <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-enunas-purple text-white text-[10px] flex items-center justify-center leading-none">
+                              {item.quantity}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-league-spartan text-[10px] text-enunas-gray-medium uppercase tracking-[0.05em] mb-0.5">
+                              {item.brand}
+                            </p>
+                            <p className="font-league-spartan text-xs text-enunas-black leading-snug">
+                              {item.name}
+                            </p>
+                            <p className="font-league-spartan text-[10px] text-enunas-gray-medium mt-1">
+                              Größe: {item.size}
+                              {item.color && ` · ${item.color.name}`}
+                            </p>
+                          </div>
+                          <p className="font-league-spartan text-xs text-enunas-black flex-shrink-0">
+                            €{(item.price * item.quantity).toFixed(2)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Totals */}
+                    <div className="border-t border-enunas-gray-light pt-4 space-y-2">
+                      <div className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium">
+                        <span>Zwischensumme</span>
+                        <span>€{totalPrice.toFixed(2)}</span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-league-spartan text-[10px] text-enunas-gray-medium uppercase tracking-[0.05em] mb-0.5">
-                          {item.brand}
-                        </p>
-                        <p className="font-league-spartan text-xs text-enunas-black leading-snug">
-                          {item.name}
-                        </p>
-                        <p className="font-league-spartan text-[10px] text-enunas-gray-medium mt-1">
-                          Größe: {item.size}
-                          {item.color && ` · ${item.color.name}`}
-                        </p>
+                      <div className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium">
+                        <span>Versand</span>
+                        <span>{shippingCost === 0 ? 'Kostenlos' : `€${shippingCost.toFixed(2)}`}</span>
                       </div>
-                      <p className="font-league-spartan text-xs text-enunas-black flex-shrink-0">
-                        €{(item.price * item.quantity).toFixed(2)}
+                      {upsellDiscount > 0 && (
+                        <div className="flex justify-between font-league-spartan text-xs text-enunas-success">
+                          <span>Enunas-Vorteil (−10&nbsp;%)</span>
+                          <span>−€{upsellDiscount.toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between font-league-spartan text-sm text-enunas-black pt-3 border-t border-enunas-gray-light">
+                        <span className="font-medium">Gesamt</span>
+                        <span className="font-medium">€{finalTotal.toFixed(2)}</span>
+                      </div>
+                      <p className="font-league-spartan text-[10px] text-enunas-gray-medium">
+                        inkl. MwSt.
                       </p>
                     </div>
-                  ))}
-                </div>
 
-                {/* Totals */}
-                <div className="border-t border-enunas-gray-light pt-4 space-y-2">
-                  <div className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium">
-                    <span>Zwischensumme</span>
-                    <span>€{totalPrice.toFixed(2)}</span>
+                    {/* Coupon code — see handleApplyCoupon above for why this never fabricates a
+                        discount preview for codes the frontend can't actually verify. */}
+                    <form onSubmit={handleApplyCoupon} className="flex gap-2 pt-4 mt-4 border-t border-enunas-gray-light">
+                      <input
+                        ref={couponInputRef}
+                        type="text"
+                        name="coupon"
+                        placeholder="Gutscheincode"
+                        value={couponInput}
+                        onChange={e => setCouponInput(e.target.value)}
+                        className="flex-1 min-w-0 border border-enunas-gray-light px-3 py-2.5 font-league-spartan text-xs text-enunas-black bg-white focus:outline-none focus:border-enunas-purple transition-colors duration-200"
+                      />
+                      <button
+                        type="submit"
+                        className="flex-shrink-0 font-league-spartan text-[11px] uppercase tracking-[0.15em] text-enunas-purple border border-enunas-purple px-4 hover:bg-enunas-purple hover:text-white transition-colors duration-200"
+                      >
+                        Anwenden
+                      </button>
+                    </form>
+                    {couponMessage && (
+                      <p
+                        className={`font-league-spartan text-[11px] mt-2 ${
+                          couponMessage.type === 'success' ? 'text-enunas-success' : 'text-enunas-gray-medium'
+                        }`}
+                      >
+                        {couponMessage.text}
+                      </p>
+                    )}
                   </div>
-                  <div className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium">
-                    <span>Versand</span>
-                    <span>{shippingCost === 0 ? 'Kostenlos' : `€${shippingCost.toFixed(2)}`}</span>
-                  </div>
-                  {upsellDiscount > 0 && (
-                    <div className="flex justify-between font-league-spartan text-xs text-enunas-success">
-                      <span>Enunas-Vorteil (−10&nbsp;%)</span>
-                      <span>−€{upsellDiscount.toFixed(2)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between font-league-spartan text-sm text-enunas-black pt-3 border-t border-enunas-gray-light">
-                    <span className="font-medium">Gesamt</span>
-                    <span className="font-medium">€{finalTotal.toFixed(2)}</span>
-                  </div>
-                  <p className="font-league-spartan text-[10px] text-enunas-gray-medium">
-                    inkl. MwSt.
-                  </p>
-                </div>
-
-                {/* Coupon code — see handleApplyCoupon above for why this never fabricates a
-                    discount preview for codes the frontend can't actually verify. */}
-                <form onSubmit={handleApplyCoupon} className="flex gap-2 pt-4 mt-4 border-t border-enunas-gray-light">
-                  <input
-                    type="text"
-                    name="coupon"
-                    placeholder="Gutscheincode"
-                    value={couponInput}
-                    onChange={e => setCouponInput(e.target.value)}
-                    className="flex-1 min-w-0 border border-enunas-gray-light px-3 py-2.5 font-league-spartan text-xs text-enunas-black bg-white focus:outline-none focus:border-enunas-purple transition-colors duration-200"
-                  />
-                  <button
-                    type="submit"
-                    className="flex-shrink-0 font-league-spartan text-[11px] uppercase tracking-[0.15em] text-enunas-purple border border-enunas-purple px-4 hover:bg-enunas-purple hover:text-white transition-colors duration-200"
-                  >
-                    Anwenden
-                  </button>
-                </form>
-                {couponMessage && (
-                  <p
-                    className={`font-league-spartan text-[11px] mt-2 ${
-                      couponMessage.type === 'success' ? 'text-enunas-success' : 'text-enunas-gray-medium'
-                    }`}
-                  >
-                    {couponMessage.text}
-                  </p>
                 )}
               </div>
             </aside>
+
+            {/* Submit — mobile/tablet only, right under the order summary above. Targets the
+                form by id since it lives outside it here. */}
+            <div className="lg:hidden space-y-3">
+              <button
+                type="submit"
+                form="checkout-form"
+                disabled={loading || !addressSelection}
+                className="group relative w-full overflow-hidden bg-enunas-purple text-white py-5 hover:bg-enunas-purple-dark transition-colors duration-300 ease-out-expo disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                <span
+                  className="absolute top-0 h-full w-[40%] -skew-x-12 left-[-60%] group-hover:left-[120%] transition-[left] duration-700 ease-out-expo pointer-events-none"
+                  style={{ background: 'linear-gradient(100deg, transparent, rgba(255,255,255,0.2), transparent)' }}
+                  aria-hidden
+                />
+                <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
+                <span className="relative z-10 font-cormorant text-[20px] tracking-[0.06em]">{loading ? 'Bitte warten…' : 'Zur Zahlung'}</span>
+                <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
+              </button>
+
+              <p className="font-league-spartan text-[10px] text-enunas-gray-medium text-center leading-relaxed">
+                Mit Ihrer Bestellung stimmen Sie unseren{' '}
+                <Link href="/agbs" className="underline hover:no-underline">AGB</Link>
+                {' '}und der{' '}
+                <Link href="/datenschutzerklärung" className="underline hover:no-underline">
+                  Datenschutzerklärung
+                </Link>{' '}zu.
+              </p>
+            </div>
 
           </div>
         </div>

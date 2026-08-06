@@ -252,7 +252,12 @@ export default function KategorieAuswahl() {
               alignItems: 'flex-end',
               gap: '6px',
               overflowX: 'auto',
-              scrollSnapType: 'x mandatory',
+              // `mandatory` forces every scroll gesture — however small — to fully commit to
+              // landing on a snap point, which on this narrow rail reads as overly twitchy (a
+              // short flick blows straight past to the next/prev item). `proximity` only nudges
+              // into alignment when a scroll already comes to rest near one, so light scrolling
+              // settles more gently instead of always snapping hard.
+              scrollSnapType: 'x proximity',
               WebkitOverflowScrolling: 'touch',
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',

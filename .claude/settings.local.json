@@ -165,7 +165,9 @@
       "Bash(git check-ignore *)",
       "Bash(echo \"exit:$?\")",
       "Bash(git rev-list *)",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "mcp__chrome-devtools__drag",
+      "mcp__chrome-devtools__get_console_message"
     ]
   }
 }

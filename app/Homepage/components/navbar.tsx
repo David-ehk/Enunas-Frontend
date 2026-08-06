@@ -41,17 +41,15 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Load recents from localStorage — seed demo data if empty
+  // Load recents from localStorage — an empty list is a real empty list, not a cue to fabricate
+  // placeholder searches. Seeding demo data here previously meant a visitor who'd never searched
+  // anything still saw fake "Zuletzt gesucht" entries, and deleting every real entry down to zero
+  // just brought the demo data straight back on the next mount (e.g. navigating away and back —
+  // this Navbar isn't in a shared layout, so it remounts on every page).
   useEffect(() => {
     try {
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as string[]
-      if (stored.length === 0) {
-        const demo = ['Vivienne Westwood', 'Jacken', 'Sneaker']
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(demo))
-        setRecentSearches(demo)
-      } else {
-        setRecentSearches(stored)
-      }
+      setRecentSearches(stored)
     } catch {}
   }, [])
 
