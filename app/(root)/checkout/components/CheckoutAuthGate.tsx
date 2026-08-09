@@ -62,7 +62,7 @@ export default function CheckoutAuthGate({ onSuccess }: CheckoutAuthGateProps = 
     'w-full border border-enunas-gray-light px-4 py-3 font-league-spartan text-sm text-enunas-black bg-white focus:outline-none focus:border-enunas-purple transition-colors duration-200'
 
   return (
-    <div className="max-w-md mx-auto py-8">
+    <div className="max-w-md mx-auto px-6 sm:px-8 py-8">
       <div className="text-center mb-8">
         <p className="font-league-spartan text-[11px] tracking-[0.35em] uppercase text-enunas-gray-medium mb-3">
           Anmeldung erforderlich

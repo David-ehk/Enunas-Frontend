@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { getCuration, saveCuration, type CurationData, type Segment } from '@/lib/curation'
+import { getTopDesigners, saveTopDesigners, MAX_TOP_DESIGNERS } from '@/lib/topDesigners'
 import type { AdminApiProduct } from '@/types/api'
-import { GripVertical, X, Plus, Check, Save, Trash2 } from 'lucide-react'
+import { GripVertical, X, Plus, Check, Save, Trash2, AlertTriangle } from 'lucide-react'
 import { PageHeader, SearchInput, SelectFilter } from './shared'
 import { isProductLive } from '@/lib/product'
 
@@ -159,6 +160,94 @@ function DropZoneEmpty() {
   )
 }
 
+// Picks the 3 brands featured in /marken's "Top Designer" row. Same localStorage-only
+// persistence as the curation tool below (see lib/topDesigners.ts) — this is a preview, not a
+// real feature yet: without a backend field, only this admin's own browser ever sees the pick.
+function TopDesignerPicker({ brandNames }: { brandNames: string[] }) {
+  const [selected, setSelected] = useState<string[]>(() => getTopDesigners())
+  const [saved, setSaved] = useState(false)
+
+  function toggle(name: string) {
+    setSelected(prev => {
+      if (prev.includes(name)) return prev.filter(n => n !== name)
+      if (prev.length >= MAX_TOP_DESIGNERS) return prev
+      return [...prev, name]
+    })
+  }
+
+  function save() {
+    saveTopDesigners(selected)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2200)
+  }
+
+  return (
+    <div className="rounded-xl p-5" style={{ background: 'white', border: '1px solid #E8E8E8' }}>
+      <div className="flex items-center justify-between mb-1">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#0A0A0A]"
+          style={{ fontFamily: 'var(--font-league-spartan)' }}>
+          Top Designer
+        </p>
+        <span className="text-[10px] text-[#9B9B9B] tabular-nums" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+          {selected.length}/{MAX_TOP_DESIGNERS}
+        </span>
+      </div>
+      <p className="text-[10px] text-[#9B9B9B] mb-4" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+        Wähle bis zu {MAX_TOP_DESIGNERS} Marken für die Top-Designer-Auswahl auf /marken.
+      </p>
+
+      <div className="flex flex-wrap gap-2 mb-4">
+        {brandNames.length === 0
+          ? (
+            <p className="text-[11px] text-[#9B9B9B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+              Keine Marken verfügbar.
+            </p>
+          )
+          : brandNames.map(name => {
+            const isSelected = selected.includes(name)
+            const disabled = !isSelected && selected.length >= MAX_TOP_DESIGNERS
+            return (
+              <button
+                key={name}
+                onClick={() => toggle(name)}
+                disabled={disabled}
+                className="px-3.5 py-1.5 rounded-lg text-[11px] font-semibold border transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{
+                  fontFamily: 'var(--font-league-spartan)',
+                  background: isSelected ? '#370E4D' : 'white',
+                  color: isSelected ? '#fff' : '#6B6B6B',
+                  borderColor: isSelected ? '#370E4D' : '#E8E8E8',
+                }}
+              >
+                {name}
+              </button>
+            )
+          })}
+      </div>
+
+      <div className="flex items-center justify-between gap-4">
+        <p className="flex items-center gap-1.5 text-[10px] text-amber-700" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+          <AlertTriangle className="w-3 h-3 shrink-0" />
+          Nur Vorschau in diesem Browser — ohne Backend-Feld sehen echte Besucher diese Auswahl nicht.
+        </p>
+        <button
+          onClick={save}
+          className="flex items-center gap-2 h-8 px-4 rounded-lg text-[11px] font-semibold shrink-0 transition-all duration-200"
+          style={{
+            fontFamily: 'var(--font-league-spartan)',
+            background: saved ? '#1A5A3C' : '#370E4D',
+            color: '#fff',
+          }}
+        >
+          {saved
+            ? <><Check className="w-3.5 h-3.5" /> Gespeichert</>
+            : <><Save className="w-3.5 h-3.5" /> Speichern</>}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function Storefront({ products }: { products: AdminApiProduct[] }) {
   const [curation, setCuration] = useState<CurationData>(() => getCuration())
   const [section, setSection]   = useState<SectionTab>('trendy')
@@ -202,6 +291,11 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
     const set = new Set(approved.map(p => p.brandName).filter(Boolean))
     return [{ value: 'all', label: 'Alle Marken' }, ...Array.from(set).sort().map(b => ({ value: b, label: b }))]
   }, [approved])
+
+  const brandNames = useMemo(
+    () => brandOptions.filter(b => b.value !== 'all').map(b => b.value),
+    [brandOptions]
+  )
 
   const catOptions = useMemo(() => {
     const set = new Set<string>()
@@ -288,6 +382,8 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
         italicTitle="kuratieren."
         noBorder
       />
+
+      <TopDesignerPicker brandNames={brandNames} />
 
       {/* Section tabs */}
       <div className="flex gap-1 p-1 rounded-xl w-fit"

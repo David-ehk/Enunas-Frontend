@@ -55,12 +55,16 @@ export async function fetcher<T>(path: string, options: FetchOptions = {}): Prom
   }
 
   if (!res.ok) {
-    const text = await res.text().catch(() => res.statusText);
-    let message = text || res.statusText;
+    const text = await res.text().catch(() => '');
+    // Falls back to the raw body only when it isn't JSON (likely a plain-text error message).
+    // A JSON body without a `.message` — e.g. Spring's default error shape
+    // ({timestamp, status, error, path}, no `message`) — must never fall through to dumping
+    // that raw JSON at the user; `.error` or a generic message reads far better.
+    let message = text || res.statusText || 'Ein Fehler ist aufgetreten.';
     try {
       const json = JSON.parse(text);
-      if (json.message) message = json.message;
-    } catch { /* not JSON */ }
+      message = json.message || json.error || res.statusText || 'Ein Fehler ist aufgetreten.';
+    } catch { /* not JSON — keep the raw text assigned above */ }
     throw new FetchError(res.status, message);
   }
 

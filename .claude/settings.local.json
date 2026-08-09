@@ -167,7 +167,11 @@
       "Bash(git rev-list *)",
       "Bash(git fetch *)",
       "mcp__chrome-devtools__drag",
-      "mcp__chrome-devtools__get_console_message"
+      "mcp__chrome-devtools__get_console_message",
+      "Bash(tasklist)",
+      "PowerShell(Get-CimInstance *)",
+      "Bash(tasklist //FI \"IMAGENAME eq chrome.exe\" //FO CSV)",
+      "Bash(wmic process *)"
     ]
   }
 }

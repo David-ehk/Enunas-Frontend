@@ -29,11 +29,11 @@ const CATEGORIES: Category[] = [
   {
     key: 'neu', label: 'Neu', title: 'Neu', kicker: 'Neu eingetroffen', route: '/neu',
     sub: [
-      { label: 'Damen',         href: '/neu', deep: true },
-      { label: 'Herren',        href: '/neu', deep: true },
-      { label: 'Schuhe',        href: '/neu' },
-      { label: 'Taschen',       href: '/neu' },
-      { label: 'Accessoires',   href: '/neu' },
+      { label: 'Damen',         href: '/neu?gender=damen', deep: true },
+      { label: 'Herren',        href: '/neu?gender=herren', deep: true },
+      { label: 'Schuhe',        href: '/neu?cat=schuhe' },
+      { label: 'Taschen',       href: '/neu?cat=accessoires' },
+      { label: 'Accessoires',   href: '/neu?cat=accessoires' },
     ],
     highlights: [{ label: 'Herbstkollektion 2026' }, { label: 'Die Drop-Liste' }, { label: 'Wieder verfügbar' }],
     tiles: [
@@ -49,7 +49,7 @@ const CATEGORIES: Category[] = [
       { label: 'Bestseller',        href: '/trendy' },
       { label: 'Meistgesehen',      href: '/trendy' },
       { label: "Editor's Picks",    href: '/trendy' },
-      { label: 'Im Trend: Schuhe',  href: '/trendy', deep: true },
+      { label: 'Im Trend: Schuhe',  href: '/trendy?cat=schuhe', deep: true },
       { label: 'Im Trend: Taschen', href: '/trendy', deep: true },
     ],
     highlights: [{ label: 'Das Berlin-Set' }, { label: 'Quiet Luxury' }, { label: 'Statement-Taschen' }],

@@ -332,14 +332,30 @@ function BestaetiguungContent() {
   }, [orderId])
 
   useEffect(() => {
-    if (!isUpsell) return
-    productApi.list({ size: 4 })
-      .then(r => setProducts(r.content.map(p => ({
-        ...apiProductToCardShape(p),
-        href: `/angebot/${generateSlug(p.brandName)}/${p.slug}`,
-      }))))
+    // Waits for the order fetch attempt to finish (success or failure) so this only runs once,
+    // with whatever purchased-items data is actually available — starting it in parallel would
+    // mean firing this fetch a second time the moment `order` resolves.
+    if (!isUpsell || orderLoading) return
+    // A "special discount" on the exact thing just bought at full price is a confusing,
+    // self-defeating upsell — exclude items from the order just placed. Order items from the
+    // real backend don't carry a productId (see ApiOrderItem), only productName, so this
+    // matches on name; fetching a larger pool than the 4 shown backfills whatever the filter
+    // removes instead of risking an empty/short grid.
+    productApi.list({ size: 20 })
+      .then(r => {
+        const purchasedNames = new Set(
+          (order?.items ?? [])
+            .map(i => (i.productName ?? i.name ?? '').trim().toLowerCase())
+            .filter(Boolean)
+        )
+        const filtered = r.content.filter(p => !purchasedNames.has(p.name.trim().toLowerCase()))
+        setProducts(filtered.slice(0, 4).map(p => ({
+          ...apiProductToCardShape(p),
+          href: `/angebot/${generateSlug(p.brandName)}/${p.slug}`,
+        })))
+      })
       .catch(() => {})
-  }, [isUpsell])
+  }, [isUpsell, orderLoading, order])
 
   // ── VARIANT 2: Upsell ────────────────────────────────────────────────────────
   if (isUpsell) {

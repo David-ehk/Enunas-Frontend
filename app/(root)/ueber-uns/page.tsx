@@ -40,8 +40,8 @@ export default function UeberUnsPage() {
             Wir sind<br />Enunas
           </h1>
           <p className="text-[15px] lg:text-[17px] font-light leading-[1.6] text-[#2D2D2D] m-0">
-            Der kuratierte Marktplatz für Designer- &amp; Streetwear — ein Ort, wo Mode auf
-            Haltung trifft und Kuration zur Superkraft wird.
+            Der kuratierte Marktplatz für Designer- und Streetwear. Die Zukunft neu definieren.
+            Ein Ort für Stil, Seele und Vision. Einzigartig. Exklusiv. Echt.
           </p>
         </div>
       </section>
@@ -72,10 +72,10 @@ export default function UeberUnsPage() {
               Mode als Medium —<br />kuratiert mit Haltung
             </h2>
             <p className="text-[14px] lg:text-[15px] font-light leading-[1.65] text-[#2D2D2D] m-0 max-w-[640px]">
-              Wir glauben, dass Mode mehr ist als Kleidung. Sie ist ein Ausdruck von Identität,
-              Kultur und Haltung. Bei Enunas kuratieren wir jedes Stück mit Sorgfalt — immer mit
-              der Frage, was es über die Person sagt, die es trägt. Wir verbinden Fashion-Forward-
-              Denker:innen mit den aufregendsten Marken und Designern unserer Zeit.
+              Wir glauben, dass Mode mehr ist als Kleidung. Sie ist Ausdruck von Identität,
+              Kultur und Haltung. Bei Enunas steckt hinter jedem Stück eine Frage: Was sagt es
+              über die Person, die es trägt? Wir verbinden Fashion-Forward-Denker mit den
+              aufregendsten Marken und Designern unserer Zeit.
             </p>
           </div>
         </div>
@@ -84,7 +84,7 @@ export default function UeberUnsPage() {
       {/* Values */}
       <section className="bg-[#F5F5F0] px-8 lg:px-16 py-24">
         <p className="text-[11px] uppercase tracking-[0.3em] text-[#6B6B6B] mb-8">Unsere Werte</p>
-        <div className="grid md:grid-cols-2 gap-12 max-w-3xl">
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-24">
           {values.map((v) => (
             <div key={v.n} className="border-t border-[#E8E8E8] pt-7">
               <p
@@ -99,7 +99,7 @@ export default function UeberUnsPage() {
               >
                 {v.title}
               </h3>
-              <p className="text-[14px] font-light leading-[1.65] text-[#2D2D2D] m-0">{v.body}</p>
+              <p className="text-[14px] font-light leading-[1.65] text-[#2D2D2D] m-0 max-w-[480px]">{v.body}</p>
             </div>
           ))}
         </div>
@@ -116,8 +116,8 @@ export default function UeberUnsPage() {
             sizes="(max-width: 1024px) 100vw, 42vw"
           />
         </div>
-        <div className="bg-[#370E4D] text-white px-10 lg:px-14 py-16 lg:py-[72px] flex flex-col justify-center">
-          <p className="text-[11px] uppercase tracking-[0.3em] opacity-70 mb-5">Die Geschichte</p>
+        <div className="bg-[#F5F5F0] text-[#0A0A0A] border-t-2 border-[#370E4D] px-10 lg:px-14 py-16 lg:py-[72px] flex flex-col justify-center">
+          <p className="text-[11px] uppercase tracking-[0.3em] text-[#6B6B6B] mb-5">Die Geschichte</p>
           <h2
             className="text-[40px] lg:text-[52px] font-light leading-[1.1] mb-7"
             style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
@@ -125,17 +125,19 @@ export default function UeberUnsPage() {
             Gegründet aus einer<br />echten Lücke
           </h2>
           <p
-            className="text-[17px] lg:text-[19px] font-light italic leading-[1.65] opacity-90 m-0"
+            className="text-[17px] lg:text-[19px] font-light italic leading-[1.65] text-[#2D2D2D] m-0"
             style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
           >
-            2023 entstand Enunas aus der Frustration über mangelnde Kuration im deutschen
-            Streetwear-Markt. Unser Gründerteam wollte einen Ort schaffen, der Qualität, Design
-            und Community wirklich zusammenbringt — als Standard, nicht als Versprechen.
+            2026 entstand Enunas aus unserer Frustration über die fehlende Kuration im deutschen
+            Streetwear-Markt. Wir wollten einen Ort schaffen, an dem besondere Brands,
+            hochwertige Designs und eine echte Community zusammenkommen. Für uns geht es nicht
+            nur darum, Kleidung anzubieten, sondern eine neue Art zu entdecken, was Stil
+            bedeuten kann.
           </p>
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Stats — hidden at launch, none of these numbers are true yet
       <section className="border-t border-[#E8E8E8] px-8 lg:px-16 py-16">
         <div className="grid grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
@@ -154,6 +156,7 @@ export default function UeberUnsPage() {
           ))}
         </div>
       </section>
+      */}
 
     </div>
   )

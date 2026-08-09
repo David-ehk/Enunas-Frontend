@@ -245,8 +245,9 @@ export default function ProductDetails({
             {/* 8. Catalogue tags */}
             <CatalogueTags categories={product.catalogueCategory} />
 
-            {/* 9. Size guide row */}
+            {/* 9. Size guide row — hidden for beta, too much work to finish now
             <SizeGuideRow />
+            */}
 
             {/* 10. CTA */}
             {listingsFailed && (
@@ -298,7 +299,7 @@ export default function ProductDetails({
                 )}
                 <div>
                   {([
-                    { k: 'Produktnummer',  v: selectedVariant?.sku ?? null,    highlight: true },
+                    { k: 'Produktnummer',  v: selectedVariant?.sku ?? colorVariant?.sku ?? null, highlight: true },
                     { k: 'Farbe',          v: selectedColor?.name ?? null,     highlight: false },
                     { k: 'Gewicht',        v: selectedVariant ? `${selectedVariant.weightGrams} g` : null, highlight: false },
                     { k: 'Material',       v: product.material || null,        highlight: false },

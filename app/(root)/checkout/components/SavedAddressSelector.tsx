@@ -17,13 +17,18 @@ interface SavedAddressSelectorProps {
   // skips that call entirely and drops straight into the manual entry form below instead of
   // surfacing a misleading "Adressen konnten nicht geladen werden" error.
   isAuthenticated: boolean
+  // Bumped by the checkout page when a submit attempt was blocked on "no address selected" —
+  // jumps straight into the entry form instead of leaving the visitor to notice and click
+  // "+ Neue Adresse hinzufügen" themselves. No-ops while there are saved addresses to pick
+  // from instead (the list itself is the right thing to land on then) or once one is entered.
+  openFormSignal?: number
 }
 
 // Address entry/editing happens inline in the page flow, not in a popup dialog — matches the
 // familiar Shopify-style checkout pattern rather than a modal interrupting the page.
 type View = 'list' | 'form'
 
-export default function SavedAddressSelector({ onChange, isAuthenticated }: SavedAddressSelectorProps) {
+export default function SavedAddressSelector({ onChange, isAuthenticated, openFormSignal }: SavedAddressSelectorProps) {
   const [addresses, setAddresses] = useState<ApiUserAddress[]>([])
   const [loading, setLoading] = useState(isAuthenticated)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -76,6 +81,17 @@ export default function SavedAddressSelector({ onChange, isAuthenticated }: Save
   // when `selection` itself changes, which never happens from an unrelated parent re-render since
   // this component is never unmounted/remounted by the parent.
   useEffect(() => { onChange(selection) }, [selection, onChange])
+
+  // Signal from the checkout page: a submit attempt found no address selected. If there's
+  // nothing to pick from (empty list, or the list failed to load — e.g. a stale/expired
+  // token), open the entry form directly instead of leaving the visitor stuck on the error
+  // banner needing an extra "+ Neue Adresse hinzufügen" click. Skipped once there are saved
+  // addresses to choose from — the list itself is already the right thing to land on.
+  useEffect(() => {
+    if (!openFormSignal) return
+    if (view === 'list' && addresses.length === 0) openAddForm()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openFormSignal])
 
   function openAddForm() {
     setFormMode('new')

@@ -6,7 +6,7 @@ These rules are absolute. Follow them on every task without exception.
 
 1. **Only modify what was explicitly requested.** Do NOT make unsolicited changes to existing components, styles, or structure. If you notice something else that could be improved, mention it but do not change it.
 2. **Implement fixes directly.** Do not stop at planning or diagnosis unless explicitly asked to plan only. Always verify the fix works before reporting success.
-3. **Run `npm run build` after TypeScript changes** to verify no type errors were introduced. Do not report a fix as complete until the build passes.
+3. **Run `pnpm run build` after TypeScript changes** to verify no type errors were introduced. Do not report a fix as complete until the build passes.
 4. **Product routes use 2 levels** (`/bekleidung/[category]/[slug]`), not 3. Product slugs must be consistent across all data sources — check both homepage and product page data files when modifying routing.
 5. **CSS/Layout debugging:** When fixing z-index, sticky/fixed positioning, or overlay issues, always check parent element `overflow` and stacking context. If Tailwind classes don't work on first attempt, use inline styles as fallback.
 6. **No unsolicited refactoring.** A bug fix doesn't need surrounding code cleaned up. Don't add docstrings, comments, or type annotations to code you didn't change.
@@ -78,10 +78,10 @@ Before generating any code, verify:
 ### Commands
 
 ```bash
-npm run dev          # Start development server (localhost:3000)
-npm run build        # Build for production (uses Turbopack)
-npm run start        # Start production server
-npm run lint         # Run ESLint
+pnpm run dev          # Start development server (localhost:3000)
+pnpm run build        # Build for production (uses Turbopack)
+pnpm run start        # Start production server
+pnpm run lint         # Run ESLint
 ```
 
 ---

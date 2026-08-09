@@ -30,7 +30,10 @@ export default function CheckoutPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [summaryOpen, setSummaryOpen] = useState(false)
   const [focusCouponSignal, setFocusCouponSignal] = useState(0)
+  const [openAddressFormSignal, setOpenAddressFormSignal] = useState(0)
   const couponInputRef = useRef<HTMLInputElement>(null)
+  const signInNoticeRef = useRef<HTMLDivElement>(null)
+  const addressSectionRef = useRef<HTMLElement>(null)
 
   // Auto-apply discount code passed from the upsell confirmation flow
   useEffect(() => {
@@ -89,14 +92,32 @@ export default function CheckoutPage() {
     }
   }
 
+  // Fires on the submit buttons' own click, ahead of the browser's native constraint validation
+  // (Kontakt's e-mail field is genuinely `required` and must stay that way — see CheckoutAddressForm
+  // for why the address fields underneath deliberately are not). Without this, an unauthenticated
+  // guest who also hasn't typed an e-mail yet would get the browser's native "fill this field"
+  // tooltip on Kontakt instead of being sent to the sign-in notice — auth has to win first,
+  // regardless of what's filled in below it. Native validation (and, after that, the address
+  // check in handleSubmit) only gets a chance to run once this lets the click through.
+  function handleSubmitClick(e: React.MouseEvent<HTMLButtonElement>) {
+    if (!isAuthenticated) {
+      e.preventDefault()
+      setError('Bitte melden Sie sich an, um fortzufahren.')
+      signInNoticeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!isAuthenticated) {
       setError('Bitte melden Sie sich an, um fortzufahren.')
+      signInNoticeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       return
     }
     if (!addressSelection) {
       setError('Bitte wähle oder gib eine Lieferadresse ein.')
+      addressSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      setOpenAddressFormSignal((s) => s + 1)
       return
     }
     setError(null)
@@ -145,6 +166,14 @@ export default function CheckoutPage() {
 
   const inputClass =
     'w-full border border-enunas-gray-light px-4 py-3 font-league-spartan text-sm text-enunas-black bg-white focus:outline-none focus:border-enunas-purple transition-colors duration-200'
+
+  // Not passed to the submit button's `disabled` attribute — a natively disabled button never
+  // fires a click, so it couldn't scroll to the reason. Instead it only greys the button out
+  // visually; the real gate (and the scroll-to-reason) lives in handleSubmit above.
+  const checkoutBlocked = !isAuthenticated || !addressSelection
+  const submitButtonClass =
+    'group relative w-full overflow-hidden bg-enunas-purple text-white py-5 transition-colors duration-300 ease-out-expo' +
+    (loading || checkoutBlocked ? ' opacity-60 cursor-not-allowed' : ' hover:bg-enunas-purple-dark')
 
   if (cartItems.length === 0) {
     return (
@@ -195,7 +224,9 @@ export default function CheckoutPage() {
   return (
     <>
       <CheckoutNavbar />
-      <div className="min-h-screen pb-20 px-4 sm:px-8 lg:px-16 bg-white" style={{ paddingTop: '42px' }}>
+      {/* CheckoutNavbar is fixed and renders at 49px tall (py-2 + its text-2xl logo line +
+          border-b) — this padding-top has to clear that or the breadcrumb below sits under it. */}
+      <div className="min-h-screen pb-20 px-4 sm:px-8 lg:px-16 bg-white" style={{ paddingTop: '60px' }}>
         <div className="max-w-6xl mx-auto">
 
           {/* Breadcrumb + heading */}
@@ -220,7 +251,7 @@ export default function CheckoutPage() {
               order needs an account, instead of being walled off from the page outright. The
               actual sign-in/register form opens in CheckoutAuthModal, not inline. */}
           {!isAuthenticated && (
-            <div className="mb-10 flex items-center gap-3 border-l-2 border-enunas-purple bg-enunas-purple-muted px-4 py-2.5">
+            <div ref={signInNoticeRef} className="mb-10 flex items-center gap-3 border-l-2 border-enunas-purple bg-enunas-purple-muted px-4 py-2.5">
               <p className="font-league-spartan text-[11px] text-enunas-black">
                 Für die Bestellung ist eine Anmeldung erforderlich.
               </p>
@@ -259,11 +290,15 @@ export default function CheckoutPage() {
               </section>
 
               {/* Shipping address */}
-              <section>
+              <section ref={addressSectionRef}>
                 <h2 className="font-league-spartan text-xs uppercase tracking-[0.15em] text-enunas-gray-medium mb-4">
                   Lieferadresse
                 </h2>
-                <SavedAddressSelector onChange={setAddressSelection} isAuthenticated={isAuthenticated} />
+                <SavedAddressSelector
+                  onChange={setAddressSelection}
+                  isAuthenticated={isAuthenticated}
+                  openFormSignal={openAddressFormSignal}
+                />
               </section>
 
               {/* Payment method */}
@@ -349,8 +384,9 @@ export default function CheckoutPage() {
               <div className="hidden lg:block space-y-3">
                 <button
                   type="submit"
-                  disabled={loading || !addressSelection}
-                  className="group relative w-full overflow-hidden bg-enunas-purple text-white py-5 hover:bg-enunas-purple-dark transition-colors duration-300 ease-out-expo disabled:opacity-60 disabled:cursor-not-allowed"
+                  onClick={handleSubmitClick}
+                  disabled={loading}
+                  className={submitButtonClass}
                 >
                   {/* Diagonal shimmer sweep */}
                   <span
@@ -374,16 +410,20 @@ export default function CheckoutPage() {
               </div>
             </form>
 
-            {/* ── Right: order summary — accordion ─────────── */}
+            {/* ── Right: order summary ──────────────────────
+                Accordion (collapsed-by-default, toggle button) is phone-only (<md). From md
+                up (tablet + desktop) the full summary is always shown, no toggle at all. */}
             <aside className="lg:col-span-2">
-              <div className="bg-enunas-off-white p-6 lg:sticky lg:top-24">
+              <div className="lg:sticky lg:top-24">
 
-                {/* Rabatt hinzufügen — always visible; opens the accordion (if collapsed) and
-                    jumps straight to the Gutscheincode field below. */}
+                {/* Rabatt hinzufügen — standalone button above the summary block; opens the
+                    accordion (if collapsed) and jumps straight to the Gutscheincode field below.
+                    Phone-only (<md) — from md up the summary (and its Gutscheincode field) is
+                    always expanded already, so this shortcut has nothing to do. */}
                 <button
                   type="button"
                   onClick={handleAddDiscountClick}
-                  className="w-full flex items-center gap-1.5 font-league-spartan text-[11px] uppercase tracking-[0.15em] text-enunas-purple pb-4 mb-4 border-b border-enunas-gray-light hover:text-enunas-purple-light transition-colors duration-200"
+                  className="md:hidden w-full flex items-center justify-center gap-1.5 font-league-spartan text-[11px] uppercase tracking-[0.15em] text-enunas-purple border border-enunas-purple py-3 mb-4 hover:bg-enunas-purple hover:text-white transition-colors duration-200"
                 >
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                     <path d="M12 5v14M5 12h14" />
@@ -391,42 +431,60 @@ export default function CheckoutPage() {
                   Rabatt hinzufügen
                 </button>
 
-                {/* Accordion header — first item's image, item count, total, toggle. This row
-                    alone is the entire collapsed state; everything else only mounts when open. */}
-                <button
-                  type="button"
-                  onClick={() => setSummaryOpen((o) => !o)}
-                  aria-expanded={summaryOpen}
-                  className="w-full flex items-center justify-between gap-4"
-                >
-                  <span className="flex items-center gap-3 min-w-0">
-                    <span className="relative w-12 h-14 flex-shrink-0 bg-white border border-enunas-gray-light">
-                      {cartItems[0]?.image && (
-                        <Image src={cartItems[0].image} alt={cartItems[0].name} fill className="object-cover" />
-                      )}
-                    </span>
-                    <span className="font-league-spartan text-xs text-enunas-gray-medium text-left">
-                      {itemCount} {itemCount === 1 ? 'Artikel' : 'Artikel'}
-                    </span>
-                  </span>
-                  <span className="flex items-center gap-2 flex-shrink-0">
-                    <span className="font-league-spartan text-sm text-enunas-black font-medium">
-                      €{finalTotal.toFixed(2)}
-                    </span>
-                    <svg
-                      width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-                      className={`text-enunas-gray-medium transition-transform duration-300 ease-out-expo ${summaryOpen ? 'rotate-180' : ''}`}
-                    >
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
-                  </span>
-                </button>
+                <div className="bg-enunas-off-white p-6">
 
-                {summaryOpen && (
-                  <div className="mt-6 animate-fade-in">
-                    <h2 className="font-league-spartan text-xs uppercase tracking-[0.15em] text-enunas-gray-medium mb-6">
-                      Bestellübersicht
-                    </h2>
+                {/* Collapsed state — phone only, and only while closed. This is the entire
+                    collapsed view; the full breakdown below replaces it once opened instead of
+                    sitting alongside it, so the total isn't shown twice at once. */}
+                {!summaryOpen && (
+                  <button
+                    type="button"
+                    onClick={() => setSummaryOpen(true)}
+                    aria-expanded={false}
+                    className="md:hidden w-full flex items-center justify-between gap-4"
+                  >
+                    <span className="flex items-center gap-3 min-w-0">
+                      <span className="relative w-12 h-14 flex-shrink-0 bg-white border border-enunas-gray-light">
+                        {cartItems[0]?.image && (
+                          <Image src={cartItems[0].image} alt={cartItems[0].name} fill className="object-cover" />
+                        )}
+                      </span>
+                      <span className="font-league-spartan text-xs text-enunas-gray-medium text-left">
+                        {itemCount} {itemCount === 1 ? 'Artikel' : 'Artikel'}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-2 flex-shrink-0">
+                      <span className="font-league-spartan text-sm text-enunas-black font-medium">
+                        €{finalTotal.toFixed(2)}
+                      </span>
+                      <svg
+                        width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                        className="text-enunas-gray-medium"
+                      >
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </span>
+                  </button>
+                )}
+
+                {/* Full breakdown — open on phone (toggle to collapse again), always on
+                    tablet/desktop (md+) regardless of summaryOpen. */}
+                <div className={`${summaryOpen ? 'block' : 'hidden'} md:block animate-fade-in`}>
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="font-league-spartan text-xs uppercase tracking-[0.15em] text-enunas-gray-medium">
+                        Bestellübersicht
+                      </h2>
+                      <button
+                        type="button"
+                        onClick={() => setSummaryOpen(false)}
+                        aria-label="Bestellübersicht einklappen"
+                        className="md:hidden text-enunas-gray-medium hover:text-enunas-black transition-colors duration-200"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="rotate-180">
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      </button>
+                    </div>
 
                     {/* Items */}
                     <div className="space-y-5 mb-6">
@@ -517,8 +575,8 @@ export default function CheckoutPage() {
                         {couponMessage.text}
                       </p>
                     )}
-                  </div>
-                )}
+                </div>
+                </div>
               </div>
             </aside>
 
@@ -528,8 +586,9 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 form="checkout-form"
-                disabled={loading || !addressSelection}
-                className="group relative w-full overflow-hidden bg-enunas-purple text-white py-5 hover:bg-enunas-purple-dark transition-colors duration-300 ease-out-expo disabled:opacity-60 disabled:cursor-not-allowed"
+                onClick={handleSubmitClick}
+                disabled={loading}
+                className={submitButtonClass}
               >
                 <span
                   className="absolute top-0 h-full w-[40%] -skew-x-12 left-[-60%] group-hover:left-[120%] transition-[left] duration-700 ease-out-expo pointer-events-none"

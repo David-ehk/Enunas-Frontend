@@ -64,6 +64,14 @@ export default function CheckoutAddressForm({
   // Deliberately not a <form>: every usage (new address, editing a saved one) renders inline
   // inside the outer checkout <form> (SavedAddressSelector), so a nested <form> here would be
   // invalid HTML. Enter-to-submit is preserved manually below instead.
+  //
+  // The inputs below also deliberately skip the native `required` attribute, even though they
+  // are genuinely required — validateAddressForm() + the touched-state error display above
+  // already enforce that independently. Native `required` on fields living inside the outer
+  // checkout <form> would make the browser's own constraint validation block every submit
+  // click on this form (showing its own tooltip on whichever field happens to be empty)
+  // before the outer form's onSubmit — and its sign-in/address scroll-to-reason logic — ever
+  // runs, regardless of whether the visitor is even looking at the address step yet.
   function handleContainerKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     // AddressAutocomplete calls preventDefault() itself when Enter selects a suggestion —
     // e.defaultPrevented lets that case fall through without also submitting the form.
@@ -85,7 +93,6 @@ export default function CheckoutAddressForm({
             value={values.firstName}
             onChange={(e) => set('firstName')(e.target.value)}
             onBlur={() => markTouched('firstName')}
-            required
             maxLength={100}
             aria-invalid={!!fieldError('firstName')}
             className={`${inputClass} ${fieldError('firstName') ? errorClass : ''}`}
@@ -102,7 +109,6 @@ export default function CheckoutAddressForm({
             value={values.lastName}
             onChange={(e) => set('lastName')(e.target.value)}
             onBlur={() => markTouched('lastName')}
-            required
             maxLength={100}
             aria-invalid={!!fieldError('lastName')}
             className={`${inputClass} ${fieldError('lastName') ? errorClass : ''}`}
@@ -129,7 +135,6 @@ export default function CheckoutAddressForm({
                 city: sel.city ?? prev.city,
               }))
             }}
-            required
             aria-invalid={!!fieldError('street')}
             className={`${inputClass} ${fieldError('street') ? errorClass : ''}`}
           />
@@ -144,7 +149,6 @@ export default function CheckoutAddressForm({
             value={values.houseNumber}
             onChange={(e) => set('houseNumber')(e.target.value)}
             onBlur={() => markTouched('houseNumber')}
-            required
             maxLength={16}
             aria-invalid={!!fieldError('houseNumber')}
             className={`${inputClass} ${fieldError('houseNumber') ? errorClass : ''}`}
@@ -181,7 +185,6 @@ export default function CheckoutAddressForm({
             value={values.postalCode}
             onChange={(e) => set('postalCode')(e.target.value)}
             onBlur={() => markTouched('postalCode')}
-            required
             maxLength={16}
             aria-invalid={!!fieldError('postalCode')}
             className={`${inputClass} ${fieldError('postalCode') ? errorClass : ''}`}
@@ -198,7 +201,6 @@ export default function CheckoutAddressForm({
             value={values.city}
             onChange={(e) => set('city')(e.target.value)}
             onBlur={() => markTouched('city')}
-            required
             maxLength={128}
             aria-invalid={!!fieldError('city')}
             className={`${inputClass} ${fieldError('city') ? errorClass : ''}`}
@@ -219,7 +221,7 @@ export default function CheckoutAddressForm({
         >
           <option value="DE">Deutschland</option>
         </select>
-        <p className="font-league-spartan text-[11px] text-enunas-gray-medium mt-1">
+        <p className="font-league-spartan text-[11px] font-medium text-enunas-purple mt-1">
           Aktuell liefern wir ausschließlich innerhalb Deutschlands.
           <br />
           Orders are currently only possible within Germany.
