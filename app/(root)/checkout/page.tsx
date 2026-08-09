@@ -9,14 +9,22 @@ import CheckoutNavbar from '@/app/(root)/cart/components/CheckoutNavbar'
 import CartFooter from '@/app/(root)/cart/components/CartFooter'
 import CheckoutAuthModal from './components/CheckoutAuthModal'
 import SavedAddressSelector from './components/SavedAddressSelector'
-import { orderApi, FetchError } from '@/lib/api'
+import { orderApi, FetchError, type CreateOrderDto, type OrderPreviewResponseDto } from '@/lib/api'
 import { calcShipping, calcUpsellDiscount, calcFinalTotal } from '@/lib/pricing'
 import { toShippingAddressDto, type AddressSelection } from '@/lib/address'
+
+const SHIPPING_METHOD_LABEL: Record<OrderPreviewResponseDto['shippingBreakdown'][number]['calculationMethod'], string> = {
+  GLOBAL_DEFAULT: 'Standard',
+  BRAND_FLAT_RATE: 'Pauschale',
+  BRAND_FREE_SHIPPING: 'Kostenlos',
+}
 
 export default function CheckoutPage() {
   const { cartItems, itemCount, totalPrice, clearCart } = useCart()
   const { isAuthenticated, isLoading: authLoading, user } = useAuth()
 
+  // Client-side estimate — shown instantly, before a shipping address exists to price against.
+  // Superseded by the live `preview` below the moment the backend can actually answer.
   const shippingCost = calcShipping(totalPrice)
 
   const [email, setEmail] = useState(user?.email ?? '')
@@ -29,6 +37,8 @@ export default function CheckoutPage() {
   const [couponMessage, setCouponMessage] = useState<{ type: 'success' | 'info'; text: string } | null>(null)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [summaryOpen, setSummaryOpen] = useState(false)
+  const [preview, setPreview] = useState<OrderPreviewResponseDto | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
   const [focusCouponSignal, setFocusCouponSignal] = useState(0)
   const [openAddressFormSignal, setOpenAddressFormSignal] = useState(0)
   const couponInputRef = useRef<HTMLInputElement>(null)
@@ -56,11 +66,68 @@ export default function CheckoutPage() {
   const upsellDiscount = calcUpsellDiscount(totalPrice, promoCode)
   const finalTotal = calcFinalTotal(totalPrice, shippingCost, upsellDiscount)
 
-  // There is no backend endpoint to pre-validate a discount code — only /orders itself applies
-  // and returns the real discount at creation time (see lib/pricing.ts's own note on this). So
-  // this never fabricates a discount preview for a code it can't verify: UPSELL10 is the one
-  // code the client recognizes and can show feedback for immediately; anything else is simply
-  // carried through to order submission, where the backend is the actual authority.
+  // POST /orders/preview runs the exact same pricing pipeline as order creation, so once an
+  // address is on file this is the authoritative source for shipping/discount/total — it
+  // supersedes the client-side estimates above. UPSELL10 still gets instant local feedback
+  // on apply (below) since that one code is recognized client-side too, but the preview
+  // response is what actually confirms or corrects it, including surfacing a real error for
+  // an invalid/expired/exhausted code instead of silently falling back to an undiscounted total.
+  useEffect(() => {
+    if (!addressSelection || cartItems.length === 0 || cartItems.some((item) => !item.defaultListingId)) {
+      setPreview(null)
+      return
+    }
+    let cancelled = false
+    const timer = setTimeout(async () => {
+      setPreviewLoading(true)
+      try {
+        const body: CreateOrderDto = {
+          items: cartItems.map((item) => ({
+            listingId: Number(item.defaultListingId!),
+            quantity: item.quantity,
+          })),
+          ...(addressSelection.mode === 'saved'
+            ? { savedAddressId: addressSelection.id }
+            : { shippingAddress: toShippingAddressDto(addressSelection.address) }),
+          discountCode: promoCode.trim() || undefined,
+        }
+        const res = await orderApi.preview(body)
+        if (cancelled) return
+        setPreview(res)
+        if (promoCode.trim()) {
+          setCouponMessage(
+            res.discountAmount
+              ? { type: 'success', text: `✓ Rabatt angewendet (−€${res.discountAmount.toFixed(2)})` }
+              : { type: 'info', text: 'Für diesen Code gilt kein Rabatt.' }
+          )
+        }
+      } catch (err) {
+        if (cancelled) return
+        setPreview(null)
+        if (promoCode.trim()) {
+          setCouponMessage({
+            type: 'info',
+            text: err instanceof FetchError ? err.message : 'Gutscheincode konnte nicht geprüft werden.',
+          })
+        }
+      } finally {
+        if (!cancelled) setPreviewLoading(false)
+      }
+    }, 400)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+    // cartItems is compared by identity via CartContext's own state updates (add/remove/qty
+    // change all produce a new array), so it's safe to depend on directly here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartItems, addressSelection, promoCode])
+
+  const displaySubtotal = preview?.subtotal ?? totalPrice
+  const displayShippingTotal = preview?.shippingTotal ?? shippingCost
+  const displayDiscount = preview?.discountAmount ?? upsellDiscount
+  const displayTotal = preview?.total ?? finalTotal
+
   // "Rabatt hinzufügen" opens the (possibly still-collapsed) order summary accordion and jumps
   // straight to the coupon field — the signal counter (rather than watching summaryOpen itself)
   // means clicking it again while already open still re-focuses/re-scrolls, and the effect only
@@ -85,7 +152,13 @@ export default function CheckoutPage() {
     setPromoCode(code)
     if (!code) {
       setCouponMessage(null)
+    } else if (addressSelection) {
+      // The preview effect above re-runs on this promoCode change and will replace this with
+      // the backend-confirmed result (success, no-discount, or a real invalid-code error).
+      setCouponMessage({ type: 'info', text: 'Wird geprüft…' })
     } else if (calcUpsellDiscount(totalPrice, code) > 0) {
+      // No address yet, so no preview call can run — fall back to the one code the client can
+      // recognize on its own; anything else is simply carried through to order submission.
       setCouponMessage({ type: 'success', text: '✓ Rabatt angewendet' })
     } else {
       setCouponMessage({ type: 'info', text: 'Wird bei der Bestellung geprüft.' })
@@ -455,7 +528,7 @@ export default function CheckoutPage() {
                     </span>
                     <span className="flex items-center gap-2 flex-shrink-0">
                       <span className="font-league-spartan text-sm text-enunas-black font-medium">
-                        €{finalTotal.toFixed(2)}
+                        €{displayTotal.toFixed(2)}
                       </span>
                       <svg
                         width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -522,33 +595,50 @@ export default function CheckoutPage() {
                       ))}
                     </div>
 
-                    {/* Totals */}
+                    {/* Totals — once `preview` has loaded (POST /orders/preview, requires a
+                        chosen shipping address) these are the backend-authoritative numbers,
+                        guaranteed to match what order creation actually charges. Until then,
+                        the client-side estimate from lib/pricing.ts is shown instead. */}
                     <div className="border-t border-enunas-gray-light pt-4 space-y-2">
                       <div className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium">
                         <span>Zwischensumme</span>
-                        <span>€{totalPrice.toFixed(2)}</span>
+                        <span>€{displaySubtotal.toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium">
-                        <span>Versand</span>
-                        <span>{shippingCost === 0 ? 'Kostenlos' : `€${shippingCost.toFixed(2)}`}</span>
-                      </div>
-                      {upsellDiscount > 0 && (
+
+                      {preview?.shippingBreakdown && preview.shippingBreakdown.length > 0 ? (
+                        preview.shippingBreakdown.map((line) => (
+                          <div key={line.brandId} className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium">
+                            <span>
+                              Versand — {line.brandName}
+                              <span className="text-enunas-gray-medium/70"> · {SHIPPING_METHOD_LABEL[line.calculationMethod]}</span>
+                            </span>
+                            <span>{line.amount === 0 ? 'Kostenlos' : `€${line.amount.toFixed(2)}`}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium">
+                          <span>Versand{previewLoading ? ' …' : ''}</span>
+                          <span>{displayShippingTotal === 0 ? 'Kostenlos' : `€${displayShippingTotal.toFixed(2)}`}</span>
+                        </div>
+                      )}
+
+                      {displayDiscount > 0 && (
                         <div className="flex justify-between font-league-spartan text-xs text-enunas-success">
-                          <span>Enunas-Vorteil (−10&nbsp;%)</span>
-                          <span>−€{upsellDiscount.toFixed(2)}</span>
+                          <span>{preview?.discountCode ? `Rabatt (${preview.discountCode})` : 'Enunas-Vorteil (−10 %)'}</span>
+                          <span>−€{displayDiscount.toFixed(2)}</span>
                         </div>
                       )}
                       <div className="flex justify-between font-league-spartan text-sm text-enunas-black pt-3 border-t border-enunas-gray-light">
                         <span className="font-medium">Gesamt</span>
-                        <span className="font-medium">€{finalTotal.toFixed(2)}</span>
+                        <span className="font-medium">€{displayTotal.toFixed(2)}</span>
                       </div>
                       <p className="font-league-spartan text-[10px] text-enunas-gray-medium">
                         inkl. MwSt.
                       </p>
                     </div>
 
-                    {/* Coupon code — see handleApplyCoupon above for why this never fabricates a
-                        discount preview for codes the frontend can't actually verify. */}
+                    {/* Coupon code — applying it re-runs the preview effect above, which is what
+                        actually confirms or rejects the code against the backend. */}
                     <form onSubmit={handleApplyCoupon} className="flex gap-2 pt-4 mt-4 border-t border-enunas-gray-light">
                       <input
                         ref={couponInputRef}

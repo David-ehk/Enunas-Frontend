@@ -10,6 +10,9 @@ export interface SettlementRow {
   commissionNet: number
   commissionVat: number
   commissionGross: number
+  // Shipping revenue for this brand/period — a separate ledger line from the commission
+  // figures above, not included in commissionNet/commissionGross/payoutAmount.
+  shippingRevenue?: number
   payoutAmount: number
   orderCount: number
   refundCount: number

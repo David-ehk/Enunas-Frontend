@@ -28,6 +28,22 @@ export const adminApi = {
       });
     },
 
+    // Backend SetShippingProfileDto = { shippingCost, originCountry, avgShippingDays }.
+    // ⚠️ Full-replace PATCH despite the verb — every field is written on every call, so callers
+    // must always submit all three (pre-filled with current values), never a partial object.
+    // shippingCost: null unsets it (falls back to the platform default rate); 0 is an explicit
+    // free-shipping override; a positive number is the brand's flat rate. originCountry is a
+    // 2-letter ISO-3166 code. The response does not echo these fields back (same gap as
+    // setPayoutProfile above) — callers must update their own state optimistically.
+    async setShippingProfile(id: string, dto: {
+      shippingCost: number | null; originCountry: string; avgShippingDays: number;
+    }): Promise<AdminBrand> {
+      return fetcher<AdminBrand>(`/admin/brands/${id}/shipping-profile`, {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      });
+    },
+
     // Backend AdminBrandMasterDataDto: address fields are @NotBlank (mandatory),
     // country is 2-letter; `domestic` is derived server-side from addressCountry === 'DE'.
     async updateStammdaten(id: string, dto: {

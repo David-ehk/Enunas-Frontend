@@ -162,6 +162,31 @@ function OrderRow({
             </div>
           )}
 
+          {/* Shipping breakdown — shippingSnapshots is frozen per brand at checkout. An empty
+              or missing array means this order predates the shipping feature (no backfill);
+              treated as "no data", never shown as free shipping. */}
+          {(order.shippingSnapshots && order.shippingSnapshots.length > 0) || order.shippingTotal != null ? (
+            <div className="mb-4 pt-3 border-t border-enunas-gray-light space-y-1.5">
+              {order.shippingSnapshots && order.shippingSnapshots.length > 0 ? (
+                order.shippingSnapshots.map((line) => (
+                  <div key={line.brandId} className="flex items-center justify-between">
+                    <p className="font-league-spartan text-xs text-enunas-gray-medium">Versand — {line.brandName}</p>
+                    <p className="font-league-spartan text-xs text-enunas-black">
+                      {line.amount === 0 ? 'Kostenlos' : formatEuroDecimal(line.amount)}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="flex items-center justify-between">
+                  <p className="font-league-spartan text-xs text-enunas-gray-medium">Versand</p>
+                  <p className="font-league-spartan text-xs text-enunas-black">
+                    {order.shippingTotal === 0 ? 'Kostenlos' : formatEuroDecimal(order.shippingTotal)}
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : null}
+
           {/* Actions */}
           <div className="flex items-center gap-6 flex-wrap">
             {order.trackingNumber && (

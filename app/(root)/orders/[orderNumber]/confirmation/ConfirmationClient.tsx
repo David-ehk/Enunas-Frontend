@@ -182,7 +182,38 @@ function OrderDetails({ order }: { order: ApiOrder }) {
 
       {order.total != null && order.total > 0 && (
         <div className="py-5 border-b border-enunas-gray-light">
-          <div className="flex justify-between">
+          {order.subtotal != null && (
+            <div className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium mb-2">
+              <span>Zwischensumme</span>
+              <span>{fmt(order.subtotal)}</span>
+            </div>
+          )}
+
+          {/* shippingSnapshots is frozen at checkout, one line per brand. An empty/missing array
+              means this order predates the shipping feature (no backfill) — treated as "no
+              data", never displayed as free shipping. */}
+          {order.shippingSnapshots && order.shippingSnapshots.length > 0 ? (
+            order.shippingSnapshots.map(line => (
+              <div key={line.brandId} className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium mb-2">
+                <span>Versand — {line.brandName}</span>
+                <span>{line.amount === 0 ? 'Kostenlos' : fmt(line.amount)}</span>
+              </div>
+            ))
+          ) : order.shippingTotal != null ? (
+            <div className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium mb-2">
+              <span>Versand</span>
+              <span>{order.shippingTotal === 0 ? 'Kostenlos' : fmt(order.shippingTotal)}</span>
+            </div>
+          ) : null}
+
+          {order.discountAmount != null && order.discountAmount > 0 && (
+            <div className="flex justify-between font-league-spartan text-xs text-enunas-success mb-2">
+              <span>{order.discountCode ? `Rabatt (${order.discountCode})` : 'Rabatt'}</span>
+              <span>−{fmt(order.discountAmount)}</span>
+            </div>
+          )}
+
+          <div className="flex justify-between pt-2 border-t border-enunas-gray-light">
             <p className="font-league-spartan text-sm text-enunas-black font-medium">Gesamt</p>
             <p className="font-league-spartan text-sm text-enunas-black font-medium">{fmt(order.total)}</p>
           </div>

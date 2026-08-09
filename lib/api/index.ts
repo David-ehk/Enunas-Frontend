@@ -8,7 +8,10 @@ export type { UserAddressDto } from './modules/addressApi';
 export { productApi } from './modules/productApi';
 export type { ProductSearchParams } from './modules/productApi';
 export { orderApi } from './modules/orderApi';
-export type { CreateOrderDto, ShippingAddressDto } from './modules/orderApi';
+export type {
+  CreateOrderDto, ShippingAddressDto, OrderPreviewResponseDto, OrderPreviewItem,
+  ShippingBreakdownLine, ShippingSnapshot, ShippingCalculationMethod,
+} from './modules/orderApi';
 export { wardrobeApi } from './modules/wardrobeApi';
 export { brandApi } from './modules/brandApi';
 export { adminApi } from './modules/adminApi';

@@ -14,6 +14,15 @@ interface PayoutDraft {
   bankAccountHolder: string
 }
 
+// Form-string mirror of SetShippingProfileDto. shippingCost is kept as a string so the form can
+// tell "left blank" (→ null, not configured) apart from "typed 0" (→ explicit free shipping) —
+// collapsing those into one falsy value would lose a meaningful distinction.
+interface ShippingDraft {
+  shippingCost: string
+  originCountry: string
+  avgShippingDays: string
+}
+
 // Address fields are @NotBlank in the backend; `domestic` is derived server-side
 // from addressCountry === 'DE' and cannot be set independently.
 interface StammDraft {
@@ -481,6 +490,12 @@ export default function Brands() {
   const [payoutError, setPayoutError]   = useState<string | null>(null)
   const [payouts, setPayouts]           = useState<AdminPayout[]>([])
 
+  // Shipping profile editing
+  const [editingShipping, setEditingShipping] = useState<string | null>(null)
+  const [shippingDraft, setShippingDraft] = useState<ShippingDraft>({ shippingCost: '', originCountry: 'DE', avgShippingDays: '' })
+  const [savingShipping, setSavingShipping] = useState(false)
+  const [shippingError, setShippingError]   = useState<string | null>(null)
+
   // Stammdaten editing
   const [editingStamm, setEditingStamm] = useState<string | null>(null)
   const [stammDraft, setStammDraft]     = useState<StammDraft>({ legalName: '', addressStreet: '', addressPostalCode: '', addressCity: '', addressCountry: 'DE', vatId: '', taxNumber: '' })
@@ -601,6 +616,42 @@ export default function Brands() {
     } catch {
       setPayoutError('Speichern fehlgeschlagen — bitte IBAN-Format prüfen und erneut versuchen.')
     } finally { setSavingPayout(false) }
+  }
+
+  async function saveShippingProfile(brandId: string) {
+    const country = shippingDraft.originCountry.trim().toUpperCase()
+    if (country.length !== 2) {
+      setShippingError('Herkunftsland muss ein 2-stelliger Ländercode sein (z. B. DE).')
+      return
+    }
+    const daysRaw = shippingDraft.avgShippingDays.trim()
+    const avgShippingDays = daysRaw === '' ? NaN : Number(daysRaw)
+    if (!Number.isFinite(avgShippingDays) || avgShippingDays < 0) {
+      setShippingError('Ø Versandtage sind erforderlich (Zahl ≥ 0).')
+      return
+    }
+    const costRaw = shippingDraft.shippingCost.trim()
+    // Blank is a deliberate choice — it unsets the override and falls back to the platform
+    // default — not an error, and not the same as "0" (explicit free shipping).
+    const shippingCost = costRaw === '' ? null : Number(costRaw)
+    if (shippingCost != null && (!Number.isFinite(shippingCost) || shippingCost < 0)) {
+      setShippingError('Versandkosten dürfen nicht negativ sein.')
+      return
+    }
+
+    setSavingShipping(true)
+    setShippingError(null)
+    try {
+      await adminApi.brands.setShippingProfile(brandId, { shippingCost, originCountry: country, avgShippingDays })
+      // Full-replace PATCH; response doesn't echo the shipping fields back — same gap as
+      // setPayoutProfile above — so show what was actually sent, not a round-trip confirmation.
+      setBrands(prev => prev.map(b => b.id === brandId
+        ? { ...b, shippingCost, originCountry: country, avgShippingDays }
+        : b))
+      setEditingShipping(null)
+    } catch {
+      setShippingError('Speichern fehlgeschlagen — bitte Eingaben prüfen und erneut versuchen.')
+    } finally { setSavingShipping(false) }
   }
 
   async function saveStammdaten(brandId: string) {
@@ -1160,6 +1211,108 @@ export default function Brands() {
                               </div>
                             ) : (
                               <p className="text-[11px] text-[#9B9B9B] italic">Kein Auszahlungsprofil hinterlegt — klicken Sie auf Bearbeiten, um eines einzurichten.</p>
+                            )}
+                          </div>
+
+                          {/* Versandprofil */}
+                          <div className="pt-4 mt-4 border-t border-[#EBEBEB]">
+                            <div className="flex items-center justify-between mb-3">
+                              <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium">Versandprofil</p>
+                              {editingShipping !== brand.id && (
+                                <button
+                                  onClick={() => {
+                                    setEditingShipping(brand.id)
+                                    setShippingError(null)
+                                    setShippingDraft({
+                                      shippingCost: brand.shippingCost != null ? String(brand.shippingCost) : '',
+                                      originCountry: brand.originCountry ?? 'DE',
+                                      avgShippingDays: brand.avgShippingDays != null ? String(brand.avgShippingDays) : '',
+                                    })
+                                  }}
+                                  className="text-[11px] font-medium hover:underline transition-all duration-200"
+                                  style={{ color: '#370E4D', fontFamily: 'var(--font-league-spartan)' }}
+                                >
+                                  Bearbeiten
+                                </button>
+                              )}
+                            </div>
+
+                            {editingShipping === brand.id ? (
+                              <div className="space-y-3">
+                                <div className="grid grid-cols-3 gap-3">
+                                  <div>
+                                    <FLabel>Versandkosten (€)</FLabel>
+                                    <FInput
+                                      value={shippingDraft.shippingCost}
+                                      onChange={v => setShippingDraft(d => ({ ...d, shippingCost: v }))}
+                                      placeholder="leer = Plattform-Standard"
+                                    />
+                                    <p className="text-[10px] text-[#9B9B9B] mt-1" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                                      Leer = Standard · 0 = kostenlos · &gt;0 = Pauschale
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <FLabel>Herkunftsland</FLabel>
+                                    <FInput
+                                      value={shippingDraft.originCountry}
+                                      onChange={v => setShippingDraft(d => ({ ...d, originCountry: v.toUpperCase().slice(0, 2) }))}
+                                      placeholder="DE"
+                                    />
+                                  </div>
+                                  <div>
+                                    <FLabel>Ø Versandtage</FLabel>
+                                    <FInput
+                                      value={shippingDraft.avgShippingDays}
+                                      onChange={v => setShippingDraft(d => ({ ...d, avgShippingDays: v }))}
+                                      placeholder="3"
+                                    />
+                                  </div>
+                                </div>
+                                {shippingError && (
+                                  <p className="text-[11px] font-medium" style={{ fontFamily: 'var(--font-league-spartan)', color: '#8B1E3F' }}>
+                                    {shippingError}
+                                  </p>
+                                )}
+                                <div className="flex items-center justify-end gap-2">
+                                  <button
+                                    onClick={() => { setEditingShipping(null); setShippingError(null) }}
+                                    className="h-7 px-3.5 rounded-lg text-[11px] font-medium text-[#6B6B6B] border border-[#E8E8E8] hover:bg-[#F5F5F0] transition-all duration-200"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                  >
+                                    Abbrechen
+                                  </button>
+                                  <button
+                                    onClick={() => saveShippingProfile(brand.id)}
+                                    disabled={savingShipping}
+                                    className="h-7 px-3.5 rounded-lg text-[11px] font-medium text-white transition-all duration-200 disabled:opacity-40"
+                                    style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D' }}
+                                  >
+                                    {savingShipping ? 'Speichert…' : 'Speichern'}
+                                  </button>
+                                </div>
+                              </div>
+                            ) : brand.shippingCost !== undefined || brand.originCountry || brand.avgShippingDays != null ? (
+                              <div className="grid grid-cols-3 gap-3">
+                                <div>
+                                  <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}>Versandkosten</p>
+                                  <p className="text-[12px] text-[#0A0A0A]">
+                                    {brand.shippingCost == null ? 'Standard (nicht konfiguriert)' : brand.shippingCost === 0 ? 'Kostenlos' : fmtEur(brand.shippingCost)}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}>Herkunftsland</p>
+                                  <p className="text-[12px] text-[#0A0A0A]">{brand.originCountry || '—'}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] uppercase tracking-[0.10em] text-[#9B9B9B] font-medium mb-1"
+                                    style={{ fontFamily: 'var(--font-league-spartan)' }}>Ø Versandtage</p>
+                                  <p className="text-[12px] text-[#0A0A0A]">{brand.avgShippingDays ?? '—'}</p>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-[11px] text-[#9B9B9B] italic">Kein Versandprofil hinterlegt — klicken Sie auf Bearbeiten, um eines einzurichten.</p>
                             )}
                           </div>
                         </td>

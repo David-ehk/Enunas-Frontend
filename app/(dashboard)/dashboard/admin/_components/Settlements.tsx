@@ -525,6 +525,11 @@ function HistoryTableRow({ row }: { row: SettlementRow }) {
       </TD>
       <FiktiveVatCell row={row} />
       <TD className="text-right">
+        <span className="tabular-nums text-[13px] text-[#6B6B6B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+          {row.shippingRevenue != null ? fmtEurDe(row.shippingRevenue) : '—'}
+        </span>
+      </TD>
+      <TD className="text-right">
         <span className={`tabular-nums text-[13px] font-bold ${row.payoutAmount < 0 ? 'text-[#8B1E3F]' : 'text-[#1A5A3C]'}`}
           style={{ fontFamily: 'var(--font-league-spartan)' }}>
           {fmtEurDe(row.payoutAmount)}
@@ -614,6 +619,11 @@ function SettlementTableRow({ row, periodOpen, onMark, isSepa }: {
         </span>
       </TD>
       <FiktiveVatCell row={row} />
+      <TD className="text-right">
+        <span className="tabular-nums text-[13px] text-[#6B6B6B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+          {row.shippingRevenue != null ? fmtEurDe(row.shippingRevenue) : '—'}
+        </span>
+      </TD>
       <TD className="text-right">
         <div className="flex items-center justify-end gap-1">
           <span className={`tabular-nums text-[13px] font-bold ${!isSepa ? 'text-[#8B1E3F]' : 'text-[#1A5A3C]'}`}
@@ -1309,6 +1319,7 @@ export default function Settlements() {
                     <TH right>USt</TH>
                     <TH right>Provision brutto</TH>
                     <TH right>Fiktive USt (nachrichtl.)</TH>
+                    <TH right>Versand</TH>
                     <TH right>Auszahlung</TH>
                     <TH>Abgerechnet am</TH>
                     <TH>Referenz</TH>
@@ -1370,6 +1381,7 @@ export default function Settlements() {
                     <TH right>
                       <span style={{ color: '#7A5C1E' }}>Fiktive USt (nachrichtl.)</span>
                     </TH>
+                    <TH right>Versand</TH>
                     <TH right>Auszahlung</TH>
                     <TH>Orders</TH>
                     <TH>Aktion</TH>
@@ -1378,7 +1390,7 @@ export default function Settlements() {
                 <tbody>
                   {sepaRows.length > 0 && (
                     <tr>
-                      <td colSpan={10} style={{ background: 'rgba(26,90,60,0.06)', borderTop: '2px solid rgba(26,90,60,0.15)', borderBottom: '1px solid rgba(26,90,60,0.12)', padding: '8px 20px' }}>
+                      <td colSpan={11} style={{ background: 'rgba(26,90,60,0.06)', borderTop: '2px solid rgba(26,90,60,0.15)', borderBottom: '1px solid rgba(26,90,60,0.12)', padding: '8px 20px' }}>
                         <div className="flex items-center gap-3">
                           <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#1A5A3C]"
                             style={{ fontFamily: 'var(--font-league-spartan)' }}>
@@ -1397,7 +1409,7 @@ export default function Settlements() {
 
                   {noSepaRows.length > 0 && (
                     <tr>
-                      <td colSpan={10} style={{ background: 'rgba(139,30,63,0.04)', borderTop: '2px solid rgba(139,30,63,0.12)', borderBottom: '1px solid rgba(139,30,63,0.08)', padding: '8px 20px' }}>
+                      <td colSpan={11} style={{ background: 'rgba(139,30,63,0.04)', borderTop: '2px solid rgba(139,30,63,0.12)', borderBottom: '1px solid rgba(139,30,63,0.08)', padding: '8px 20px' }}>
                         <div className="flex items-center gap-3">
                           <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#8B1E3F]"
                             style={{ fontFamily: 'var(--font-league-spartan)' }}>

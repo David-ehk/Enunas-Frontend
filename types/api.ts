@@ -169,6 +169,23 @@ export interface ApiOrderItem {
   color?: string;
 }
 
+// Why a shipping line has the amount it has: the brand has no config and the platform fallback
+// applied (GLOBAL_DEFAULT), the brand's own positive flat rate applied (BRAND_FLAT_RATE), or the
+// brand explicitly configured €0.00 (BRAND_FREE_SHIPPING).
+export type ShippingCalculationMethod = 'GLOBAL_DEFAULT' | 'BRAND_FLAT_RATE' | 'BRAND_FREE_SHIPPING';
+
+// One brand's shipping line — a cart/order spanning multiple brands gets one of these per
+// brand, charged independently; never merged into a single flat fee. On an order this is
+// frozen at checkout: even if the brand's rate changes later, the order keeps showing what
+// was actually charged.
+export interface ShippingSnapshot {
+  brandId: number | string;
+  brandName: string;
+  amount: number;
+  currency: string;
+  calculationMethod: ShippingCalculationMethod;
+}
+
 // Mirrors backend OrderResponseDto.
 // `total` is the canonical backend field. `totalAmount` is not returned by the backend;
 // treat it as always undefined when reading real API responses.
@@ -200,6 +217,10 @@ export interface ApiOrder {
   total?: number;
   subtotal?: number;
   shippingTotal?: number;
+  // Frozen at checkout, one entry per brand in the order. Empty/undefined means "no data" —
+  // orders placed before the shipping feature shipped (no backfill) — never treat that as
+  // "free shipping".
+  shippingSnapshots?: ShippingSnapshot[];
   discountCode?: string;
   discountAmount?: number;
   discountPercent?: number;
@@ -296,6 +317,14 @@ export interface AdminBrand {
   taxNumber?: string;
   domestic?: boolean;
   updatedAt?: string;
+  // Shipping profile (PATCH /admin/brands/{id}/shipping-profile). Not returned by GET
+  // /admin/brands today (BrandPartnerResponseDto doesn't carry these fields) — these are
+  // populated client-side only, right after a successful save. null shippingCost means
+  // "not configured" (falls back to the platform default); 0 means explicit free shipping;
+  // a positive number is the brand's flat rate. Three distinct states — never collapse them.
+  shippingCost?: number | null;
+  originCountry?: string;
+  avgShippingDays?: number;
 }
 
 export interface AdminCustomer {
