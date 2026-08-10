@@ -90,6 +90,7 @@ export default function Payouts() {
             <thead>
               <tr>
                 <VTH>Angekündigt am</VTH>
+                <VTH>Typ</VTH>
                 <VTH right>Betrag</VTH>
                 <VTH>Konto</VTH>
                 <VTH>Status</VTH>
@@ -103,6 +104,11 @@ export default function Payouts() {
                 return (
                   <VTR key={p.id}>
                     <VTD muted>{fmt(p.createdAt)}</VTD>
+                    <VTD>
+                      <VStatus tone={p.type === 'SHIPPING' ? 'success' : 'purple'}>
+                        {p.type === 'SHIPPING' ? 'Versand' : 'Umsatz'}
+                      </VStatus>
+                    </VTD>
                     <VTD right>
                       <span style={{ fontFamily: 'var(--font-league-spartan)', fontWeight: 600, color: '#0A0A0A' }}>
                         {fmtEur2(p.amount)}

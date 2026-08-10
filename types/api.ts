@@ -342,6 +342,10 @@ export interface AdminCustomer {
 export interface AdminPayout {
   id: string;
   brandPartnerId?: number;
+  // Which ledger stream this transfer covers — REVENUE (product/commission-side net) or
+  // SHIPPING (shipping money collected on the brand's behalf). Every payout-generation cycle
+  // can produce up to one of each per brand, as two separate bank transfers.
+  type: 'REVENUE' | 'SHIPPING' | string;
   amount: number;
   debtAbsorbed?: number;
   status: 'PENDING' | 'APPROVED' | 'PAID' | 'CANCELLED' | string;

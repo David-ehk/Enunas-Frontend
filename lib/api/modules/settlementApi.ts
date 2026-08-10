@@ -11,7 +11,11 @@ export interface SettlementRow {
   commissionVat: number
   commissionGross: number
   // Shipping revenue for this brand/period — a separate ledger line from the commission
-  // figures above, not included in commissionNet/commissionGross/payoutAmount.
+  // figures above (commissionNet/commissionVat/commissionGross exclude it, carrying zero VAT
+  // by construction). It IS folded into payoutAmount below, though: the backend's ledger
+  // aggregate sums brandPayout across both ORDER_PAYMENT and SHIPPING_REVENUE entries, so
+  // payoutAmount = product payout + shippingRevenue. Subtract shippingRevenue from payoutAmount
+  // to isolate the product-only payout.
   shippingRevenue?: number
   payoutAmount: number
   orderCount: number
