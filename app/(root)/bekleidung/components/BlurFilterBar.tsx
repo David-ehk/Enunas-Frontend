@@ -163,8 +163,12 @@ export default function BlurFilterBar({
   useEffect(() => {
     const onScroll = () => {
       if (!watchRef.current) return
-      const gone = watchRef.current.getBoundingClientRect().bottom < 0
-      setVisible(gone)
+      const barGone = watchRef.current.getBoundingClientRect().bottom < 0
+      // Hide again once the footer scrolls into view so the fixed pill
+      // doesn't float on top of the footer at the bottom of the page.
+      const footer = document.querySelector('footer')
+      const footerVisible = footer ? footer.getBoundingClientRect().top < window.innerHeight : false
+      setVisible(barGone && !footerVisible)
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
@@ -260,6 +264,7 @@ export default function BlurFilterBar({
                 fontWeight: 700,
                 fontFamily: "'League Spartan', sans-serif",
                 flexShrink: 0,
+                paddingLeft: 0.5,
               }}>
                 {activeFilterCount}
               </span>
@@ -340,7 +345,7 @@ export default function BlurFilterBar({
               fontSize: 8, width: 13, height: 13, borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontWeight: 600, fontFamily: "'League Spartan', sans-serif",
-              pointerEvents: 'none',
+              pointerEvents: 'none', paddingLeft: 0.5,
             }}>
               {activeFilterCount}
             </span>

@@ -60,7 +60,7 @@ export default function LegalPage({ kicker, title, lede, meta, sections, contact
               {kicker}
             </span>
             <span className="hidden sm:block text-[10px] uppercase tracking-[0.28em] text-[#6B6B6B]" style={{ fontWeight: 500 }}>
-              Enunas UG — Berlin
+              Enunas — München
             </span>
           </div>
         </div>

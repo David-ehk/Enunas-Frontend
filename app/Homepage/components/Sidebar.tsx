@@ -229,7 +229,7 @@ function VideoTile({ tile }: { tile: TileData }) {
   return (
     <div className="mn-tile mn-is-video" data-paused={paused ? 'true' : 'false'}>
       <div className="mn-tile-media mn-kb">
-        <img src={tile.img} alt={tile.name} />
+        {/* <img src={tile.img} alt={tile.name} /> */}
       </div>
       <div className="mn-video-tag">
         <span className="mn-rec" />{paused ? 'Pausiert' : 'Video'}
@@ -253,7 +253,7 @@ function Tile({ tile }: { tile: TileData }) {
   if (tile.video) return <VideoTile tile={tile} />
   return (
     <div className="mn-tile">
-      <div className="mn-tile-media"><img src={tile.img} alt={tile.name} /></div>
+      <div className="mn-tile-media">{/* <img src={tile.img} alt={tile.name} /> */}</div>
       <div className="mn-tile-cap">
         <div className="mn-kicker">{tile.kicker}</div>
         <span className="mn-name">{tile.name}</span>
@@ -296,8 +296,8 @@ const MEGA_CSS = `
 .mn-mega {
   position: fixed; top: 0; left: 0; z-index: 9999;
   height: 100vh; height: 100dvh;
-  width: min(1320px, 94vw);
-  display: grid; grid-template-columns: 312px 360px 1fr;
+  width: min(672px, 94vw);
+  display: grid; grid-template-columns: 312px 360px;
   transform: translateX(-101%);
   transition: transform 760ms cubic-bezier(0.16,1,0.3,1);
   box-shadow: 0 0 90px rgba(0,0,0,0.22);
@@ -604,13 +604,6 @@ const MEGA_CSS = `
 .mn-tile[data-paused="true"] .mn-video-tag .mn-rec { background: rgba(255,255,255,0.4); }
 .mn-is-video .mn-tile-cap { left: 60px; }
 
-/* ── Laptop / medium desktop (hide editorial, keep 2 columns) ── */
-@media (max-width: 1100px) {
-  .mn-mega { grid-template-columns: 260px 1fr; width: 92vw; }
-  .mn-editorial { display: none; }
-  .mn-sub { border-right: none; }
-}
-
 /* ── Tablet / phone — full-width drill-down ── */
 @media (max-width: 768px) {
   .mn-mega {
@@ -875,7 +868,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
         </div>
 
-        {/* ── Column 3 · editorial ── */}
+        {/* ── Column 3 · editorial ──
         <div className="mn-editorial">
           <div className="mn-tiles" key={tileKey}>
             {active.tiles.map((tile, i) => (
@@ -883,6 +876,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             ))}
           </div>
         </div>
+        */}
       </nav>
     </>
   )

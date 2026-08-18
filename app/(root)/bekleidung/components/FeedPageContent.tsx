@@ -197,6 +197,7 @@ export default function FeedPageContent({ basePath, HeroComponent, brandFilter, 
                 background: '#370E4D', color: '#fff', fontSize: 8,
                 width: 13, height: 13, borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600,
+                paddingLeft: 0.5,
               }}>
                 {activeFilterCount}
               </span>
