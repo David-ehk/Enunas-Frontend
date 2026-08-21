@@ -5,7 +5,7 @@ const sections: LegalSection[] = [
   {
     id: 's1', num: '§ 1', label: 'Geltungsbereich', title: 'Geltungsbereich',
     paras: [
-      'Diese Allgemeinen Geschäftsbedingungen gelten für alle Verträge zwischen der Enunas UG (haftungsbeschränkt), Musterstraße 42, 10115 Berlin („Enunas") und Verbraucherinnen und Verbrauchern sowie Unternehmerinnen und Unternehmern („Kund:in"), die über den Online-Shop www.enunas.com abgeschlossen werden.',
+      'Diese Allgemeinen Geschäftsbedingungen gelten für alle Verträge zwischen David Emmanuel Hod Konan (Einzelunternehmen „Enunas"), Appenzellerstr. 113, 81475 München („Enunas") und Verbraucherinnen und Verbrauchern sowie Unternehmerinnen und Unternehmern („Kund:in"), die über den Online-Shop www.enunas.com abgeschlossen werden.',
       'Abweichende Bedingungen des Kunden werden nicht anerkannt, es sei denn, Enunas stimmt ihrer Geltung ausdrücklich schriftlich zu.',
     ],
   },
@@ -35,7 +35,7 @@ const sections: LegalSection[] = [
   {
     id: 's5', num: '§ 5', label: 'Eigentumsvorbehalt', title: 'Eigentumsvorbehalt',
     paras: [
-      'Die Ware bleibt bis zur vollständigen Bezahlung des Kaufpreises Eigentum der Enunas UG (haftungsbeschränkt).',
+      'Die Ware bleibt bis zur vollständigen Bezahlung des Kaufpreises Eigentum von David Emmanuel Hod Konan (Enunas).',
     ],
   },
   {
@@ -70,7 +70,7 @@ const sections: LegalSection[] = [
     id: 's10', num: '§ 10', label: 'Anwendbares Recht', title: 'Anwendbares Recht & Gerichtsstand',
     paras: [
       'Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts.',
-      'Gerichtsstand für alle Streitigkeiten mit Kaufleuten und juristischen Personen des öffentlichen Rechts ist Berlin.',
+      'Gerichtsstand für alle Streitigkeiten mit Kaufleuten und juristischen Personen des öffentlichen Rechts ist München.',
       'Sollten einzelne Bestimmungen unwirksam sein, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt.',
     ],
   },

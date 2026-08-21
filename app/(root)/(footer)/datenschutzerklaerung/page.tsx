@@ -5,7 +5,7 @@ const sections: LegalSection[] = [
   {
     id: 'v', num: '01', label: 'Verantwortlicher', title: 'Verantwortlicher',
     paras: [
-      'Verantwortlich für die Verarbeitung personenbezogener Daten auf dieser Website ist die Enunas UG (haftungsbeschränkt), Musterstraße 42, 10115 Berlin, vertreten durch den Geschäftsführer David Emmanuel Hod Konan.',
+      'Verantwortlich für die Verarbeitung personenbezogener Daten auf dieser Website ist David Emmanuel Hod Konan (Einzelunternehmen „Enunas"), Appenzellerstr. 113, 81475 München.',
       ['Datenschutz-Kontakt', 'datenschutz@enunas.com'],
     ],
   },
@@ -55,7 +55,7 @@ const sections: LegalSection[] = [
     id: 'r', num: '08', label: 'Ihre Rechte', title: 'Ihre Rechte nach DSGVO',
     paras: [
       'Ihnen stehen zu: Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20) sowie Widerspruch (Art. 21 DSGVO). Zur Ausübung: datenschutz@enunas.com.',
-      ['Beschwerderecht', 'Berliner Beauftragte für Datenschutz und Informationsfreiheit, Alt-Moabit 59–61, 10555 Berlin.'],
+      ['Beschwerderecht', 'Bayerisches Landesamt für Datenschutzaufsicht (BayLDA), Promenade 18, 91522 Ansbach.'],
     ],
   },
   {

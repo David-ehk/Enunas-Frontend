@@ -346,6 +346,50 @@ function DocTypeBadge({ row }: { row: SettlementRow }) {
   )
 }
 
+// ─── Payout type badge ─────────────────────────────────────────────────────────
+
+function PayoutTypeBadge({ type }: { type: string }) {
+  const isShipping = type === 'SHIPPING'
+  return (
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+      <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0" style={{ background: isShipping ? '#1A5A3C' : '#370E4D' }} />
+      <span
+        className="text-[10px] uppercase tracking-[0.1em] font-medium text-[#2D2D2D]"
+        style={{ fontFamily: 'var(--font-league-spartan)' }}
+      >
+        {isShipping ? 'Versand' : 'Umsatz'}
+      </span>
+    </span>
+  )
+}
+
+// ─── Platform-wide P&L row ────────────────────────────────────────────────────
+
+function SumRow({ label, value, bold, accent, muted }: {
+  label: string; value: number; bold?: boolean; accent?: boolean; muted?: boolean
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <span
+        className={bold ? 'font-semibold' : ''}
+        style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '12px', color: muted ? '#6B6B6B' : '#2D2D2D' }}
+      >
+        {label}
+      </span>
+      <span
+        className={`tabular-nums ${bold ? 'font-bold' : 'font-medium'}`}
+        style={{
+          fontFamily: 'var(--font-league-spartan)',
+          fontSize: bold ? '14px' : '13px',
+          color: accent ? '#370E4D' : value < 0 ? '#8B1E3F' : '#0A0A0A',
+        }}
+      >
+        {value < 0 ? `−${fmtEurDe(Math.abs(value))}` : fmtEurDe(value)}
+      </span>
+    </div>
+  )
+}
+
 // ─── Fiktive USt cell ─────────────────────────────────────────────────────────
 
 function FiktiveVatCell({ row }: { row: SettlementRow }) {
@@ -879,18 +923,47 @@ export default function Settlements() {
     }
   }
 
-  const { sepaRows, noSepaRows, sepaTotal, commissionNetTotal, commissionGrossTotal, totalFiktiveVat, rcRows } = useMemo(() => {
+  const {
+    sepaRows, noSepaRows, sepaTotal, commissionNetTotal, commissionGrossTotal, totalFiktiveVat, rcRows,
+    shippingTotal, payoutGrandTotal, productPayoutTotal, warenumsatzTotal, shippingByBrand,
+  } = useMemo(() => {
     const sepa   = rows.filter(r => r.payoutAmount > 0)
     const noSepa = rows.filter(r => r.payoutAmount <= 0)
     const rc     = rows.filter(r => !r.domestic && !r.isCreditNote)
+
+    const commissionNet   = rows.reduce((s, r) => s + r.commissionNet,   0)
+    const commissionGross = rows.reduce((s, r) => s + r.commissionGross, 0)
+
+    // Platform-wide "Versand an Brands" — sums the existing per-brand shippingRevenue figure
+    // (already computed backend-side from SHIPPING_REVENUE ledger entries for the selected
+    // period/view). This aggregates the same `rows` the per-brand table and its own Versand
+    // column already render from — no shipping amount is calculated here, only summed.
+    const shipping = rows.reduce((s, r) => s + (r.shippingRevenue ?? 0), 0)
+    // payoutAmount already folds shipping money in (see backend LedgerRepository), so
+    // subtracting the shipping figure isolates the product-only payout — separating an
+    // already-known amount back out of an already-known total, not a second shipping calc.
+    const payoutAll      = rows.reduce((s, r) => s + r.payoutAmount, 0)
+    const productPayout  = payoutAll - shipping
+    const warenumsatz    = commissionGross + productPayout
+
+    const byBrand = rows
+      .filter(r => (r.shippingRevenue ?? 0) > 0)
+      .map(r => ({ brandId: r.brandId, brandName: r.brandName, amount: r.shippingRevenue ?? 0 }))
+      .sort((a, b) => b.amount - a.amount)
+
     return {
       sepaRows: sepa,
       noSepaRows: noSepa,
       rcRows: rc,
-      sepaTotal:            sepa.reduce((s, r) => s + r.payoutAmount,    0),
-      commissionNetTotal:   rows.reduce((s, r) => s + r.commissionNet,   0),
-      commissionGrossTotal: rows.reduce((s, r) => s + r.commissionGross, 0),
+      sepaTotal:            sepa.reduce((s, r) => s + r.payoutAmount, 0),
+      commissionNetTotal:   commissionNet,
+      commissionGrossTotal: commissionGross,
       totalFiktiveVat:      rc.reduce((s, r) => s + fiktiveVat(r), 0),
+      shippingTotal:        shipping,
+      payoutGrandTotal:     payoutAll,
+      productPayoutTotal:   productPayout,
+      warenumsatzTotal:     warenumsatz,
+      shippingByBrand:      byBrand,
     }
   }, [rows])
 
@@ -1159,6 +1232,55 @@ export default function Settlements() {
         </div>
       )}
 
+      {/* Platform-wide shipping overview — Versand an Brands, kept fully separate from
+          commission/USt above. Reuses the same period+view `rows` the per-brand table and its
+          own Versand column already render from; no separate shipping calculation happens here,
+          only aggregation of the already-computed per-brand shippingRevenue figure. */}
+      {(view === 'open' || view === 'settled') && !loading && rows.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <SectionCard title="Abrechnung · Gesamt">
+            <div className="px-5 py-4 space-y-2">
+              <SumRow label="Warenumsatz" value={warenumsatzTotal} />
+              <SumRow label="Provision" value={-commissionNetTotal} />
+              <SumRow label="USt. auf Provision" value={-(commissionGrossTotal - commissionNetTotal)} />
+              <div className="border-t border-[#EBEBEB] my-2" />
+              <SumRow label="Auszahlung Warenumsatz" value={productPayoutTotal} bold />
+              <div className="h-2" />
+              <SumRow label="Versand an Brands" value={shippingTotal} muted />
+              <div className="border-t border-[#EBEBEB] my-2" />
+              <SumRow label="Gesamtauszahlung an Brands" value={payoutGrandTotal} bold accent />
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Versand an Brands" count={shippingByBrand.length}>
+            {shippingByBrand.length === 0 ? (
+              <EmptyState message="Kein Versand für diesen Zeitraum." />
+            ) : (
+              <div className="px-5 py-4">
+                {shippingByBrand.map(b => (
+                  <div key={b.brandId} className="flex items-center justify-between py-1.5">
+                    <span className="text-[12px] text-[#2D2D2D]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                      {b.brandName}
+                    </span>
+                    <span className="text-[13px] font-medium tabular-nums text-[#0A0A0A]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                      {fmtEurDe(b.amount)}
+                    </span>
+                  </div>
+                ))}
+                <div className="border-t border-[#EBEBEB] mt-2 pt-2 flex items-center justify-between">
+                  <span className="text-[11px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                    Gesamt
+                  </span>
+                  <span className="text-[14px] font-bold tabular-nums" style={{ fontFamily: 'var(--font-league-spartan)', color: '#370E4D' }}>
+                    {fmtEurDe(shippingTotal)}
+                  </span>
+                </div>
+              </div>
+            )}
+          </SectionCard>
+        </div>
+      )}
+
       {/* Payouts view — SEPA-Workflow: generieren → genehmigen → als bezahlt markieren */}
       {view === 'payouts' && (() => {
         const pending  = payouts.filter(p => p.status === 'PENDING')
@@ -1205,6 +1327,7 @@ export default function Settlements() {
                     <thead>
                       <tr>
                         <TH>Brand</TH>
+                        <TH>Typ</TH>
                         <TH right>Betrag</TH>
                         <TH>IBAN / Kontoinhaber</TH>
                         <TH>Status</TH>
@@ -1218,6 +1341,7 @@ export default function Settlements() {
                         <React.Fragment key={p.id}>
                           <TableRow>
                             <TD className="font-medium text-[#0A0A0A]">{payoutBrandName(p)}</TD>
+                            <TD><PayoutTypeBadge type={p.type} /></TD>
                             <TD className="text-right font-semibold tabular-nums">{fmtEurDe(p.amount)}</TD>
                             <TD>
                               {p.iban ? (
@@ -1264,7 +1388,7 @@ export default function Settlements() {
                           </TableRow>
                           {payingId === p.id && (
                             <tr className="border-b border-[#F0F0EB]" style={{ background: '#F8F8F5' }}>
-                              <td colSpan={7} className="px-5 py-3">
+                              <td colSpan={8} className="px-5 py-3">
                                 <div className="flex items-center gap-2">
                                   <input
                                     autoFocus

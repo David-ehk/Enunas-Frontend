@@ -30,7 +30,7 @@ export default function DatenschutzerklaerungPage() {
               1. Verantwortlicher
             </p>
             <p>
-              Verantwortlicher für die Datenverarbeitung ist die Enunas GmbH, Musterstraße 1, 10115 Berlin.
+              Verantwortlicher für die Datenverarbeitung ist David Emmanuel Hod Konan (Einzelunternehmen „Enunas"), Appenzellerstr. 113, 81475 München.
               Kontakt: datenschutz@enunas.de
             </p>
           </div>
