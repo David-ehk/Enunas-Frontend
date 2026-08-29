@@ -161,18 +161,24 @@ export default function ProductDetails({
           {/* LEFT — Gallery + Breadcrumb */}
           <div>
             <ImageGallery images={product.images} productName={product.name} />
-            <nav className="px-8 py-[22px]">
+            <nav className="px-6 sm:px-8 py-4 sm:py-[22px]">
               <ol
-                className="flex items-center flex-wrap gap-3 text-enunas-gray-medium"
+                className="flex items-center flex-wrap gap-x-2.5 gap-y-1 sm:gap-x-3 text-enunas-gray-medium"
                 style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '13px', letterSpacing: '0.02em' }}
               >
-                <li><Link href="/" className="hover:text-enunas-black transition-colors duration-200">Home</Link></li>
-                <li className="text-enunas-gray-light">/</li>
-                <li><Link href="/bekleidung" className="hover:text-enunas-black transition-colors duration-200">Bekleidung</Link></li>
-                <li className="text-enunas-gray-light">/</li>
-                <li><Link href={`/marken/${brandSlug}`} className="hover:text-enunas-black transition-colors duration-200">{product.brandName}</Link></li>
-                <li className="text-enunas-gray-light">/</li>
-                <li className="text-enunas-black font-medium">{product.name}</li>
+                <li className="hidden sm:block"><Link href="/" className="hover:text-enunas-black transition-colors duration-200">Home</Link></li>
+                <li className="flex items-center gap-x-2.5 sm:gap-x-3">
+                  <span className="hidden sm:inline text-enunas-gray-light">/</span>
+                  <Link href="/bekleidung" className="hover:text-enunas-black transition-colors duration-200">Bekleidung</Link>
+                </li>
+                <li className="flex items-center gap-x-2.5 sm:gap-x-3">
+                  <span className="text-enunas-gray-light">/</span>
+                  <Link href={`/marken/${brandSlug}`} className="hover:text-enunas-black transition-colors duration-200">{product.brandName}</Link>
+                </li>
+                <li className="hidden sm:flex items-center gap-x-2.5 sm:gap-x-3">
+                  <span className="text-enunas-gray-light">/</span>
+                  <span className="text-enunas-black font-medium">{product.name}</span>
+                </li>
               </ol>
             </nav>
           </div>
@@ -261,10 +267,10 @@ export default function ProductDetails({
               disabled={ctaDisabled}
               className="group relative w-full max-w-[460px] overflow-hidden mb-6 disabled:opacity-60 disabled:cursor-not-allowed"
               style={{
-                padding: '22px 32px',
+                padding: 'clamp(13px, 3.4vw, 22px) 32px',
                 background: '#370E4D',
                 fontFamily: 'var(--font-Cormorant-Garamond)',
-                fontSize: '22px',
+                fontSize: 'clamp(15px, 4vw, 22px)',
                 fontWeight: 400,
                 letterSpacing: '0.04em',
                 border: 'none',

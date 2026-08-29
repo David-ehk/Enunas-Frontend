@@ -47,9 +47,13 @@ export interface RegisterBrandPartnerDto {
 }
 
 // Mirrors backend UpdateBrandPartnerDto — brandName ist NICHT änderbar (kein Feld im Backend).
+// Logo/Hero werden NICHT über logoUrl/heroImageUrl gesetzt (Jackson verwirft unbekannte Felder
+// still, PATCH gibt 200 ohne Persistierung) — sondern über die storageKey aus dem Presign-Flow
+// (POST /brandpartner/media/upload-url). Live gegen Produktion verifiziert.
 export type UpdateBrandPartnerDto = {
   description?: string
-  logoUrl?: string
+  logoStorageKey?: string
+  heroStorageKey?: string
   websiteUrl?: string
   instagramHandle?: string
   tiktokHandle?: string
@@ -95,6 +99,21 @@ function unpage<T>(res: Page<T> | T[]): T[] {
   return Array.isArray(res) ? res : (res.content ?? [])
 }
 
+// Presigned-upload contract (S3 direct upload) — verified live against production:
+// 1. POST this to get a presigned PUT URL + the exact headers S3 requires.
+// 2. PUT the file bytes straight to `uploadUrl`, with `requiredHeaders` MINUS `host` and
+//    `content-length` — both are forbidden headers browsers refuse to set manually; the
+//    browser sets them itself from the URL/body and the signature still matches.
+// 3. Hand the returned `key` to whichever "register this upload" endpoint applies
+//    (POST /products/{id}/media/images with storageKey, or PATCH /brandpartner/me with
+//    logoStorageKey/heroStorageKey) — the raw bucket URL is not meant to be built client-side.
+export interface MediaUploadUrlResponse {
+  key: string
+  uploadUrl: string
+  expiresAt: string
+  requiredHeaders: Record<string, string>
+}
+
 export const brandApi = {
   async apply(dto: RegisterBrandPartnerDto): Promise<ApiBrandPartner> {
     return fetcher<ApiBrandPartner>('/brandpartner/apply', {
@@ -102,6 +121,16 @@ export const brandApi = {
       body: JSON.stringify(dto),
       auth: false,
     })
+  },
+
+  media: {
+    // purpose: 'BRAND_LOGO' | 'BRAND_HERO' — image/jpeg, image/png, image/webp only.
+    async getUploadUrl(purpose: 'BRAND_LOGO' | 'BRAND_HERO', contentType: string, contentLength: number): Promise<MediaUploadUrlResponse> {
+      return fetcher<MediaUploadUrlResponse>('/brandpartner/media/upload-url', {
+        method: 'POST',
+        body: JSON.stringify({ purpose, contentType, contentLength }),
+      })
+    },
   },
 
   async getMe(): Promise<ApiBrandPartner> {
@@ -191,11 +220,20 @@ export const brandApi = {
     async list(productId: string): Promise<ApiProductImage[]> {
       return fetcher<ApiProductImage[]>(`/products/${productId}/media/images`)
     },
-    // Backend ProductImageDto: das Feld heißt `imageUrl` (@NotBlank), nicht `url`
-    async add(productId: string, url: string): Promise<ApiProductImage> {
+    // purpose is always PRODUCT_IMAGE — image/jpeg, image/png, image/webp only.
+    async getUploadUrl(productId: string, contentType: string, contentLength: number): Promise<MediaUploadUrlResponse> {
+      return fetcher<MediaUploadUrlResponse>(`/products/${productId}/media/upload-url`, {
+        method: 'POST',
+        body: JSON.stringify({ purpose: 'PRODUCT_IMAGE', contentType, contentLength }),
+      })
+    },
+    // Backend ProductImageDto expects `storageKey` (the S3 object key from getUploadUrl),
+    // NOT a URL — the backend constructs and returns the public imageUrl itself. Live-verified;
+    // an older version of this method sent `imageUrl` and always failed with a 400.
+    async add(productId: string, storageKey: string): Promise<ApiProductImage> {
       return fetcher<ApiProductImage>(`/products/${productId}/media/images`, {
         method: 'POST',
-        body: JSON.stringify({ imageUrl: url }),
+        body: JSON.stringify({ storageKey }),
       })
     },
     async delete(productId: string, imageId: string): Promise<void> {

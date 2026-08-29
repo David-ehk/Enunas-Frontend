@@ -17,10 +17,7 @@ export default function SizeSelector({ variants, selectedColor, selectedSize, on
 
   return (
     <div className="w-full max-w-[460px] mt-[26px] mb-3">
-      <div
-        className="grid gap-2"
-        style={{ gridTemplateColumns: `repeat(${Math.max(sizes.length, 1)}, 1fr)` }}
-      >
+      <div className="flex flex-wrap justify-center gap-2">
         {sizes.map((s) => {
           const v = findVariant(variants, selectedColor, s)
           const isDisabled = !v || v.stockQuantity === 0
@@ -34,7 +31,7 @@ export default function SizeSelector({ variants, selectedColor, selectedSize, on
               onClick={() => !isDisabled && onSizeSelect(s)}
               aria-pressed={isSelected}
               className={[
-                'py-4 transition-all duration-200',
+                'min-w-[72px] px-5 py-3.5 transition-all duration-200',
                 'font-league-spartan text-[13px] tracking-[0.06em]',
                 isDisabled
                   ? 'text-enunas-gray-medium bg-enunas-off-white border border-enunas-gray-light line-through cursor-not-allowed'

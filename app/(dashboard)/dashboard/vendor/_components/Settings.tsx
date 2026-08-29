@@ -6,6 +6,7 @@ import { FetchError } from '@/lib/api'
 import type { ApiBrandPartner } from '@/types/api'
 import { StatusBadge, SectionCard, fmt } from '../../admin/_components/shared'
 import { VPageHeader } from './vshared'
+import ImageDropzone from '@/components/ui/ImageDropzone'
 import { Check, Info } from 'lucide-react'
 
 const COUNTRIES = [
@@ -44,7 +45,6 @@ export default function SettingsTab({
   onUpdate: (b: ApiBrandPartner) => void
 }) {
   const [description, setDescription]       = useState(brand?.description ?? '')
-  const [logoUrl, setLogoUrl]               = useState(brand?.logoUrl ?? '')
   const [websiteUrl, setWebsiteUrl]         = useState(brand?.websiteUrl ?? '')
   const [instagramHandle, setInstagramHandle] = useState(brand?.instagramHandle ?? '')
   const [tiktokHandle, setTiktokHandle]     = useState(brand?.tiktokHandle ?? '')
@@ -78,7 +78,6 @@ export default function SettingsTab({
   useEffect(() => {
     if (brand) {
       setDescription(brand.description ?? '')
-      setLogoUrl(brand.logoUrl ?? '')
       setWebsiteUrl(brand.websiteUrl ?? '')
       setInstagramHandle(brand.instagramHandle ?? '')
       setTiktokHandle(brand.tiktokHandle ?? '')
@@ -99,13 +98,36 @@ export default function SettingsTab({
     }
   }, [brand])
 
+  const [mediaError, setMediaError] = useState<string | null>(null)
+
+  // Logo/Hero upload separately from the rest of the profile form and save immediately on
+  // drop — same pattern as product images (ImagesSection), not batched behind "Speichern".
+  async function uploadLogo(key: string) {
+    setMediaError(null)
+    try {
+      const updated = await brandApi.updateMe({ logoStorageKey: key })
+      onUpdate(updated)
+    } catch (err) {
+      setMediaError(err instanceof FetchError ? `Logo speichern fehlgeschlagen: ${err.message}` : 'Logo speichern fehlgeschlagen.')
+    }
+  }
+
+  async function uploadHero(key: string) {
+    setMediaError(null)
+    try {
+      const updated = await brandApi.updateMe({ heroStorageKey: key })
+      onUpdate(updated)
+    } catch (err) {
+      setMediaError(err instanceof FetchError ? `Hero-Bild speichern fehlgeschlagen: ${err.message}` : 'Hero-Bild speichern fehlgeschlagen.')
+    }
+  }
+
   async function saveProfile() {
     setProfileSaving(true)
     setProfileError(null)
     try {
       const updated = await brandApi.updateMe({
         description: description.trim(),
-        logoUrl: logoUrl.trim(),
         websiteUrl: websiteUrl.trim(),
         instagramHandle: instagramHandle.trim(),
         tiktokHandle: tiktokHandle.trim(),
@@ -184,7 +206,6 @@ export default function SettingsTab({
 
   const profileDirty =
     description !== (brand?.description ?? '') ||
-    logoUrl !== (brand?.logoUrl ?? '') ||
     websiteUrl !== (brand?.websiteUrl ?? '') ||
     instagramHandle !== (brand?.instagramHandle ?? '') ||
     tiktokHandle !== (brand?.tiktokHandle ?? '') ||
@@ -273,17 +294,31 @@ export default function SettingsTab({
             />
           </div>
 
-          <div>
-            <p className={labelCls} style={{ fontFamily: 'var(--font-league-spartan)' }}>Logo-URL</p>
-            <input
-              type="text"
-              value={logoUrl}
-              onChange={e => setLogoUrl(e.target.value)}
-              placeholder="https://…"
-              className={inputCls}
-              style={{ fontFamily: 'var(--font-league-spartan)' }}
+          <div className="grid grid-cols-2 gap-4">
+            <ImageDropzone
+              label="Logo"
+              hint="JPG, PNG, WebP · max. 5 MB"
+              currentUrl={brand?.logoUrl}
+              maxSizeMB={5}
+              aspect="aspect-square"
+              getUploadUrl={(contentType, contentLength) => brandApi.media.getUploadUrl('BRAND_LOGO', contentType, contentLength)}
+              onUploaded={uploadLogo}
+            />
+            <ImageDropzone
+              label="Hero-Bild"
+              hint="JPG, PNG, WebP · max. 10 MB"
+              currentUrl={brand?.heroImageUrl}
+              maxSizeMB={10}
+              aspect="aspect-[16/10]"
+              getUploadUrl={(contentType, contentLength) => brandApi.media.getUploadUrl('BRAND_HERO', contentType, contentLength)}
+              onUploaded={uploadHero}
             />
           </div>
+          {mediaError && (
+            <p className="text-[11px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+              {mediaError}
+            </p>
+          )}
 
           <div>
             <p className={labelCls} style={{ fontFamily: 'var(--font-league-spartan)' }}>Website</p>
@@ -353,7 +388,6 @@ export default function SettingsTab({
               <button
                 onClick={() => {
                   setDescription(brand?.description ?? '')
-                  setLogoUrl(brand?.logoUrl ?? '')
                   setWebsiteUrl(brand?.websiteUrl ?? '')
                   setInstagramHandle(brand?.instagramHandle ?? '')
                   setTiktokHandle(brand?.tiktokHandle ?? '')

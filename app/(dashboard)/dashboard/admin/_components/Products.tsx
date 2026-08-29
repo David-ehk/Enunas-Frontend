@@ -4,7 +4,8 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { adminApi, brandApi } from '@/lib/api'
 import type { AdminApiProduct, ApiOrder, ApiProductImage } from '@/types/api'
 import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, SelectFilter, TH, TD, TableRow, fmt, fmtEur } from './shared'
-import { Eye, EyeOff, Trash2, CheckCircle, XCircle, Flag, Pencil, RotateCcw, ImagePlus, X, Link2 } from 'lucide-react'
+import { Eye, EyeOff, Trash2, CheckCircle, XCircle, Flag, Pencil, RotateCcw, X, Download } from 'lucide-react'
+import ImageDropzone from '@/components/ui/ImageDropzone'
 import { isProductLive } from '@/lib/product'
 
 type Filter = 'all' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'DEACTIVATED'
@@ -79,13 +80,18 @@ function parseCatalogueCategory(raw: string | string[] | undefined, fallback: st
 }
 
 // ─── MediaEditor ────────────────────────────────────────────────────────────
+// Reupload/replace uses the same presigned-S3 flow as the vendor product-image dropzone
+// (POST /products/{id}/media/upload-url, storageKey-based registration — see brandApi.ts).
+// NOTE: that endpoint is currently scoped to BRAND_PARTNER role and returns 403 for ADMIN
+// tokens (verified live) — this UI is wired up and ready, but functionally blocked until the
+// backend authorizes ADMIN on /products/{id}/media/upload-url and /products/{id}/media/images
+// (or exposes admin-scoped equivalents). Errors surface inline via ImageDropzone's own
+// error state, so this fails visibly rather than silently once that's the case.
 function MediaEditor({ productId }: { productId: string }) {
   const [images, setImages]   = useState<ApiProductImage[]>([])
   const [loadingImgs, setLoadingImgs] = useState(true)
-  const [urlInput, setUrl]    = useState('')
-  const [adding, setAdding]   = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
-  const [dragOver, setDragOver] = useState(false)
+  const [uploadErr, setUploadErr] = useState<string | null>(null)
 
   useEffect(() => {
     brandApi.images.list(productId)
@@ -93,15 +99,14 @@ function MediaEditor({ productId }: { productId: string }) {
       .finally(() => setLoadingImgs(false))
   }, [productId])
 
-  async function addUrl(url: string) {
-    const trimmed = url.trim()
-    if (!trimmed) return
-    setAdding(true)
+  async function registerUpload(key: string) {
+    setUploadErr(null)
     try {
-      const created = await brandApi.images.add(productId, trimmed)
+      const created = await brandApi.images.add(productId, key)
       setImages(prev => [...prev, created])
-      setUrl('')
-    } catch { /* silent */ } finally { setAdding(false) }
+    } catch {
+      setUploadErr('Bild konnte nicht gespeichert werden.')
+    }
   }
 
   async function removeImage(id: string) {
@@ -110,15 +115,6 @@ function MediaEditor({ productId }: { productId: string }) {
       await brandApi.images.delete(productId, id)
       setImages(prev => prev.filter(i => i.id !== id))
     } catch { /* silent */ } finally { setDeleting(null) }
-  }
-
-  function onDrop(e: React.DragEvent) {
-    e.preventDefault()
-    setDragOver(false)
-    const uri = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain')
-    if (uri && (uri.startsWith('http://') || uri.startsWith('https://'))) {
-      addUrl(uri)
-    }
   }
 
   return (
@@ -131,67 +127,51 @@ function MediaEditor({ productId }: { productId: string }) {
       {/* existing images */}
       {loadingImgs
         ? <div className="h-16 flex items-center justify-center"><div className="w-4 h-4 rounded-full border-2 border-[#E8E8E8] border-t-[#370E4D] animate-spin" /></div>
-        : images.length > 0
-          ? (
+        : images.length > 0 && (
             <div className="grid grid-cols-2 gap-1.5">
               {images.map(img => (
                 <div key={img.id} className="relative group rounded-lg overflow-hidden bg-[#F0F0EB]" style={{ aspectRatio: '3/4' }}>
                   <img src={img.imageUrl} alt={img.altText ?? ''} className="w-full h-full object-cover" />
-                  <button
-                    onClick={() => removeImage(img.id)}
-                    disabled={deleting === img.id}
-                    className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 disabled:opacity-40"
-                    style={{ background: 'rgba(0,0,0,0.65)' }}
-                  >
-                    <X className="w-3 h-3 text-white" />
-                  </button>
+                  <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                    {/* Bucket isn't CORS-enabled for reads, so a forced blob-download isn't
+                        possible from here — this opens the original in a new tab, where the
+                        browser's own image viewer / right-click "Save as" downloads it. */}
+                    <a
+                      href={img.imageUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Bild in neuem Tab öffnen zum Herunterladen"
+                      className="w-5 h-5 rounded-full flex items-center justify-center"
+                      style={{ background: 'rgba(0,0,0,0.65)' }}
+                    >
+                      <Download className="w-3 h-3 text-white" />
+                    </a>
+                    <button
+                      onClick={() => removeImage(img.id)}
+                      disabled={deleting === img.id}
+                      title="Bild löschen"
+                      className="w-5 h-5 rounded-full flex items-center justify-center disabled:opacity-40"
+                      style={{ background: 'rgba(0,0,0,0.65)' }}
+                    >
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )
-          : <p className="text-[10px] text-[#C0C0BC]" style={{ fontFamily: 'var(--font-league-spartan)' }}>Keine Bilder</p>
       }
 
-      {/* drop zone */}
-      <div
-        onDragOver={e => { e.preventDefault(); setDragOver(true) }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={onDrop}
-        className="rounded-lg p-3 text-center transition-all duration-150"
-        style={{
-          border: `1.5px dashed ${dragOver ? '#370E4D' : '#D4D4CE'}`,
-          background: dragOver ? 'rgba(55,14,77,0.05)' : '#FAFAF8',
-        }}
-      >
-        <ImagePlus className="w-4 h-4 mx-auto mb-1" style={{ color: dragOver ? '#370E4D' : '#CDCDCD' }} />
-        <p className="text-[9px] leading-snug" style={{ fontFamily: 'var(--font-league-spartan)', color: dragOver ? '#370E4D' : '#9B9B9B' }}>
-          Bild-URL aus Browser hierher ziehen
-        </p>
-      </div>
-
-      {/* URL input */}
-      <div className="flex gap-1">
-        <div className="relative flex-1">
-          <Link2 className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[#C0C0BC]" />
-          <input
-            type="text"
-            value={urlInput}
-            onChange={e => setUrl(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && addUrl(urlInput)}
-            placeholder="https://…"
-            className="w-full text-[11px] border border-[#E8E8E8] bg-white rounded-lg pl-6 pr-2 py-1.5 focus:outline-none focus:border-[#370E4D]/40 transition-all placeholder:text-[#D0D0CC]"
-            style={{ fontFamily: 'var(--font-league-spartan)' }}
-          />
-        </div>
-        <button
-          onClick={() => addUrl(urlInput)}
-          disabled={adding || !urlInput.trim()}
-          className="h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white disabled:opacity-40 transition-all duration-150"
-          style={{ background: '#370E4D', fontFamily: 'var(--font-league-spartan)' }}
-        >
-          {adding ? '…' : '+'}
-        </button>
-      </div>
+      <ImageDropzone
+        label={images.length > 0 ? 'Bild ersetzen' : 'Bild hochladen'}
+        hideLabel
+        hint="JPG, PNG, WebP · max. 10 MB"
+        maxSizeMB={10}
+        aspect="aspect-[3/4]"
+        getUploadUrl={(contentType, contentLength) => brandApi.images.getUploadUrl(productId, contentType, contentLength)}
+        onUploaded={registerUpload}
+      />
+      {uploadErr && <p className="text-[10px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>{uploadErr}</p>}
     </div>
   )
 }

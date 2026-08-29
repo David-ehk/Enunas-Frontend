@@ -12,14 +12,14 @@ interface RecRowProps {
 export default function RecRow({ title, titleAccent, items, allHref = '#' }: RecRowProps) {
   return (
     <section className="px-4 sm:px-8 lg:px-16 py-6 max-w-[1800px] mx-auto">
-      <div className="flex justify-between items-baseline mb-[18px] pb-3 border-b border-enunas-gray-light">
-        <h2 className="font-cormorant text-[32px] font-light text-enunas-black">
+      <div className="flex justify-between items-baseline gap-4 mb-[18px] pb-3 border-b border-enunas-gray-light">
+        <h2 className="font-cormorant text-[22px] sm:text-[32px] leading-tight font-light text-enunas-black">
           {title}
           {titleAccent && <> <em className="italic text-enunas-gray-medium">{titleAccent}</em></>}
         </h2>
         <Link
           href={allHref}
-          className="font-league-spartan text-[11px] tracking-[0.22em] uppercase text-enunas-black border-b border-enunas-black pb-0.5 hover:text-enunas-purple hover:border-enunas-purple transition-colors"
+          className="shrink-0 font-league-spartan text-[10px] sm:text-[11px] tracking-[0.18em] sm:tracking-[0.22em] uppercase whitespace-nowrap text-enunas-black border-b border-enunas-black pb-0.5 hover:text-enunas-purple hover:border-enunas-purple transition-colors"
         >
           Alle ansehen →
         </Link>

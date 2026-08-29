@@ -9,6 +9,7 @@ import {
   TH, TD, TableRow, FilterBar, SearchInput, fmt, fmtEur,
 } from '../../admin/_components/shared'
 import { VPageHeader } from './vshared'
+import ImageDropzone from '@/components/ui/ImageDropzone'
 import {
   Plus, Trash2, ChevronLeft, Check, X, Edit2,
   Package, ChevronDown, ChevronUp, ImagePlus,
@@ -439,10 +440,8 @@ function VariantsPanel({
 function ImagesSection({ product }: { product: AdminApiProduct }) {
   const [images, setImages]     = useState<ApiProductImage[]>([])
   const [loading, setLoading]   = useState(true)
-  const [urlInput, setUrl]      = useState('')
-  const [adding, setAdding]     = useState(false)
+  const [uploadErr, setUploadErr] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
-  const [err, setErr]           = useState<string | null>(null)
 
   useEffect(() => {
     brandApi.images.list(product.id)
@@ -451,15 +450,14 @@ function ImagesSection({ product }: { product: AdminApiProduct }) {
       .finally(() => setLoading(false))
   }, [product.id])
 
-  async function addImage() {
-    if (!urlInput.trim()) { setErr('URL ist erforderlich.'); return }
-    setAdding(true); setErr(null)
+  async function registerUpload(key: string) {
+    setUploadErr(null)
     try {
-      const created = await brandApi.images.add(product.id, urlInput.trim())
+      const created = await brandApi.images.add(product.id, key)
       setImages(prev => [...prev, created])
-      setUrl('')
-    } catch { setErr('Bild konnte nicht hinzugefügt werden.') }
-    finally { setAdding(false) }
+    } catch {
+      setUploadErr('Bild konnte nicht gespeichert werden.')
+    }
   }
 
   async function deleteImage(imageId: string) {
@@ -476,7 +474,7 @@ function ImagesSection({ product }: { product: AdminApiProduct }) {
       <div className="p-6">
         {loading ? <Loader /> : (
           <>
-            {images.length > 0 ? (
+            {images.length > 0 && (
               <div className="grid grid-cols-4 gap-3 mb-5">
                 {images.map(img => (
                   <div key={img.id} className="relative group rounded-none overflow-hidden aspect-[3/4] bg-[#F5F5F0]">
@@ -491,41 +489,18 @@ function ImagesSection({ product }: { product: AdminApiProduct }) {
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="border-2 border-dashed border-[#E8E8E8] rounded-none p-8 text-center mb-5">
-                <div className="w-11 h-11 rounded-none bg-[#F5F5F0] flex items-center justify-center mx-auto mb-3">
-                  <ImagePlus className="w-5 h-5 text-[#C0C0BC]" />
-                </div>
-                <p className="text-[13px] text-[#9B9B9B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>Noch keine Bilder hochgeladen</p>
-                <p className="text-[11px] text-[#C0C0BC] mt-1" style={{ fontFamily: 'var(--font-league-spartan)' }}>JPG, PNG bis 10 MB je Bild</p>
-              </div>
             )}
-            <div className="flex gap-2 items-end pt-1">
-              <div className="flex-1">
-                <label className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Bild-URL (S3)</label>
-                <input
-                  className={INPUT}
-                  value={urlInput}
-                  onChange={e => setUrl(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && addImage()}
-                  placeholder="https://s3.amazonaws.com/enunas/…"
-                  style={{ fontFamily: 'var(--font-league-spartan)' }}
-                />
-              </div>
-              <button
-                onClick={addImage}
-                disabled={adding || !urlInput.trim()}
-                className={BTN_PRIMARY}
-                style={{ background: '#370E4D', fontFamily: 'var(--font-league-spartan)' }}
-              >
-                <Plus className="w-3.5 h-3.5" />
-                {adding ? '…' : 'Hinzufügen'}
-              </button>
+            <div className="max-w-xs">
+              <ImageDropzone
+                label={images.length > 0 ? 'Weiteres Bild hinzufügen' : 'Produktbild hinzufügen'}
+                hint="JPG, PNG, WebP · max. 10 MB"
+                maxSizeMB={10}
+                aspect="aspect-[3/4]"
+                getUploadUrl={(contentType, contentLength) => brandApi.images.getUploadUrl(product.id, contentType, contentLength)}
+                onUploaded={registerUpload}
+              />
             </div>
-            {err && <p className="text-[11px] text-[#8B1E3F] mt-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>{err}</p>}
-            <p className="text-[11px] text-[#C0C0BC] mt-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-              Datei in S3 hochladen, dann die URL hier eintragen.
-            </p>
+            {uploadErr && <p className="text-[11px] text-[#8B1E3F] mt-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>{uploadErr}</p>}
           </>
         )}
       </div>

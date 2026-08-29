@@ -271,6 +271,7 @@ export interface ApiBrandPartner {
   // brand (marken pages, brand hero). Editable via PATCH /brandpartner/me.
   description?: string;
   logoUrl?: string;
+  heroImageUrl?: string;
   websiteUrl?: string;
   instagramHandle?: string;
   tiktokHandle?: string;

@@ -45,7 +45,7 @@ export default function StickyAddToCart({
       style={{ transform: visible ? 'translateY(0)' : 'translateY(100%)' }}
       aria-hidden={!visible}
     >
-      <div className="max-w-[1800px] mx-auto px-6 lg:px-12 py-4 flex items-center gap-6">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 py-3 sm:py-4 flex items-center gap-3 sm:gap-6">
         <div className="flex-1 min-w-0">
           <p
             className="text-sm text-enunas-black truncate"
@@ -74,10 +74,10 @@ export default function StickyAddToCart({
         <button
           onClick={onCta}
           disabled={isOutOfStock}
-          className="group relative overflow-hidden px-10 py-3.5 bg-enunas-purple text-white hover:bg-enunas-purple-dark transition-colors duration-300 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
+          className="group relative overflow-hidden shrink-0 px-6 sm:px-10 py-3 sm:py-3.5 bg-enunas-purple text-white hover:bg-enunas-purple-dark transition-colors duration-300 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
           style={{
             fontFamily: 'var(--font-Cormorant-Garamond)',
-            fontSize: '18px',
+            fontSize: 'clamp(14px, 3.6vw, 18px)',
             letterSpacing: '0.06em',
           }}
         >
