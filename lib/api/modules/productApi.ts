@@ -38,6 +38,7 @@ function mockToApiProduct(m: (typeof mockProducts)[number]): ApiProduct {
     slug: m.slug,
     description: m.description,
     price: m.priceNumber,
+    available: true,
     currency: 'EUR',
     category: m.category,
     subcategory: m.subcategory,
@@ -51,6 +52,20 @@ function mockToApiProduct(m: (typeof mockProducts)[number]): ApiProduct {
   };
 }
 
+// Storefront listings must not merchandise anything that cannot be bought. A product with no
+// active listing comes back with a null price, which would otherwise render as 0,00 € and still
+// be addable to the basket. Detail routes deliberately do NOT use this — the PDP keeps rendering
+// an unavailable product so a direct link shows "Preis nicht verfügbar" rather than a 404.
+export function sellableOnly(raw: RawPagedProducts, content: ApiProduct[]): PagedProducts {
+  const sellable = content.filter(p => p.available);
+  const removed = content.length - sellable.length;
+  return {
+    ...raw,
+    content: sellable,
+    totalElements: Math.max(0, raw.totalElements - removed),
+  };
+}
+
 export const productApi = {
   async list(params: ProductSearchParams = {}): Promise<PagedProducts> {
     const qs = new URLSearchParams();
@@ -60,7 +75,7 @@ export const productApi = {
     const query = qs.toString() ? `?${qs}` : '';
     try {
       const raw = await fetcher<RawPagedProducts>(`/products${query}`);
-      return { ...raw, content: raw.content.map(adaptProduct) };
+      return sellableOnly(raw, raw.content.map(adaptProduct));
     } catch {
       if (!mockAllowed()) throw new Error('Failed to fetch products');
       let items = mockProducts.map(mockToApiProduct);
@@ -82,12 +97,17 @@ export const productApi = {
     const raw = await fetcher<RawPagedProducts>(
       `/products/search?keyword=${encodeURIComponent(keyword)}`,
     );
-    return { ...raw, content: raw.content.map(adaptProduct) };
+    return sellableOnly(raw, raw.content.map(adaptProduct));
   },
 
-  // Requires CUSTOMER or BRAND_PARTNER auth — token must be available.
+  // Public: GET /products/** is permitAll. Anonymous callers get the browse-gated view, which
+  // is an empty list for a hidden product (deliberately not a 404 — the PDP keeps rendering an
+  // unavailable product and shows "Preis nicht verfügbar"). The owning brand and admins get the
+  // full management view; the token is attached automatically when one exists.
+  // The route returns a List; a Page is tolerated so a backend shape change cannot break the PDP.
   async getListings(productId: string): Promise<ApiListing[]> {
-    return fetcher<ApiListing[]>(`/products/${productId}/listings`);
+    const raw = await fetcher<ApiListing[] | { content: ApiListing[] }>(`/products/${productId}/listings`);
+    return Array.isArray(raw) ? raw : raw.content ?? [];
   },
 
   async getMy(): Promise<ApiProduct[]> {
