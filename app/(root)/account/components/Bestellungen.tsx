@@ -7,6 +7,7 @@ import { orderApi, FetchError } from '@/lib/api'
 import { useAuth } from '@/app/context/AuthContext'
 import type { ApiOrder, ApiOrderItem, ReturnReason } from '@/types/api'
 import { formatDateLong } from '@/lib/account'
+import { describeShipment } from '@/lib/orderShipments'
 import AccountButton from './AccountButton'
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -27,7 +28,7 @@ function resolveItemTotal(item: ApiOrderItem): number | undefined {
 }
 
 const STATUS_META: Record<string, { label: string; toneClass: string }> = {
-  PENDING:          { label: 'Ausstehend',         toneClass: 'text-enunas-warning' },
+  PENDING:          { label: 'Zahlung ausstehend',  toneClass: 'text-enunas-warning' },
   PAID:             { label: 'Bezahlt',             toneClass: 'text-enunas-success' },
   SHIPPED:          { label: 'Versandt',            toneClass: 'text-enunas-success' },
   DELIVERED:        { label: 'Zugestellt',          toneClass: 'text-enunas-success' },
@@ -136,6 +137,18 @@ function OrderRow({
       {open && (
         <div className="border-t border-enunas-off-white px-5 md:px-6 py-5 bg-[#FAFAF8]">
 
+          {/* A failed payment initiation now leaves a real PENDING order behind — the backend
+              commits the order before calling the payment provider so a payment can never exist
+              without one. There is no checkout URL to resume; an expiry job cancels it within
+              30 minutes and emails the customer. Say so rather than offering a dead action. */}
+          {order.status === 'PENDING' && (
+            <p className="mb-4 pb-3 border-b border-enunas-gray-light font-league-spartan text-xs text-enunas-gray-medium leading-relaxed">
+              Diese Bestellung wartet noch auf den Zahlungsabschluss. Falls die Zahlung nicht
+              zustande kommt, wird sie innerhalb von 30 Minuten automatisch storniert — du musst
+              nichts weiter tun.
+            </p>
+          )}
+
           {/* Items list */}
           {order.items.length > 0 && (
             <div className="mb-4 space-y-2">
@@ -187,9 +200,37 @@ function OrderRow({
             </div>
           ) : null}
 
+          {/* Per-brand fulfilment. Each brand ships independently, so an order can be part-shipped. */}
+          {order.shipments && order.shipments.length > 0 && (
+            <div className="mb-4 pt-3 border-t border-enunas-gray-light space-y-2">
+              <p className="font-league-spartan text-[11px] tracking-[0.2em] uppercase text-enunas-gray-medium">
+                Sendungen
+              </p>
+              {order.shipments.map((s) => {
+                const { label, trackingNumber } = describeShipment(s)
+                return (
+                  <div key={String(s.brandId)} className="flex items-baseline justify-between gap-4">
+                    <p className="font-league-spartan text-xs text-enunas-black">{s.brandName}</p>
+                    <div className="text-right">
+                      <p className="font-league-spartan text-xs text-enunas-gray-medium">{label}</p>
+                      {trackingNumber && (
+                        <Link
+                          href={`/sendungsverfolgung?tracking=${trackingNumber}`}
+                          className="font-league-spartan text-[11px] tracking-[0.15em] uppercase text-enunas-black underline underline-offset-4 hover:text-enunas-purple transition-colors duration-300"
+                        >
+                          Sendung verfolgen →
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex items-center gap-6 flex-wrap">
-            {order.trackingNumber && (
+            {order.trackingNumber && !(order.shipments && order.shipments.length > 0) && (
               <Link
                 href={`/sendungsverfolgung?tracking=${order.trackingNumber}`}
                 className="font-league-spartan text-[11px] tracking-[0.2em] uppercase text-enunas-black underline underline-offset-4 hover:text-enunas-purple transition-colors duration-300"

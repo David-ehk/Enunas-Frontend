@@ -223,6 +223,22 @@ export interface ShippingSnapshot {
   calculationMethod: ShippingCalculationMethod;
 }
 
+// One brand's fulfilment state on an order. A multi-brand order gets one row per brand, each
+// shipping independently.
+export type OrderShipmentStatus = 'AWAITING_SHIPMENT' | 'SHIPPED' | 'PROBLEM';
+
+// carrier/trackingNumber are null when an admin marked the whole order shipped rather than the
+// brand confirming its own dispatch. shippedAt is guaranteed non-null whenever status is
+// SHIPPED — a database constraint (migration V29) enforces it, so never guard that pairing.
+export interface ApiOrderShipment {
+  brandId: number | string;
+  brandName: string;
+  status: OrderShipmentStatus | string;
+  shippedAt?: string;
+  carrier?: string | null;
+  trackingNumber?: string | null;
+}
+
 // Mirrors backend OrderResponseDto.
 // `total` is the canonical backend field. `totalAmount` is not returned by the backend;
 // treat it as always undefined when reading real API responses.
@@ -258,6 +274,8 @@ export interface ApiOrder {
   // orders placed before the shipping feature shipped (no backfill) — never treat that as
   // "free shipping".
   shippingSnapshots?: ShippingSnapshot[];
+  // One row per brand on the order. Absent on orders that predate per-brand fulfilment.
+  shipments?: ApiOrderShipment[];
   discountCode?: string;
   discountAmount?: number;
   discountPercent?: number;
