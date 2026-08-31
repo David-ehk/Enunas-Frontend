@@ -25,6 +25,8 @@ interface ProductDetailsProps {
   product: Product
   price: number
   currency: string
+  /** False when the product has no active listing — `price` is then a meaningless 0. */
+  available: boolean
   brandSlug: string
   productSlug: string
   colorHexMap: Record<string, string>
@@ -36,6 +38,7 @@ export default function ProductDetails({
   product,
   price,
   currency,
+  available,
   brandSlug,
   productSlug,
   colorHexMap,
@@ -97,7 +100,10 @@ export default function ProductDetails({
     selectedSize !== null &&
     activeListing === null
 
-  const formattedPrice = new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(price)
+  // Never render a null-priced product as 0,00 €.
+  const formattedPrice = available
+    ? new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(price)
+    : 'Preis nicht verfügbar'
 
   // Reset size when color changes if selected size no longer available for new color
   const handleColorSelect = (color: Color) => {
@@ -112,6 +118,9 @@ export default function ProductDetails({
     const listing = listings.find(
       l => l.variantColor === selectedColor?.name && l.variantSize === size
     )
+    // Resolved for the size being added, not the currently selected one — the size modal can
+    // add a size other than selectedSize. The cart reducer refuses a zero-stock line.
+    const variant = findVariant(product.variants, selectedColor?.name ?? null, size)
     return {
       productId: String(product.id),
       name: product.name,
@@ -122,14 +131,19 @@ export default function ProductDetails({
       color: selectedColor ? { id: selectedColor.id, name: selectedColor.name, hex: selectedColor.hex } : undefined,
       image: product.images[0] ?? '',
       defaultListingId: listing?.id ? String(listing.id) : undefined,
+      stockQuantity: variant?.stockQuantity,
       productPath: `/bekleidung/${brandSlug}/${productSlug}`,
     }
   }
 
-  const handleAddToCart = (size: string) => { addToCart(buildCartItem(size)); openCart() }
+  const handleAddToCart = (size: string) => {
+    if (!available) return
+    addToCart(buildCartItem(size))
+    openCart()
+  }
 
   const handleCta = () => {
-    if (isOutOfStock || variantUnavailable) return
+    if (!available || isOutOfStock || variantUnavailable) return
     if (!selectedSize) { setShowSizeModal(true); return }
     handleAddToCart(selectedSize)
   }
@@ -144,8 +158,10 @@ export default function ProductDetails({
 
   const toggle = (key: string) => setOpenAccordion(prev => (prev === key ? null : key))
 
-  const ctaDisabled = isOutOfStock || variantUnavailable
-  const ctaLabel = isOutOfStock
+  const ctaDisabled = !available || isOutOfStock || variantUnavailable
+  const ctaLabel = !available
+    ? 'Derzeit nicht verfügbar'
+    : isOutOfStock
     ? 'Ausverkauft'
     : variantUnavailable
     ? 'Derzeit nicht verfügbar'
@@ -275,10 +291,10 @@ export default function ProductDetails({
                 letterSpacing: '0.04em',
                 border: 'none',
                 color: 'white',
-                cursor: isOutOfStock ? 'not-allowed' : 'pointer',
+                cursor: ctaDisabled ? 'not-allowed' : 'pointer',
                 transition: 'background-color 300ms',
               }}
-              onMouseEnter={e => { if (!isOutOfStock) e.currentTarget.style.backgroundColor = '#250838' }}
+              onMouseEnter={e => { if (!ctaDisabled) e.currentTarget.style.backgroundColor = '#250838' }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#370E4D' }}
             >
               <span className="absolute left-1/2 -translate-x-1/2 top-[10%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[75%]" />
@@ -342,7 +358,7 @@ export default function ProductDetails({
                 onToggle={() => toggle('shipping')}
               >
                 <p style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: '16px', lineHeight: 1.7, color: '#2D2D2D' }}>
-                  Versand aus {product.originCountry || 'DE'}. {product.returnPeriodDays || 30} Tage Rückgaberecht ab Erhalt der Ware. Versandkostenfrei ab 50 €.
+                  Versand aus {product.originCountry || 'DE'}. {product.returnPeriodDays ?? 14} Tage Rückgaberecht ab Erhalt der Ware.
                 </p>
               </PdpAccordion>
 

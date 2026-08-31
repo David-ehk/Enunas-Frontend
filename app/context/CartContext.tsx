@@ -19,6 +19,8 @@ export interface CartItem {
   image: string
   quantity: number
   defaultListingId?: string
+  /** Live stock for this exact variant at add time. Undefined means unknown — no clamp applies. */
+  stockQuantity?: number
   productPath?: string
 }
 

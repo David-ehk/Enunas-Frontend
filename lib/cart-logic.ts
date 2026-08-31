@@ -28,10 +28,17 @@ export function addItem(
   item: Omit<CartItem, 'id' | 'quantity'>,
   idSuffix: () => string = () => String(Date.now()),
 ): CartItem[] {
+  // The cart persists in localStorage and every entry point funnels through here, so the
+  // sold-out gate belongs at this level rather than in each caller. Unknown stock (undefined)
+  // is not a limit — only a real number constrains the line.
+  if (item.stockQuantity === 0) return items
+
   const existing = items.find(
     i => i.productId === item.productId && i.size === item.size && i.color?.id === item.color?.id,
   )
   if (existing) {
+    const limit = item.stockQuantity ?? existing.stockQuantity
+    if (limit !== undefined && existing.quantity >= limit) return items
     return items.map(i => (i.id === existing.id ? { ...i, quantity: i.quantity + 1 } : i))
   }
   const newItem: CartItem = {
@@ -42,10 +49,14 @@ export function addItem(
   return [...items, newItem]
 }
 
-/** Set a line's quantity; quantity ≤ 0 removes the line. */
+/** Set a line's quantity; quantity ≤ 0 removes the line, and stock caps the upper end. */
 export function updateQty(items: CartItem[], itemId: string, quantity: number): CartItem[] {
   if (quantity <= 0) return items.filter(i => i.id !== itemId)
-  return items.map(i => (i.id === itemId ? { ...i, quantity } : i))
+  return items.map(i => {
+    if (i.id !== itemId) return i
+    const capped = i.stockQuantity !== undefined ? Math.min(quantity, i.stockQuantity) : quantity
+    return { ...i, quantity: capped }
+  })
 }
 
 /** Remove a line by id. */
