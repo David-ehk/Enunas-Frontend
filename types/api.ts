@@ -3,7 +3,7 @@ export type BrandStatus = 'PENDING' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED'
 // The backend returns ACTIVE for a live product — APPROVED is a lifecycle event
 // (POST /admin/products/{id}/approve), not a resting state. Both are accepted
 // here; use isProductLive() rather than comparing to a single literal.
-export type ProductStatus = 'PENDING' | 'ACTIVE' | 'APPROVED' | 'REJECTED' | 'HIDDEN';
+export type ProductStatus = 'PENDING' | 'ACTIVE' | 'APPROVED' | 'REJECTED' | 'HIDDEN' | 'ARCHIVED';
 
 // Exact backend OrderStatus enum values — PROCESSING does not exist in the backend.
 export type OrderStatus =
