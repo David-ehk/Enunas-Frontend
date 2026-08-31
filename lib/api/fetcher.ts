@@ -1,3 +1,5 @@
+import { germanErrorMessage } from './errorCopy';
+
 // Single source of truth for the API base — keep in sync with .env.local (NEXT_PUBLIC_API_URL).
 // The Spring backend serves at the root context (no /api prefix).
 //
@@ -22,7 +24,12 @@ export interface FetchOptions extends RequestInit {
 }
 
 export class FetchError extends Error {
-  constructor(public readonly status: number, message: string) {
+  constructor(
+    public readonly status: number,
+    message: string,
+    /** The untranslated backend string. English — for logs and debugging, never for the UI. */
+    public readonly serverMessage?: string,
+  ) {
     super(message);
     this.name = 'FetchError';
   }
@@ -42,30 +49,38 @@ export async function fetcher<T>(path: string, options: FetchOptions = {}): Prom
     Object.assign(headers, extraHeaders);
   }
 
+  // Whether this request actually carried a token. The backend now answers an unauthenticated
+  // request with 401 (it used to be 403), so a token-less call — anything fired before
+  // AuthContext has read localStorage, or by a component that was never logged in — would
+  // otherwise trip the session-expired path and clear auth state for no reason.
+  let sentToken = false;
   if (auth && typeof window !== 'undefined') {
     const token = localStorage.getItem('enunas_token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      sentToken = true;
+    }
   }
 
   const res = await fetch(`${getBaseUrl()}${path}`, { ...rest, headers });
 
   if (res.status === 401) {
-    onUnauthorized?.();
-    throw new FetchError(401, 'Nicht autorisiert');
+    // 401 = "who are you", 403 = "you may not". Only a rejected token means the session died.
+    if (sentToken) onUnauthorized?.();
+    throw new FetchError(401, germanErrorMessage(401), 'Unauthorized');
   }
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    // Falls back to the raw body only when it isn't JSON (likely a plain-text error message).
-    // A JSON body without a `.message` — e.g. Spring's default error shape
-    // ({timestamp, status, error, path}, no `message`) — must never fall through to dumping
-    // that raw JSON at the user; `.error` or a generic message reads far better.
-    let message = text || res.statusText || 'Ein Fehler ist aufgetreten.';
+    // Every backend error path now returns {timestamp, status, error, message, path} with a
+    // guaranteed message. A non-JSON body means something upstream of the app answered
+    // (proxy, gateway) — keep the raw text as the log string only.
+    let serverMessage: string | undefined;
     try {
       const json = JSON.parse(text);
-      message = json.message || json.error || res.statusText || 'Ein Fehler ist aufgetreten.';
-    } catch { /* not JSON — keep the raw text assigned above */ }
-    throw new FetchError(res.status, message);
+      serverMessage = json.message || json.error || undefined;
+    } catch { serverMessage = text || undefined; }
+    throw new FetchError(res.status, germanErrorMessage(res.status, serverMessage), serverMessage);
   }
 
   if (res.status === 204 || res.headers.get('content-length') === '0') {
