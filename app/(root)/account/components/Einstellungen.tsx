@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { customerApi, FetchError } from '@/lib/api'
 import { useAuth } from '@/app/context/AuthContext'
 import AccountButton from './AccountButton'
@@ -41,14 +42,22 @@ function Field({
   )
 }
 
+// Typed-confirmation phrase for the irreversible DSGVO erasure below.
+const DELETE_PHRASE = 'LÖSCHEN'
+
 export default function Einstellungen() {
-  const { user, customer: authCustomer, refreshUser, isLoading: authLoading } = useAuth()
+  const { user, customer: authCustomer, refreshUser, logout, isLoading: authLoading } = useAuth()
+  const router = useRouter()
 
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   // Populate form once auth context has the customer data
   useEffect(() => {
@@ -72,6 +81,25 @@ export default function Einstellungen() {
       )
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (deleteConfirm.trim().toUpperCase() !== DELETE_PHRASE) return
+    setDeleteError(null)
+    setDeleting(true)
+    try {
+      await customerApi.deleteMe()
+      // 204: the token is dead server-side from this moment. Clear the local session before
+      // anything else can fire an authenticated request against a tombstoned identity.
+      logout()
+      router.push('/')
+    } catch (err) {
+      // A 409 message is customer-facing German from the backend — show it as-is.
+      setDeleteError(
+        err instanceof FetchError ? err.message : 'Konto konnte nicht gelöscht werden. Bitte versuche es erneut.'
+      )
+      setDeleting(false)
     }
   }
 
@@ -143,14 +171,61 @@ export default function Einstellungen() {
       {/* Divider */}
       <div className="border-t border-enunas-gray-light mb-14" />
 
-      {/* Danger zone */}
+      {/* Danger zone — DSGVO Art. 17 erasure. Two steps and a typed phrase: a single click is
+          not an adequate gate for an irreversible action. */}
       <div>
         <h2 className="font-cormorant text-2xl font-normal text-enunas-black mb-2">Konto löschen</h2>
-        <p className="font-league-spartan text-sm text-enunas-gray-medium leading-relaxed mb-6">
-          Das Löschen deines Kontos ist endgültig. Alle deine Daten, Bestellhistorie und
-          gespeicherten Artikel werden unwiderruflich gelöscht.
+        <p className="font-league-spartan text-sm text-enunas-gray-medium leading-relaxed mb-2">
+          Das Löschen deines Kontos ist endgültig. Dein Profil, deine gespeicherten Adressen und
+          verknüpfte Anmeldedienste werden unwiderruflich gelöscht.
         </p>
-        <AccountButton variant="danger">Konto löschen</AccountButton>
+        <p className="font-league-spartan text-sm text-enunas-gray-medium leading-relaxed mb-6">
+          Deine Bestellhistorie bewahren wir aufgrund der gesetzlichen Aufbewahrungspflicht
+          (§ 257 HGB) zehn Jahre auf. Solange noch Bestellungen offen sind, ist die Löschung
+          nicht möglich.
+        </p>
+
+        {!deleteOpen ? (
+          <AccountButton variant="danger" onClick={() => setDeleteOpen(true)}>
+            Konto löschen
+          </AccountButton>
+        ) : (
+          <div className="border border-enunas-error/40 p-6 max-w-md">
+            <p className="font-league-spartan text-sm text-enunas-black leading-relaxed mb-4">
+              Gib <span className="font-semibold tracking-[0.1em]">{DELETE_PHRASE}</span> ein, um
+              die endgültige Löschung zu bestätigen.
+            </p>
+            <input
+              type="text"
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder={DELETE_PHRASE}
+              aria-label={`Zum Bestätigen ${DELETE_PHRASE} eingeben`}
+              className="w-full border border-enunas-gray-light px-4 py-3 mb-4 font-league-spartan text-sm text-enunas-black bg-white focus:outline-none focus:border-enunas-error transition-colors duration-200 placeholder:text-enunas-gray-medium/50"
+            />
+            {deleteError && (
+              <p className="font-league-spartan text-sm text-enunas-error leading-relaxed mb-4">
+                {deleteError}
+              </p>
+            )}
+            <div className="flex flex-wrap items-center gap-4">
+              <AccountButton
+                variant="danger"
+                onClick={handleDeleteAccount}
+                disabled={deleting || deleteConfirm.trim().toUpperCase() !== DELETE_PHRASE}
+                className="disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {deleting ? 'Wird gelöscht …' : 'Endgültig löschen'}
+              </AccountButton>
+              <button
+                onClick={() => { setDeleteOpen(false); setDeleteConfirm(''); setDeleteError(null) }}
+                className="font-league-spartan text-[11px] tracking-[0.2em] uppercase text-enunas-gray-medium hover:text-enunas-black transition-colors duration-300"
+              >
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   )
