@@ -50,8 +50,9 @@ export default function LieferungRuecksendungPage() {
               Versandkosten
             </p>
             <p>
-              Kostenloser Versand ab einem Bestellwert von 50 €. Darunter fällt eine Versandkostenpauschale
-              von 4,99 € an.
+              Die Versandkosten werden pro Marke berechnet. Enthält deine Bestellung Artikel mehrerer
+              Marken, wird der Versand je Marke separat ausgewiesen — die genaue Aufstellung siehst du
+              vor dem Bezahlen.
             </p>
           </div>
 

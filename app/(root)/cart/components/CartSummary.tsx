@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { formatEuro } from '@/lib/format'
-import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST, PAYMENT_BADGES } from '../constants'
+import { STANDARD_SHIPPING_COST, PAYMENT_BADGES } from '../constants'
 
 interface CartSummaryProps {
   subtotal: number;
@@ -24,7 +24,8 @@ function Row({ label, value, bold }: { label: string; value: string; bold?: bool
 }
 
 export default function CartSummary({ subtotal }: CartSummaryProps) {
-  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST
+  // Estimate only — the backend prices shipping per brand and confirms it at checkout.
+  const shipping = STANDARD_SHIPPING_COST
   const total = subtotal + shipping
 
   return (
@@ -35,7 +36,7 @@ export default function CartSummary({ subtotal }: CartSummaryProps) {
 
       <div className="flex flex-col gap-3 mb-5">
         <Row label="Zwischensumme" value={formatEuro(subtotal)} />
-        <Row label="Versand" value={shipping === 0 ? 'Kostenlos' : formatEuro(shipping)} />
+        <Row label="Versand (geschätzt)" value={formatEuro(shipping)} />
         <div className="h-px bg-enunas-gray-light my-1.5" />
         <Row label="Gesamt" value={formatEuro(total)} bold />
       </div>

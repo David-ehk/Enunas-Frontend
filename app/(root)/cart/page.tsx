@@ -5,7 +5,6 @@ import CheckoutNavbar from './components/CheckoutNavbar'
 import CartFooter from './components/CartFooter'
 import { useCart } from '@/app/context/CartContext'
 import CartHeader from './components/CartHeader'
-// import FreeShippingBar from './components/FreeShippingBar'  // TODO: re-enable once per-product shipping is configured
 import CartItemRow from './components/CartItemRow'
 import CartSummary from './components/CartSummary'
 import EmptyCart from './components/EmptyCart'
@@ -34,7 +33,6 @@ export default function CartPage() {
         <div className="max-w-[1440px] mx-auto">
           <CartHeader itemCount={itemCount} />
 
-          {/* <FreeShippingBar subtotal={totalPrice} /> */}
 
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-10 lg:gap-14 items-start">
             <section aria-label="Warenkorb Artikel">
