@@ -1,4 +1,4 @@
-import type { ApiProduct } from '@/types/api';
+import type { ApiProduct, ApiCompleteTheLookItem } from '@/types/api';
 
 // The real backend ProductResponseDto is nested and shaped very differently from the flat
 // ApiProduct the storefront was built against (the mock contract). This adapter bridges the
@@ -39,8 +39,18 @@ export interface RawProductResponse {
   careInstructions?: string;
   status: string;
   createdAt: string;
+  returnPeriodDays?: number;
   variants?: RawVariant[];
   images?: RawImage[];
+  // The backend sends a trimmed product shape here; only id/name/price are guaranteed.
+  completeTheLookProducts?: {
+    id: number;
+    name: string;
+    price: number | null;
+    brandName?: string;
+    slug?: string;
+    images?: RawImage[];
+  }[];
 }
 
 export interface RawPagedProducts {
@@ -50,6 +60,10 @@ export interface RawPagedProducts {
   size: number;
   page: number;
 }
+
+// Matches the backend's own default on ProductResponseDto.returnPeriodDays. Only used when a
+// response omits the field entirely — a real value always wins.
+export const DEFAULT_RETURN_PERIOD_DAYS = 14
 
 // Backend variants carry a colorFamily enum but no hex; map it to a representative swatch.
 const COLOR_FAMILY_HEX: Record<string, string> = {
@@ -88,16 +102,47 @@ export function adaptProduct(raw: RawProductResponse): ApiProduct {
     sku: variants[0]?.sku ?? '',
     slug: raw.slug,
     description: raw.description,
+    // A null price means "no active listing" — keep the 0 for type compatibility but flag the
+    // product unavailable so no caller renders it as 0,00 €.
     price: raw.price ?? 0,
+    available: raw.price != null,
     currency: 'EUR',
     category: (raw.category ?? '').toLowerCase(),
     gender: raw.gender,
     images,
     colours,
     sizes,
+    // Carried through verbatim: `colours`/`sizes` above flatten these for swatches and filters
+    // and drop stockQuantity, which the PDP needs to gate sold-out sizes.
+    variants: variants.map(v => ({
+      id: v.id,
+      sku: v.sku,
+      color: v.color,
+      colorFamily: v.colorFamily,
+      size: v.size,
+      stockQuantity: v.stockQuantity,
+      weightGrams: v.weightGrams,
+    })),
+    // The brand sets this per product; the backend's own default is 14. Never hardcode a
+    // different number in the UI — the PDP used to claim 30 days while the backend said 14.
+    returnPeriodDays: raw.returnPeriodDays ?? DEFAULT_RETURN_PERIOD_DAYS,
     catalogue: (raw.catalogueCategory ?? []).map(c => c.toLowerCase()),
     status: raw.status as ApiProduct['status'],
     createdAt: raw.createdAt,
     details: { material: raw.material, care: raw.careInstructions, origin: raw.originCountry },
+    // Deliberately NOT coerced to 0 like `price` above: a look card with no price simply
+    // renders without one, so there is nothing to guard with an `available` flag.
+    completeTheLookProducts: raw.completeTheLookProducts?.map(
+      (c): ApiCompleteTheLookItem => ({
+        id: String(c.id),
+        name: c.name,
+        brandName: c.brandName,
+        slug: c.slug,
+        price: c.price ?? null,
+        images: [...(c.images ?? [])]
+          .sort((a, b) => Number(b.primary) - Number(a.primary) || a.displayOrder - b.displayOrder)
+          .map(i => i.imageUrl),
+      }),
+    ),
   };
 }

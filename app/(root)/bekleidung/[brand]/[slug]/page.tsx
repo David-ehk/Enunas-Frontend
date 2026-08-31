@@ -6,9 +6,10 @@ import SimilarProducts from './components/SimilarProducts'
 import CuratedRecommendations from '@/components/CuratedRecommendations'
 import { notFound } from 'next/navigation'
 import { productApi, resolveProductWithMeta } from '@/lib/api'
+import { DEFAULT_RETURN_PERIOD_DAYS } from '@/lib/api/productResponseAdapter'
 // productApi used below for category/brand recommendations
 import { generateSlug } from '@/lib/product'
-import type { ApiProduct } from '@/types/api'
+import type { ApiProduct, ApiCompleteTheLookItem } from '@/types/api'
 import type { Product as PdpProduct, Variant } from './types/product'
 import type { RecItem } from './components/ProductCard'
 
@@ -20,18 +21,33 @@ interface ProductPageProps {
 }
 
 function toNewProduct(p: ApiProduct): PdpProduct {
-  const variants: Variant[] = []
-  let variantId = 1
-  for (const colour of (p.colours ?? [])) {
-    for (const size of (p.sizes ?? [])) {
-      variants.push({
-        color: colour.name,
-        id: variantId++,
-        size,
-        sku: `${p.sku ?? 'PROD'}-${colour.name.slice(0, 3).toUpperCase()}-${size}`,
-        stockQuantity: 10,
-        weightGrams: 500,
-      })
+  // Prefer the real backend variants — they carry the true per-variant stockQuantity and SKU.
+  // The synthesised fallback below only applies to mock/pre-connect data that has no variants;
+  // it fabricates stock, so anything built from it must never be treated as sellable truth.
+  let variants: Variant[]
+  if (p.variants && p.variants.length > 0) {
+    variants = p.variants.map(v => ({
+      color: v.color,
+      id: v.id,
+      size: v.size,
+      sku: v.sku,
+      stockQuantity: v.stockQuantity,
+      weightGrams: v.weightGrams ?? 0,
+    }))
+  } else {
+    variants = []
+    let variantId = 1
+    for (const colour of (p.colours ?? [])) {
+      for (const size of (p.sizes ?? [])) {
+        variants.push({
+          color: colour.name,
+          id: variantId++,
+          size,
+          sku: `${p.sku ?? 'PROD'}-${colour.name.slice(0, 3).toUpperCase()}-${size}`,
+          stockQuantity: 10,
+          weightGrams: 500,
+        })
+      }
     }
   }
 
@@ -54,7 +70,7 @@ function toNewProduct(p: ApiProduct): PdpProduct {
     name: p.name,
     originCountry: p.details?.origin ?? '',
     releaseDate: null,
-    returnPeriodDays: 30,
+    returnPeriodDays: p.returnPeriodDays ?? DEFAULT_RETURN_PERIOD_DAYS,
     status: 'ACTIVE',
     updatedAt: p.createdAt,
     variants,
@@ -66,10 +82,22 @@ function toRecItem(p: ApiProduct): RecItem {
   return {
     brand: p.brandName,
     name: p.name,
-    price: `€ ${p.price.toFixed(0)}`,
+    price: p.available ? `€ ${p.price.toFixed(0)}` : null,
     colors: (p.colours ?? []).map(c => c.hex),
     href: `/bekleidung/${generateSlug(p.brandName)}/${p.slug}`,
     image: p.images?.[0],
+  }
+}
+
+function completeTheLookToRecItem(c: ApiCompleteTheLookItem): RecItem {
+  return {
+    brand: c.brandName ?? '',
+    name: c.name,
+    // null price = no active listing. The card renders without a price rather than "€ 0".
+    price: c.price != null ? `€ ${c.price.toFixed(0)}` : null,
+    colors: [],
+    href: c.slug && c.brandName ? `/bekleidung/${generateSlug(c.brandName)}/${c.slug}` : '#',
+    image: c.images?.[0],
   }
 }
 
@@ -96,10 +124,15 @@ async function ProductPage({ params }: ProductPageProps) {
     productApi.list({ size: 100 }).catch(() => ({ content: [] as ApiProduct[] })),
   ])
 
-  const relatedItems: RecItem[] = categoryRes.content
-    .filter((p: ApiProduct) => p.id !== resolved.id)
-    .slice(0, 4)
-    .map(toRecItem)
+  // The brand's own curated look wins when the backend supplies one; the category query is only
+  // a fallback for products with nothing curated.
+  const curated = resolved.completeTheLookProducts ?? []
+  const relatedItems: RecItem[] = curated.length > 0
+    ? curated.slice(0, 4).map(completeTheLookToRecItem)
+    : categoryRes.content
+        .filter((p: ApiProduct) => p.id !== resolved.id)
+        .slice(0, 4)
+        .map(toRecItem)
 
   const brandItems: RecItem[] = allRes.content
     .filter((p: ApiProduct) => generateSlug(p.brandName) === brand && p.id !== resolved.id)
@@ -121,6 +154,7 @@ async function ProductPage({ params }: ProductPageProps) {
       <ProductDetails
         product={product}
         price={resolved.price}
+        available={resolved.available}
         currency={resolved.currency ?? 'EUR'}
         brandSlug={brand}
         productSlug={slug}

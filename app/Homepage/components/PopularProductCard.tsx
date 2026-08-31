@@ -45,7 +45,8 @@ interface PopularProductCardProps {
   imgURL: string;
   brandName: string;
   productName: string;
-  price: string;
+  /** null when the product has no active listing — the card then omits the price line. */
+  price: string | null;
   href: string;
   colours: ProductColour[];
   createdAt: Date | string;
@@ -215,9 +216,11 @@ const PopularProductCard = ({
               </div>
 
               {/* Price */}
-              <p className="text-sm font-light text-enunas-black">
-                {price}
-              </p>
+              {price !== null && (
+                <p className="text-sm font-light text-enunas-black">
+                  {price}
+                </p>
+              )}
             </div>
 
             {/* Hover Content (Sizes & Categories) - Absolute for crossfade */}
