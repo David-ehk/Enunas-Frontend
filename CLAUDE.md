@@ -375,9 +375,24 @@ All protected routes require: `Authorization: Bearer <token>` — handled automa
 | `GET` | `/admin/orders/status/{status}` | — | `Page<OrderResponseDto>` |
 | `PATCH` | `/admin/orders/{orderId}/status?status=` | — | `OrderResponseDto` |
 | `POST` | `/admin/orders/{orderId}/cancel` | `CancelOrderDto` | `OrderResponseDto` |
-| `POST` | `/admin/orders/{orderId}/return/approve` | — | `OrderResponseDto` |
-| `POST` | `/admin/orders/{orderId}/return/receive` | — | `OrderResponseDto` |
-| `POST` | `/admin/orders/{orderId}/return/refund?refundAmount=` | — | `OrderResponseDto` |
+
+---
+
+### Admin — Returns (ADMIN)
+
+A return belongs to a **brand**, not to an order — one order can carry several returns, one per
+brand whose items are going back, each with its own lifecycle. Address them by `returnNumber`.
+
+| Method | Path | Precondition | Response |
+|--------|------|--------------|----------|
+| `POST` | `/admin/returns/{returnNumber}/approve` | status `REQUESTED` | `OrderResponseDto` |
+| `POST` | `/admin/returns/{returnNumber}/receive` | status `APPROVED` — restores stock | `OrderResponseDto` |
+| `POST` | `/admin/returns/{returnNumber}/refund?refundAmount=` | status `RECEIVED`; `refundAmount` optional, capped at the refundable total | `OrderResponseDto` |
+
+> **Deprecated:** the older order-scoped shims `/admin/orders/{orderId}/return/{approve,receive,refund}`
+> are superseded by the routes above and must not be used in new code. `approve` still works;
+> **`receive` fails with HTTP 500** (verified against production, 29 Aug 2026). `lib/api/modules/adminReturnsApi.ts`
+> already targets the correct `/admin/returns/*` routes.
 
 ---
 

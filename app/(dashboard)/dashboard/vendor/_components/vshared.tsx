@@ -13,6 +13,14 @@ export function fmtEur(v: number) {
 export function fmtK(v: number) {
   return v >= 1000 ? `€${(v / 1000).toFixed(0)}K` : fmtEur(v)
 }
+/**
+ * Cent-exact money. Use this wherever the figure is a ledger amount a partner might reconcile
+ * against an invoice or a payout — fmtEur rounds to whole euros, which turns 4,99 into "€ 5"
+ * and hides exactly the cent-level precision settlement figures need to expose.
+ */
+export function fmtEurExact(v: number) {
+  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(v)
+}
 export function fmt(s?: string | null) {
   if (!s) return '—'
   return new Date(s).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })

@@ -2,14 +2,19 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { brandApi } from '@/lib/api/modules/brandApi'
-import type { AdminApiProduct, ApiOrder, AdminApiVariant } from '@/types/api'
+import type { AdminApiProduct, ApiOrder, AdminApiVariant, AdminPayout } from '@/types/api'
+import {
+  ownSkus, ownItems, itemGross, isRevenueOrder, participatesIn,
+  grossProductAmount, refundedAmount, summarise, partnerSettlementAmount,
+} from '@/lib/brandRevenue'
 import {
   VPageHeader, VKPIGrid, VKPI, VCard, VAreaChart, DonutMulti,
-  Grid3, VStatus, VChip, VBtn, fmtEur, fmtK, Loader, EmptyState,
+  Grid3, VStatus, VChip, VBtn, fmtEur, fmtEurExact, fmtK, Loader, EmptyState,
 } from './vshared'
 
-// Umsatzrelevante Status — unbezahlte (PENDING) und stornierte Bestellungen zählen nicht
-const REVENUE_STATUSES = ['PAID', 'SHIPPED', 'DELIVERED', 'RETURN_REQUESTED', 'RETURN_APPROVED', 'RETURN_RECEIVED', 'REFUNDED']
+// Umsatzdefinition lebt in lib/brandRevenue (isRevenueOrder): bezahlte Bestellungen zählen,
+// PENDING/CANCELLED nicht — und Erstattungen werden als BETRAG abgezogen, statt die Bestellung
+// per Status auszuschließen. Sonst verschwänden Verkauf und Erstattung gemeinsam.
 
 const DONUT_COLORS = ['#370E4D', '#9B7BB5', '#C9B8D6', '#6B4226', '#1A5A3C']
 
@@ -22,13 +27,20 @@ function dayKey(d: Date): string {
 export default function Overview({ onNavigate }: { onNavigate: (tab: string) => void }) {
   const [products, setProducts] = useState<AdminApiProduct[]>([])
   const [orders, setOrders]     = useState<ApiOrder[]>([])
+  // Needed to pick this brand's own shipping snapshot and its own returns off a shared order.
+  const [brandId, setBrandId]   = useState<string | null>(null)
+  // Server-computed settlement. The only source for a commission-adjusted figure — the
+  // frontend must not re-derive one.
+  const [payouts, setPayouts]   = useState<AdminPayout[]>([])
   const [loading, setLoading]   = useState(true)
 
   useEffect(() => {
     Promise.all([
       brandApi.products.getMy().catch(() => [] as AdminApiProduct[]),
       brandApi.orders.getAll().catch(() => [] as ApiOrder[]),
-    ]).then(([p, o]) => { setProducts(p); setOrders(o) })
+      brandApi.getMe().then(b => String(b.id)).catch(() => null),
+      brandApi.payouts.getMine().catch(() => [] as AdminPayout[]),
+    ]).then(([p, o, id, pay]) => { setProducts(p); setOrders(o); setBrandId(id); setPayouts(pay) })
       .finally(() => setLoading(false))
   }, [])
 
@@ -36,26 +48,49 @@ export default function Overview({ onNavigate }: { onNavigate: (tab: string) => 
   const monthLabel = now.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })
 
   const {
-    grossMTD, netMTD, openOrders, pendingReturns, toShip,
-    chartData, chartCompare, chartLabels, categoryMix, lowStock,
+    merchandiseMTD, refundedMTD, shippingMTD, settlementAmount,
+    openOrders, pendingReturns, toShip,
+    chartData, chartCompare, chartLabels, categoryMix, mixTotal, lowStock,
   } = useMemo(() => {
     const startMTD = new Date(now.getFullYear(), now.getMonth(), 1)
-    const revenueOrders = orders.filter(o => REVENUE_STATUSES.includes(o.status))
 
-    const mtd      = revenueOrders.filter(o => new Date(o.createdAt) >= startMTD)
-    const grossMTD = mtd.reduce((s, o) => s + (o.totalAmount ?? 0), 0)
-    // Brand erhält Brutto abzüglich 18 % Plattform-Provision (Backend: commission-rate 0.18)
-    const netMTD   = Math.round(grossMTD * 0.82)
+    // /brand/orders liefert ganze Bestellungen — bei Multi-Brand-Bestellungen also auch die
+    // Positionen anderer Marken. Deshalb NICHT die Order-Summe nehmen, sondern nur die eigenen
+    // Positionen (Join über variantSku) und die eigene Versand-/Retouren-Zeile.
+    const skus = ownSkus(products)
+    const revenueOrders = orders.filter(o => isRevenueOrder(o) && participatesIn(o, brandId))
 
-    const openOrders     = orders.filter(o => o.status === 'PAID').length
-    const pendingReturns = orders.filter(o => o.status === 'RETURN_REQUESTED').length
-    const toShip         = orders.filter(o => o.status === 'PAID').slice(0, 3)
+    const mtd = revenueOrders.filter(o => new Date(o.createdAt) >= startMTD)
+    const ledger = summarise(mtd, skus, brandId)
 
-    // Umsatzverlauf — letzte 14 Tage aus echten Bestellungen, Vergleich: die 14 Tage davor
+    // Warenumsatz = eigener Bruttoumsatz − eigene Erstattungen. KEINE Provisionslogik.
+    const merchandiseMTD = ledger.netMerchandiseValue
+    const refundedMTD    = ledger.refundedAmount
+    const shippingMTD    = ledger.shippingAmount
+    // Auszahlung kommt ausschließlich aus den serverseitig berechneten Payouts. null = noch
+    // nicht abgerechnet — dann zeigt die Kachel "—" statt einer erfundenen Zahl.
+    const settlementAmount = partnerSettlementAmount(payouts)
+
+    // Auch diese Zähler nur über die eigenen Bestellungen — sonst zeigt eine Marke Aufgaben an,
+    // die zu einer anderen Marke derselben Bestellung gehören.
+    const ownOrders      = revenueOrders
+    const openOrders     = ownOrders.filter(o => o.status === 'PAID').length
+    const toShip         = ownOrders.filter(o => o.status === 'PAID').slice(0, 3)
+    // Retouren gehören einer Marke, nicht der Bestellung — deshalb über returns[].brandId
+    // zählen statt über den Order-Status.
+    const pendingReturns = ownOrders.reduce((n, o) =>
+      n + (o.returns ?? []).filter(r =>
+        String(r.brandId) === String(brandId) && r.status === 'REQUESTED').length, 0)
+
+    // Umsatzverlauf — letzte 14 Tage, Vergleich: die 14 Tage davor. Wie die KPI netto nach
+    // Erstattungen, damit Kachel und Kurve dieselbe Zahl erzählen. Die Erstattung wird dem Tag
+    // der Bestellung zugeordnet (nicht dem Erstattungsdatum), damit sich die Kurve zur MTD-Summe
+    // aufaddiert.
     const byDay = new Map<string, number>()
     for (const o of revenueOrders) {
       const k = dayKey(new Date(o.createdAt))
-      byDay.set(k, (byDay.get(k) ?? 0) + (o.totalAmount ?? 0))
+      const net = grossProductAmount(o, skus) - refundedAmount(o, brandId)
+      byDay.set(k, (byDay.get(k) ?? 0) + net)
     }
     const chartData: number[] = []
     const chartCompare: number[] = []
@@ -69,16 +104,20 @@ export default function Overview({ onNavigate }: { onNavigate: (tab: string) => 
     }
 
     // Umsatz-Mix nach Katalogkategorie — aus echten Order-Items + eigenen Produkten
-    const catByProduct = new Map<string, string>()
+    // Zuordnung über variantSku statt productId/price — die sendet das Backend nicht
+    // (siehe ApiOrderItem in types/api.ts), der Mix wäre sonst dauerhaft leer.
+    const catBySku = new Map<string, string>()
     for (const p of products) {
       const cat = Array.isArray(p.catalogueCategory) ? p.catalogueCategory[0] : p.catalogueCategory
-      catByProduct.set(String(p.id), cat ?? 'Sonstige')
+      for (const v of p.variants ?? []) {
+        if (v.sku) catBySku.set(v.sku, cat ?? 'Sonstige')
+      }
     }
     const mixMap = new Map<string, number>()
     for (const o of revenueOrders) {
-      for (const item of o.items ?? []) {
-        const cat = catByProduct.get(String(item.productId)) ?? 'Sonstige'
-        mixMap.set(cat, (mixMap.get(cat) ?? 0) + (item.price ?? 0) * (item.quantity ?? 1))
+      for (const item of ownItems(o, skus)) {
+        const cat = catBySku.get(item.variantSku ?? '') ?? 'Sonstige'
+        mixMap.set(cat, (mixMap.get(cat) ?? 0) + itemGross(item))
       }
     }
     const categoryMix = [...mixMap.entries()]
@@ -88,6 +127,9 @@ export default function Overview({ onNavigate }: { onNavigate: (tab: string) => 
         value,
         color: DONUT_COLORS[i % DONUT_COLORS.length],
       }))
+    // Mitte des Donuts aus den Segmenten selbst — so kann sie nie von ihnen abweichen. Der Mix
+    // ist brutto vor Erstattungen, deshalb NICHT merchandiseMTD verwenden.
+    const mixTotal = categoryMix.reduce((s, seg) => s + seg.value, 0)
 
     // Lagerwarnungen — echte Varianten mit niedrigem Bestand
     const lowStock = products.flatMap(p =>
@@ -100,9 +142,12 @@ export default function Overview({ onNavigate }: { onNavigate: (tab: string) => 
         }))
     ).slice(0, 4)
 
-    return { grossMTD, netMTD, openOrders, pendingReturns, toShip, chartData, chartCompare, chartLabels, categoryMix, lowStock }
+    return {
+      merchandiseMTD, refundedMTD, shippingMTD, settlementAmount,
+      openOrders, pendingReturns, toShip, chartData, chartCompare, chartLabels, categoryMix, mixTotal, lowStock,
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orders, products])
+  }, [orders, products, brandId, payouts])
 
   if (loading) return <Loader />
 
@@ -118,17 +163,24 @@ export default function Overview({ onNavigate }: { onNavigate: (tab: string) => 
 
       {/* 6-KPI row — alles live; Retourenquote & Conversion folgen in Phase 3 */}
       <VKPIGrid cols={6}>
-        <VKPI label="Umsatz MTD"      value={fmtK(grossMTD)}  delta={`${monthLabel}`}                                               deltaTone="muted" />
+        <VKPI label="Warenumsatz MTD" value={fmtEurExact(merchandiseMTD)}
+              delta={refundedMTD > 0 ? `${monthLabel} · abzgl. ${fmtEurExact(refundedMTD)} Erstattungen` : `${monthLabel} · ohne Versand`}
+              deltaTone={refundedMTD > 0 ? 'down' : 'muted'} />
         <VKPI label="Offen"           value={openOrders}        delta="bezahlt, noch nicht versandt"                                  deltaTone={openOrders > 0 ? 'down' : 'muted'} />
         <VKPI label="Offene Retouren" value={pendingReturns}    delta={pendingReturns > 0 ? 'Aktion erforderlich' : 'Keine offenen'}  deltaTone={pendingReturns > 0 ? 'down' : 'muted'} />
-        <VKPI label="Nächste Zahlung" value={fmtK(netMTD)}      delta="nach Abrechnung (− 18 % Provision)"                            deltaTone="muted" />
+        <VKPI label="Offene Auszahlung"
+              value={settlementAmount === null ? '—' : fmtEurExact(settlementAmount)}
+              delta={settlementAmount === null ? 'noch nicht abgerechnet' : 'laut Abrechnung, nach Provision'}
+              deltaTone="muted" />
         <VKPI label="Retourenquote"   value="—"                 delta="Phase 3"                                                       deltaTone="muted" />
         <VKPI label="Conversion"      value="—"                 delta="Phase 3"                                                       deltaTone="muted" />
       </VKPIGrid>
 
       {/* Umsatzverlauf — echte Tagesumsätze der letzten 14 Tage */}
+      {/* Versanderlöse sind eine eigene Ledger-Zeile: keine Provision darauf, deshalb getrennt
+          vom Warenumsatz ausgewiesen statt hineingerechnet. */}
       <VCard eyebrow="Umsatz — letzte 14 Tage" title="Umsatzverlauf"
-        action={<VChip tone="ghost">{now.toLocaleDateString('de-DE', { month: 'short' })}</VChip>}>
+        action={<VChip tone="ghost">{`Versanderlöse MTD ${fmtEurExact(shippingMTD)}`}</VChip>}>
         <VAreaChart data={chartData} compare={chartCompare} labels={chartLabels} fmt={fmtEur} height={230} />
       </VCard>
 
@@ -136,7 +188,7 @@ export default function Overview({ onNavigate }: { onNavigate: (tab: string) => 
       <Grid3>
         <VCard eyebrow="Kategorien" title="Umsatz-Mix">
           {categoryMix.length > 0 ? (
-            <DonutMulti segments={categoryMix} centerValue={fmtK(grossMTD)} centerLabel="Gesamt" />
+            <DonutMulti segments={categoryMix} centerValue={fmtK(mixTotal)} centerLabel="Gesamt" />
           ) : (
             <EmptyState message="Noch keine Verkäufe — der Mix erscheint mit der ersten Bestellung." />
           )}

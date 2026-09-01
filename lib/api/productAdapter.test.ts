@@ -10,6 +10,7 @@ function product(overrides: Partial<ApiProduct> = {}): ApiProduct {
     sku: 'X',
     slug: 'waterfall',
     price: 49.95,
+    available: true,
     category: 'clothing',
     images: ['a.jpg', 'b.jpg'],
     colours: [{ hex: '#000000', name: 'Black' }],

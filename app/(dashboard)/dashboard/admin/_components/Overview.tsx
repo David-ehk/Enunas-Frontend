@@ -160,7 +160,7 @@ export default function Overview({ orders, brands, products, customers }: Props)
     orders.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 15)
       .forEach(o => {
         const ev = ORDER_EVENT[o.status] ?? { title: 'Bestellung', dot: '#9B9B9B' }
-        events.push({ id: `order-${o.id}`, title: ev.title, sub: `#${String(o.id).slice(0, 8).toUpperCase()} · ${fmtEur(o.totalAmount)}`, at: o.createdAt, dot: ev.dot })
+        events.push({ id: `order-${o.id}`, title: ev.title, sub: `#${String(o.id).slice(0, 8).toUpperCase()} · ${fmtEur(o.total ?? o.totalAmount)}`, at: o.createdAt, dot: ev.dot })
       })
     brands.filter(b => b.createdAt).sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()).slice(0, 6)
       .forEach(b => {
@@ -189,7 +189,7 @@ export default function Overview({ orders, brands, products, customers }: Props)
     const matchOrders = orders.filter(o =>
       String(o.id).toLowerCase().includes(q) ||
       o.status.toLowerCase().includes(q) ||
-      fmtEur(o.totalAmount).includes(q)
+      fmtEur(o.total ?? o.totalAmount).includes(q)
     ).slice(0, 4)
     const matchCustomers = customers.filter(c =>
       `${c.firstName} ${c.lastName}`.toLowerCase().includes(q) ||
@@ -323,7 +323,7 @@ export default function Overview({ orders, brands, products, customers }: Props)
                         key={o.id}
                         primary={`#${String(o.id).slice(0, 8).toUpperCase()}`}
                         secondary={new Date(o.createdAt).toLocaleDateString('de-DE')}
-                        mono={fmtEur(o.totalAmount)}
+                        mono={fmtEur(o.total ?? o.totalAmount)}
                         badge={o.status}
                       />
                     ))}

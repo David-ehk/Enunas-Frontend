@@ -33,6 +33,7 @@ export async function resolveProductBySlug(slug: string): Promise<ApiProduct | n
     slug: mock.slug,
     description: mock.description,
     price: mock.priceNumber,
+    available: true,
     currency: 'EUR',
     category: mock.category,
     subcategory: mock.subcategory,

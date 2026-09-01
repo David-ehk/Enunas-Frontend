@@ -328,13 +328,15 @@ function OrderRow({
         </TD>
         <TD>
           <div className="text-[12px] text-[#6B6B6B] max-w-[200px]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-            {(order.items ?? []).slice(0, 2).map(i => i.name).join(', ') || '—'}
+            {(order.items ?? []).slice(0, 2).map(i => i.productName ?? i.name).filter(Boolean).join(', ') || '—'}
             {(order.items ?? []).length > 2 && (
               <span className="text-[#9B9B9B]"> +{order.items.length - 2}</span>
             )}
           </div>
         </TD>
-        <TD className="font-semibold text-[#0A0A0A]">{fmtEur(order.totalAmount)}</TD>
+        {/* Order-Gesamtsumme: bei Multi-Brand-Bestellungen inkl. fremder Positionen, bis
+            /brand/orders serverseitig auf die anfragende Marke gescopet ist. */}
+        <TD className="font-semibold text-[#0A0A0A]">{fmtEur(order.total ?? order.totalAmount)}</TD>
         <TD className="text-[#9B9B9B]">{fmt(order.createdAt)}</TD>
         <TD><StatusBadge status={order.status} /></TD>
         <TD>
