@@ -87,3 +87,25 @@ describe('updateQty / removeItem', () => {
     expect(removeItem(items, 'a').map(i => i.id)).toEqual(['b'])
   })
 })
+
+describe('stock limits', () => {
+  it('refuses to add an item with zero stock', () => {
+    expect(addItem([], newItem({ stockQuantity: 0 }), () => 'X')).toEqual([])
+  })
+
+  it('does not bump an existing line past available stock', () => {
+    const one = addItem([], newItem({ stockQuantity: 1 }), () => 'X')
+    const two = addItem(one, newItem({ stockQuantity: 1 }), () => 'Y')
+    expect(two).toHaveLength(1)
+    expect(two[0].quantity).toBe(1)
+  })
+
+  it('adds normally when stock is unknown', () => {
+    expect(addItem([], newItem(), () => 'X')).toHaveLength(1)
+  })
+
+  it('clamps updateQty at available stock', () => {
+    const one = addItem([], newItem({ stockQuantity: 2 }), () => 'X')
+    expect(updateQty(one, one[0].id, 9)[0].quantity).toBe(2)
+  })
+})

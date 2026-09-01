@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Fragment } from 'react'
 import { brandApi } from '@/lib/api/modules/brandApi'
+import { FetchError } from '@/lib/api'
 import type { CreateProductDto, CreateProductVariantDto, CreateListingDto, UpdateListingDto } from '@/lib/api/modules/brandApi'
 import type { AdminApiProduct, AdminApiVariant, ApiListing, ApiProductImage, PriceInputMode } from '@/types/api'
 import {
@@ -1642,6 +1643,8 @@ export default function Products() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [deleting, setDeleting]     = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<{ id: string; message: string } | null>(null)
+  const [archiving, setArchiving] = useState<string | null>(null)
   // productId → Brutto-Preise der Listings (ProductResponseDto trägt keinen Preis;
   // Preise leben auf Listings — niemals € 0,00 anzeigen)
   const [priceMap, setPriceMap] = useState<Record<string, number[]>>({})
@@ -1693,11 +1696,39 @@ export default function Products() {
 
   async function deleteProduct(id: string) {
     setDeleting(id)
+    setDeleteError(null)
     try {
       await brandApi.products.delete(id)
       setProducts(prev => prev.filter(p => p.id !== id))
-    } catch { /* silent */ }
-    finally { setDeleting(null); setConfirmDelete(null) }
+      setConfirmDelete(null)
+    } catch (err) {
+      // The backend checks up front now and explains itself: which product, why it is blocked,
+      // and that archiving is the way out. That is better copy than anything generic, so it is
+      // shown verbatim.
+      setDeleteError({
+        id,
+        message: err instanceof FetchError ? err.message : 'Produkt konnte nicht gelöscht werden.',
+      })
+    } finally {
+      setDeleting(null)
+    }
+  }
+
+  async function archiveProduct(id: string) {
+    setArchiving(id)
+    try {
+      const updated = await brandApi.products.update(id, { status: 'ARCHIVED' })
+      setProducts(prev => prev.map(p => (p.id === id ? updated : p)))
+      setDeleteError(null)
+      setConfirmDelete(null)
+    } catch (err) {
+      setDeleteError({
+        id,
+        message: err instanceof FetchError ? err.message : 'Produkt konnte nicht archiviert werden.',
+      })
+    } finally {
+      setArchiving(null)
+    }
   }
 
   const filtered = products.filter(p => {
@@ -1835,21 +1866,41 @@ export default function Products() {
                           {expandedId === p.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         </button>
                         {confirmDelete === p.id ? (
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => deleteProduct(p.id)}
-                              disabled={deleting === p.id}
-                              className="h-7 px-2.5 rounded-none bg-rose-50 border border-rose-200 text-[11px] text-rose-700 hover:bg-rose-100 transition-all duration-150"
-                              style={{ fontFamily: 'var(--font-league-spartan)' }}
-                            >
-                              {deleting === p.id ? '…' : 'Löschen bestätigen'}
-                            </button>
-                            <button
-                              onClick={() => setConfirmDelete(null)}
-                              className="h-7 w-7 rounded-none border border-[#E8E8E8] flex items-center justify-center text-[#9B9B9B] hover:text-[#6B6B6B]"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => deleteProduct(p.id)}
+                                disabled={deleting === p.id}
+                                className="h-7 px-2.5 rounded-none bg-rose-50 border border-rose-200 text-[11px] text-rose-700 hover:bg-rose-100 transition-all duration-150"
+                                style={{ fontFamily: 'var(--font-league-spartan)' }}
+                              >
+                                {deleting === p.id ? '…' : 'Löschen bestätigen'}
+                              </button>
+                              {deleteError?.id === p.id && (
+                                <button
+                                  onClick={() => archiveProduct(p.id)}
+                                  disabled={archiving === p.id}
+                                  className="h-7 px-2.5 rounded-none border border-[#E8E8E8] text-[11px] text-[#6B6B6B] hover:border-[#370E4D]/40 hover:text-[#370E4D] transition-all duration-150"
+                                  style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                >
+                                  {archiving === p.id ? '…' : 'Stattdessen archivieren'}
+                                </button>
+                              )}
+                              <button
+                                onClick={() => { setConfirmDelete(null); setDeleteError(null) }}
+                                className="h-7 w-7 rounded-none border border-[#E8E8E8] flex items-center justify-center text-[#9B9B9B] hover:text-[#6B6B6B]"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                            {deleteError?.id === p.id && (
+                              <p
+                                className="max-w-[420px] text-[11px] leading-snug text-rose-700"
+                                style={{ fontFamily: 'var(--font-league-spartan)' }}
+                              >
+                                {deleteError.message}
+                              </p>
+                            )}
                           </div>
                         ) : (
                           <button

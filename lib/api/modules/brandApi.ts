@@ -1,5 +1,5 @@
 import { fetcher } from '../fetcher'
-import type { ApiBrandPartner, AdminApiProduct, AdminApiVariant, ApiOrder, ApiListing, ApiProductImage, AdminPayout } from '@/types/api'
+import type { ProductStatus, ApiBrandPartner, AdminApiProduct, AdminApiVariant, ApiOrder, ApiListing, ApiProductImage, AdminPayout } from '@/types/api'
 
 export interface CreateProductVariantDto {
   color: string
@@ -28,9 +28,11 @@ export interface CreateProductDto {
   variants: CreateProductVariantDto[]
 }
 
+// `status` is not part of CreateProductDto, but PUT /products/update/{id} accepts it — the
+// backend's own 409 on delete tells the brand to "set its status to ARCHIVED instead".
 export type UpdateProductDto = Partial<
   Omit<CreateProductDto, 'variants' | 'gender' | 'productType' | 'category'>
->
+> & { status?: ProductStatus }
 export interface RegisterBrandPartnerDto {
   email: string
   password: string

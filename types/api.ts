@@ -3,7 +3,7 @@ export type BrandStatus = 'PENDING' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED'
 // The backend returns ACTIVE for a live product — APPROVED is a lifecycle event
 // (POST /admin/products/{id}/approve), not a resting state. Both are accepted
 // here; use isProductLive() rather than comparing to a single literal.
-export type ProductStatus = 'PENDING' | 'ACTIVE' | 'APPROVED' | 'REJECTED' | 'HIDDEN';
+export type ProductStatus = 'PENDING' | 'ACTIVE' | 'APPROVED' | 'REJECTED' | 'HIDDEN' | 'ARCHIVED';
 
 // Exact backend OrderStatus enum values — PROCESSING does not exist in the backend.
 export type OrderStatus =
@@ -125,6 +125,32 @@ export interface ApiUserAddress {
   updatedAt: string;
 }
 
+// One real backend ProductVariantResponseDto row. `colours`/`sizes` on ApiProduct are flattened
+// views for filters and swatches; this keeps the per-variant facts those views drop — above all
+// stockQuantity, without which the storefront cannot tell a sold-out size from an available one.
+export interface ApiProductVariant {
+  id: number;
+  sku: string;
+  color: string;
+  colorFamily?: string;
+  size: string;
+  stockQuantity: number;
+  weightGrams?: number;
+}
+
+// One "Vervollständige den Look" reference. The backend used to 500 when a referenced product
+// had no sellable listing; it now returns the card with `price: null`. Null means "not currently
+// buyable" — render the card without a price and without any add-to-cart affordance, never as
+// €0 or €null.
+export interface ApiCompleteTheLookItem {
+  id: string;
+  name: string;
+  brandName?: string;
+  slug?: string;
+  price: number | null;
+  images: string[];
+}
+
 export interface ApiProduct {
   id: string;
   name: string;
@@ -133,6 +159,11 @@ export interface ApiProduct {
   slug: string;
   description?: string;
   price: number;
+  // The backend sets ProductResponseDto.price to null when the product has no active listing,
+  // so this is the storefront's "can it be sold" signal — and unlike /products/{id}/listings it
+  // needs no auth token, so it works for anonymous visitors too. When false, `price` is a
+  // meaningless 0 placeholder and must never be rendered.
+  available: boolean;
   currency?: string;
   category: string;
   subcategory?: string;
@@ -140,10 +171,16 @@ export interface ApiProduct {
   images: string[];
   colours: { id?: string; hex: string; name: string; colorFamily?: string }[];
   sizes: string[];
+  /** Real backend variants, carrying per-variant stock. Absent only for mock/pre-connect data. */
+  variants?: ApiProductVariant[];
+  /** Brand-configured return window in days. Backend default is 14 — never assume 30. */
+  returnPeriodDays?: number;
   catalogue?: string[];
   status: ProductStatus;
   createdAt: string;
   details?: { material?: string; care?: string; origin?: string };
+  /** Absent when the brand has not curated a look for this product. */
+  completeTheLookProducts?: ApiCompleteTheLookItem[];
 }
 
 // Mirrors backend OrderItemResponseDto.
@@ -186,6 +223,22 @@ export interface ShippingSnapshot {
   calculationMethod: ShippingCalculationMethod;
 }
 
+// One brand's fulfilment state on an order. A multi-brand order gets one row per brand, each
+// shipping independently.
+export type OrderShipmentStatus = 'AWAITING_SHIPMENT' | 'SHIPPED' | 'PROBLEM';
+
+// carrier/trackingNumber are null when an admin marked the whole order shipped rather than the
+// brand confirming its own dispatch. shippedAt is guaranteed non-null whenever status is
+// SHIPPED — a database constraint (migration V29) enforces it, so never guard that pairing.
+export interface ApiOrderShipment {
+  brandId: number | string;
+  brandName: string;
+  status: OrderShipmentStatus | string;
+  shippedAt?: string;
+  carrier?: string | null;
+  trackingNumber?: string | null;
+}
+
 // Mirrors backend OrderResponseDto.
 // `total` is the canonical backend field. `totalAmount` is not returned by the backend;
 // treat it as always undefined when reading real API responses.
@@ -221,6 +274,8 @@ export interface ApiOrder {
   // orders placed before the shipping feature shipped (no backfill) — never treat that as
   // "free shipping".
   shippingSnapshots?: ShippingSnapshot[];
+  // One row per brand on the order. Absent on orders that predate per-brand fulfilment.
+  shipments?: ApiOrderShipment[];
   discountCode?: string;
   discountAmount?: number;
   discountPercent?: number;
@@ -379,7 +434,10 @@ export interface AdminApiVariant {
   weightGrams?: number;
 }
 
-export interface AdminApiProduct extends Omit<ApiProduct, 'status'> {
+// `variants` is omitted from the base and redeclared below: the admin/vendor views use the
+// looser AdminApiVariant shape (string ids, all fields optional), which is not assignable to the
+// storefront's stricter ApiProductVariant.
+export interface AdminApiProduct extends Omit<ApiProduct, 'status' | 'variants'> {
   status: string;
   brandId?: string;
   gender?: string;

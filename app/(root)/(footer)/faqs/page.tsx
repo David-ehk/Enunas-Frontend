@@ -54,7 +54,7 @@ const faqs = [
       },
       {
         q: 'Wie viel kostet der Versand?',
-        a: 'Ab einem Bestellwert von 250 € ist der Versand kostenlos. Darunter berechnen wir eine Pauschale von 4,99 €.',
+        a: 'Die Versandkosten werden pro Marke berechnet und dir vor dem Bezahlen in der Bestellübersicht einzeln ausgewiesen. Einige Marken versenden kostenfrei.',
       },
       {
         q: 'Kann ich meine Bestellung verfolgen?',

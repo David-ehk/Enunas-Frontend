@@ -4,8 +4,9 @@ import Link from 'next/link';
 export interface RecItem {
   brand: string;
   name: string;
-  /** Pre-formatted price, e.g. "€ 1.120" */
-  price: string;
+  /** Pre-formatted price, e.g. "€ 1.120". null when the item has no active listing — the card
+   *  then renders without a price line. */
+  price: string | null;
   /** Hex values for the small swatch dots below the name */
   colors: string[];
   /** Optional image src; if omitted, a tinted SVG placeholder renders */
@@ -72,12 +73,14 @@ export default function ProductCard({ item, aspect = '3/4', compact = false }: P
         </div>
       )}
 
-      <p className={`
-        font-league-spartan ${compact ? 'text-xs' : 'text-[13px]'}
-        font-light text-enunas-black
-      `}>
-        {item.price}
-      </p>
+      {item.price !== null && (
+        <p className={`
+          font-league-spartan ${compact ? 'text-xs' : 'text-[13px]'}
+          font-light text-enunas-black
+        `}>
+          {item.price}
+        </p>
+      )}
     </Link>
   );
 }

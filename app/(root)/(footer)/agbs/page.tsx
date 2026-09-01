@@ -28,7 +28,7 @@ const sections: LegalSection[] = [
   {
     id: 's4', num: '§ 4', label: 'Lieferung & Versand', title: 'Lieferung und Versand',
     paras: [
-      'Lieferungen erfolgen innerhalb Deutschlands sowie in ausgewählte europäische Länder. Standardlieferung 3–5 Werktage, Expresslieferung 1–2 Werktage gegen Aufpreis. Ab einem Bestellwert von EUR 100,– innerhalb Deutschlands ist die Standardlieferung kostenfrei.',
+      'Lieferungen erfolgen innerhalb Deutschlands sowie in ausgewählte europäische Länder. Standardlieferung 3–5 Werktage, Expresslieferung 1–2 Werktage gegen Aufpreis. Die Versandkosten werden pro Marke berechnet und dir vor Abschluss der Bestellung gesondert ausgewiesen.',
       'Die Lieferfrist beginnt am Tag nach Vertragsschluss. Ist ein Artikel nicht vorrätig, wird der Kunde umgehend informiert und kann die Bestellung kostenfrei stornieren.',
     ],
   },

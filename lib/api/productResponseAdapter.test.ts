@@ -53,6 +53,46 @@ describe('adaptProduct', () => {
     expect(adaptProduct(raw({ price: null })).price).toBe(0)
   })
 
+  it('flags a null price as unavailable so it is never shown as 0,00 €', () => {
+    expect(adaptProduct(raw()).available).toBe(true)
+    expect(adaptProduct(raw({ price: null })).available).toBe(false)
+  })
+
+  it('carries real variants through so the PDP can gate sold-out sizes', () => {
+    const p = adaptProduct(raw())
+    expect(p.variants).toHaveLength(3)
+    expect(p.variants?.map(v => v.stockQuantity)).toEqual([5, 3, 2])
+    expect(p.variants?.map(v => v.sku)).toEqual(['SKU-1', 'SKU-2', 'SKU-3'])
+  })
+
+  it('carries the return period through and defaults to 14, never 30', () => {
+    expect(adaptProduct(raw({ returnPeriodDays: 14 })).returnPeriodDays).toBe(14)
+    expect(adaptProduct(raw({ returnPeriodDays: 30 })).returnPeriodDays).toBe(30)
+    // Omitted by the response → backend's own default, not the PDP's old hardcoded 30.
+    expect(adaptProduct(raw()).returnPeriodDays).toBe(14)
+  })
+
+  it('keeps colours[].name and variants[].color on the same join key', () => {
+    // The PDP resolves a chip via findVariant(variants, selectedColor, size), where selectedColor
+    // comes from colours[].name. If these two ever diverge, NO variant resolves and every size
+    // renders disabled — indistinguishable from genuinely sold out.
+    const p = adaptProduct(raw())
+    const variantColors = new Set(p.variants?.map(v => v.color))
+    for (const c of p.colours) expect(variantColors.has(c.name)).toBe(true)
+    // And the pairing actually resolves to the right stock.
+    const found = p.variants?.find(v => v.color === 'Blue' && v.size === 'L')
+    expect(found?.stockQuantity).toBe(3)
+  })
+
+  it('preserves a zero stockQuantity rather than defaulting it', () => {
+    // The PDP previously synthesised every variant with stockQuantity: 10, which is why a
+    // sold-out size stayed selectable and addable to the basket.
+    const p = adaptProduct(raw({
+      variants: [{ id: 1, sku: 'SKU-1', color: 'Black', colorFamily: 'BLACK', size: 'M', stockQuantity: 0 }],
+    }))
+    expect(p.variants?.[0].stockQuantity).toBe(0)
+  })
+
   it('lowercases category and catalogue', () => {
     const p = adaptProduct(raw())
     expect(p.category).toBe('clothing')
@@ -69,5 +109,27 @@ describe('adaptProduct', () => {
     expect(p.sizes).toEqual([])
     expect(p.images).toEqual([])
     expect(p.sku).toBe('')
+  })
+})
+
+describe('completeTheLookProducts', () => {
+  const base = {
+    id: 41, name: 'Jacket', slug: 'jacket', price: 200, brandName: 'Alpha',
+    status: 'ACTIVE', createdAt: '2026-01-01T00:00:00',
+  }
+
+  it('carries a null price through instead of coercing it to 0', () => {
+    const p = adaptProduct({
+      ...base,
+      completeTheLookProducts: [
+        { id: 88, name: 'Cargo Pant', price: 129 },
+        { id: 92, name: 'Wool Beanie', price: null },
+      ],
+    } as never)
+    expect(p.completeTheLookProducts?.map(i => i.price)).toEqual([129, null])
+  })
+
+  it('is undefined when the backend omits the field', () => {
+    expect(adaptProduct(base as never).completeTheLookProducts).toBeUndefined()
   })
 })

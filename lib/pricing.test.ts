@@ -1,15 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { calcShipping, calcUpsellDiscount, calcFinalTotal } from './pricing'
+import { calcShipping, calcUpsellDiscount, calcFinalTotal, STANDARD_SHIPPING } from './pricing'
 
 describe('calcShipping', () => {
-  it('is free at or above the 50€ threshold', () => {
-    expect(calcShipping(50)).toBe(0)
-    expect(calcShipping(120)).toBe(0)
-  })
-
-  it('charges the flat 4.99€ below the threshold', () => {
-    expect(calcShipping(49.99)).toBe(4.99)
-    expect(calcShipping(0)).toBe(4.99)
+  it('charges the flat rate regardless of order value — there is no free-shipping threshold', () => {
+    expect(calcShipping(10)).toBe(STANDARD_SHIPPING)
+    expect(calcShipping(50)).toBe(STANDARD_SHIPPING)
+    expect(calcShipping(500)).toBe(STANDARD_SHIPPING)
   })
 })
 

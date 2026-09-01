@@ -6,7 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Navbar from '@/app/Homepage/components/navbar'
 import CartFooter from '@/app/(root)/cart/components/CartFooter'
-import { orderApi, fetcher } from '@/lib/api'
+import { orderApi, listingApi, FetchError } from '@/lib/api'
 import { useCart } from '@/app/context/CartContext'
 import type { ApiOrder, ApiListing } from '@/types/api'
 
@@ -270,6 +270,10 @@ export default function ConfirmationClient({ orderNumber, isUpsell }: Props) {
   const [listing, setListing] = useState<ApiListing | null>(null)
   const [selectedSize, setSelectedSize] = useState<string>(UPSELL_CONFIG.sizes[2])
   const [showUpsell, setShowUpsell] = useState(isUpsell)
+  // The upsell listing is hardcoded. GET /listings/{id} is gated now: it 404s once the product
+  // is suspended/rejected or the availability window closes. Merchandising an unbuyable item on
+  // the confirmation page is worse than showing nothing, so a 404 hides the block entirely.
+  const [upsellUnavailable, setUpsellUnavailable] = useState(false)
 
   const hasTriggered = useRef(false)
   useEffect(() => {
@@ -287,11 +291,16 @@ export default function ConfirmationClient({ orderNumber, isUpsell }: Props) {
   }, [orderNumber])
 
   useEffect(() => {
-    if (!showUpsell) return
-    fetcher<ApiListing>(`/listings/${UPSELL_CONFIG.listingId}`)
-      .then(setListing)
-      .catch(() => {})
-  }, [showUpsell])
+    if (!showUpsell && !isUpsell) return
+    listingApi
+      .getById(UPSELL_CONFIG.listingId)
+      .then((l) => { setListing(l); setUpsellUnavailable(false) })
+      .catch((err) => {
+        // 404 = gated or gone → hide the offer. Anything else (network, 5xx) is transient, so
+        // keep the block and let the fallback price stand.
+        if (err instanceof FetchError && err.status === 404) setUpsellUnavailable(true)
+      })
+  }, [showUpsell, isUpsell])
 
   const originalPrice = listing?.price ?? UPSELL_CONFIG.fallbackOriginalPrice
   const discountedPreviewPrice = Math.round(originalPrice * 0.9 * 100) / 100
@@ -313,7 +322,7 @@ export default function ConfirmationClient({ orderNumber, isUpsell }: Props) {
   }
 
   // ── CASE 3: ?upsell=true — full product detail + compact thank-you below ────
-  if (isUpsell) {
+  if (isUpsell && !upsellUnavailable) {
     return (
       <>
         <Navbar />
@@ -439,7 +448,7 @@ export default function ConfirmationClient({ orderNumber, isUpsell }: Props) {
   }
 
   // ── CASE 2: 20% trigger — compact header + countdown + product card ──────────
-  if (showUpsell) {
+  if (showUpsell && !upsellUnavailable) {
     return (
       <>
         <Navbar />

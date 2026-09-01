@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useCart } from '@/app/context/CartContext'
 import Image from 'next/image'
 import Link from 'next/link'
-import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_COST } from '../constants'
+import { STANDARD_SHIPPING_COST } from '../constants'
 
 /* ─────────────────────────────────────────────────────────────────
    CSS from design_handoff_cart/cart/cart.css — embedded so it loads
@@ -76,32 +76,6 @@ const css = `
 }
 .enu-cart-close:hover { color: #0A0A0A; transform: rotate(90deg); }
 
-/* Free-shipping bar */
-.enu-ship {
-  flex: none; padding: 18px 30px 20px; background: #F5F5F0;
-  border-bottom: 1px solid var(--hair-c);
-}
-.enu-ship-row {
-  display: flex; align-items: baseline; justify-content: space-between;
-  gap: 14px; margin-bottom: 11px;
-}
-.enu-ship-msg {
-  font-size: 11px; letter-spacing: 0.13em; text-transform: uppercase; line-height: 1.5;
-  color: #0A0A0A;
-}
-.enu-ship-msg.is-done { color: var(--ship); }
-.enu-ship-msg .enu-amt { color: #0A0A0A; font-weight: 500; }
-.enu-ship-meta {
-  font-size: 11px; letter-spacing: 0.06em; color: var(--muted);
-  font-variant-numeric: tabular-nums; white-space: nowrap;
-}
-.enu-ship-track {
-  position: relative; height: 2px; background: var(--hair-c); overflow: hidden;
-}
-.enu-ship-fill {
-  position: absolute; inset: 0 auto 0 0; width: var(--pct, 0%);
-  background: var(--ship); transition: width 900ms var(--ease);
-}
 
 /* Item list */
 .enu-cart-body {
@@ -450,10 +424,8 @@ export default function CartSidebar() {
   const [activeTab, setActiveTab] = useState<'cart' | 'wish'>('cart')
   const [removingId, setRemovingId] = useState<string | null>(null)
 
-  const freeShip = totalPrice >= FREE_SHIPPING_THRESHOLD
-  const shipping  = freeShip ? 0 : STANDARD_SHIPPING_COST
-  const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - totalPrice)
-  const pct       = Math.min(100, (totalPrice / FREE_SHIPPING_THRESHOLD) * 100)
+  // Estimate only — the backend prices shipping per brand and confirms it at checkout.
+  const shipping  = STANDARD_SHIPPING_COST
   const total     = totalPrice + shipping
 
   function handleRemove(id: string) {
@@ -565,11 +537,8 @@ export default function CartSidebar() {
                 <span className="enu-val">{fmt(totalPrice)}</span>
               </div>
               <div className="enu-sum-row">
-                <span className="enu-lbl">Versand</span>
-                {freeShip
-                  ? <span className="enu-val free">Kostenlos</span>
-                  : <span className="enu-val">{fmt(shipping)}</span>
-                }
+                <span className="enu-lbl">Versand (geschätzt)</span>
+                <span className="enu-val">{fmt(shipping)}</span>
               </div>
             </div>
             <div className="enu-sum-total">

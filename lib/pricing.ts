@@ -3,12 +3,17 @@
 // only live discount code (UPSELL10) is auto-attached and the backend is the source of truth
 // for money. Keep this free of React / side effects.
 
-export const FREE_SHIPPING_THRESHOLD = 50
 export const STANDARD_SHIPPING = 4.99
 
-/** Free shipping at or above the threshold, otherwise the flat standard rate. */
-export function calcShipping(subtotal: number): number {
-  return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING
+/**
+ * Pre-address placeholder only. The backend prices shipping per brand
+ * (GLOBAL_DEFAULT / BRAND_FLAT_RATE / BRAND_FREE_SHIPPING) and POST /orders/preview is the
+ * authoritative answer the moment an address exists — this is what the summary shows before
+ * then. There is deliberately no order-value free-shipping threshold: the backend has no such
+ * rule, and promising one the checkout will not honour is worse than a flat estimate.
+ */
+export function calcShipping(_subtotal: number): number {
+  return STANDARD_SHIPPING
 }
 
 /**

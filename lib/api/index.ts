@@ -7,6 +7,8 @@ export { addressApi } from './modules/addressApi';
 export type { UserAddressDto } from './modules/addressApi';
 export { productApi } from './modules/productApi';
 export type { ProductSearchParams } from './modules/productApi';
+export { listingApi } from './modules/listingApi';
+export type { ListingSearchParams } from './modules/listingApi';
 export { orderApi } from './modules/orderApi';
 export type {
   CreateOrderDto, ShippingAddressDto, OrderPreviewResponseDto, OrderPreviewItem,
