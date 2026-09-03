@@ -3,6 +3,7 @@
 import { useState, useEffect, Fragment } from 'react'
 import { brandApi } from '@/lib/api/modules/brandApi'
 import { FetchError } from '@/lib/api'
+import { errorRemedies, type ErrorRemedy } from '@/lib/api/errorCopy'
 import type { CreateProductDto, CreateProductVariantDto, CreateListingDto, UpdateListingDto } from '@/lib/api/modules/brandApi'
 import type { AdminApiProduct, AdminApiVariant, ApiListing, ApiProductImage, PriceInputMode } from '@/types/api'
 import {
@@ -438,7 +439,15 @@ function VariantsPanel({
 }
 
 // ─── Images section ────────────────────────────────────────────────────────────
-function ImagesSection({ product }: { product: AdminApiProduct }) {
+function ImagesSection({
+  product,
+  onImagesChanged,
+}: {
+  product: AdminApiProduct
+  /** Keeps the product list's row thumbnail in sync — it used to show the empty placeholder
+   *  until the brand hit "Aktualisieren", which read as a failed upload. */
+  onImagesChanged?: (imageUrls: string[]) => void
+}) {
   const [images, setImages]     = useState<ApiProductImage[]>([])
   const [loading, setLoading]   = useState(true)
   const [uploadErr, setUploadErr] = useState<string | null>(null)
@@ -451,11 +460,16 @@ function ImagesSection({ product }: { product: AdminApiProduct }) {
       .finally(() => setLoading(false))
   }, [product.id])
 
+  function publish(next: ApiProductImage[]) {
+    setImages(next)
+    onImagesChanged?.(next.map(i => i.imageUrl))
+  }
+
   async function registerUpload(key: string) {
     setUploadErr(null)
     try {
       const created = await brandApi.images.add(product.id, key)
-      setImages(prev => [...prev, created])
+      publish([...images, created])
     } catch {
       setUploadErr('Bild konnte nicht gespeichert werden.')
     }
@@ -465,7 +479,7 @@ function ImagesSection({ product }: { product: AdminApiProduct }) {
     setDeleting(imageId)
     try {
       await brandApi.images.delete(product.id, imageId)
-      setImages(prev => prev.filter(i => i.id !== imageId))
+      publish(images.filter(i => i.id !== imageId))
     } catch { /* silent */ }
     finally { setDeleting(null) }
   }
@@ -504,6 +518,163 @@ function ImagesSection({ product }: { product: AdminApiProduct }) {
             {uploadErr && <p className="text-[11px] text-[#8B1E3F] mt-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>{uploadErr}</p>}
           </>
         )}
+      </div>
+    </SectionCard>
+  )
+}
+
+// ─── Complete the look ────────────────────────────────────────────────────────
+// The PDP already renders a curated "Vervollständige den Look" row and prefers it over its
+// category-query fallback (app/(root)/bekleidung/[brand]/[slug]/page.tsx). Until now nothing in
+// the portal could actually curate one — the create wizard hardcoded the flag off and sent an
+// empty id list — so every product fell back to "same category" suggestions.
+const MAX_LOOK_PRODUCTS = 4
+
+// /products/my returns `images` as ProductImageResponseDto objects, while locally-updated state
+// (see ImagesSection.onImagesChanged) holds plain URL strings. Tolerate both.
+function coverImageUrl(p: AdminApiProduct): string | null {
+  const first = p.images?.[0]
+  if (!first) return null
+  return typeof first === 'string' ? first : (first as { imageUrl?: string }).imageUrl ?? null
+}
+
+function CompleteTheLookSection({
+  product,
+  onSaved,
+}: {
+  product: AdminApiProduct
+  onSaved: (p: AdminApiProduct) => void
+}) {
+  const [candidates, setCandidates] = useState<AdminApiProduct[]>([])
+  const [loading, setLoading]       = useState(true)
+  const [enabled, setEnabled]       = useState<boolean>(product.completeTheLookEnabled ?? false)
+  const [selected, setSelected]     = useState<string[]>(
+    (product.completeTheLookProducts ?? []).map(p => String(p.id)),
+  )
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved]   = useState(false)
+  const [err, setErr]       = useState<string | null>(null)
+  const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    brandApi.products.getMy()
+      .then(all => setCandidates(all.filter(p => p.id !== product.id)))
+      .catch(() => setCandidates([]))
+      .finally(() => setLoading(false))
+  }, [product.id])
+
+  function toggle(id: string) {
+    setSaved(false)
+    setSelected(prev => {
+      if (prev.includes(id)) return prev.filter(x => x !== id)
+      if (prev.length >= MAX_LOOK_PRODUCTS) return prev
+      return [...prev, id]
+    })
+  }
+
+  async function save() {
+    setSaving(true); setErr(null)
+    try {
+      const updated = await brandApi.products.update(product.id, {
+        completeTheLookEnabled: enabled,
+        completeTheLookProductIds: enabled ? selected : [],
+      })
+      onSaved(updated)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
+    } catch (e) {
+      setErr(e instanceof FetchError ? e.message : 'Look konnte nicht gespeichert werden.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const visible = candidates.filter(c =>
+    !search.trim() || c.name.toLowerCase().includes(search.trim().toLowerCase()),
+  )
+
+  return (
+    <SectionCard title="Vervollständige den Look">
+      <div className="p-6 space-y-4">
+        <p className="text-[12px] text-[#6B6B6B] leading-relaxed" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+          Wähle bis zu {MAX_LOOK_PRODUCTS} Produkte, die zu diesem Produkt passen. Sie erscheinen auf der
+          Produktseite unter „Vervollständige den Look“. Ohne Auswahl zeigt die Seite automatisch
+          Produkte aus derselben Kategorie.
+        </p>
+
+        <label className="flex items-center gap-2.5 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={e => { setEnabled(e.target.checked); setSaved(false) }}
+            className="w-3.5 h-3.5 accent-[#370E4D] cursor-pointer"
+          />
+          <span className="text-[12px] text-[#0A0A0A]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+            Eigenen Look für dieses Produkt kuratieren
+          </span>
+        </label>
+
+        {enabled && (
+          loading ? <Loader /> : candidates.length === 0 ? (
+            <EmptyState message="Noch keine weiteren Produkte vorhanden — lege zuerst ein zweites Produkt an." />
+          ) : (
+            <>
+              <input
+                className={INPUT}
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Produkte durchsuchen…"
+                style={{ fontFamily: 'var(--font-league-spartan)' }}
+              />
+              <p className="text-[10px] uppercase tracking-[0.15em] text-[#9B9B9B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                {selected.length}/{MAX_LOOK_PRODUCTS} gewählt
+              </p>
+              <div className="grid grid-cols-4 gap-3">
+                {visible.map(c => {
+                  const isSelected = selected.includes(c.id)
+                  const atMax = !isSelected && selected.length >= MAX_LOOK_PRODUCTS
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => toggle(c.id)}
+                      disabled={atMax}
+                      className="text-left group disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <div
+                        className="relative aspect-[3/4] bg-[#F5F5F0] overflow-hidden border transition-colors duration-200"
+                        style={{ borderColor: isSelected ? '#370E4D' : '#E8E8E8' }}
+                      >
+                        {coverImageUrl(c)
+                          ? <img src={coverImageUrl(c)!} alt="" className="w-full h-full object-cover" />
+                          : <div className="w-full h-full flex items-center justify-center text-[9px] tracking-[0.15em] text-[#C0C0BC]">LEER</div>}
+                        {isSelected && (
+                          <span className="absolute top-1.5 right-1.5 w-5 h-5 flex items-center justify-center" style={{ background: '#370E4D' }}>
+                            <Check className="w-3 h-3 text-white" />
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1.5 text-[11px] text-[#2D2D2D] leading-tight line-clamp-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                        {c.name}
+                      </p>
+                    </button>
+                  )
+                })}
+              </div>
+            </>
+          )
+        )}
+
+        {err && <p className="text-[11px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>{err}</p>}
+
+        <button
+          onClick={save}
+          disabled={saving}
+          className={BTN_PRIMARY}
+          style={{ background: '#370E4D', fontFamily: 'var(--font-league-spartan)' }}
+        >
+          {saving ? 'Speichert…' : saved ? <><Check className="w-3.5 h-3.5" /> Gespeichert</> : 'Look speichern'}
+        </button>
       </div>
     </SectionCard>
   )
@@ -886,10 +1057,12 @@ function EditPanel({
   product,
   onBack,
   onSaved,
+  onImagesChanged,
 }: {
   product: AdminApiProduct
   onBack: () => void
   onSaved: (p: AdminApiProduct) => void
+  onImagesChanged?: (imageUrls: string[]) => void
 }) {
   const [form, setForm] = useState({
     name:             product.name,
@@ -946,7 +1119,7 @@ function EditPanel({
         </div>
       </div>
 
-      <ImagesSection product={product} />
+      <ImagesSection product={product} onImagesChanged={onImagesChanged} />
 
       <SectionCard title="Produktdetails">
         <div className="p-6 space-y-4">
@@ -994,6 +1167,8 @@ function EditPanel({
       </SectionCard>
 
       <ListingsSection product={product} />
+
+      <CompleteTheLookSection product={product} onSaved={onSaved} />
     </div>
   )
 }
@@ -1643,8 +1818,12 @@ export default function Products() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [deleting, setDeleting]     = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
-  const [deleteError, setDeleteError] = useState<{ id: string; message: string } | null>(null)
+  // `remedies` comes from the backend error code, not from the message — it decides which ways
+  // out are actually offered, so the UI never suggests a step the backend has already ruled out.
+  const [deleteError, setDeleteError] =
+    useState<{ id: string; message: string; remedies: ErrorRemedy[] } | null>(null)
   const [archiving, setArchiving] = useState<string | null>(null)
+  const [clearingListings, setClearingListings] = useState<string | null>(null)
   // productId → Brutto-Preise der Listings (ProductResponseDto trägt keinen Preis;
   // Preise leben auf Listings — niemals € 0,00 anzeigen)
   const [priceMap, setPriceMap] = useState<Record<string, number[]>>({})
@@ -1702,15 +1881,40 @@ export default function Products() {
       setProducts(prev => prev.filter(p => p.id !== id))
       setConfirmDelete(null)
     } catch (err) {
-      // The backend checks up front now and explains itself: which product, why it is blocked,
-      // and that archiving is the way out. That is better copy than anything generic, so it is
-      // shown verbatim.
+      // Branch on the stable `code`, never on the message — that text is English human copy and
+      // is reworded over time. An error with no code, or one we don't recognise yet, simply
+      // offers no remedy rather than guessing at one.
       setDeleteError({
         id,
         message: err instanceof FetchError ? err.message : 'Produkt konnte nicht gelöscht werden.',
+        remedies: err instanceof FetchError ? errorRemedies(err.code) : [],
       })
     } finally {
       setDeleting(null)
+    }
+  }
+
+  // PRODUCT_HAS_LISTINGS is the one recoverable delete failure: clear the listings, then retry
+  // the delete in the same click so the brand doesn't have to walk into the detail view.
+  async function clearListingsAndRetryDelete(id: string) {
+    setClearingListings(id)
+    setDeleteError(null)
+    try {
+      const listings = await brandApi.listings.list(id)
+      for (const l of listings) {
+        await brandApi.listings.delete(id, String(l.id))
+      }
+      await brandApi.products.delete(id)
+      setProducts(prev => prev.filter(p => p.id !== id))
+      setConfirmDelete(null)
+    } catch (err) {
+      setDeleteError({
+        id,
+        message: err instanceof FetchError ? err.message : 'Produkt konnte nicht gelöscht werden.',
+        remedies: err instanceof FetchError ? errorRemedies(err.code) : [],
+      })
+    } finally {
+      setClearingListings(null)
     }
   }
 
@@ -1725,6 +1929,7 @@ export default function Products() {
       setDeleteError({
         id,
         message: err instanceof FetchError ? err.message : 'Produkt konnte nicht archiviert werden.',
+        remedies: err instanceof FetchError ? errorRemedies(err.code) : [],
       })
     } finally {
       setArchiving(null)
@@ -1763,6 +1968,10 @@ export default function Products() {
         onSaved={(updated) => {
           setProducts(prev => prev.map(p => p.id === updated.id ? updated : p))
           setSelected(updated)
+        }}
+        onImagesChanged={(imageUrls) => {
+          setProducts(prev => prev.map(p => p.id === selected.id ? { ...p, images: imageUrls } : p))
+          setSelected(prev => prev ? { ...prev, images: imageUrls } : prev)
         }}
       />
     )
@@ -1876,7 +2085,17 @@ export default function Products() {
                               >
                                 {deleting === p.id ? '…' : 'Löschen bestätigen'}
                               </button>
-                              {deleteError?.id === p.id && (
+                              {deleteError?.id === p.id && deleteError.remedies.includes('delete-listings') && (
+                                <button
+                                  onClick={() => clearListingsAndRetryDelete(p.id)}
+                                  disabled={clearingListings === p.id}
+                                  className="h-7 px-2.5 rounded-none border border-[#E8E8E8] text-[11px] text-[#6B6B6B] hover:border-[#370E4D]/40 hover:text-[#370E4D] transition-all duration-150"
+                                  style={{ fontFamily: 'var(--font-league-spartan)' }}
+                                >
+                                  {clearingListings === p.id ? '…' : 'Listings löschen & erneut versuchen'}
+                                </button>
+                              )}
+                              {deleteError?.id === p.id && deleteError.remedies.includes('archive') && (
                                 <button
                                   onClick={() => archiveProduct(p.id)}
                                   disabled={archiving === p.id}

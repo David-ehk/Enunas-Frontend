@@ -7,6 +7,8 @@ export interface ProductCardShape {
   brandName: string;
   productName: string;
   price: string;
+  /** Pre-formatted pre-discount price; null when not reduced. Non-null is the "on sale" flag. */
+  originalPrice?: string | null;
   href: string;
   colours: { hex: string; name: string; colorFamily?: string }[];
   createdAt: Date | string;
@@ -29,6 +31,8 @@ export function apiProductToCardShape(p: ApiProduct): ProductCardShape {
     brandName: p.brandName,
     productName: p.name,
     price: `${p.price.toFixed(2).replace('.', ',')}€`,
+    originalPrice:
+      p.originalPrice != null ? `${p.originalPrice.toFixed(2).replace('.', ',')}€` : null,
     href: `/bekleidung/${brandSlug}/${p.slug}`,
     colours: p.colours.map(c => ({ hex: c.hex, name: c.name, colorFamily: c.colorFamily })),
     createdAt: p.createdAt,

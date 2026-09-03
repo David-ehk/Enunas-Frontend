@@ -47,6 +47,8 @@ interface PopularProductCardProps {
   productName: string;
   /** null when the product has no active listing — the card then omits the price line. */
   price: string | null;
+  /** Pre-formatted pre-discount price. Non-null is itself the "on sale" signal. */
+  originalPrice?: string | null;
   href: string;
   colours: ProductColour[];
   createdAt: Date | string;
@@ -68,6 +70,7 @@ const PopularProductCard = ({
   brandName,
   productName,
   price,
+  originalPrice,
   href,
   colours,
   createdAt,
@@ -215,10 +218,22 @@ const PopularProductCard = ({
                 )}
               </div>
 
-              {/* Price */}
+              {/* Price — a non-null originalPrice means this product is reduced. */}
               {price !== null && (
-                <p className="text-sm font-light text-enunas-black">
+                <p className={`text-sm font-light flex items-baseline gap-2 ${originalPrice ? 'text-enunas-error' : 'text-enunas-black'}`}>
                   {price}
+                  {originalPrice && (
+                    <span
+                      className="text-enunas-gray-dark"
+                      style={{
+                        textDecorationLine: 'line-through',
+                        textDecorationColor: '#8B1E3F',
+                        textDecorationThickness: '1.5px',
+                      }}
+                    >
+                      {originalPrice}
+                    </span>
+                  )}
                 </p>
               )}
             </div>

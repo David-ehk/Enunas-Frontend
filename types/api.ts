@@ -148,6 +148,8 @@ export interface ApiCompleteTheLookItem {
   brandName?: string;
   slug?: string;
   price: number | null;
+  /** Pre-discount price of the same listing `price` came from; null when not on sale. */
+  originalPrice?: number | null;
   images: string[];
 }
 
@@ -155,6 +157,12 @@ export interface ApiProduct {
   id: string;
   name: string;
   brandName: string;
+  /** Brand's collection for this product, e.g. "Herbst 2026". Null when unset. */
+  collectionName?: string | null;
+  /** Brand's story behind the product. Null when the brand wrote none — genuinely optional. */
+  inspirationStory?: string | null;
+  /** Brand-set release date. Null when unset. */
+  releaseDate?: string | null;
   sku: string;
   slug: string;
   description?: string;
@@ -181,6 +189,13 @@ export interface ApiProduct {
   details?: { material?: string; care?: string; origin?: string };
   /** Absent when the brand has not curated a look for this product. */
   completeTheLookProducts?: ApiCompleteTheLookItem[];
+  /** Whether the brand curates its own look for this product instead of the category fallback. */
+  completeTheLookEnabled?: boolean;
+  /**
+   * Pre-discount price, set only while a sale is running. `price` is always the effective one.
+   * Null whenever there is no markdown — see RawProductResponse.originalPrice for backend status.
+   */
+  originalPrice?: number | null;
 }
 
 // Mirrors backend OrderItemResponseDto.
@@ -471,6 +486,15 @@ export interface ApiListing {
   variantStockQuantity?: number;
   price: number;
   discountPrice?: number;
+  /**
+   * Server-computed price pair, added alongside price/discountPrice. `currentPrice` is what the
+   * customer pays and `originalPrice` is the strike-through — non-null is itself the "on sale"
+   * signal, exactly as on ProductResponseDto. Prefer these over re-deriving from
+   * price/discountPrice: the backend owns the rule (date windows, drop dates) and a client copy
+   * of it silently diverges. Optional so a stale/other-environment response still works.
+   */
+  currentPrice?: number;
+  originalPrice?: number | null;
   priceInputMode?: PriceInputMode;
   priceNet?: number;
   priceGross?: number;

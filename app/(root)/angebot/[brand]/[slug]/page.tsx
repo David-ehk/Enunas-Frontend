@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Lock } from 'lucide-react'
 import { resolveProductWithMeta } from '@/lib/api'
+import { resolvePromoPricing } from '@/lib/pricing'
 import CartFooter from '@/app/(root)/cart/components/CartFooter'
 
 const DISCOUNT_PCT = 10
@@ -62,8 +63,13 @@ export default function AngebotPage() {
       .catch(() => setLoading(false))
   }, [params.slug])
 
-  const originalPrice = product?.price ?? 0
-  const discountedPrice = originalPrice * (1 - DISCOUNT_PCT / 100)
+  // `product.price` is the effective price and can already be a markdown, so it must not be
+  // used as the strike-through figure nor as the base for the promo — see resolvePromoPricing.
+  const { promoPrice, listPrice, alreadyReduced } = resolvePromoPricing(
+    product?.price ?? 0,
+    product?.originalPrice,
+    DISCOUNT_PCT,
+  )
   const images = product?.images ?? []
   const sizes = product?.sizes ?? []
 
@@ -92,7 +98,12 @@ export default function AngebotPage() {
       return
     }
     setAdded(true)
-    localStorage.setItem('enunas_upsell_code', 'UPSELL10')
+    // UPSELL10 is applied by the backend against the cart subtotal, which for an already
+    // reduced product is the sale price — attaching it there would stack the promo on top of
+    // the markdown and charge less than either price the customer was shown.
+    if (!alreadyReduced) {
+      localStorage.setItem('enunas_upsell_code', 'UPSELL10')
+    }
     setTimeout(() => router.push('/checkout?upsell=true'), 800)
   }
 
@@ -217,10 +228,10 @@ export default function AngebotPage() {
                     className="font-cormorant font-light"
                     style={{ fontSize: 'clamp(30px, 5vw, 46px)', color: '#8B1E3F' }}
                   >
-                    {discountedPrice.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                    {promoPrice.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                   </span>
                   <span className="font-league-spartan text-lg text-enunas-gray-medium line-through">
-                    {originalPrice.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                    {listPrice.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                   </span>
                 </div>
                 <p className="font-league-spartan text-[10px] text-enunas-gray-medium tracking-[0.1em] uppercase">

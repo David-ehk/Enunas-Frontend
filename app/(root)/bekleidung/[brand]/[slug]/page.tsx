@@ -10,7 +10,7 @@ import { DEFAULT_RETURN_PERIOD_DAYS } from '@/lib/api/productResponseAdapter'
 // productApi used below for category/brand recommendations
 import { generateSlug } from '@/lib/product'
 import type { ApiProduct, ApiCompleteTheLookItem } from '@/types/api'
-import type { Product as PdpProduct, Variant } from './types/product'
+import type { Product as PdpProduct, Variant, Gender } from './types/product'
 import type { RecItem } from './components/ProductCard'
 
 interface ProductPageProps {
@@ -19,6 +19,12 @@ interface ProductPageProps {
     slug: string
   }>
 }
+
+const GENDERS: Gender[] = ['UNISEX', 'MEN', 'WOMEN']
+
+// toFixed(0) rendered 119,95 € as "€ 120" on every recommendation card.
+const priceFormatter = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' })
+const formatCardPrice = (value: number) => priceFormatter.format(value)
 
 function toNewProduct(p: ApiProduct): PdpProduct {
   // Prefer the real backend variants — they carry the true per-variant stockQuantity and SKU.
@@ -57,19 +63,22 @@ function toNewProduct(p: ApiProduct): PdpProduct {
     careInstructions: p.details?.care ?? null,
     catalogueCategory: (p.catalogue && p.catalogue.length > 0) ? p.catalogue : null,
     category: p.category,
-    collectionName: null,
+    collectionName: p.collectionName ?? null,
     createdAt: p.createdAt,
     creatorEmail: '',
     creatorId: 0,
     description: p.description ?? '',
-    gender: null,
+    // The adapter carries the backend's gender through (productResponseAdapter.ts) — this used to
+    // be hardcoded null, which silently blanked the badge and the "Geschlecht" spec row on every
+    // product no matter what the brand picked at creation.
+    gender: GENDERS.includes(p.gender as Gender) ? (p.gender as Gender) : null,
     id: parseInt(p.id) || 0,
     images: p.images ?? [],
-    inspirationStory: null,
+    inspirationStory: p.inspirationStory ?? null,
     material: p.details?.material ?? '',
     name: p.name,
     originCountry: p.details?.origin ?? '',
-    releaseDate: null,
+    releaseDate: p.releaseDate ?? null,
     returnPeriodDays: p.returnPeriodDays ?? DEFAULT_RETURN_PERIOD_DAYS,
     status: 'ACTIVE',
     updatedAt: p.createdAt,
@@ -82,21 +91,34 @@ function toRecItem(p: ApiProduct): RecItem {
   return {
     brand: p.brandName,
     name: p.name,
-    price: p.available ? `€ ${p.price.toFixed(0)}` : null,
+    price: p.available ? formatCardPrice(p.price) : null,
+    // On sale is exactly `originalPrice != null` — never a comparison against `price`.
+    originalPrice:
+      p.available && p.originalPrice != null ? formatCardPrice(p.originalPrice) : null,
     colors: (p.colours ?? []).map(c => c.hex),
     href: `/bekleidung/${generateSlug(p.brandName)}/${p.slug}`,
     image: p.images?.[0],
   }
 }
 
-function completeTheLookToRecItem(c: ApiCompleteTheLookItem): RecItem {
+// The curated payload carries no `slug` (verified live: it is `{brandName, id, image, name,
+// price}`), so the card used to link to '#'. The catalogue query on this page already holds every
+// product, so the slug is recovered by id instead of dead-ending the link.
+function completeTheLookToRecItem(
+  c: ApiCompleteTheLookItem,
+  slugById: Map<string, string>,
+): RecItem {
+  const slug = c.slug ?? slugById.get(String(c.id))
   return {
     brand: c.brandName ?? '',
     name: c.name,
     // null price = no active listing. The card renders without a price rather than "€ 0".
-    price: c.price != null ? `€ ${c.price.toFixed(0)}` : null,
+    price: c.price != null ? formatCardPrice(c.price) : null,
+    // The look payload carries the same sale pair as the product itself.
+    originalPrice:
+      c.price != null && c.originalPrice != null ? formatCardPrice(c.originalPrice) : null,
     colors: [],
-    href: c.slug && c.brandName ? `/bekleidung/${generateSlug(c.brandName)}/${c.slug}` : '#',
+    href: slug && c.brandName ? `/bekleidung/${generateSlug(c.brandName)}/${slug}` : '#',
     image: c.images?.[0],
   }
 }
@@ -126,9 +148,13 @@ async function ProductPage({ params }: ProductPageProps) {
 
   // The brand's own curated look wins when the backend supplies one; the category query is only
   // a fallback for products with nothing curated.
+  const slugById = new Map<string, string>(
+    allRes.content.map((p: ApiProduct) => [String(p.id), p.slug]),
+  )
+
   const curated = resolved.completeTheLookProducts ?? []
   const relatedItems: RecItem[] = curated.length > 0
-    ? curated.slice(0, 4).map(completeTheLookToRecItem)
+    ? curated.slice(0, 4).map(c => completeTheLookToRecItem(c, slugById))
     : categoryRes.content
         .filter((p: ApiProduct) => p.id !== resolved.id)
         .slice(0, 4)
@@ -154,6 +180,7 @@ async function ProductPage({ params }: ProductPageProps) {
       <ProductDetails
         product={product}
         price={resolved.price}
+        originalPrice={resolved.originalPrice ?? null}
         available={resolved.available}
         currency={resolved.currency ?? 'EUR'}
         brandSlug={brand}
@@ -161,7 +188,7 @@ async function ProductPage({ params }: ProductPageProps) {
         colorHexMap={colorHexMap}
         productId={resolved.id}
       />
-      <CompleteTheLook items={relatedItems} />
+      <CompleteTheLook items={relatedItems} heroImage={product.images[0]} />
       <MoreFromBrand brand={product.brandName} items={brandItems} />
       <SimilarProducts items={similarItems} />
       <CuratedRecommendations excludeId={resolved.id} />

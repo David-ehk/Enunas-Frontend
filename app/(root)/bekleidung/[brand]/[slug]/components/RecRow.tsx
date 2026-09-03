@@ -10,6 +10,8 @@ interface RecRowProps {
 }
 
 export default function RecRow({ title, titleAccent, items, allHref = '#' }: RecRowProps) {
+  if (!items || items.length === 0) return null;
+
   return (
     <section className="px-4 sm:px-8 lg:px-16 py-6 max-w-[1800px] mx-auto">
       <div className="flex justify-between items-baseline gap-4 mb-[18px] pb-3 border-b border-enunas-gray-light">

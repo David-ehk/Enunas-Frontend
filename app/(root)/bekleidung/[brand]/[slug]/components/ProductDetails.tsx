@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import ImageGallery from './ImageGallery'
 import BrandLink from './BrandLink'
-import GenderBadge from './GenderBadge'
+import GenderBadge, { GENDER_LABELS } from './GenderBadge'
 import InspirationStory from './InspirationStory'
 import ColorSelector from './ColorSelector'
 import SizeSelector from './SizeSelector'
@@ -19,11 +19,14 @@ import type { Color } from '@/lib/color'
 import { useCart } from '@/app/context/CartContext'
 import { useAuth } from '@/app/context/AuthContext'
 import { productApi } from '@/lib/api'
+import { listingPriceView } from '@/lib/pricing'
 import type { ApiListing } from '@/types/api'
 
 interface ProductDetailsProps {
   product: Product
   price: number
+  /** Pre-discount price from the product response. Non-null is itself the "on sale" signal. */
+  originalPrice?: number | null
   currency: string
   /** False when the product has no active listing — `price` is then a meaningless 0. */
   available: boolean
@@ -37,6 +40,7 @@ interface ProductDetailsProps {
 export default function ProductDetails({
   product,
   price,
+  originalPrice,
   currency,
   available,
   brandSlug,
@@ -56,7 +60,12 @@ export default function ProductDetails({
   const [showSizeModal, setShowSizeModal] = useState(false)
   const [openAccordion, setOpenAccordion] = useState<string | null>('details')
 
-  // Listings fetched client-side (endpoint requires auth token from localStorage).
+  // Listings tell us availability AND the price of the specific variant once one is picked.
+  // The pairing hazard is only in AGGREGATING across listings — the cheapest current price and
+  // the cheapest list price can come from different rows and produce a nonsense pair. Within a
+  // single listing there is no ambiguity: price and discountPrice are the same row. So the
+  // selected variant's own listing prices it, and the product-level price/originalPrice pair
+  // (the backend's cheapest sellable listing, i.e. the "ab" figure) covers everything else.
   const [listings, setListings] = useState<ApiListing[]>([])
   const [listingsLoading, setListingsLoading] = useState(false)
   const [listingsFailed, setListingsFailed] = useState(false)
@@ -66,14 +75,14 @@ export default function ProductDetails({
   const { addToCart, openCart } = useCart()
 
   useEffect(() => {
-    if (!isAuthenticated || !productId) return
+    if (!productId) return
     setListingsLoading(true)
     setListingsFailed(false)
     productApi.getListings(productId)
       .then(setListings)
       .catch(() => setListingsFailed(true))
       .finally(() => setListingsLoading(false))
-  }, [isAuthenticated, productId])
+  }, [productId])
 
   const selectedVariant = findVariant(product.variants, selectedColor?.name ?? null, selectedSize)
   // SKU shown as soon as a color is selected — not size-dependent
@@ -100,10 +109,30 @@ export default function ProductDetails({
     selectedSize !== null &&
     activeListing === null
 
+  const priceView = useMemo(() => {
+    // A variant is chosen: price it from its own listing row (see listingPriceView).
+    if (activeListing) return listingPriceView(activeListing)
+    // Otherwise the product-level pair, which the backend derives from the cheapest sellable
+    // listing — the "ab €X" figure.
+    return { current: price, original: originalPrice ?? null }
+  }, [activeListing, price, originalPrice])
+
+  const money = useMemo(
+    () => new Intl.NumberFormat('de-DE', { style: 'currency', currency }),
+    [currency],
+  )
+
   // Never render a null-priced product as 0,00 €.
-  const formattedPrice = available
-    ? new Intl.NumberFormat('de-DE', { style: 'currency', currency }).format(price)
-    : 'Preis nicht verfügbar'
+  const formattedPrice = available ? money.format(priceView.current) : 'Preis nicht verfügbar'
+  const formattedOriginalPrice =
+    available && priceView.original != null ? money.format(priceView.original) : null
+  // Percentage is presentation only — the sale itself is decided by `originalPrice != null`,
+  // never by comparing the two numbers.
+  const discountPct =
+    priceView.original != null && priceView.original > 0
+      ? Math.round((1 - priceView.current / priceView.original) * 100)
+      : 0
+  const hasDiscount = formattedOriginalPrice != null
 
   // Reset size when color changes if selected size no longer available for new color
   const handleColorSelect = (color: Color) => {
@@ -229,19 +258,46 @@ export default function ProductDetails({
             <InspirationStory text={product.inspirationStory} />
 
             {/* 5. Price */}
-            <div className="flex items-baseline gap-3 mb-10">
-              <span
-                className="text-enunas-black"
-                style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '22px', fontWeight: 300 }}
-              >
-                {formattedPrice}
-              </span>
-              <span
-                className="text-enunas-gray-medium"
-                style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '12px', letterSpacing: '0.02em' }}
-              >
-                inkl. MwSt. zzgl. Versand
-              </span>
+            <div className="flex flex-col items-center gap-2 mb-10">
+              <div className="flex items-baseline gap-3">
+                <span
+                  className={hasDiscount ? 'text-enunas-error' : 'text-enunas-black'}
+                  style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '22px', fontWeight: 300 }}
+                >
+                  {formattedPrice}
+                </span>
+                {formattedOriginalPrice && (
+                  <span
+                    className="text-enunas-gray-dark"
+                    style={{
+                      fontFamily: 'var(--font-league-spartan)',
+                      fontSize: '17px',
+                      fontWeight: 400,
+                      textDecorationLine: 'line-through',
+                      textDecorationColor: '#8B1E3F',
+                      textDecorationThickness: '1.5px',
+                    }}
+                  >
+                    {formattedOriginalPrice}
+                  </span>
+                )}
+                <span
+                  className="text-enunas-gray-medium"
+                  style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '12px', letterSpacing: '0.02em' }}
+                >
+                  inkl. MwSt.
+                </span>
+              </div>
+              {/* textIndent offsets the trailing letter-spacing after the last glyph, which
+                  would otherwise push the label off-centre inside the box. */}
+              {hasDiscount && discountPct > 0 && (
+                <span
+                  className="inline-flex items-center justify-center bg-enunas-error text-white px-3 py-1.5 leading-none uppercase"
+                  style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '10px', letterSpacing: '0.2em', textIndent: '0.2em' }}
+                >
+                  Reduziert −{discountPct} %
+                </span>
+              )}
             </div>
 
             {/* 6. Color + SKU */}
@@ -323,11 +379,15 @@ export default function ProductDetails({
                   {([
                     { k: 'Produktnummer',  v: selectedVariant?.sku ?? colorVariant?.sku ?? null, highlight: true },
                     { k: 'Farbe',          v: selectedColor?.name ?? null,     highlight: false },
-                    { k: 'Gewicht',        v: selectedVariant ? `${selectedVariant.weightGrams} g` : null, highlight: false },
                     { k: 'Material',       v: product.material || null,        highlight: false },
-                    { k: 'Geschlecht',     v: product.gender,                  highlight: false },
-                    { k: 'Kollektion',     v: product.collectionName,          highlight: false },
-                  ] as { k: string; v: string | null | undefined; highlight: boolean }[]).map(({ k, v, highlight }) => (
+                    { k: 'Geschlecht',     v: product.gender ? GENDER_LABELS[product.gender] : null, highlight: false },
+                    // Optional rows sit last and disappear entirely when unset, rather than
+                    // showing an em dash. Gewicht is the least useful of the two, so it trails.
+                    { k: 'Kollektion',     v: product.collectionName,          highlight: false, optional: true },
+                    { k: 'Gewicht',        v: selectedVariant?.weightGrams ? `${selectedVariant.weightGrams} g` : null, highlight: false, optional: true },
+                  ] as { k: string; v: string | null | undefined; highlight: boolean; optional?: boolean }[])
+                    .filter(({ v, optional }) => !optional || !!v)
+                    .map(({ k, v, highlight }) => (
                     <div
                       key={k}
                       className="flex gap-4 py-1.5 border-b border-dashed border-enunas-gray-light last:border-0"

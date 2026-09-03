@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { germanErrorMessage } from './errorCopy'
+import { germanErrorMessage, errorRemedies } from './errorCopy'
 
 describe('germanErrorMessage', () => {
   it('translates infra statuses instead of echoing the English backend string', () => {
@@ -25,6 +25,30 @@ describe('germanErrorMessage', () => {
   it('gives 5xx a single German message', () => {
     expect(germanErrorMessage(500, 'An unexpected error occurred')).toMatch(/Serverfehler/)
     expect(germanErrorMessage(503, null)).toMatch(/Serverfehler/)
+  })
+
+  it('prefers a known code over both the status copy and the English message', () => {
+    expect(germanErrorMessage(409, 'Product 41 still has listings.', 'PRODUCT_HAS_LISTINGS'))
+      .toMatch(/Listings/)
+    expect(germanErrorMessage(409, 'Product 41 has been ordered.', 'PRODUCT_HAS_ORDERS'))
+      .toMatch(/bereits bestellt/)
+    expect(germanErrorMessage(409, 'Referenced elsewhere.', 'PRODUCT_REFERENCED'))
+      .toMatch(/Support/)
+  })
+
+  it('treats an unknown code as a generic failure rather than echoing the message', () => {
+    const msg = 'Product 41 exploded in a novel way'
+    expect(germanErrorMessage(409, msg, 'PRODUCT_SOMETHING_NEW')).not.toBe(msg)
+    expect(germanErrorMessage(409, msg, 'PRODUCT_SOMETHING_NEW')).toBe('Ein Fehler ist aufgetreten.')
+  })
+
+  it('offers only the remedies the code actually allows', () => {
+    expect(errorRemedies('PRODUCT_HAS_LISTINGS')).toEqual(['delete-listings', 'archive'])
+    // Ordered products can never be deleted, so the listings remedy must not be offered.
+    expect(errorRemedies('PRODUCT_HAS_ORDERS')).toEqual(['archive'])
+    expect(errorRemedies('PRODUCT_REFERENCED')).toEqual(['support'])
+    expect(errorRemedies('PRODUCT_SOMETHING_NEW')).toEqual([])
+    expect(errorRemedies(undefined)).toEqual([])
   })
 
   it('falls back to generic German when the body carried no message', () => {

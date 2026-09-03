@@ -151,11 +151,20 @@ export default function RegisterPage() {
             Bitte prüfen Sie Ihr E-Mail-Postfach und bestätigen Sie Ihre Adresse. Nach der Prüfung durch unser Team erhalten Sie Zugang zum Brand Portal.
           </p>
           <Link
-            href="/dashboard/login"
-            style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, letterSpacing: '0.08em', color: '#370E4D', textDecoration: 'underline' }}
+            href={`/dashboard/verify?email=${encodeURIComponent(form.email.trim())}`}
+            className="block w-full bg-[#370E4D] hover:bg-[#250838] transition-colors duration-300"
+            style={{ padding: '15px 32px', fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: 18, fontWeight: 400, letterSpacing: '0.06em', color: 'white' }}
           >
-            Zum Login
+            Code eingeben
           </Link>
+          <div className="mt-5">
+            <Link
+              href="/dashboard/login"
+              style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, letterSpacing: '0.08em', color: '#9B9B9B', textDecoration: 'underline' }}
+            >
+              Zum Login
+            </Link>
+          </div>
         </div>
       </div>
     )

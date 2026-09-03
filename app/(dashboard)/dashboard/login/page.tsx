@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { authApi } from '@/lib/api'
+import { authApi, FetchError } from '@/lib/api'
 import { useAuth } from '@/app/context/AuthContext'
 import type { UserRole } from '@/types/api'
 
@@ -15,11 +15,13 @@ export default function DashboardLoginPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [needsVerification, setNeedsVerification] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setNeedsVerification(false)
     setLoading(true)
     try {
       // 1. POST /auth/login — stores JWT in localStorage via setToken()
@@ -32,8 +34,23 @@ export default function DashboardLoginPage() {
       if (role === 'ADMIN') router.replace('/dashboard/admin')
       else if (role === 'BRAND_PARTNER') router.replace('/dashboard/vendor')
       else router.replace('/account')
-    } catch {
-      setError('E-Mail oder Passwort ist falsch.')
+    } catch (err: unknown) {
+      // The backend answers a *correct* password with 409 when the account is not yet usable —
+      // either the email is unverified or an admin has not approved the brand yet. Both used to
+      // surface as "wrong password", which sends the brand partner looking in the wrong place.
+      if (err instanceof FetchError && err.status === 409) {
+        const serverMessage = err.serverMessage ?? ''
+        if (/verify/i.test(serverMessage)) {
+          setNeedsVerification(true)
+          setError('Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.')
+        } else if (/approval|approve/i.test(serverMessage)) {
+          setError('Ihr Konto wartet noch auf die Freigabe durch unser Team. Sie erhalten eine E-Mail, sobald es soweit ist.')
+        } else {
+          setError(err.message)
+        }
+      } else {
+        setError('E-Mail oder Passwort ist falsch.')
+      }
     } finally {
       setLoading(false)
     }
@@ -161,6 +178,21 @@ export default function DashboardLoginPage() {
             >
               {error}
             </p>
+          )}
+
+          {needsVerification && (
+            <Link
+              href={`/dashboard/verify?email=${encodeURIComponent(email.trim())}`}
+              style={{
+                fontFamily: 'var(--font-league-spartan)',
+                fontSize: '11px',
+                letterSpacing: '0.06em',
+                color: '#370E4D',
+                textDecoration: 'underline',
+              }}
+            >
+              Jetzt Code eingeben
+            </Link>
           )}
 
           {/* Submit */}

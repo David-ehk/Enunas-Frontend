@@ -27,6 +27,38 @@ function raw(overrides: Partial<RawProductResponse> = {}): RawProductResponse {
 }
 
 describe('adaptProduct', () => {
+  it('carries collectionName through and treats the empty string as unset', () => {
+    expect(adaptProduct(raw({ collectionName: 'Herbst 2026' })).collectionName).toBe('Herbst 2026')
+    expect(adaptProduct(raw({ collectionName: '' })).collectionName).toBeNull()
+    expect(adaptProduct(raw()).collectionName).toBeNull()
+  })
+
+  it('treats a non-null originalPrice as the sale signal without comparing it to price', () => {
+    expect(adaptProduct(raw({ price: 119.95, originalPrice: 149.95 })).originalPrice).toBe(149.95)
+    expect(adaptProduct(raw({ price: 89.95, originalPrice: null })).originalPrice).toBeNull()
+    expect(adaptProduct(raw({ price: 89.95 })).originalPrice).toBeNull()
+  })
+
+  it('keeps an originalPrice the backend reports at or below price', () => {
+    // The pair always comes from one listing, so the backend is the authority on what counts as
+    // a markdown. Second-guessing it here would silently drop a legitimate sale.
+    expect(adaptProduct(raw({ price: 50, originalPrice: 50 })).originalPrice).toBe(50)
+    expect(adaptProduct(raw({ price: 50, originalPrice: 40 })).originalPrice).toBe(40)
+  })
+
+  it('carries the sale pair onto complete-the-look items', () => {
+    const out = adaptProduct(raw({
+      completeTheLookProducts: [
+        { id: 8, name: 'Cargo Pant', price: 99.95, originalPrice: 129.95, image: 'p.jpg' },
+        { id: 9, name: 'Tee', price: 29.95, image: 't.jpg' },
+        { id: 10, name: 'Unsellable', price: null, image: 'u.jpg' },
+      ],
+    }))
+    expect(out.completeTheLookProducts?.[0].originalPrice).toBe(129.95)
+    expect(out.completeTheLookProducts?.[1].originalPrice).toBeNull()
+    expect(out.completeTheLookProducts?.[2].price).toBeNull()
+  })
+
   it('flattens distinct colours by name in first-seen order with hex mapping', () => {
     const p = adaptProduct(raw())
     expect(p.colours.map(c => c.name)).toEqual(['Blue', 'Black'])

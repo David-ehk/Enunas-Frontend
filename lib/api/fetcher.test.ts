@@ -30,6 +30,35 @@ describe('fetcher error envelope', () => {
     vi.stubEnv('NEXT_PUBLIC_API_URL', 'https://api.test')
   })
 
+  it('exposes a backend error code and path, and leaves code undefined when absent', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(
+      JSON.stringify({
+        timestamp: 't', status: 409, error: 'Conflict',
+        code: 'PRODUCT_HAS_ORDERS',
+        message: 'Product 41 has been ordered', path: '/products/delete/41',
+      }),
+      { status: 409 },
+    )))
+    const err = await fetcher('/products/delete/41', { auth: false }).catch((e) => e)
+    expect(err.code).toBe('PRODUCT_HAS_ORDERS')
+    expect(err.path).toBe('/products/delete/41')
+    expect(err.serverMessage).toBe('Product 41 has been ordered')
+    expect(err.message).toMatch(/bereits bestellt/)
+
+    // An error without a code keeps falling back to the message.
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(
+      JSON.stringify({
+        timestamp: 't', status: 404, error: 'Not Found',
+        message: 'No product found with slug: nope', path: '/products/slug/nope',
+      }),
+      { status: 404 },
+    )))
+    const plain = await fetcher('/products/slug/nope', { auth: false }).catch((e) => e)
+    expect(plain.code).toBeUndefined()
+    expect(plain.path).toBe('/products/slug/nope')
+    expect(plain.message).toBe('No product found with slug: nope')
+  })
+
   it('translates a 403 and keeps the English string for logs', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(
       JSON.stringify({ timestamp: 't', status: 403, error: 'Forbidden', message: 'Access denied', path: '/admin/orders' }),

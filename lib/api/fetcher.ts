@@ -21,6 +21,12 @@ export function getBaseUrl(): string {
 
 export interface FetchOptions extends RequestInit {
   auth?: boolean;
+  /**
+   * How to read a successful body. Defaults to 'json'. A handful of backend routes are declared
+   * as `String` in Spring and answer with bare text/plain ("Email verified. Awaiting admin
+   * approval.") — res.json() throws on those, so they opt into 'text'.
+   */
+  parse?: 'json' | 'text';
 }
 
 export class FetchError extends Error {
@@ -29,6 +35,15 @@ export class FetchError extends Error {
     message: string,
     /** The untranslated backend string. English — for logs and debugging, never for the UI. */
     public readonly serverMessage?: string,
+    /**
+     * Stable machine-readable failure identifier. Branch on THIS, never on `serverMessage` —
+     * that string is human copy and gets reworded. Undefined when the backend error carries no
+     * code (the field is absent, not null), in which case `serverMessage` is the fallback.
+     * An unrecognised code is a generic failure: the set grows over time.
+     */
+    public readonly code?: string,
+    /** Request path the backend echoed back, for logs. */
+    public readonly path?: string,
   ) {
     super(message);
     this.name = 'FetchError';
@@ -42,7 +57,7 @@ export function setOnUnauthorized(cb: () => void): void {
 }
 
 export async function fetcher<T>(path: string, options: FetchOptions = {}): Promise<T> {
-  const { auth = true, headers: extraHeaders, ...rest } = options;
+  const { auth = true, parse = 'json', headers: extraHeaders, ...rest } = options;
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
   if (extraHeaders) {
@@ -72,19 +87,33 @@ export async function fetcher<T>(path: string, options: FetchOptions = {}): Prom
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    // Every backend error path now returns {timestamp, status, error, message, path} with a
-    // guaranteed message. A non-JSON body means something upstream of the app answered
-    // (proxy, gateway) — keep the raw text as the log string only.
+    // Every backend error path returns {timestamp, status, error, message, path}, plus a `code`
+    // on the failures that have one. A non-JSON body means something upstream of the app
+    // answered (proxy, gateway) — keep the raw text as the log string only.
     let serverMessage: string | undefined;
+    let code: string | undefined;
+    let path: string | undefined;
     try {
       const json = JSON.parse(text);
       serverMessage = json.message || json.error || undefined;
+      // Absent, not null, on errors without one — so only a real non-empty string counts.
+      code = typeof json.code === 'string' && json.code ? json.code : undefined;
+      path = typeof json.path === 'string' ? json.path : undefined;
     } catch { serverMessage = text || undefined; }
-    throw new FetchError(res.status, germanErrorMessage(res.status, serverMessage), serverMessage);
+    throw new FetchError(
+      res.status,
+      germanErrorMessage(res.status, serverMessage, code),
+      serverMessage,
+      code,
+      path,
+    );
   }
 
   if (res.status === 204 || res.headers.get('content-length') === '0') {
     return undefined as unknown as T;
+  }
+  if (parse === 'text') {
+    return (await res.text()) as unknown as T;
   }
   return res.json() as Promise<T>;
 }

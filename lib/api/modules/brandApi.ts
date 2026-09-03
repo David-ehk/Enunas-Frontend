@@ -116,12 +116,38 @@ export interface MediaUploadUrlResponse {
   requiredHeaders: Record<string, string>
 }
 
+// Mirrors backend VerifyUserDto. The code field is `verificationCode` — live-verified against
+// production (POST /brandpartner/verify → 200 "Email verified. Awaiting admin approval.").
+export interface VerifyBrandPartnerDto {
+  email: string
+  verificationCode: string
+}
+
 export const brandApi = {
   async apply(dto: RegisterBrandPartnerDto): Promise<ApiBrandPartner> {
     return fetcher<ApiBrandPartner>('/brandpartner/apply', {
       method: 'POST',
       body: JSON.stringify(dto),
       auth: false,
+    })
+  },
+
+  // Both verification routes are declared as `String` in Spring and answer with bare text/plain,
+  // so they need parse: 'text' — the default res.json() throws on their bodies.
+  async verify(dto: VerifyBrandPartnerDto): Promise<string> {
+    return fetcher<string>('/brandpartner/verify', {
+      method: 'POST',
+      body: JSON.stringify(dto),
+      auth: false,
+      parse: 'text',
+    })
+  },
+
+  async resendVerification(email: string): Promise<string> {
+    return fetcher<string>(`/brandpartner/resend-verification?email=${encodeURIComponent(email)}`, {
+      method: 'POST',
+      auth: false,
+      parse: 'text',
     })
   },
 

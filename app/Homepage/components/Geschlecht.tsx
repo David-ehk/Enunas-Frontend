@@ -9,7 +9,7 @@ const geschlecht = [
   },
   {
     title: "Herren",
-    image: "https://amq-mcq.dam.kering.com/asset/e5ee7220-3680-49a9-a084-c5477140578b/Original-Ecom/McQUEEN-SS26-PRE-CO_HOLIDAY_1X1_1-16.jpg",
+    image: "https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbFUVMOLG1aNpOoMmVw7A9nJHZeUQ1IbEiR28L",
     link: "/men"
   }
 ]

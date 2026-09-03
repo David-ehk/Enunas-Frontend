@@ -27,9 +27,21 @@ export interface RawProductResponse {
   id: number;
   name: string;
   slug: string;
+  /** The effective lowest active price — already the discounted one when a sale is running. */
   price: number | null;
+  /**
+   * The pre-discount price of the same listing `price` came from. Sent on every product
+   * response (verified live 2 Sep 2026 on /products, /products/slug/{slug} and
+   * /products/color-family/{family}). "On sale" is exactly `originalPrice != null` — the
+   * backend guarantees it is never at or below `price`, so never compare the two here.
+   */
+  originalPrice?: number | null;
   brandId?: number;
   brandName: string;
+  collectionName?: string | null;
+  /** The brand's story for this product. Optional — plenty of products have none. */
+  inspirationStory?: string | null;
+  releaseDate?: string | null;
   description?: string;
   category?: string;
   catalogueCategory?: string[];
@@ -43,12 +55,17 @@ export interface RawProductResponse {
   variants?: RawVariant[];
   images?: RawImage[];
   // The backend sends a trimmed product shape here; only id/name/price are guaranteed.
+  // Verified live 2 Sep 2026: it actually sends `{ brandName, id, image, name, price }` — a
+  // SINGULAR `image` string, and no `slug`. `images` is kept for the full-shape case.
   completeTheLookProducts?: {
     id: number;
     name: string;
     price: number | null;
+    /** Same sale pair as the top-level product, so look cards can strike through too. */
+    originalPrice?: number | null;
     brandName?: string;
     slug?: string;
+    image?: string;
     images?: RawImage[];
   }[];
 }
@@ -106,7 +123,18 @@ export function adaptProduct(raw: RawProductResponse): ApiProduct {
     // product unavailable so no caller renders it as 0,00 €.
     price: raw.price ?? 0,
     available: raw.price != null,
+    // "On sale" is exactly `originalPrice != null`. The backend derives both numbers from the
+    // one winning listing and never returns an original at or below `price`, so comparing them
+    // here could only ever discard a legitimate markdown.
+    originalPrice: raw.originalPrice ?? null,
     currency: 'EUR',
+    // The backend populates this from the entity (verified live: "Herbst 2026"). It sends an
+    // empty string for products with no collection, which is "unset", not a collection named "".
+    collectionName: raw.collectionName || null,
+    // Same treatment as collectionName: the backend sends "" for "unset", and an empty story is
+    // not a story. The PDP used to hardcode this to null, so a brand's story never reached it.
+    inspirationStory: raw.inspirationStory || null,
+    releaseDate: raw.releaseDate || null,
     category: (raw.category ?? '').toLowerCase(),
     gender: raw.gender,
     images,
@@ -139,9 +167,16 @@ export function adaptProduct(raw: RawProductResponse): ApiProduct {
         brandName: c.brandName,
         slug: c.slug,
         price: c.price ?? null,
-        images: [...(c.images ?? [])]
-          .sort((a, b) => Number(b.primary) - Number(a.primary) || a.displayOrder - b.displayOrder)
-          .map(i => i.imageUrl),
+        originalPrice: c.originalPrice ?? null,
+        // Production sends the cover as a single `image` string; fall back to it whenever the
+        // richer `images` array is absent, otherwise every look card renders imageless.
+        images: c.images?.length
+          ? [...c.images]
+              .sort((a, b) => Number(b.primary) - Number(a.primary) || a.displayOrder - b.displayOrder)
+              .map(i => i.imageUrl)
+          : c.image
+            ? [c.image]
+            : [],
       }),
     ),
   };
