@@ -264,6 +264,10 @@ export default function RegisterPage() {
                   ))}
                 </select>
               </div>
+              <p style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 10, lineHeight: 1.6, color: '#9B9B9B' }}>
+                Diese Adresse gilt zunächst auch als Retourenadresse. Eine abweichende Adresse für
+                Rücksendungen kannst du nach der Freigabe im Brand Portal unter „Einstellungen“ hinterlegen.
+              </p>
             </div>
           </div>
 

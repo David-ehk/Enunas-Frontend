@@ -10,7 +10,8 @@ import CartFooter from '@/app/(root)/cart/components/CartFooter'
 import CheckoutAuthModal from './components/CheckoutAuthModal'
 import SavedAddressSelector from './components/SavedAddressSelector'
 import { orderApi, FetchError, type CreateOrderDto, type OrderPreviewResponseDto } from '@/lib/api'
-import { calcShipping, calcUpsellDiscount, calcFinalTotal } from '@/lib/pricing'
+import { calcShipping, calcFinalTotal } from '@/lib/pricing'
+import { UPSELL_CODE_STORAGE_KEY } from '@/lib/featureFlags'
 import { toShippingAddressDto, type AddressSelection } from '@/lib/address'
 
 const SHIPPING_METHOD_LABEL: Record<OrderPreviewResponseDto['shippingBreakdown'][number]['calculationMethod'], string> = {
@@ -45,12 +46,22 @@ export default function CheckoutPage() {
   const signInNoticeRef = useRef<HTMLDivElement>(null)
   const addressSectionRef = useRef<HTMLElement>(null)
 
-  // Auto-apply discount code passed from the upsell confirmation flow
+  // FUTURE (upsell): the confirmation-page upsell used to hand a code to the checkout through
+  // localStorage, and this auto-applied it. Removed for launch — the feature is not ready, and the
+  // key was only cleared after a *successful* order, so anyone who opened /angebot and abandoned
+  // kept a silent 10% off every later checkout: it survived logout and even a different account
+  // signing in on the same browser. Nothing reads the key now, so any left over in a visitor's
+  // browser is inert. Restore this together with the promo page, and give the code an expiry.
+  //
+  // useEffect(() => {
+  //   const upsellCode = localStorage.getItem(UPSELL_CODE_STORAGE_KEY)
+  //   if (upsellCode) setPromoCode(upsellCode)
+  // }, [])
+  //
+  // One-off cleanup so a code stranded by the old behaviour cannot come back if the block above
+  // is ever re-enabled. Safe to delete once enough time has passed.
   useEffect(() => {
-    const upsellCode = localStorage.getItem('enunas_upsell_code')
-    if (upsellCode) {
-      setPromoCode(upsellCode)
-    }
+    localStorage.removeItem(UPSELL_CODE_STORAGE_KEY)
   }, [])
 
   // Keeps the visible input in sync when a code was auto-applied above, without fighting the
@@ -63,7 +74,12 @@ export default function CheckoutPage() {
     if (user?.email) setEmail(user.email)
   }, [user?.email])
 
-  const upsellDiscount = calcUpsellDiscount(totalPrice, promoCode)
+  // FUTURE (upsell): UPSELL10 was the one code recognised client-side, for instant feedback before
+  // the server preview came back. With the feature off nothing should promise a discount the
+  // backend has not confirmed, so the local estimate is always 0 and `preview.discountAmount`
+  // (the real, server-priced answer) is the only thing that can discount an order.
+  // const upsellDiscount = calcUpsellDiscount(totalPrice, promoCode)
+  const upsellDiscount = 0
   const finalTotal = calcFinalTotal(totalPrice, shippingCost, upsellDiscount)
 
   // POST /orders/preview runs the exact same pricing pipeline as order creation, so once an
@@ -156,10 +172,11 @@ export default function CheckoutPage() {
       // The preview effect above re-runs on this promoCode change and will replace this with
       // the backend-confirmed result (success, no-discount, or a real invalid-code error).
       setCouponMessage({ type: 'info', text: 'Wird geprüft…' })
-    } else if (calcUpsellDiscount(totalPrice, code) > 0) {
-      // No address yet, so no preview call can run — fall back to the one code the client can
-      // recognize on its own; anything else is simply carried through to order submission.
-      setCouponMessage({ type: 'success', text: '✓ Rabatt angewendet' })
+      // FUTURE (upsell): with no address there is no preview call, and UPSELL10 used to be
+      // confirmed client-side here. Removed for launch — claiming "Rabatt angewendet" for a code
+      // the server has not accepted is exactly the promise we cannot keep yet.
+      // } else if (calcUpsellDiscount(totalPrice, code) > 0) {
+      //   setCouponMessage({ type: 'success', text: '✓ Rabatt angewendet' })
     } else {
       setCouponMessage({ type: 'info', text: 'Wird bei der Bestellung geprüft.' })
     }
@@ -223,7 +240,7 @@ export default function CheckoutPage() {
         return
       }
 
-      localStorage.removeItem('enunas_upsell_code')
+      // (The upsell code is cleared on mount now, not only here — see the FUTURE note above.)
       clearCart()
       window.location.href = order.checkoutUrl
     } catch (err) {
@@ -624,7 +641,7 @@ export default function CheckoutPage() {
 
                       {displayDiscount > 0 && (
                         <div className="flex justify-between font-league-spartan text-xs text-enunas-success">
-                          <span>{preview?.discountCode ? `Rabatt (${preview.discountCode})` : 'Enunas-Vorteil (−10 %)'}</span>
+                          <span>{preview?.discountCode ? `Rabatt (${preview.discountCode})` : 'Rabatt'}</span>
                           <span>−€{displayDiscount.toFixed(2)}</span>
                         </div>
                       )}

@@ -69,12 +69,13 @@ export type UpdateBrandPartnerDto = {
   taxNumber?: string
   // Return (warehouse) address — separate from the legal address above. Blank
   // values mean "fall back to the registered business address".
-  // UNVERIFIED field names; see lib/api/modules/returnsApi.ts.
+  // Field names verified against PATCH /brandpartner/me (03 Sep 2026) — the
+  // returnAddress* variants are rejected with HTTP 400.
   returnRecipient?: string
-  returnAddressStreet?: string
-  returnAddressPostalCode?: string
-  returnAddressCity?: string
-  returnAddressCountry?: string
+  returnStreet?: string
+  returnPostalCode?: string
+  returnCity?: string
+  returnCountry?: string
   returnInstructions?: string
 }
 

@@ -317,7 +317,11 @@ export default function ConfirmationClient({ orderNumber, isUpsell }: Props) {
       image: UPSELL_CONFIG.imageUrl,
       defaultListingId: String(UPSELL_CONFIG.listingId),
     })
-    localStorage.setItem('enunas_upsell_code', DISCOUNT_CODE)
+    // FUTURE (upsell): handed DISCOUNT_CODE to the checkout via localStorage. Removed for launch
+    // together with the checkout side that read it — the key outlived the visit and discounted
+    // later, unrelated orders. Unreachable today anyway: this only runs from the upsell views,
+    // which are gated off in page.tsx.
+    // localStorage.setItem(UPSELL_CODE_STORAGE_KEY, DISCOUNT_CODE)
     router.push('/checkout')
   }
 

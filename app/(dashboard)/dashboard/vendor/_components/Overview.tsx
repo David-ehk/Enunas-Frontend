@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { brandApi } from '@/lib/api/modules/brandApi'
-import type { AdminApiProduct, ApiOrder, AdminApiVariant, AdminPayout } from '@/types/api'
+import type { AdminApiProduct, ApiOrder, AdminApiVariant, AdminPayout, ApiBrandPartner } from '@/types/api'
 import {
   ownSkus, ownItems, itemGross, isRevenueOrder, participatesIn,
   grossProductAmount, refundedAmount, summarise, partnerSettlementAmount,
@@ -28,7 +28,8 @@ export default function Overview({ onNavigate }: { onNavigate: (tab: string) => 
   const [products, setProducts] = useState<AdminApiProduct[]>([])
   const [orders, setOrders]     = useState<ApiOrder[]>([])
   // Needed to pick this brand's own shipping snapshot and its own returns off a shared order.
-  const [brandId, setBrandId]   = useState<string | null>(null)
+  const [brand, setBrand]       = useState<ApiBrandPartner | null>(null)
+  const brandId = brand ? String(brand.id) : null
   // Server-computed settlement. The only source for a commission-adjusted figure — the
   // frontend must not re-derive one.
   const [payouts, setPayouts]   = useState<AdminPayout[]>([])
@@ -38,9 +39,9 @@ export default function Overview({ onNavigate }: { onNavigate: (tab: string) => 
     Promise.all([
       brandApi.products.getMy().catch(() => [] as AdminApiProduct[]),
       brandApi.orders.getAll().catch(() => [] as ApiOrder[]),
-      brandApi.getMe().then(b => String(b.id)).catch(() => null),
+      brandApi.getMe().catch(() => null),
       brandApi.payouts.getMine().catch(() => [] as AdminPayout[]),
-    ]).then(([p, o, id, pay]) => { setProducts(p); setOrders(o); setBrandId(id); setPayouts(pay) })
+    ]).then(([p, o, b, pay]) => { setProducts(p); setOrders(o); setBrand(b); setPayouts(pay) })
       .finally(() => setLoading(false))
   }, [])
 
@@ -151,6 +152,11 @@ export default function Overview({ onNavigate }: { onNavigate: (tab: string) => 
 
   if (loading) return <Loader />
 
+  // Blank return address ⇒ the storefront falls back to the legal/business address on every
+  // new return. Nudge the brand to set a dedicated one.
+  const needsReturnAddress =
+    brand != null && !((brand.returnStreet ?? '').trim() && (brand.returnCity ?? '').trim())
+
   return (
     <div className="space-y-4">
       <VPageHeader
@@ -196,10 +202,26 @@ export default function Overview({ onNavigate }: { onNavigate: (tab: string) => 
 
         <VCard eyebrow="Aktionen" title="Offene Punkte" style={{ gridColumn: 'span 2' }}>
           <div className="divide-y divide-[#F5F5F0]">
-            {toShip.length === 0 && lowStock.length === 0 && (
+            {toShip.length === 0 && lowStock.length === 0 && !needsReturnAddress && (
               <p className="py-3 text-[12px] text-[#9B9B9B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
                 Keine offenen Punkte.
               </p>
+            )}
+
+            {needsReturnAddress && (
+              <div className="flex items-start justify-between py-3">
+                <div>
+                  <p style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 12, color: '#0A0A0A', fontWeight: 500 }}>
+                    Retourenadresse hinterlegen
+                  </p>
+                  <p style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, color: '#9B9B9B', marginTop: 2 }}>
+                    Ohne eigene Retourenadresse gehen Rücksendungen an deine Geschäftsadresse.
+                  </p>
+                </div>
+                <button onClick={() => onNavigate('settings')} style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#370E4D', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  Einrichten →
+                </button>
+              </div>
             )}
 
             {/* Versandbereite Bestellungen — echt */}
@@ -207,7 +229,7 @@ export default function Overview({ onNavigate }: { onNavigate: (tab: string) => 
               <div key={o.id} className="flex items-start justify-between py-3">
                 <div>
                   <p style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 12, color: '#0A0A0A', fontWeight: 500 }}>
-                    Bestellung #{String(o.id).slice(0, 8).toUpperCase()} versandbereit
+                    Bestellung {o.orderNumber ?? `#${String(o.id).slice(0, 8).toUpperCase()}`} versandbereit
                   </p>
                   <p style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, color: '#9B9B9B', marginTop: 2 }}>
                     {fmtEur(o.total ?? o.totalAmount ?? 0)} · Bezahlt

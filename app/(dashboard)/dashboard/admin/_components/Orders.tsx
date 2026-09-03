@@ -182,13 +182,18 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
               {visible.map(order => (
                 <React.Fragment key={order.id}>
                   <TableRow>
-                    <TD className="font-mono font-semibold text-[#0A0A0A]">#{String(order.id).slice(0, 8).toUpperCase()}</TD>
+                    <TD className="font-mono font-semibold text-[#0A0A0A]">{order.orderNumber ?? `#${String(order.id).slice(0, 8).toUpperCase()}`}</TD>
                     <TD className="text-[#6B6B6B]">{getCustomerLabel(order.userId)}</TD>
                     <TD className="text-[#6B6B6B]">{fmt(order.createdAt)}</TD>
                     <TD className="font-medium text-[#0A0A0A]">{fmtEur(order.total ?? order.totalAmount)}</TD>
                     <TD className="text-[#6B6B6B]">{order.items?.length ?? 0}</TD>
                     <TD><StatusBadge status={order.status} /></TD>
-                    <TD className="font-mono text-[11px] text-[#9B9B9B]">{order.trackingNumber || '—'}</TD>
+                    <TD className="font-mono text-[11px] text-[#9B9B9B]">
+                      {(order.shipments ?? [])
+                        .filter(s => s.trackingNumber)
+                        .map(s => [s.carrier, s.trackingNumber].filter(Boolean).join(' '))
+                        .join(' · ') || '—'}
+                    </TD>
                     <TD>
                       <button
                         onClick={() => setExpanded(expanded === order.id ? null : order.id)}
@@ -249,6 +254,22 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
                             </div>
                           </div>
                         </div>
+
+                        {order.shipments && order.shipments.length > 0 && (
+                          <div className="border-t border-[#EBEBEB] pt-4 mb-4">
+                            <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-2">Sendungen</p>
+                            <div className="space-y-1">
+                              {order.shipments.map(s => (
+                                <div key={String(s.brandId)} className="flex items-baseline justify-between gap-4 text-[12px]">
+                                  <span className="text-[#0A0A0A]">{s.brandName}</span>
+                                  <span className="text-[#6B6B6B] font-mono text-[11px]">
+                                    {[s.carrier, s.trackingNumber].filter(Boolean).join(' ') || s.status}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         <div className="flex items-center gap-2 flex-wrap border-t border-[#EBEBEB] pt-4">
                           <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mr-1">Aktionen</p>

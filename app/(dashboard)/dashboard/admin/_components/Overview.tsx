@@ -105,7 +105,7 @@ export default function Overview({ orders, brands, products, customers }: Props)
   const returns      = orders.filter(o => o.status === 'RETURN_REQUESTED').length
   const pendingBrands   = brands.filter(b => b.status === 'PENDING').length
   const pendingProducts = products.filter(p => p.status === 'PENDING').length
-  const activeBrands    = brands.filter(b => ['APPROVED', 'VERIFIED'].includes(b.status)).length
+  const activeBrands    = brands.filter(b => ['APPROVED', 'ACTIVE'].includes(b.status)).length
   const activeCustomers = customers.filter(c => c.status !== 'SUSPENDED' && c.status !== 'DEACTIVATED').length
   const aov = orders.length > 0 ? revenue / orders.length : 0
   const approvedProducts = products.filter(p => isProductLive(p.status)).length
@@ -164,7 +164,7 @@ export default function Overview({ orders, brands, products, customers }: Props)
       })
     brands.filter(b => b.createdAt).sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()).slice(0, 6)
       .forEach(b => {
-        const isActive = ['APPROVED', 'VERIFIED'].includes(b.status)
+        const isActive = ['APPROVED', 'ACTIVE'].includes(b.status)
         events.push({ id: `brand-${b.id}`, title: b.status === 'PENDING' ? 'Marke beantragt' : isActive ? 'Marke aktiv' : b.status === 'REJECTED' ? 'Marke abgelehnt' : 'Marke gesperrt', sub: b.brandName, at: b.createdAt!, dot: b.status === 'PENDING' ? '#7A5C1E' : isActive ? '#1A5A3C' : '#8B1E3F' })
       })
     products.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 6)

@@ -66,10 +66,10 @@ export default function SettingsTab({
 
   // Return (warehouse) address — kept separate from the legal address above.
   const [retRecipient, setRetRecipient]     = useState(brand?.returnRecipient ?? '')
-  const [retStreet, setRetStreet]           = useState(brand?.returnAddressStreet ?? '')
-  const [retPostalCode, setRetPostalCode]   = useState(brand?.returnAddressPostalCode ?? '')
-  const [retCity, setRetCity]               = useState(brand?.returnAddressCity ?? '')
-  const [retCountry, setRetCountry]         = useState(brand?.returnAddressCountry ?? 'DE')
+  const [retStreet, setRetStreet]           = useState(brand?.returnStreet ?? '')
+  const [retPostalCode, setRetPostalCode]   = useState(brand?.returnPostalCode ?? '')
+  const [retCity, setRetCity]               = useState(brand?.returnCity ?? '')
+  const [retCountry, setRetCountry]         = useState(brand?.returnCountry ?? 'DE')
   const [retInstructions, setRetInstructions] = useState(brand?.returnInstructions ?? '')
   const [retSaving, setRetSaving]           = useState(false)
   const [retSaved, setRetSaved]             = useState(false)
@@ -90,10 +90,10 @@ export default function SettingsTab({
       setVatId(brand.vatId ?? '')
       setTaxNumber(brand.taxNumber ?? '')
       setRetRecipient(brand.returnRecipient ?? '')
-      setRetStreet(brand.returnAddressStreet ?? '')
-      setRetPostalCode(brand.returnAddressPostalCode ?? '')
-      setRetCity(brand.returnAddressCity ?? '')
-      setRetCountry(brand.returnAddressCountry ?? 'DE')
+      setRetStreet(brand.returnStreet ?? '')
+      setRetPostalCode(brand.returnPostalCode ?? '')
+      setRetCity(brand.returnCity ?? '')
+      setRetCountry(brand.returnCountry ?? 'DE')
       setRetInstructions(brand.returnInstructions ?? '')
     }
   }, [brand])
@@ -181,10 +181,10 @@ export default function SettingsTab({
     try {
       const updated = await brandApi.updateMe({
         returnRecipient: retRecipient.trim(),
-        returnAddressStreet: retStreet.trim(),
-        returnAddressPostalCode: retPostalCode.trim(),
-        returnAddressCity: retCity.trim(),
-        returnAddressCountry: retCountry,
+        returnStreet: retStreet.trim(),
+        returnPostalCode: retPostalCode.trim(),
+        returnCity: retCity.trim(),
+        returnCountry: retCountry,
         returnInstructions: retInstructions.trim(),
       })
       onUpdate(updated)
@@ -222,15 +222,15 @@ export default function SettingsTab({
 
   const retDirty =
     retRecipient !== (brand?.returnRecipient ?? '') ||
-    retStreet !== (brand?.returnAddressStreet ?? '') ||
-    retPostalCode !== (brand?.returnAddressPostalCode ?? '') ||
-    retCity !== (brand?.returnAddressCity ?? '') ||
-    retCountry !== (brand?.returnAddressCountry ?? 'DE') ||
+    retStreet !== (brand?.returnStreet ?? '') ||
+    retPostalCode !== (brand?.returnPostalCode ?? '') ||
+    retCity !== (brand?.returnCity ?? '') ||
+    retCountry !== (brand?.returnCountry ?? 'DE') ||
     retInstructions !== (brand?.returnInstructions ?? '')
 
   // Blank return address ⇒ the platform falls back to the registered business address.
   const hasReturnAddress = Boolean(
-    (brand?.returnAddressStreet ?? '').trim() && (brand?.returnAddressCity ?? '').trim(),
+    (brand?.returnStreet ?? '').trim() && (brand?.returnCity ?? '').trim(),
   )
 
   return (
@@ -659,10 +659,10 @@ export default function SettingsTab({
               <button
                 onClick={() => {
                   setRetRecipient(brand?.returnRecipient ?? '')
-                  setRetStreet(brand?.returnAddressStreet ?? '')
-                  setRetPostalCode(brand?.returnAddressPostalCode ?? '')
-                  setRetCity(brand?.returnAddressCity ?? '')
-                  setRetCountry(brand?.returnAddressCountry ?? 'DE')
+                  setRetStreet(brand?.returnStreet ?? '')
+                  setRetPostalCode(brand?.returnPostalCode ?? '')
+                  setRetCity(brand?.returnCity ?? '')
+                  setRetCountry(brand?.returnCountry ?? 'DE')
                   setRetInstructions(brand?.returnInstructions ?? '')
                 }}
                 className="h-9 px-4 rounded-none text-[12px] text-[#6B6B6B] border border-[#E8E8E8] hover:bg-[#F5F5F0] transition-all duration-200"

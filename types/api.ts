@@ -1,5 +1,5 @@
 export type UserRole = 'CUSTOMER' | 'BRAND_PARTNER' | 'ADMIN';
-export type BrandStatus = 'PENDING' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'VERIFIED' | 'SUSPENDED';
+export type BrandStatus = 'PENDING' | 'PENDING_REVIEW' | 'APPROVED' | 'ACTIVE' | 'REJECTED' | 'VERIFIED' | 'SUSPENDED';
 // The backend returns ACTIVE for a live product — APPROVED is a lifecycle event
 // (POST /admin/products/{id}/approve), not a resting state. Both are accepted
 // here; use isProductLive() rather than comparing to a single literal.
@@ -348,13 +348,17 @@ export interface ApiBrandPartner {
   contactEmail?: string;
   // Return (warehouse) address — deliberately separate from the legal/company
   // address above. When these are blank the platform falls back to the
-  // registered business address. UNVERIFIED field names.
+  // registered business address (see effectiveReturnAddress). Field names
+  // verified against GET/PATCH /brandpartner/me (03 Sep 2026).
   returnRecipient?: string;
-  returnAddressStreet?: string;
-  returnAddressPostalCode?: string;
-  returnAddressCity?: string;
-  returnAddressCountry?: string;
+  returnStreet?: string;
+  returnPostalCode?: string;
+  returnCity?: string;
+  returnCountry?: string;
   returnInstructions?: string;
+  // Read-only: the return address the storefront actually shows — the fields
+  // above joined, or the business address when they are blank.
+  effectiveReturnAddress?: string;
 }
 
 export interface BrandOrder {

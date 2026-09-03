@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Lock } from 'lucide-react'
 import { resolveProductWithMeta } from '@/lib/api'
 import { resolvePromoPricing } from '@/lib/pricing'
+import { UPSELL_ENABLED } from '@/lib/featureFlags'
 import CartFooter from '@/app/(root)/cart/components/CartFooter'
 
 const DISCOUNT_PCT = 10
@@ -46,6 +47,11 @@ function useCountdown(totalSeconds: number) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function AngebotPage() {
+  // The promo page is the entry point of the upsell flow: it writes UPSELL10 to localStorage and
+  // sends the visitor to checkout with it applied. While the feature is switched off the route
+  // 404s, so a shared link cannot hand out a discount.
+  if (!UPSELL_ENABLED) notFound()
+
   const params = useParams<{ brand: string; slug: string }>()
   const router = useRouter()
   const { display, expired, remaining } = useCountdown(COUNTDOWN_SECONDS)
@@ -98,12 +104,17 @@ export default function AngebotPage() {
       return
     }
     setAdded(true)
+    // FUTURE (upsell): this handed UPSELL10 to the checkout through localStorage. Removed for
+    // launch along with the checkout side that read it — a code written here outlived the visit
+    // and silently discounted later, unrelated orders. This whole route 404s while the feature is
+    // off (see the UPSELL_ENABLED guard above), so nothing reaches this line today.
+    //
     // UPSELL10 is applied by the backend against the cart subtotal, which for an already
     // reduced product is the sale price — attaching it there would stack the promo on top of
     // the markdown and charge less than either price the customer was shown.
-    if (!alreadyReduced) {
-      localStorage.setItem('enunas_upsell_code', 'UPSELL10')
-    }
+    // if (!alreadyReduced) {
+    //   localStorage.setItem(UPSELL_CODE_STORAGE_KEY, 'UPSELL10')
+    // }
     setTimeout(() => router.push('/checkout?upsell=true'), 800)
   }
 

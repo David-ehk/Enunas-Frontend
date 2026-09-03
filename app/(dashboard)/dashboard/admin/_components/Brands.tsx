@@ -368,7 +368,7 @@ function BrandFinancialPanel({
                             <TableRow key={order.id}>
                               <TD>
                                 <span className="font-mono text-[11px] text-[#6B6B6B]">
-                                  #{order.id.slice(-8).toUpperCase()}
+                                  {order.orderNumber ?? `#${String(order.id).slice(-8).toUpperCase()}`}
                                 </span>
                               </TD>
                               <TD className="text-[#6B6B6B]">{fmt(order.createdAt)}</TD>

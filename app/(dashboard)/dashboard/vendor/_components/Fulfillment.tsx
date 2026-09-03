@@ -92,7 +92,7 @@ function ShipModal({
               </p>
               <p className="text-[#0A0A0A] leading-none"
                 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 20, fontWeight: 300 }}>
-                #{order.id.slice(0, 8).toUpperCase()}
+                {order.orderNumber ?? `#${String(order.id).slice(0, 8).toUpperCase()}`}
               </p>
             </div>
           </div>
@@ -252,7 +252,7 @@ function ProblemModal({
               </p>
               <p className="text-[#0A0A0A] leading-none"
                 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 20, fontWeight: 300 }}>
-                #{order.id.slice(0, 8).toUpperCase()}
+                {order.orderNumber ?? `#${String(order.id).slice(0, 8).toUpperCase()}`}
               </p>
             </div>
           </div>
@@ -322,7 +322,7 @@ function OrderRow({
         <TD>
           <div className="flex items-center gap-2">
             <span className="font-mono font-semibold text-[12px] text-[#0A0A0A]">
-              #{order.id.slice(0, 8).toUpperCase()}
+              {order.orderNumber ?? `#${String(order.id).slice(0, 8).toUpperCase()}`}
             </span>
           </div>
         </TD>

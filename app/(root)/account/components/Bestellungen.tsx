@@ -304,17 +304,51 @@ function OrderRow({
 
           {/* Return details — shown once a return exists */}
           {hasReturn && (
-            <div className="mt-4 border-t border-enunas-gray-light pt-4">
-              {order.returnShipToAddress && (
-                <>
+            <div className="mt-4 border-t border-enunas-gray-light pt-4 space-y-4">
+              <p
+                className={cn(
+                  'font-league-spartan text-xs leading-relaxed',
+                  order.status === 'REFUNDED' ? 'text-enunas-success' : 'text-enunas-gray-dark'
+                )}
+              >
+                {order.status === 'RETURN_REQUESTED' &&
+                  'Dein Retourenantrag ist eingegangen und wird geprüft. Du kannst die Ware bereits an die unten stehende Adresse zurücksenden.'}
+                {order.status === 'RETURN_APPROVED' &&
+                  'Deine Retoure ist genehmigt. Bitte sende die Ware innerhalb von 14 Tagen an die unten stehende Adresse zurück.'}
+                {order.status === 'RETURN_RECEIVED' &&
+                  'Deine Rücksendung ist eingegangen und wird geprüft — die Erstattung erfolgt innerhalb von 5–10 Werktagen über deine ursprüngliche Zahlungsmethode.'}
+                {order.status === 'REFUNDED' &&
+                  'Erstattet — der Betrag wurde über deine ursprüngliche Zahlungsmethode zurückgezahlt.'}
+              </p>
+
+              {['RETURN_REQUESTED', 'RETURN_APPROVED'].includes(String(order.status)) && (
+                <div>
                   <p className="font-league-spartan text-[10px] tracking-[0.2em] uppercase text-enunas-gray-medium mb-2">
-                    Retourenadresse
+                    So sendest du zurück
                   </p>
-                  <pre className="font-league-spartan text-sm text-enunas-black whitespace-pre-line leading-relaxed mb-2">
+                  <ol className="font-league-spartan text-xs text-enunas-gray-dark leading-relaxed list-decimal pl-4 space-y-1">
+                    <li>Artikel ungetragen, ungewaschen und mit Originaletiketten einpacken — nach Möglichkeit im Originalkarton.</li>
+                    <li>Die Retourennummer außen am Paket vermerken oder gut sichtbar beilegen.</li>
+                    <li>Paket über einen Versanddienst deiner Wahl an die Rücksendeadresse schicken. Die unmittelbaren Kosten der Rücksendung trägst du selbst.</li>
+                    <li>Einlieferungsbeleg und Sendungsnummer bis zum Abschluss der Erstattung aufbewahren.</li>
+                  </ol>
+                  <p className="font-league-spartan text-[11px] text-enunas-gray-medium mt-2">
+                    Ein vorfrankiertes Retourenlabel bieten wir derzeit nicht an.
+                  </p>
+                </div>
+              )}
+
+              {order.returnShipToAddress && (
+                <div>
+                  <p className="font-league-spartan text-[10px] tracking-[0.2em] uppercase text-enunas-gray-medium mb-2">
+                    Rücksendeadresse
+                  </p>
+                  <pre className="font-league-spartan text-sm text-enunas-black whitespace-pre-line leading-relaxed">
                     {order.returnShipToAddress}
                   </pre>
-                </>
+                </div>
               )}
+
               {order.returnNumber && (
                 <p className="font-league-spartan text-[11px] text-enunas-gray-medium">
                   Retourennummer:{' '}

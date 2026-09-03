@@ -43,6 +43,8 @@ const sections: LegalSection[] = [
     paras: [
       'Verbrauchern steht ein gesetzliches Widerrufsrecht zu. Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag, an dem der Kunde oder ein benannter Dritter die Waren in Besitz genommen hat.',
       'Zur Ausübung genügt eine eindeutige Erklärung — etwa per E-Mail an widerruf@enunas.com oder über das Online-Rückgabeformular. Zur Fristwahrung reicht die rechtzeitige Absendung der Mitteilung.',
+      'Die Kunden haben die Waren unverzüglich und in jedem Fall spätestens binnen vierzehn Tagen ab dem Tag, an dem sie Enunas über den Widerruf unterrichten, zurückzusenden. Nach dem Antrag werden die Rücksendeadresse der jeweiligen Marke sowie eine Retourennummer im Kundenkonto angezeigt; die Rücksendung erfolgt an diese Adresse.',
+      'Die Kunden tragen die unmittelbaren Kosten der Rücksendung der Waren. Ein vorfrankiertes Retourenlabel wird nicht bereitgestellt.',
       'Im Falle eines wirksamen Widerrufs erstattet Enunas alle Zahlungen innerhalb von vierzehn Tagen zurück, sofern die Ware eingegangen ist oder deren Rücksendung nachgewiesen wurde.',
     ],
   },

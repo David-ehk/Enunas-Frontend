@@ -66,7 +66,16 @@ export default function LieferungRuecksendungPage() {
             </p>
             <p className="mt-4">
               Um eine Rücksendung einzuleiten, melden Sie sich in Ihrem Konto an und wählen Sie die
-              entsprechende Bestellung aus.
+              entsprechende Bestellung aus. Nach dem Antrag zeigen wir Ihnen die Rücksendeadresse der
+              jeweiligen Marke und eine Retourennummer an. Da jede Marke eigenständig versendet, gehen
+              Rücksendungen direkt an die Marke — bei Bestellungen mehrerer Marken bitte getrennt
+              zurücksenden.
+            </p>
+            <p className="mt-4">
+              Sie organisieren die Rücksendung über einen Versanddienst Ihrer Wahl und tragen die
+              unmittelbaren Kosten der Rücksendung selbst. Ein vorfrankiertes Retourenlabel stellen
+              wir derzeit nicht bereit. Bitte bewahren Sie den Einlieferungsbeleg bis zum Abschluss
+              der Erstattung auf.
             </p>
           </div>
 

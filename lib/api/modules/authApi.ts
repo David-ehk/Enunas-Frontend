@@ -57,10 +57,21 @@ export const authApi = {
     return fetcher<void>('/auth/password', { method: 'POST', body: JSON.stringify(data) });
   },
 
+  // Two-step reset: forgot-password emails a code, reset-password consumes it. Both are
+  // permitAll on the backend (no token). Endpoint paths verified against SecurityConfiguration —
+  // the older single '/auth/password-reset' path 404s.
   async requestPasswordReset(email: string): Promise<void> {
-    return fetcher<void>('/auth/password-reset', {
+    return fetcher<void>('/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ email }),
+      auth: false,
+    });
+  },
+
+  async resetPassword(data: { token: string; newPassword: string }): Promise<void> {
+    return fetcher<void>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
       auth: false,
     });
   },

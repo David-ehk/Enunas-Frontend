@@ -8,6 +8,7 @@ import CartFooter from '@/app/(root)/cart/components/CartFooter'
 import { orderApi } from '@/lib/api/modules/orderApi'
 import { productApi, apiProductToCardShape } from '@/lib/api'
 import { generateSlug } from '@/lib/product'
+import { UPSELL_ENABLED } from '@/lib/featureFlags'
 import type { ApiOrder } from '@/types/api'
 import type { ProductCardShape } from '@/lib/api'
 
@@ -316,7 +317,9 @@ function CountdownBanner({ discountPct }: { discountPct: number }) {
 function BestaetiguungContent() {
   const searchParams  = useSearchParams()
   const orderId       = searchParams.get('orderId')
-  const isUpsell      = searchParams.get('upsell') === 'true'
+  // Gated like the order-confirmation route: with the upsell off, `?upsell=true` is ignored and
+  // this always renders the standard confirmation.
+  const isUpsell      = UPSELL_ENABLED && searchParams.get('upsell') === 'true'
   const discountPct   = 10
 
   const [order, setOrder]         = useState<ApiOrder | null>(null)
