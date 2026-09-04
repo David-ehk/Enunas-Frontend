@@ -113,14 +113,18 @@ const EMPTY_WIZARD: WizardData = {
   catalogueCategory: [],
 }
 
+// The Look step is optional — it can be skipped straight through to the review.
+type WizardStep = 1 | 2 | 3 | 4 | 5
+
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function StepIndicator({ step }: { step: 1 | 2 | 3 | 4 }) {
+function StepIndicator({ step }: { step: WizardStep }) {
   const steps = [
     { n: 1, label: 'Grunddaten' },
     { n: 2, label: 'Varianten' },
     { n: 3, label: 'Preis' },
-    { n: 4, label: 'Überprüfung' },
+    { n: 4, label: 'Look' },
+    { n: 5, label: 'Überprüfung' },
   ]
   return (
     <div className="flex items-center gap-0 mb-8">
@@ -538,6 +542,132 @@ function coverImageUrl(p: AdminApiProduct): string | null {
   return typeof first === 'string' ? first : (first as { imageUrl?: string }).imageUrl ?? null
 }
 
+// Toggling an already-selected id always removes it; adding past the cap is a no-op rather
+// than silently evicting an earlier pick.
+function toggleLookSelection(prev: string[], id: string): string[] {
+  if (prev.includes(id)) return prev.filter(x => x !== id)
+  if (prev.length >= MAX_LOOK_PRODUCTS) return prev
+  return [...prev, id]
+}
+
+// Shared by the edit panel and the create wizard's Look step, so a look is curated the same way
+// wherever you start from. `excludeProductId` is omitted during creation — the product does not
+// exist yet, so there is nothing to filter out of its own candidate list.
+function LookPicker({
+  excludeProductId,
+  enabled,
+  onEnabledChange,
+  selected,
+  onToggle,
+  onCandidatesLoaded,
+}: {
+  excludeProductId?: string
+  enabled: boolean
+  onEnabledChange: (v: boolean) => void
+  selected: string[]
+  onToggle: (id: string) => void
+  /** id -> name for everything offered, so a caller holding only ids can label them. */
+  onCandidatesLoaded?: (names: Record<string, string>) => void
+}) {
+  const [candidates, setCandidates] = useState<AdminApiProduct[]>([])
+  const [loading, setLoading]       = useState(true)
+  const [search, setSearch]         = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    brandApi.products.getMy()
+      .then(all => {
+        if (cancelled) return
+        const usable = all.filter(p => p.id !== excludeProductId)
+        setCandidates(usable)
+        onCandidatesLoaded?.(Object.fromEntries(usable.map(p => [p.id, p.name])))
+      })
+      .catch(() => { if (!cancelled) setCandidates([]) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+    // onCandidatesLoaded is a setter from the caller and is deliberately not a dependency —
+    // including it would refetch on every parent render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [excludeProductId])
+
+  const visible = candidates.filter(c =>
+    !search.trim() || c.name.toLowerCase().includes(search.trim().toLowerCase()),
+  )
+
+  return (
+    <>
+      <p className="text-[12px] text-[#6B6B6B] leading-relaxed" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+        Wähle bis zu {MAX_LOOK_PRODUCTS} Produkte, die zu diesem Produkt passen. Sie erscheinen auf der
+        Produktseite unter „Vervollständige den Look“. Ohne Auswahl zeigt die Seite automatisch
+        Produkte aus derselben Kategorie.
+      </p>
+
+      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={e => onEnabledChange(e.target.checked)}
+          className="w-3.5 h-3.5 accent-[#370E4D] cursor-pointer"
+        />
+        <span className="text-[12px] text-[#0A0A0A]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+          Eigenen Look für dieses Produkt kuratieren
+        </span>
+      </label>
+
+      {enabled && (
+        loading ? <Loader /> : candidates.length === 0 ? (
+          <EmptyState message="Noch keine weiteren Produkte vorhanden — lege zuerst ein zweites Produkt an." />
+        ) : (
+          <>
+            <input
+              className={INPUT}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Produkte durchsuchen…"
+              style={{ fontFamily: 'var(--font-league-spartan)' }}
+            />
+            <p className="text-[10px] uppercase tracking-[0.15em] text-[#9B9B9B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+              {selected.length}/{MAX_LOOK_PRODUCTS} gewählt
+            </p>
+            <div className="grid grid-cols-4 gap-3">
+              {visible.map(c => {
+                const isSelected = selected.includes(c.id)
+                const atMax = !isSelected && selected.length >= MAX_LOOK_PRODUCTS
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => onToggle(c.id)}
+                    disabled={atMax}
+                    className="text-left group disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <div
+                      className="relative aspect-[3/4] bg-[#F5F5F0] overflow-hidden border transition-colors duration-200"
+                      style={{ borderColor: isSelected ? '#370E4D' : '#E8E8E8' }}
+                    >
+                      {coverImageUrl(c)
+                        ? <img src={coverImageUrl(c)!} alt="" className="w-full h-full object-cover" />
+                        : <div className="w-full h-full flex items-center justify-center text-[9px] tracking-[0.15em] text-[#C0C0BC]">LEER</div>}
+                      {isSelected && (
+                        <span className="absolute top-1.5 right-1.5 w-5 h-5 flex items-center justify-center" style={{ background: '#370E4D' }}>
+                          <Check className="w-3 h-3 text-white" />
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1.5 text-[11px] text-[#2D2D2D] leading-tight line-clamp-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                      {c.name}
+                    </p>
+                  </button>
+                )
+              })}
+            </div>
+          </>
+        )
+      )}
+    </>
+  )
+}
+
 function CompleteTheLookSection({
   product,
   onSaved,
@@ -545,32 +675,13 @@ function CompleteTheLookSection({
   product: AdminApiProduct
   onSaved: (p: AdminApiProduct) => void
 }) {
-  const [candidates, setCandidates] = useState<AdminApiProduct[]>([])
-  const [loading, setLoading]       = useState(true)
-  const [enabled, setEnabled]       = useState<boolean>(product.completeTheLookEnabled ?? false)
-  const [selected, setSelected]     = useState<string[]>(
+  const [enabled, setEnabled]   = useState<boolean>(product.completeTheLookEnabled ?? false)
+  const [selected, setSelected] = useState<string[]>(
     (product.completeTheLookProducts ?? []).map(p => String(p.id)),
   )
   const [saving, setSaving] = useState(false)
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState<string | null>(null)
-  const [search, setSearch] = useState('')
-
-  useEffect(() => {
-    brandApi.products.getMy()
-      .then(all => setCandidates(all.filter(p => p.id !== product.id)))
-      .catch(() => setCandidates([]))
-      .finally(() => setLoading(false))
-  }, [product.id])
-
-  function toggle(id: string) {
-    setSaved(false)
-    setSelected(prev => {
-      if (prev.includes(id)) return prev.filter(x => x !== id)
-      if (prev.length >= MAX_LOOK_PRODUCTS) return prev
-      return [...prev, id]
-    })
-  }
 
   async function save() {
     setSaving(true); setErr(null)
@@ -589,81 +700,16 @@ function CompleteTheLookSection({
     }
   }
 
-  const visible = candidates.filter(c =>
-    !search.trim() || c.name.toLowerCase().includes(search.trim().toLowerCase()),
-  )
-
   return (
     <SectionCard title="Vervollständige den Look">
       <div className="p-6 space-y-4">
-        <p className="text-[12px] text-[#6B6B6B] leading-relaxed" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-          Wähle bis zu {MAX_LOOK_PRODUCTS} Produkte, die zu diesem Produkt passen. Sie erscheinen auf der
-          Produktseite unter „Vervollständige den Look“. Ohne Auswahl zeigt die Seite automatisch
-          Produkte aus derselben Kategorie.
-        </p>
-
-        <label className="flex items-center gap-2.5 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={e => { setEnabled(e.target.checked); setSaved(false) }}
-            className="w-3.5 h-3.5 accent-[#370E4D] cursor-pointer"
-          />
-          <span className="text-[12px] text-[#0A0A0A]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-            Eigenen Look für dieses Produkt kuratieren
-          </span>
-        </label>
-
-        {enabled && (
-          loading ? <Loader /> : candidates.length === 0 ? (
-            <EmptyState message="Noch keine weiteren Produkte vorhanden — lege zuerst ein zweites Produkt an." />
-          ) : (
-            <>
-              <input
-                className={INPUT}
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Produkte durchsuchen…"
-                style={{ fontFamily: 'var(--font-league-spartan)' }}
-              />
-              <p className="text-[10px] uppercase tracking-[0.15em] text-[#9B9B9B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                {selected.length}/{MAX_LOOK_PRODUCTS} gewählt
-              </p>
-              <div className="grid grid-cols-4 gap-3">
-                {visible.map(c => {
-                  const isSelected = selected.includes(c.id)
-                  const atMax = !isSelected && selected.length >= MAX_LOOK_PRODUCTS
-                  return (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => toggle(c.id)}
-                      disabled={atMax}
-                      className="text-left group disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      <div
-                        className="relative aspect-[3/4] bg-[#F5F5F0] overflow-hidden border transition-colors duration-200"
-                        style={{ borderColor: isSelected ? '#370E4D' : '#E8E8E8' }}
-                      >
-                        {coverImageUrl(c)
-                          ? <img src={coverImageUrl(c)!} alt="" className="w-full h-full object-cover" />
-                          : <div className="w-full h-full flex items-center justify-center text-[9px] tracking-[0.15em] text-[#C0C0BC]">LEER</div>}
-                        {isSelected && (
-                          <span className="absolute top-1.5 right-1.5 w-5 h-5 flex items-center justify-center" style={{ background: '#370E4D' }}>
-                            <Check className="w-3 h-3 text-white" />
-                          </span>
-                        )}
-                      </div>
-                      <p className="mt-1.5 text-[11px] text-[#2D2D2D] leading-tight line-clamp-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                        {c.name}
-                      </p>
-                    </button>
-                  )
-                })}
-              </div>
-            </>
-          )
-        )}
+        <LookPicker
+          excludeProductId={product.id}
+          enabled={enabled}
+          onEnabledChange={v => { setEnabled(v); setSaved(false) }}
+          selected={selected}
+          onToggle={id => { setSaved(false); setSelected(prev => toggleLookSelection(prev, id)) }}
+        />
 
         {err && <p className="text-[11px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>{err}</p>}
 
@@ -1175,7 +1221,7 @@ function EditPanel({
 
 // ─── Create wizard ────────────────────────────────────────────────────────────
 function CreateWizard({ onBack, onCreated }: { onBack: () => void; onCreated: (p: AdminApiProduct) => void }) {
-  const [step, setStep]         = useState<1 | 2 | 3 | 4>(1)
+  const [step, setStep]         = useState<WizardStep>(1)
   const [data, setData]         = useState<WizardData>(EMPTY_WIZARD)
   const [variants, setVariants] = useState<VariantRow[]>([])
   const [submitting, setSubmitting] = useState(false)
@@ -1186,6 +1232,11 @@ function CreateWizard({ onBack, onCreated }: { onBack: () => void; onCreated: (p
   const [batchSizes, setBatchSizes]   = useState<string[]>([])
   const [batchStock, setBatchStock]   = useState(1)
   const [batchWeight, setBatchWeight] = useState(250)
+
+  // Look step state — sent with the create call, so no follow-up request is needed.
+  const [lookEnabled, setLookEnabled]   = useState(false)
+  const [lookSelected, setLookSelected] = useState<string[]>([])
+  const [lookNames, setLookNames]       = useState<Record<string, string>>({})
 
   // Price step state
   const [priceMode, setPriceMode]         = useState<PriceInputMode>('GROSS')
@@ -1270,8 +1321,8 @@ function CreateWizard({ onBack, onCreated }: { onBack: () => void; onCreated: (p
           stockQuantity: v.stockQuantity,
           weightGrams: v.weightGrams,
         })),
-        completeTheLookEnabled: false,
-        completeTheLookProductIds: [],
+        completeTheLookEnabled: lookEnabled,
+        completeTheLookProductIds: lookEnabled ? lookSelected : [],
       }
       const created = await brandApi.products.create(dto)
 
@@ -1727,15 +1778,52 @@ function CreateWizard({ onBack, onCreated }: { onBack: () => void; onCreated: (p
                 className={BTN_PRIMARY}
                 style={{ background: '#370E4D', fontFamily: 'var(--font-league-spartan)' }}
               >
-                Weiter: Überprüfung →
+                Weiter: Look →
               </button>
             </div>
           </div>
         </SectionCard>
       )}
 
-      {/* ── Step 4: Review ── */}
+      {/* ── Step 4: Complete the look (optional) ── */}
       {step === 4 && (
+        <SectionCard title="Vervollständige den Look">
+          <div className="p-6 space-y-4">
+            <LookPicker
+              enabled={lookEnabled}
+              onEnabledChange={setLookEnabled}
+              selected={lookSelected}
+              onToggle={id => setLookSelected(prev => toggleLookSelection(prev, id))}
+              onCandidatesLoaded={setLookNames}
+            />
+
+            <div className="flex items-center justify-between pt-2">
+              <button onClick={() => { setErr(null); setStep(3) }} className={BTN_GHOST} style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                ← Zurück
+              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => { setErr(null); setLookEnabled(false); setLookSelected([]); setStep(5) }}
+                  className={BTN_GHOST}
+                  style={{ fontFamily: 'var(--font-league-spartan)' }}
+                >
+                  Überspringen
+                </button>
+                <button
+                  onClick={() => { setErr(null); setStep(5) }}
+                  className={BTN_PRIMARY}
+                  style={{ background: '#370E4D', fontFamily: 'var(--font-league-spartan)' }}
+                >
+                  Weiter →
+                </button>
+              </div>
+            </div>
+          </div>
+        </SectionCard>
+      )}
+
+      {/* ── Step 5: Review ── */}
+      {step === 5 && (
         <SectionCard title="Überprüfung">
           <div className="p-6 space-y-5">
             <div className="grid grid-cols-2 gap-4">
@@ -1769,6 +1857,15 @@ function CreateWizard({ onBack, onCreated }: { onBack: () => void; onCreated: (p
             </div>
 
             <div>
+              <p className="text-[10px] uppercase tracking-[0.1em] text-[#9B9B9B] mb-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>Vervollständige den Look</p>
+              <p className="text-[13px] text-[#2D2D2D]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                {lookEnabled && lookSelected.length > 0
+                  ? lookSelected.map(id => lookNames[id] ?? id).join(' · ')
+                  : 'Übersprungen — die Produktseite zeigt automatisch Produkte aus derselben Kategorie.'}
+              </p>
+            </div>
+
+            <div>
               <p className="text-[10px] uppercase tracking-[0.1em] text-[#9B9B9B] mb-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>Katalog-Kategorien</p>
               <div className="flex flex-wrap gap-1.5">
                 {data.catalogueCategory.map(c => (
@@ -1785,7 +1882,7 @@ function CreateWizard({ onBack, onCreated }: { onBack: () => void; onCreated: (p
             {err && <p className="text-[11px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>{err}</p>}
 
             <div className="flex items-center justify-between pt-2">
-              <button onClick={() => { setErr(null); setStep(3) }} className={BTN_GHOST} style={{ fontFamily: 'var(--font-league-spartan)' }}>
+              <button onClick={() => { setErr(null); setStep(4) }} className={BTN_GHOST} style={{ fontFamily: 'var(--font-league-spartan)' }}>
                 ← Zurück
               </button>
               <button
