@@ -240,7 +240,11 @@ const css = `
   width: 100%; margin-top: 18px; position: relative; overflow: hidden;
   background: var(--acc); color: #fff; border: 0; padding: 18px;
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 18px; font-weight: 400; letter-spacing: 0.06em;
+  /* Light (300), not Regular: white serif on this solid purple fill reads visually heavier
+     than the same weight does dark-on-white (irradiation) — Light is what actually renders as
+     the site's normal elegant weight here. Same fix as the /cart page's own "Zur Kasse" button
+     (CartSummary.tsx). */
+  font-size: 18px; font-weight: 300; letter-spacing: 0.06em;
   display: flex; align-items: center; justify-content: center; gap: 12px;
   cursor: pointer; text-decoration: none;
   transition: background 300ms var(--ease-q);

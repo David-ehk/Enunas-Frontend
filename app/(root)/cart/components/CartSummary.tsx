@@ -46,7 +46,10 @@ export default function CartSummary({ subtotal }: CartSummaryProps) {
         className="group relative block w-full overflow-hidden bg-enunas-purple text-white text-center py-5 hover:bg-enunas-purple-dark transition-colors duration-300 ease-out-expo mb-4"
       >
         <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
-        <span className="relative z-10 font-cormorant text-[18px] tracking-[0.06em]">Zur Kasse</span>
+        {/* font-light: white serif text on this solid purple fill reads visually heavier than
+            the same weight does in dark-on-white contexts (irradiation) — Light (300, already
+            loaded) is what actually renders as the site's normal elegant weight here. */}
+        <span className="relative z-10 font-cormorant font-light text-[18px] tracking-[0.06em]">Zur Kasse</span>
         <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
       </Link>
 

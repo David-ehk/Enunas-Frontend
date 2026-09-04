@@ -21,7 +21,19 @@
  *   API_URL          default https://api.enunas.com
  *   ADMIN_EMAIL      required
  *   ADMIN_PASSWORD   required
- *   TEST_PASSWORD    password for generated accounts (default: a random one, printed at the end)
+ *   BRAND_A_EMAIL    required — an existing, email-verified brand partner
+ *   BRAND_A_PASSWORD required
+ *   BRAND_B_EMAIL    required — a DIFFERENT brand; two are needed to detect cross-brand leakage
+ *   BRAND_B_PASSWORD required
+ *   TEST_PASSWORD    password for the generated customer (default: random, printed at the end)
+ *
+ * WHY BRANDS ARE REUSED, NOT CREATED
+ *   Brand partners cannot be deleted (FK constraints), so creating two per run would litter the
+ *   environment permanently. They also can no longer be created headlessly: since the Sep 2026
+ *   backend fix, /admin/brands/{id}/approve no longer enables a login on its own — the account
+ *   must complete /brandpartner/verify with a code sent by email. That is correct behaviour and
+ *   this script does not try to work around it. Products and listings ARE created per run, since
+ *   those can be hidden again afterwards.
  *
  * FLAGS
  *   --confirm-writes  required; acknowledges this mutates the target environment
@@ -35,6 +47,8 @@
 const API = (process.env.API_URL || 'https://api.enunas.com').replace(/\/$/, '')
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD
+const BRAND_A = { email: process.env.BRAND_A_EMAIL, password: process.env.BRAND_A_PASSWORD }
+const BRAND_B = { email: process.env.BRAND_B_EMAIL, password: process.env.BRAND_B_PASSWORD }
 const ARGS = new Set(process.argv.slice(2))
 
 const CONFIRMED = ARGS.has('--confirm-writes')
@@ -42,7 +56,10 @@ const KEEP = ARGS.has('--keep')
 const NO_PAY = ARGS.has('--no-pay')
 const JSON_OUT = ARGS.has('--json')
 
-const STAMP = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 12)
+// Minute resolution plus randomness: accounts cannot be deleted, so two runs in the same minute
+// must not collide on an email address.
+const STAMP = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 12) +
+              Math.random().toString(36).slice(2, 6)
 const TEST_PASSWORD = process.env.TEST_PASSWORD || `Rg-${Math.random().toString(36).slice(2, 10)}-${STAMP}!`
 
 // ── reporting ────────────────────────────────────────────────────────────────
@@ -118,22 +135,26 @@ const fixture = {
   createdListings: [],  // { productId, listingId, token }
 }
 
-async function createBrand(admin, label, price, size, color) {
-  const email = `claude.rg+${label.toLowerCase()}${STAMP}@enunas-test.com`
-  const brandName = `RG ${label} ${STAMP}`
+/**
+ * Logs in as an existing verified brand and gives it a fresh product + listing for this run.
+ * See the header note on why brands are reused rather than created.
+ */
+async function setUpBrand(label, email, password, price, size, color) {
+  let token
+  try {
+    token = await login(email, password)
+  } catch (err) {
+    throw new Error(
+      `Could not log in as BRAND_${label.toUpperCase()} (${email}): ${err.message}\n` +
+      `  This script needs two existing, email-verified brand partners. Since the Sep 2026 fix, ` +
+      `admin approval alone no longer enables a brand login — the account must have completed ` +
+      `/brandpartner/verify. Create and verify two brands once, then set BRAND_A_* / BRAND_B_*.`,
+    )
+  }
 
-  const applied = await api('POST', '/brandpartner/apply', {
-    body: {
-      email, password: TEST_PASSWORD, brandName,
-      firstName: label, lastName: 'Regression',
-      legalName: `${brandName} GmbH`,
-      addressStreet: 'Teststrasse 1', addressPostalCode: '10115',
-      addressCity: 'Berlin', addressCountry: 'DE',
-    },
-  })
-  const brandId = applied.id
-  await api('POST', `/admin/brands/${brandId}/approve`, { token: admin })
-  const token = await login(email, TEST_PASSWORD)
+  const me = await api('GET', '/brandpartner/me', { token })
+  const brandId = me.id
+  const brandName = me.brandName
 
   const product = await api('POST', '/products/create', {
     token,
@@ -167,15 +188,35 @@ async function createBrand(admin, label, price, size, color) {
 
 // ── Mollie test-mode payment (Playwright — already a devDependency) ──────────
 async function payWithMollieTestCard(checkoutUrl) {
-  const { chromium } = await import('playwright')
-  const browser = await chromium.launch({ headless: true })
+  // The repo ships @playwright/test (which re-exports the browser API); the standalone
+  // `playwright` package is not installed. Try both so this works either way.
+  let chromium
   try {
-    const page = await browser.newContext().newPage()
+    ({ chromium } = await import('@playwright/test'))
+  } catch {
+    try { ({ chromium } = await import('playwright')) } catch {
+      return { ok: false, reason: 'Playwright not installed — run `pnpm exec playwright install chromium`, or pass --no-pay' }
+    }
+  }
+  let browser
+  try {
+    browser = await chromium.launch({ headless: true })
+    // Pin the locale so Mollie's copy (and therefore every selector below) is deterministic;
+    // the banner and button labels change language otherwise.
+    const context = await browser.newContext({ locale: 'de-DE' })
+    const page = await context.newPage()
     await page.goto(checkoutUrl, { waitUntil: 'domcontentloaded' })
 
     const bodyText = await page.locator('body').innerText()
-    if (!/Testzahlung|test payment|test mode/i.test(bodyText)) {
-      return { ok: false, reason: 'Mollie is NOT in test mode — refusing to complete a real payment' }
+    // Mollie renders this banner in the viewer's own language and spells it "testmode" in
+    // English but "Testzahlung" in German — match generously, or a live-mode guard turns into a
+    // false alarm that silently blocks every downstream check.
+    if (!/testmode|test\s*mode|testzahlung|test\s*payment|testbetaling/i.test(bodyText)) {
+      return {
+        ok: false,
+        reason: 'Mollie does not look like test mode — refusing to complete a possibly real payment. ' +
+                `Page began: ${bodyText.replace(/\s+/g, ' ').slice(0, 160)}`,
+      }
     }
 
     await page.getByRole('button', { name: /Karte|Card/i }).first().click()
@@ -192,9 +233,12 @@ async function payWithMollieTestCard(checkoutUrl) {
     await page.waitForLoadState('domcontentloaded')
     return { ok: true }
   } catch (err) {
-    return { ok: false, reason: err.message }
+    return { ok: false, reason: err.message.split('\n')[0] }
   } finally {
-    await browser.close()
+    // Must never throw: a failure closing the browser would replace the real reason above and,
+    // because this runs in a promise, escape as an unhandled rejection that kills the process
+    // before cleanup gets to run.
+    try { await browser?.close() } catch { /* browser already gone */ }
   }
 }
 
@@ -258,9 +302,21 @@ async function run() {
                   `Current API_URL would be: ${API}`)
     process.exit(2)
   }
-  if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
-    console.error('Set ADMIN_EMAIL and ADMIN_PASSWORD in the environment. ' +
-                  'Never hardcode them — this repo is public.')
+  const missing = [
+    !ADMIN_EMAIL && 'ADMIN_EMAIL', !ADMIN_PASSWORD && 'ADMIN_PASSWORD',
+    !BRAND_A.email && 'BRAND_A_EMAIL', !BRAND_A.password && 'BRAND_A_PASSWORD',
+    !BRAND_B.email && 'BRAND_B_EMAIL', !BRAND_B.password && 'BRAND_B_PASSWORD',
+  ].filter(Boolean)
+  if (missing.length) {
+    console.error(`Missing required environment variables: ${missing.join(', ')}\n` +
+                  'Never hardcode them — this repo is public.\n' +
+                  'BRAND_A_* and BRAND_B_* must be two DIFFERENT existing, email-verified brand ' +
+                  'partners; two are required to detect cross-brand leakage.')
+    process.exit(2)
+  }
+  if (BRAND_A.email === BRAND_B.email) {
+    console.error('BRAND_A_EMAIL and BRAND_B_EMAIL must be different brands — ' +
+                  'the leakage check is meaningless otherwise.')
     process.exit(2)
   }
 
@@ -274,11 +330,21 @@ async function run() {
   const admin = await login(ADMIN_EMAIL, ADMIN_PASSWORD)
   pass('SETUP-admin', 'admin authenticated')
 
-  const A = await createBrand(admin, 'Alpha', 89.95, 'M', 'BLACK')
-  const B = await createBrand(admin, 'Beta', 29.95, 'L', 'WHITE')
+  const A = await setUpBrand('Alpha', BRAND_A.email, BRAND_A.password, 89.95, 'M', 'BLACK')
+  const B = await setUpBrand('Beta', BRAND_B.email, BRAND_B.password, 29.95, 'L', 'WHITE')
   fixture.brands = [A, B]
-  pass('SETUP-brands', 'two brands created, approved, each with stock',
+  pass('SETUP-brands', 'two existing brands, each given a fresh product with stock',
     `${A.name} (listing ${A.listingId} @ ${money(A.price)}) · ${B.name} (listing ${B.listingId} @ ${money(B.price)})`)
+
+  // Settlement rows aggregate the whole PERIOD, not one order. Snapshot them before creating
+  // anything so the commission assertions below can compare the delta this run caused, instead
+  // of assuming the month contains exactly one order.
+  const PERIOD = new Date().toISOString().slice(0, 7)
+  const baselineRows = await api('GET', `/admin/settlements?period=${PERIOD}`, { token: admin })
+  const baseline = Object.fromEntries((baselineRows ?? []).map(r => [String(r.brandId), r]))
+  const before = id => baseline[String(id)] ?? { commissionNet: 0, commissionVat: 0, commissionGross: 0, payoutAmount: 0, shippingRevenue: 0 }
+  pass('SETUP-baseline', `settlement baseline captured for ${PERIOD}`,
+    `${(baselineRows ?? []).length} brand row(s) already in this period`)
 
   const custEmail = `claude.rg+cust${STAMP}@enunas-test.com`
   await api('POST', '/auth/signup', { body: { email: custEmail, password: TEST_PASSWORD } })
@@ -402,6 +468,17 @@ async function run() {
     check('SHIP-tracking', "Brand A's tracking number is not attached to Brand B's portion",
       !tracking.includes(`RG-${STAMP}-A`),
       tracking.includes(`RG-${STAMP}-A`) ? "Brand A's tracking number is visible on Brand B's view" : 'not present')
+
+    // Now let the second brand ship too. PARTIALLY_SHIPPED is a legitimate intermediate state,
+    // and the order only becomes SHIPPED — and therefore deliverable — once every brand has
+    // dispatched. Returns gate on DELIVERED, so this step is a prerequisite, not an extra.
+    await api('POST', `/brand/orders/${order.id}/ship`, {
+      token: B.token,
+      body: { carrier: 'DHL', trackingNumber: `RG-${STAMP}-B`, note: 'regression: brand B' },
+    })
+    const bothShipped = await api('GET', `/orders/${order.id}`, { token: custToken })
+    check('SHIP-completes', 'order becomes SHIPPED once every brand has dispatched',
+      bothShipped.status === 'SHIPPED', `status=${bothShipped.status}`)
   }
 
   phase('Returns still work after the shipment change  (regression risk)')
@@ -409,10 +486,12 @@ async function run() {
   if (!paid) {
     skip('RET-lifecycle', 'needs a PAID order')
   } else {
-    // Returns require DELIVERED. If per-brand shipment changed the status model, this is
-    // exactly where it breaks — hence testing it right after the shipment change.
+    // Returns require DELIVERED. The per-brand shipment change introduced PARTIALLY_SHIPPED as
+    // an intermediate state, so DELIVERED is only reachable once every brand has shipped — which
+    // the phase above now does. This is the regression-risk check: that a fully shipped
+    // multi-brand order can still be delivered, and therefore still be returned.
     const del = await api('PATCH', `/admin/orders/${order.id}/status?status=DELIVERED`, { token: admin, raw: true })
-    check('RET-precondition', 'order can still reach DELIVERED after a per-brand shipment',
+    check('RET-precondition', 'a fully shipped multi-brand order can still reach DELIVERED',
       del.status === 200, `HTTP ${del.status} ${del.json?.message ?? ''}`)
 
     const ownItem = (await api('GET', `/orders/${order.id}`, { token: custToken }))
@@ -430,12 +509,18 @@ async function run() {
       !!ret && (ret.orderItemIds ?? []).length === 1,
       ret ? `${ret.returnNumber} · brand ${ret.brandName} · items ${JSON.stringify(ret.orderItemIds)}` : 'no return for Brand A')
 
-    // Idempotency: the same return must not be creatable twice.
-    const dup = await api('POST', `/orders/${order.id}/return`, {
-      token: custToken, raw: true,
-      body: { orderItemId: ownItem?.id, reason: 'WRONG_SIZE', description: 'regression duplicate' },
-    })
-    check('IDEM-return', 'duplicate return request is rejected', dup.status === 409, `HTTP ${dup.status}`)
+    // Idempotency: the same return must not be creatable twice. Only meaningful if the FIRST
+    // one succeeded — otherwise a 409 here just means "there was nothing to duplicate", which
+    // would read as a pass while proving nothing.
+    if (withReturn.status !== 200) {
+      skip('IDEM-return', 'duplicate-return check needs a successful first return')
+    } else {
+      const dup = await api('POST', `/orders/${order.id}/return`, {
+        token: custToken, raw: true,
+        body: { orderItemId: ownItem?.id, reason: 'WRONG_SIZE', description: 'regression duplicate' },
+      })
+      check('IDEM-return', 'duplicate return request is rejected', dup.status === 409, `HTTP ${dup.status}`)
+    }
 
     if (returnNumber) {
       const stockBefore = (await api('GET', `/products/${A.productId}/variants`))[0].stockQuantity
@@ -464,31 +549,44 @@ async function run() {
 
   // ── commission / settlement / payout ───────────────────────────────────────
   phase('Commission, settlement and payout')
-  const period = new Date().toISOString().slice(0, 7)
-  const settlements = await api('GET', `/admin/settlements?period=${period}`, { token: admin })
+  const settlements = await api('GET', `/admin/settlements?period=${PERIOD}`, { token: admin })
   const sB = settlements.find(s => String(s.brandId) === String(B.id))
 
   if (!sB) {
     skip('COMM-math', `no settlement row yet for ${B.name}`)
   } else {
-    // Brand B was never refunded, so its row should still show a full commission.
+    // Compare the DELTA this run caused. The row aggregates the period, so any earlier order in
+    // the same month would otherwise make these look like clean multiples and read as a failure.
+    const b0 = before(B.id)
+    const dNet = sB.commissionNet - b0.commissionNet
+    const dVat = sB.commissionVat - b0.commissionVat
+    const dGross = sB.commissionGross - b0.commissionGross
+    const dPayout = sB.payoutAmount - b0.payoutAmount
+    const dShip = (sB.shippingRevenue ?? 0) - (b0.shippingRevenue ?? 0)
+
     const net = Math.round((B.price / 1.19) * 100) / 100
     const cNet = Math.round(net * 0.18 * 100) / 100
     const cVat = Math.round(cNet * 0.19 * 100) / 100
-    check('COMM-net', 'commission is 18 % of the NET item value',
-      near(sB.commissionNet, cNet, 0.011), `expected ${money(cNet)} got ${money(sB.commissionNet)}`)
-    check('COMM-vat', 'VAT is charged on the commission',
-      near(sB.commissionVat, cVat, 0.011), `expected ${money(cVat)} got ${money(sB.commissionVat)}`)
-    check('PAYOUT-amount', 'payout = item gross + shipping − commission gross',
-      near(sB.payoutAmount, B.price + (sB.shippingRevenue ?? 0) - sB.commissionGross, 0.011),
-      `payout=${money(sB.payoutAmount)} (gross ${money(B.price)} + ship ${money(sB.shippingRevenue)} − comm ${money(sB.commissionGross)})`)
+    check('COMM-net', 'commission on this order is 18 % of its NET value',
+      near(dNet, cNet, 0.011), `Δ commissionNet=${money(dNet)} expected ${money(cNet)} (gross ${money(B.price)} → net ${money(net)})`)
+    check('COMM-vat', 'VAT is charged on that commission',
+      near(dVat, cVat, 0.011), `Δ commissionVat=${money(dVat)} expected ${money(cVat)}`)
+    check('PAYOUT-amount', 'payout delta = item gross + own shipping − commission gross',
+      near(dPayout, B.price + dShip - dGross, 0.011),
+      `Δ payout=${money(dPayout)} (gross ${money(B.price)} + Δship ${money(dShip)} − Δcomm ${money(dGross)})`)
   }
 
   const sA = settlements.find(s => String(s.brandId) === String(A.id))
   if (sA && returnNumber) {
-    check('REFUND-reversal', 'a refunded sale reverses its commission',
-      near(sA.commissionGross, 0, 0.011),
-      `Brand A commissionGross=${money(sA.commissionGross)} payout=${money(sA.payoutAmount)} (shipping retained)`)
+    // Brand A's item was sold and then fully refunded within this run, so the NET effect on
+    // commission must be zero — its shipping revenue is still retained.
+    const a0 = before(A.id)
+    const dGrossA = sA.commissionGross - a0.commissionGross
+    check('REFUND-reversal', 'a refunded sale nets its commission back to zero',
+      near(dGrossA, 0, 0.011),
+      `Δ commissionGross=${money(dGrossA)} (sold then refunded) · Δ payout=${money(sA.payoutAmount - a0.payoutAmount)}`)
+  } else if (!returnNumber) {
+    skip('REFUND-reversal', 'no return was created')
   }
 
   const recon = await api('GET', '/admin/reconciliation', { token: admin })
@@ -599,6 +697,15 @@ async function cleanup(admin) {
 }
 
 // ── main ─────────────────────────────────────────────────────────────────────
+// Last-resort net. An unhandled rejection would otherwise tear the process down before the
+// cleanup in `finally` runs, leaving fixture products live on a public storefront.
+process.on('unhandledRejection', err => {
+  console.error(`\n${C.r}UNHANDLED REJECTION${C.x} — fixtures may still be live, clean up manually:`)
+  console.error(`  products: ${fixture.createdProductIds.join(', ') || 'none'}`)
+  console.error(`  ${err?.stack?.split('\n')[0] ?? err}`)
+  process.exit(1)
+})
+
 let exitCode = 0
 try {
   await run()
@@ -633,7 +740,7 @@ try {
       }
     }
     console.log(`\n${C.b}Left behind${C.x} ${C.d}(cannot be deleted — FK constraints)${C.x}`)
-    for (const b of fixture.brands) console.log(`  brand ${b.id}  ${b.name}  ${b.email}`)
+    for (const b of fixture.brands) console.log(`  ${C.d}brand ${b.id} ${b.name} — reused, not created${C.x}`)
     if (fixture.customer) console.log(`  customer   ${fixture.customer.email}`)
     if (fixture.order) console.log(`  order      ${fixture.order.orderNumber}`)
     console.log(`  ${C.d}account password: ${TEST_PASSWORD}${C.x}`)

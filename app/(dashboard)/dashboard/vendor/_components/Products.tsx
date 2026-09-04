@@ -688,7 +688,7 @@ function CompleteTheLookSection({
     try {
       const updated = await brandApi.products.update(product.id, {
         completeTheLookEnabled: enabled,
-        completeTheLookProductIds: enabled ? selected : [],
+        completeTheLookProductIds: enabled ? selected.map(Number) : [],
       })
       onSaved(updated)
       setSaved(true)
@@ -1322,7 +1322,7 @@ function CreateWizard({ onBack, onCreated }: { onBack: () => void; onCreated: (p
           weightGrams: v.weightGrams,
         })),
         completeTheLookEnabled: lookEnabled,
-        completeTheLookProductIds: lookEnabled ? lookSelected : [],
+        completeTheLookProductIds: lookEnabled ? lookSelected.map(Number) : [],
       }
       const created = await brandApi.products.create(dto)
 

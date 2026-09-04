@@ -24,7 +24,7 @@ export interface CreateProductDto {
   returnPeriodDays?: number
   catalogueCategory: string[]
   completeTheLookEnabled: boolean
-  completeTheLookProductIds: string[]
+  completeTheLookProductIds: number[]
   variants: CreateProductVariantDto[]
 }
 

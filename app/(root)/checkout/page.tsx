@@ -186,22 +186,20 @@ export default function CheckoutPage() {
   // (Kontakt's e-mail field is genuinely `required` and must stay that way — see CheckoutAddressForm
   // for why the address fields underneath deliberately are not). Without this, an unauthenticated
   // guest who also hasn't typed an e-mail yet would get the browser's native "fill this field"
-  // tooltip on Kontakt instead of being sent to the sign-in notice — auth has to win first,
-  // regardless of what's filled in below it. Native validation (and, after that, the address
-  // check in handleSubmit) only gets a chance to run once this lets the click through.
+  // tooltip on Kontakt instead of the sign-in modal — auth has to win first, regardless of what's
+  // filled in below it. Native validation (and, after that, the address check in handleSubmit)
+  // only gets a chance to run once this lets the click through.
   function handleSubmitClick(e: React.MouseEvent<HTMLButtonElement>) {
     if (!isAuthenticated) {
       e.preventDefault()
-      setError('Bitte melden Sie sich an, um fortzufahren.')
-      signInNoticeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      setAuthModalOpen(true)
     }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!isAuthenticated) {
-      setError('Bitte melden Sie sich an, um fortzufahren.')
-      signInNoticeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      setAuthModalOpen(true)
       return
     }
     if (!addressSelection) {
@@ -391,7 +389,11 @@ export default function CheckoutPage() {
                 />
               </section>
 
-              {/* Payment method */}
+              {/* Payment method — hidden for now. Mollie's own hosted checkout is where a
+                  payment method actually gets chosen; this selector only duplicated that
+                  choice client-side without feeding it anywhere. Left in place, disabled,
+                  in case a client-side selector is wanted again later. */}
+              {false && (
               <section>
                 <h2 className="font-league-spartan text-xs uppercase tracking-[0.15em] text-enunas-gray-medium mb-4">
                   Zahlungsmethode
@@ -461,6 +463,7 @@ export default function CheckoutPage() {
                   })}
                 </div>
               </section>
+              )}
 
               {/* Error */}
               {error && (

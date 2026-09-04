@@ -78,13 +78,20 @@ export default function GoogleLoginButton({ context, onError, onSuccess }: Googl
         return
       }
       setGoogleCredentialHandler(handleCredential)
+      // A hardcoded width overflows past the padded column on narrow screens — Google renders
+      // an element exactly that wide regardless of what actually fits, ignoring the parent's
+      // own padding entirely (a fixed-width child doesn't shrink for its container). Measuring
+      // the available width here and handing that to Google instead makes the button match every
+      // other full-width control in this form. Google only accepts 200–400px.
+      const available = containerRef.current.parentElement?.getBoundingClientRect().width
+      const width = Math.min(400, Math.max(200, Math.floor(available || 360)))
       const rendered = renderGoogleButton(containerRef.current, {
         type: 'standard',
         theme: 'outline',
         size: 'large',
         shape: 'pill',
         text: context === 'register' ? 'signup_with' : 'signin_with',
-        width: 360,
+        width,
       })
       setLoadState(rendered ? 'ready' : 'unavailable')
     })
@@ -130,7 +137,15 @@ export default function GoogleLoginButton({ context, onError, onSuccess }: Googl
           className="flex justify-center"
           style={{
             opacity: submitting ? 0.6 : 1,
-            pointerEvents: submitting ? 'none' : 'auto',
+            // Only ever force 'none' (to block double-submits while the async Google flow is in
+            // flight) — never force 'auto'. This component is mounted inside CheckoutAuthModal
+            // even while that modal is closed (hidden via `pointer-events: none` on its
+            // ancestors, not by unmounting); forcing 'auto' here overrode that and left this
+            // button clickable-and-invisible on top of the checkout page, silently swallowing
+            // clicks meant for whatever real control happened to sit at the same screen position
+            // (e.g. "Adresse verwenden") — which is why address data typed there never seemed to
+            // register. Leaving it `undefined` when idle lets it inherit normally instead.
+            pointerEvents: submitting ? 'none' : undefined,
             transition: 'opacity 200ms',
           }}
           aria-busy={submitting}
