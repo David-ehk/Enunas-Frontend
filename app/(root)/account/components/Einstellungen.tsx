@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { customerApi, FetchError } from '@/lib/api'
+import { authApi, customerApi, FetchError } from '@/lib/api'
 import { useAuth } from '@/app/context/AuthContext'
 import AccountButton from './AccountButton'
 
@@ -54,6 +54,12 @@ export default function Einstellungen() {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordSaving, setPasswordSaving] = useState(false)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [passwordSaved, setPasswordSaved] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState('')
   const [deleting, setDeleting] = useState(false)
@@ -81,6 +87,35 @@ export default function Einstellungen() {
       )
     } finally {
       setSaving(false)
+    }
+  }
+
+  // Backend endpoint (POST /auth/password via authApi.changePassword) already existed and
+  // worked — only the UI was missing; this replaces the old "coming soon" placeholder.
+  async function handleChangePassword() {
+    setPasswordError(null)
+    if (newPassword.length < 8) {
+      setPasswordError('Das neue Passwort muss mindestens 8 Zeichen lang sein.')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Die Passwörter stimmen nicht überein.')
+      return
+    }
+    setPasswordSaving(true)
+    try {
+      await authApi.changePassword({ currentPassword, newPassword })
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      setPasswordSaved(true)
+      setTimeout(() => setPasswordSaved(false), 3000)
+    } catch (err) {
+      setPasswordError(
+        err instanceof FetchError ? err.message : 'Passwort konnte nicht geändert werden. Bitte versuche es erneut.'
+      )
+    } finally {
+      setPasswordSaving(false)
     }
   }
 
@@ -160,12 +195,51 @@ export default function Einstellungen() {
       {/* Divider */}
       <div className="border-t border-enunas-gray-light mb-14" />
 
-      {/* Password — no backend endpoint yet */}
+      {/* Password */}
       <div className="mb-14">
-        <h2 className="font-cormorant text-2xl font-normal text-enunas-black mb-2">Passwort ändern</h2>
-        <p className="font-league-spartan text-sm text-enunas-gray-medium leading-relaxed">
-          Diese Funktion steht in Kürze zur Verfügung.
-        </p>
+        <div className="flex items-baseline justify-between mb-6">
+          <h2 className="font-cormorant text-2xl font-normal text-enunas-black">Passwort ändern</h2>
+          {passwordSaved && (
+            <span className="font-league-spartan text-[11px] tracking-[0.2em] uppercase text-enunas-success">
+              Gespeichert ✓
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div className="sm:col-span-2">
+            <Field
+              label="Aktuelles Passwort"
+              value={currentPassword}
+              onChange={setCurrentPassword}
+              type="password"
+            />
+          </div>
+          <Field
+            label="Neues Passwort"
+            value={newPassword}
+            onChange={setNewPassword}
+            type="password"
+            placeholder="Mind. 8 Zeichen"
+          />
+          <Field
+            label="Neues Passwort bestätigen"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            type="password"
+          />
+        </div>
+
+        {passwordError && (
+          <p className="font-league-spartan text-xs text-enunas-error mb-4">{passwordError}</p>
+        )}
+
+        <AccountButton
+          onClick={handleChangePassword}
+          disabled={passwordSaving || !currentPassword || !newPassword || !confirmPassword}
+        >
+          {passwordSaving ? 'Wird geändert …' : 'Passwort ändern'}
+        </AccountButton>
       </div>
 
       {/* Divider */}

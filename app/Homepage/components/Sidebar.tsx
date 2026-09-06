@@ -17,11 +17,11 @@ interface Category  {
 
 /* ─── Image paths (served from /public) ─────────────────────── */
 const IMG = {
-  trendy: '/assets/images/nav/TRENDY.jpg',
-  newin:  '/assets/images/nav/NEWIN.jpg',
-  t1:     '/assets/images/nav/Test1.jpg',
-  t3:     '/assets/images/nav/Test3.jpg',
-  t4:     '/assets/images/nav/Test4.jpg',
+  trendy: 'https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbEjpFAQkSvJt4go7bMAYej9qRVTcdUEW5PfGx',
+  newin:  'https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbrfIHABpCO3JYSUEtWXlN4R9fmP51DQnaLgeG',
+  t1:     'https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbtHIlEDhG6Y2kcfPEpBKhCNUQTLJxsWyoARO0',
+  t3:     'https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWb0EblCQrBXq53z9PRKSjkdsgaJcHbGTtnfQC1',
+  t4:     'https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbTw1Ou2RpfFK1aboweMAYBCUvi498QlNzmyDk',
 }
 
 /* ─── Nav data ───────────────────────────────────────────────── */

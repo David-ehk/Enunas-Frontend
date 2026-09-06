@@ -10,8 +10,6 @@ import RecentOrder from './components/RecentOrder'
 import WishlistPreview from './components/WishlistPreview'
 import Bestellungen from './components/Bestellungen'
 import Adressen from './components/Adressen'
-import Zahlungen from './components/Zahlungen'
-import Newsletter from './components/Newsletter'
 import Einstellungen from './components/Einstellungen'
 import { orderApi } from '@/lib/api/modules/orderApi'
 import { authApi } from '@/lib/api/modules/authApi'
@@ -24,8 +22,6 @@ const SECTION_TITLES: Record<AccountSection, string> = {
   bestellungen:  'Bestellungen',
   wunschliste:   'Wunschliste',
   adressen:      'Adressen',
-  zahlungen:     'Zahlungsmethoden',
-  newsletter:    'Newsletter',
   einstellungen: 'Einstellungen',
 }
 
@@ -282,8 +278,6 @@ export default function AccountPage() {
               {activeSection === 'bestellungen'  && <Bestellungen />}
               {activeSection === 'wunschliste'   && <WishlistPreview items={wishlistItems} />}
               {activeSection === 'adressen'      && <Adressen />}
-              {activeSection === 'zahlungen'     && <Zahlungen />}
-              {activeSection === 'newsletter'    && <Newsletter />}
               {activeSection === 'einstellungen' && <Einstellungen />}
             </div>
           </div>

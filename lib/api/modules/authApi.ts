@@ -53,8 +53,11 @@ export const authApi = {
     return fetcher<ApiUser>('/auth/profile', { method: 'PATCH', body: JSON.stringify(data) });
   },
 
+  // Verified live against the backend 2026-09-06: '/auth/password' 404s ("No endpoint POST
+  // auth/password") — the real route is '/auth/change-password', confirmed by getting a genuine
+  // "Current password is incorrect" business-logic error back instead of a route-not-found one.
   async changePassword(data: { currentPassword: string; newPassword: string }): Promise<void> {
-    return fetcher<void>('/auth/password', { method: 'POST', body: JSON.stringify(data) });
+    return fetcher<void>('/auth/change-password', { method: 'POST', body: JSON.stringify(data) });
   },
 
   // Two-step reset: forgot-password emails a code, reset-password consumes it. Both are

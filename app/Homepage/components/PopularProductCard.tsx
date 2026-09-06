@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useAuth } from "@/app/context/AuthContext"
 import { useWishlist, type WishlistItem } from "@/app/context/WishlistContext"
+import { SEGMENT_LABELS } from "@/lib/product"
 
 interface ProductColour {
   hex: string;
@@ -276,13 +277,18 @@ const PopularProductCard = ({
               {displayCategories.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {displayCategories.map((category, index) => {
-                    const colors = STYLE_COLORS[category.toLowerCase()] || { bg: 'bg-gray-400', text: 'text-white' }
+                    const key = category.toLowerCase()
+                    const colors = STYLE_COLORS[key] || { bg: 'bg-gray-400', text: 'text-white' }
+                    // Segment values are stored/lowercased for routing and lookups (see
+                    // lib/product.ts) — SEGMENT_LABELS is the shared display-case map for them,
+                    // same one segmentBreakdown() uses on /saved-lists.
+                    const label = SEGMENT_LABELS[key] ?? (key.charAt(0).toUpperCase() + key.slice(1))
                     return (
                       <span
                         key={index}
                         className={`px-3 py-1 text-xs font-light border border-black ${colors.bg} ${colors.text}`}
                       >
-                        {category}
+                        {label}
                       </span>
                     )
                   })}

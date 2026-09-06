@@ -11,7 +11,7 @@ function Test() {
      
     <div className="pt-16 min-h-screen">
       <div className="relative">
-        <video src="/assets/videos/Inspiration.mp4" autoPlay loop muted playsInline className="w-full h-screen object-cover"/>
+        <video src="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWb2WGqVP7isC1V3ItrQiuhO5KGRm6Ue0BLyTDl" autoPlay loop muted playsInline className="w-full h-screen object-cover"/>
         <span className="absolut inset-0 bg-black/30"></span>
       </div>
       <div className="flex-1 flex items-center justify-center pt-20 min-h-screen">

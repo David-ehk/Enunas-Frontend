@@ -16,11 +16,11 @@ export default function KategorieAuswahl() {
   const [isImageLoading, setIsImageLoading] = useState(false)
 
   const kategorie = [
-    { id: 'kategorie1', name: 'Streetwear',   image: '/assets/images/Test6.WebP',  color: 'bg-[#0011A5]', colorHex: '#0011A5', link: '/bekleidung/streetwear'   },
-    { id: 'kategorie2', name: 'Experimental', image: '/assets/images/Test2.WebP', color: 'bg-[#6C169C]', colorHex: '#6C169C', link: '/bekleidung/experimental' },
-    { id: 'kategorie3', name: 'Athleisure',   image: '/assets/images/Test3.WebP',  color: 'bg-[#C01B1B]', colorHex: '#C01B1B', link: '/bekleidung/athleisure'  },
-    { id: 'kategorie4', name: 'Cultural',     image: '/assets/images/Test4.WebP',  color: 'bg-[#EA9575]', colorHex: '#EA9575', link: '/bekleidung/cultural'    },
-    { id: 'kategorie5', name: 'Star',         image: '/assets/images/Test5.WebP',  color: 'bg-black',     colorHex: '#000000', link: '/bekleidung/star'        },
+    { id: 'kategorie1', name: 'Streetwear',   image: 'https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbtHIlEDhG6Y2kcfPEpBKhCNUQTLJxsWyoARO0',  color: 'bg-[#0011A5]', colorHex: '#0011A5', link: '/bekleidung/streetwear'   },
+    { id: 'kategorie2', name: 'Experimental', image: 'https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbnWELfxw3qGZHCA2Las4gv7ei5YNoUDkOrzP0', color: 'bg-[#6C169C]', colorHex: '#6C169C', link: '/bekleidung/experimental' },
+    { id: 'kategorie3', name: 'Athleisure',   image: 'https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWb0EblCQrBXq53z9PRKSjkdsgaJcHbGTtnfQC1',  color: 'bg-[#C01B1B]', colorHex: '#C01B1B', link: '/bekleidung/athleisure'  },
+    { id: 'kategorie4', name: 'Cultural',     image: 'https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbTw1Ou2RpfFK1aboweMAYBCUvi498QlNzmyDk',  color: 'bg-[#EA9575]', colorHex: '#EA9575', link: '/bekleidung/cultural'    },
+    { id: 'kategorie5', name: 'Star',         image: 'https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbUFTrjg0CkowKO0cMZUjxbWqG5AnJDLrlYgd9',  color: 'bg-black',     colorHex: '#000000', link: '/bekleidung/star'        },
   ]
 
   // Mobile carousel state

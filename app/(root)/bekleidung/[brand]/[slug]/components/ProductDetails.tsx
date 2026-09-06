@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import ImageGallery from './ImageGallery'
 import BrandLink from './BrandLink'
 import GenderBadge, { GENDER_LABELS } from './GenderBadge'
@@ -18,6 +19,7 @@ import { Product, findVariant, uniqueColors } from '../types/product'
 import type { Color } from '@/lib/color'
 import { useCart } from '@/app/context/CartContext'
 import { useAuth } from '@/app/context/AuthContext'
+import { useWishlist, type WishlistItem } from '@/app/context/WishlistContext'
 import { productApi } from '@/lib/api'
 import { listingPriceView } from '@/lib/pricing'
 import type { ApiListing } from '@/types/api'
@@ -59,6 +61,8 @@ export default function ProductDetails({
   const [copiedSku, setCopiedSku] = useState(false)
   const [showSizeModal, setShowSizeModal] = useState(false)
   const [openAccordion, setOpenAccordion] = useState<string | null>('details')
+  const [justSaved, setJustSaved] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
 
   // Listings tell us availability AND the price of the specific variant once one is picked.
   // The pairing hazard is only in AGGREGATING across listings — the cheapest current price and
@@ -71,8 +75,10 @@ export default function ProductDetails({
   const [listingsFailed, setListingsFailed] = useState(false)
 
   const { isAuthenticated } = useAuth()
+  const router = useRouter()
   const ctaRef = useRef<HTMLButtonElement>(null)
   const { addToCart, openCart } = useCart()
+  const { isSaved, toggle: toggleWishlist } = useWishlist()
 
   useEffect(() => {
     if (!productId) return
@@ -185,7 +191,50 @@ export default function ProductDetails({
     setTimeout(() => setCopiedSku(false), 1600)
   }
 
-  const toggle = (key: string) => setOpenAccordion(prev => (prev === key ? null : key))
+  // Same id + heart used on product cards (PopularProductCard.tsx) — saving here or there is
+  // the same wishlist entry either way.
+  const saved = isSaved(String(product.id))
+
+  const handleToggleSaved = () => {
+    if (!isAuthenticated) { router.push('/account'); return }
+    const wasSaved = saved
+    const item: WishlistItem = {
+      id: String(product.id),
+      imgURL: product.images[0] ?? '',
+      brandName: product.brandName,
+      productName: product.name,
+      price: formattedPrice,
+      originalPrice: formattedOriginalPrice,
+      href: `/bekleidung/${brandSlug}/${productSlug}`,
+      colours: colorsForSelector,
+      createdAt: product.createdAt,
+      sizes: [...new Set(product.variants.filter(v => v.stockQuantity > 0).map(v => v.size))],
+      catalogue: product.catalogueCategory ?? undefined,
+    }
+    toggleWishlist(item)
+    if (!wasSaved) {
+      setJustSaved(true)
+      window.setTimeout(() => setJustSaved(false), 500)
+    }
+  }
+
+  // Native share sheet where available (mostly mobile — see ImageGallery's `lg:hidden` on this
+  // button); falls back to copying the link, same "copied" acknowledgment pattern as copySku.
+  const handleShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : ''
+    const shareData = { title: product.name, text: `${product.brandName} — ${product.name}`, url }
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try { await navigator.share(shareData) } catch { /* user cancelled the share sheet */ }
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      setShareCopied(true)
+      setTimeout(() => setShareCopied(false), 1600)
+    } catch { /* noop */ }
+  }
+
+  const toggleAccordion = (key: string) => setOpenAccordion(prev => (prev === key ? null : key))
 
   const ctaDisabled = !available || isOutOfStock || variantUnavailable
   const ctaLabel = !available
@@ -205,7 +254,15 @@ export default function ProductDetails({
 
           {/* LEFT — Gallery + Breadcrumb */}
           <div>
-            <ImageGallery images={product.images} productName={product.name} />
+            <ImageGallery
+              images={product.images}
+              productName={product.name}
+              saved={saved}
+              onToggleSaved={handleToggleSaved}
+              justSaved={justSaved}
+              onShare={handleShare}
+              shareCopied={shareCopied}
+            />
             <nav className="px-6 sm:px-8 py-4 sm:py-[22px]">
               <ol
                 className="flex items-center flex-wrap gap-x-2.5 gap-y-1 sm:gap-x-3 text-enunas-gray-medium"
@@ -368,7 +425,7 @@ export default function ProductDetails({
                 id="details"
                 title="Produktdetails"
                 open={openAccordion === 'details'}
-                onToggle={() => toggle('details')}
+                onToggle={() => toggleAccordion('details')}
               >
                 {product.description && (
                   <p style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: '16px', lineHeight: 1.7, color: '#2D2D2D', marginBottom: '16px' }}>
@@ -415,7 +472,7 @@ export default function ProductDetails({
                 id="shipping"
                 title="Versand & Rückgabe"
                 open={openAccordion === 'shipping'}
-                onToggle={() => toggle('shipping')}
+                onToggle={() => toggleAccordion('shipping')}
               >
                 <p style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: '16px', lineHeight: 1.7, color: '#2D2D2D' }}>
                   Versand aus {product.originCountry || 'DE'}. {product.returnPeriodDays ?? 14} Tage Rückgaberecht ab Erhalt der Ware.
@@ -426,7 +483,7 @@ export default function ProductDetails({
                 id="care"
                 title="Pflegehinweise"
                 open={openAccordion === 'care'}
-                onToggle={() => toggle('care')}
+                onToggle={() => toggleAccordion('care')}
                 isLast
               >
                 <PflegeAccordionContent careInstructions={product.careInstructions} />

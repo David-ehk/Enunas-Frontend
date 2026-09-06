@@ -235,36 +235,24 @@ const css = `
   margin-top: 4px; text-align: right;
 }
 
-/* Checkout CTA */
+/* Checkout CTA — identical treatment to the site "Abonnieren" / "Weiter einkaufen"
+   buttons (Subscribe.tsx, checkout/page.tsx): purple fill, Cormorant 18px/0.06em,
+   two white hairlines that contract to 70% on hover. */
 .enu-checkout {
   width: 100%; margin-top: 18px; position: relative; overflow: hidden;
-  background: var(--acc); color: #fff; border: 0; padding: 18px;
+  background: var(--acc); color: #fff; border: 0; padding: 16px 32px;
   font-family: 'Cormorant Garamond', Georgia, serif;
-  /* Light (300), not Regular: white serif on this solid purple fill reads visually heavier
-     than the same weight does dark-on-white (irradiation) — Light is what actually renders as
-     the site's normal elegant weight here. Same fix as the /cart page's own "Zur Kasse" button
-     (CartSummary.tsx). */
-  font-size: 18px; font-weight: 300; letter-spacing: 0.06em;
+  font-size: 18px; font-weight: 400; letter-spacing: 0.06em;
   display: flex; align-items: center; justify-content: center; gap: 12px;
   cursor: pointer; text-decoration: none;
   transition: background 300ms var(--ease-q);
 }
 .enu-checkout .enu-lock { display: flex; opacity: 0.85; }
 .enu-checkout:hover { background: #250838; }
-/* Diagonal shimmer sweep — premium glow on hover */
-.enu-checkout::after {
-  content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
-  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.22), transparent);
-  transform: skewX(-18deg); transition: left 720ms var(--ease);
-  pointer-events: none;
-}
-.enu-checkout:hover::after { left: 120%; }
-/* Two hairlines that contract on hover */
 .enu-checkout-line {
   position: absolute; left: 50%; transform: translateX(-50%);
-  width: 100%; height: 1px; background: rgba(255,255,255,0.55);
-  transition: width 500ms cubic-bezier(0.16, 1, 0.3, 1);
-  pointer-events: none;
+  width: 100%; height: 1px; background: rgba(255,255,255,0.6);
+  transition: width 500ms var(--ease); pointer-events: none;
 }
 .enu-checkout-line.top { top: 14%; }
 .enu-checkout-line.bot { bottom: 14%; }

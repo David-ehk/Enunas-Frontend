@@ -487,24 +487,11 @@ export default function FilterSidebar({
         }}>
           <button
             onClick={onClose}
-            onMouseEnter={e => { e.currentTarget.style.background = '#1E1E1E' }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#0A0A0A' }}
-            style={{
-              width: '100%',
-              padding: '17px 0',
-              background: '#0A0A0A',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-              fontFamily: "'League Spartan', sans-serif",
-              fontSize: 10,
-              letterSpacing: '0.28em',
-              textTransform: 'uppercase',
-              fontWeight: 600,
-              transition: 'background 220ms ease',
-            }}
+            className="group relative w-full overflow-hidden bg-enunas-purple text-white py-4 hover:bg-enunas-purple-dark transition-colors duration-300 ease-out-expo"
           >
-            {resultCount} Artikel anzeigen
+            <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
+            <span className="relative z-10 font-cormorant text-[18px] tracking-[0.06em]">{resultCount} Artikel anzeigen</span>
+            <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
           </button>
         </div>
       </div>

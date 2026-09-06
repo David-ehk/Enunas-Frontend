@@ -53,35 +53,12 @@ export interface Address {
   isDefault: boolean;
 }
 
-export interface PaymentMethod {
-  id: string;
-  type: 'visa' | 'mastercard' | 'paypal' | 'klarna' | 'applepay';
-  label: string;
-  last4?: string;
-  expiryMonth?: number;
-  expiryYear?: number;
-  email?: string;
-  isDefault: boolean;
-}
-
 export interface UserProfile {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   dateOfBirth: string;
-}
-
-export interface NewsletterCategory {
-  id: string;
-  label: string;
-  description: string;
-  active: boolean;
-}
-
-export interface NewsletterPrefs {
-  subscribed: boolean;
-  categories: NewsletterCategory[];
 }
 
 export interface WishlistEntry {
@@ -200,13 +177,6 @@ export function getMockAddresses(): Address[] {
   ];
 }
 
-export function getMockPaymentMethods(): PaymentMethod[] {
-  return [
-    { id: 'pay-1', type: 'visa', label: 'Visa', last4: '4242', expiryMonth: 9, expiryYear: 2027, isDefault: true },
-    { id: 'pay-2', type: 'paypal', label: 'PayPal', email: 'alex@example.com', isDefault: false },
-  ];
-}
-
 export function getMockProfile(): UserProfile {
   return {
     firstName: 'Alex',
@@ -214,18 +184,6 @@ export function getMockProfile(): UserProfile {
     email: 'alex@example.com',
     phone: '+49 170 1234567',
     dateOfBirth: '1992-08-14',
-  };
-}
-
-export function getMockNewsletterPrefs(): NewsletterPrefs {
-  return {
-    subscribed: true,
-    categories: [
-      { id: 'new', label: 'Neuankömmlinge', description: 'Neue Kollektionen und frische Drops zuerst', active: true },
-      { id: 'sale', label: 'Sale & Angebote', description: 'Exklusive Rabatte und Flash-Sales', active: false },
-      { id: 'drops', label: 'Limitierte Drops', description: 'Exklusive Releases und Kooperationen', active: true },
-      { id: 'editorial', label: 'Editorial', description: 'Stories, Lookbooks und Inspirationen', active: true },
-    ],
   };
 }
 

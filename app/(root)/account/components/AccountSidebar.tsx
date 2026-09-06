@@ -8,8 +8,6 @@ export type AccountSection =
   | 'bestellungen'
   | 'wunschliste'
   | 'adressen'
-  | 'zahlungen'
-  | 'newsletter'
   | 'einstellungen'
 
 interface NavItem {
@@ -22,8 +20,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'bestellungen',  label: 'Bestellungen' },
   { id: 'wunschliste',   label: 'Wunschliste' },
   { id: 'adressen',      label: 'Adressen' },
-  { id: 'zahlungen',     label: 'Zahlungsmethoden' },
-  { id: 'newsletter',    label: 'Newsletter' },
   { id: 'einstellungen', label: 'Einstellungen' },
 ]
 

@@ -4,7 +4,7 @@ const HeroNew = ({ count, loading = false }: { count?: number; loading?: boolean
 
       {/* Photo — fills the section, no overlap with navbar needed since section is in normal flow */}
       <img
-        src="/assets/images/NEWIN.jpg"
+        src="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbrfIHABpCO3JYSUEtWXlN4R9fmP51DQnaLgeG"
         alt="New in"
         style={{
           position: 'absolute',

@@ -4,7 +4,7 @@ const HeroTrendy = ({ count, loading = false }: { count?: number; loading?: bool
 
       {/* Photo */}
       <img
-        src="/assets/images/TRENDY.jpg"
+        src="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbEjpFAQkSvJt4go7bMAYej9qRVTcdUEW5PfGx"
         alt="Trendy"
         style={{
           position: 'absolute',

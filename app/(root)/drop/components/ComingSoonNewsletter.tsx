@@ -58,7 +58,7 @@ export default function ComingSoonNewsletter() {
       <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
         <video
           ref={videoRef}
-          src="/assets/Videos/Version1Enunas.mp4"
+          src="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWb2WGqVP7isC1V3ItrQiuhO5KGRm6Ue0BLyTDl"
           autoPlay loop muted playsInline
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',

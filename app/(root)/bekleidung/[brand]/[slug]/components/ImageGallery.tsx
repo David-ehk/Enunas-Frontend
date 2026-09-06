@@ -5,9 +5,77 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 interface ImageGalleryProps {
   images: string[];
   productName: string;
+  /** Wired up by ProductDetails — omitted entirely hides the heart button. */
+  saved?: boolean;
+  onToggleSaved?: () => void;
+  /** Plays the one-shot pop when a heart is saved (not on unsave). */
+  justSaved?: boolean;
+  /** Omitted hides the share button. Rendered on md/sm only — see GalleryActions. */
+  onShare?: () => void;
+  /** Brief "Link kopiert" acknowledgment when Web Share isn't available and the URL was
+      copied to the clipboard instead. */
+  shareCopied?: boolean;
 }
 
-function ImageGallery({ images, productName }: ImageGalleryProps) {
+// Heart + share, overlaid top-right on the hero image — same spot and same heart used on
+// product cards elsewhere (PopularProductCard.tsx), so saving reads as the same action
+// everywhere. Share is native (`navigator.share`) where available, which desktop browsers
+// mostly don't offer, hence `lg:hidden` — on desktop there's no OS share sheet to hand the link
+// to, so the button would just always fall through to "copy link", better done in one place.
+function GalleryActions({ saved, onToggleSaved, justSaved, onShare, shareCopied }: Omit<ImageGalleryProps, 'images' | 'productName'>) {
+  if (!onToggleSaved && !onShare) return null
+  return (
+    <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+      {onToggleSaved && (
+        <button
+          type="button"
+          onClick={onToggleSaved}
+          aria-label={saved ? 'Von Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
+          aria-pressed={saved}
+          className="w-10 h-10 rounded-full bg-white/85 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-colors duration-200"
+        >
+          <svg
+            className={`w-5 h-5 transition-colors ${saved ? 'text-enunas-purple' : 'text-enunas-black'} ${justSaved ? 'animate-heart-pop' : ''}`}
+            fill={saved ? 'currentColor' : 'none'}
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+            />
+          </svg>
+        </button>
+      )}
+      {onShare && (
+        <div className="relative lg:hidden">
+          <button
+            type="button"
+            onClick={onShare}
+            aria-label="Seite teilen"
+            className="w-10 h-10 rounded-full bg-white/85 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-colors duration-200"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-enunas-black">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <path d="M8.6 10.6l6.8-3.8M8.6 13.4l6.8 3.8" />
+            </svg>
+          </button>
+          {shareCopied && (
+            <span className="absolute top-full right-0 mt-2 whitespace-nowrap bg-enunas-black text-white text-[11px] px-2.5 py-1 rounded pointer-events-none">
+              Link kopiert
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, onShare, shareCopied }: ImageGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
   const imageRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -60,9 +128,10 @@ function ImageGallery({ images, productName }: ImageGalleryProps) {
   if (images.length === 0) {
     return (
       <div
-        className="w-full h-[60vh] md:h-[100vh] flex flex-col items-center justify-center"
+        className="relative w-full h-[60vh] md:h-[100vh] flex flex-col items-center justify-center"
         style={{ background: '#F5F5F0' }}
       >
+        <GalleryActions saved={saved} onToggleSaved={onToggleSaved} justSaved={justSaved} onShare={onShare} shareCopied={shareCopied} />
         <svg
           width="48" height="48" viewBox="0 0 48 48" fill="none"
           style={{ opacity: 0.18, marginBottom: '16px' }}
@@ -89,6 +158,8 @@ function ImageGallery({ images, productName }: ImageGalleryProps) {
 
   return (
     <div className="relative w-full h-[60vh] md:h-[100vh]">
+      <GalleryActions saved={saved} onToggleSaved={onToggleSaved} justSaved={justSaved} onShare={onShare} shareCopied={shareCopied} />
+
       {/* Quadrat-Indikator - Unten auf Mobile, Links auf Desktop */}
       <div className="absolute z-20 bottom-4 left-1/2 -translate-x-1/2 flex flex-row gap-3 md:bottom-auto md:left-4 md:top-1/2 md:-translate-y-1/2 md:translate-x-0 md:flex-col">
         {images.map((_, index) => (

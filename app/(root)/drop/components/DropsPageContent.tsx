@@ -446,7 +446,7 @@ export default function DropsPageContent() {
       {/* ══════════════════════ HERO ══════════════════════ */}
       <section style={{ position: 'relative', height: 640, overflow: 'hidden' }}>
         <video
-          src="/assets/Videos/Inspiration.mp4"
+          src="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWb2WGqVP7isC1V3ItrQiuhO5KGRm6Ue0BLyTDl"
           autoPlay loop muted playsInline
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',

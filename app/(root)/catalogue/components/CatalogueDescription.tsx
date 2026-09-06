@@ -78,7 +78,7 @@ function CatalogueDescription() {
         philosophy="Wenn du dich beim Anziehen nicht erklären musst, dann bist du hier richtig."
         href="/bekleidung/streetwear"
         imageFirst={true}
-        imageSrc="/assets/images/Test1.WebP"
+        imageSrc="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbtHIlEDhG6Y2kcfPEpBKhCNUQTLJxsWyoARO0"
       />
 
       {/* Experimental */}
@@ -102,7 +102,7 @@ function CatalogueDescription() {
         philosophy="Wenn Stil und Bewegung für dich kein Widerspruch sind, sondern eine Selbstverständlichkeit"
         href="/bekleidung/athleisure"
         imageFirst={true}
-        imageSrc="/assets/images/Test3.WebP"
+        imageSrc="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWb0EblCQrBXq53z9PRKSjkdsgaJcHbGTtnfQC1"
       />
 
       {/* Culture */}
@@ -114,7 +114,7 @@ function CatalogueDescription() {
         philosophy="Du interessierst dich für die Geschichten hinter der Mode, und für dich ist sie ein Ausdruck von Inspiration, um dich mit der Welt zu verbinden."
         href="/bekleidung/cultural"
         imageFirst={false}
-        imageSrc="/assets/images/Test4.WebP"
+        imageSrc="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbTw1Ou2RpfFK1aboweMAYBCUvi498QlNzmyDk"
       />
 
       {/* Star */}
@@ -126,7 +126,7 @@ function CatalogueDescription() {
         philosophy="Du musst nichts erklären – dein Stil macht das."
         href="/bekleidung/star"
         imageFirst={true}
-        imageSrc="/assets/images/Test1.WebP"
+        imageSrc="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbUFTrjg0CkowKO0cMZUjxbWqG5AnJDLrlYgd9"
       />
 
     </section>
