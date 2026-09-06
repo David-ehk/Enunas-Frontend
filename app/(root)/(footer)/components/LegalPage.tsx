@@ -66,8 +66,9 @@ export default function LegalPage({ kicker, title, lede, meta, sections, contact
         </div>
 
         <h1
+          lang="de"
           className="font-light m-0 leading-[0.94] tracking-[-0.01em]"
-          style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: 'clamp(52px, 8vw, 116px)', marginTop: 52, maxWidth: 1100 }}
+          style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: 'clamp(44px, 8vw, 116px)', marginTop: 52, maxWidth: 1100, overflowWrap: 'break-word', hyphens: 'auto' }}
         >
           {title}
         </h1>
@@ -153,16 +154,23 @@ export default function LegalPage({ kicker, title, lede, meta, sections, contact
               id={s.id}
               style={{ padding: '80px 0', borderBottom: '1px solid #DCDCD5' }}
             >
-              <div className="flex items-center gap-5 mb-7">
+              <div className="flex items-baseline gap-3 sm:gap-5 mb-7">
                 <span
                   className="font-normal flex-shrink-0"
-                  style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: 22, color: '#370E4D', minWidth: 52, letterSpacing: '0.02em' }}
+                  style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: 22, color: '#370E4D', minWidth: 40, letterSpacing: '0.02em' }}
                 >
                   {s.num}
                 </span>
                 <h2
-                  className="font-light leading-[1.02] m-0 uppercase"
-                  style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: 'clamp(24px, 2.5vw, 36px)', letterSpacing: '0.12em' }}
+                  lang="de"
+                  className="font-light leading-[1.02] m-0 uppercase min-w-0"
+                  style={{
+                    fontFamily: 'var(--font-Cormorant-Garamond)',
+                    fontSize: 'clamp(22px, 2.5vw, 36px)',
+                    letterSpacing: '0.08em',
+                    overflowWrap: 'break-word',
+                    hyphens: 'auto',
+                  }}
                 >
                   {s.title}
                 </h2>

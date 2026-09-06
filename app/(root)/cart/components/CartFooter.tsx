@@ -34,13 +34,13 @@ export default function CartFooter() {
               Können wir dir behilflich sein?
             </p>
             <p className="font-cormorant text-[17px] sm:text-[22px] font-light leading-[1.45] text-white/95">
-              Unser Kundenservice ist Montag bis Samstag von 9:30 – 19:00 Uhr für dich da.
+              Unser Kundenservice ist Montag bis Samstag von 10:00 – 18:00 Uhr für dich da.
             </p>
             <Link
-              href="mailto:contact@enunas.com"
+              href="mailto:info@enunas.com"
               className="inline-block mt-3 sm:mt-[18px] font-cormorant italic text-[16px] sm:text-[20px] text-white pb-0.5 border-b border-white/40 hover:border-white transition-colors duration-200 no-underline"
             >
-              contact@enunas.com
+              info@enunas.com
             </Link>
           </div>
         </div>

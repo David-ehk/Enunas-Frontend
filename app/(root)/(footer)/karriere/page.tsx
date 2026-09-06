@@ -133,10 +133,10 @@ export default function KarrierePage() {
               className="text-[20px] lg:text-[22px] font-light italic text-[#6B6B6B] m-0"
               style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
             >
-              jobs@enunas.com
+              info@enunas.com
             </p>
             <a
-              href="mailto:jobs@enunas.com"
+              href="mailto:info@enunas.com"
               className="inline-block px-10 py-[18px] bg-[#370E4D] text-white text-[11px] uppercase tracking-[0.2em] hover:bg-[#4A1566] transition-colors duration-200 no-underline"
               style={{ fontFamily: 'var(--font-league-spartan)' }}
             >

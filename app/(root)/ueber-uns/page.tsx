@@ -109,7 +109,7 @@ export default function UeberUnsPage() {
       <div className="grid lg:grid-cols-[5fr_7fr]">
         <div className="relative h-[300px] lg:h-[500px] overflow-hidden">
           <Image
-            src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=900&auto=format&fit=crop&q=80"
+            src="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbUWYc1N0CkowKO0cMZUjxbWqG5AnJDLrlYgd9"
             alt="Enunas — Our story"
             fill
             className="object-cover"

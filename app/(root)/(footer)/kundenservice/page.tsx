@@ -28,10 +28,10 @@ export default function KundenservicePage() {
           <h2 className="text-[11px] uppercase tracking-[0.15em] text-[#0A0A0A] mb-2">E-Mail</h2>
           <p className="text-[#6B6B6B] mb-3">Antwort innerhalb von 24 Stunden (Mo–Fr)</p>
           <a
-            href="mailto:service@enunas.de"
+            href="mailto:info@enunas.com"
             className="text-[#370E4D] underline hover:text-[#4A1566] transition-colors"
           >
-            service@enunas.de
+            info@enunas.com
           </a>
         </div>
 

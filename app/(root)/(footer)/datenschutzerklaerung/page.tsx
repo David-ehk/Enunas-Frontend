@@ -6,7 +6,7 @@ const sections: LegalSection[] = [
     id: 'v', num: '01', label: 'Verantwortlicher', title: 'Verantwortlicher',
     paras: [
       'Verantwortlich für die Verarbeitung personenbezogener Daten auf dieser Website ist David Emmanuel Hod Konan (Einzelunternehmen „Enunas"), Appenzellerstr. 113, 81475 München.',
-      ['Datenschutz-Kontakt', 'datenschutz@enunas.com'],
+      ['Datenschutz-Kontakt', 'info@enunas.com'],
     ],
   },
   {
@@ -35,7 +35,7 @@ const sections: LegalSection[] = [
     id: 'n', num: '05', label: 'Newsletter', title: 'Newsletter',
     paras: [
       'Mit Ihrer ausdrücklichen Einwilligung senden wir Ihnen unseren Newsletter. Die Anmeldung erfolgt im Double-Opt-In-Verfahren; Zeitpunkt und IP-Adresse werden als Nachweis gespeichert.',
-      'Sie können den Newsletter jederzeit abbestellen — über den Abmelde-Link oder per E-Mail an newsletter@enunas.com.',
+      'Sie können den Newsletter jederzeit abbestellen — über den Abmelde-Link oder per E-Mail an info@enunas.com.',
     ],
   },
   {
@@ -54,7 +54,7 @@ const sections: LegalSection[] = [
   {
     id: 'r', num: '08', label: 'Ihre Rechte', title: 'Ihre Rechte nach DSGVO',
     paras: [
-      'Ihnen stehen zu: Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20) sowie Widerspruch (Art. 21 DSGVO). Zur Ausübung: datenschutz@enunas.com.',
+      'Ihnen stehen zu: Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20) sowie Widerspruch (Art. 21 DSGVO). Zur Ausübung: info@enunas.com.',
       ['Beschwerderecht', 'Bayerisches Landesamt für Datenschutzaufsicht (BayLDA), Promenade 18, 91522 Ansbach.'],
     ],
   },
@@ -84,7 +84,7 @@ export default function DatenschutzerklaerungPage() {
         aside: 'Sie möchten Ihre Rechte ausüben oder haben Fragen? Melden Sie sich.',
         eyebrow: 'Datenschutz-Team',
         heading: <>Ihre Daten, Ihre Wahl</>,
-        email: 'datenschutz@enunas.com',
+        email: 'info@enunas.com',
         hours: 'Antwort binnen 5 Werktagen',
       }}
     />
