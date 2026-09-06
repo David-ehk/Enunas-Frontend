@@ -6,10 +6,10 @@
 
 import Link from 'next/link'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
-import type { WishlistEntry } from '@/lib/account'
+import type { WishlistItem } from '@/app/context/WishlistContext'
 
 interface WishlistPreviewProps {
-  items: WishlistEntry[];
+  items: WishlistItem[];
 }
 
 export default function WishlistPreview({ items }: WishlistPreviewProps) {

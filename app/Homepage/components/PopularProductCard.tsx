@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useAuth } from "@/app/context/AuthContext"
-import { useWishlist } from "@/app/context/WishlistContext"
+import { useWishlist, type WishlistItem } from "@/app/context/WishlistContext"
 
 interface ProductColour {
   hex: string;
@@ -94,6 +94,10 @@ const PopularProductCard = ({
   const { isAuthenticated } = useAuth();
   const { isSaved, toggle } = useWishlist();
   const saved = id ? isSaved(id) : false;
+  // Only plays on the save direction — a bounce on *removing* a heart reads as "that went
+  // wrong", not as confirmation. Cleared on a timer rather than an animationend listener so it
+  // can't get stuck true if the card unmounts mid-animation (e.g. filters re-sorting the grid).
+  const [justSaved, setJustSaved] = useState(false);
 
   function handleToggleSaved(e: React.MouseEvent) {
     e.preventDefault();
@@ -103,7 +107,16 @@ const PopularProductCard = ({
       router.push('/account');
       return;
     }
-    toggle(id);
+    const wasSaved = saved;
+    const item: WishlistItem = {
+      id, imgURL, brandName, productName, price, originalPrice, href,
+      colours, createdAt, sizes, catalogue: displayCategories,
+    };
+    toggle(item);
+    if (!wasSaved) {
+      setJustSaved(true);
+      window.setTimeout(() => setJustSaved(false), 500);
+    }
   }
 
   return (
@@ -138,7 +151,7 @@ const PopularProductCard = ({
             aria-pressed={saved}
           >
             <svg
-              className={`w-5 h-5 transition-colors ${saved ? 'text-enunas-purple' : 'text-enunas-black hover:text-enunas-purple'}`}
+              className={`w-5 h-5 transition-colors ${saved ? 'text-enunas-purple' : 'text-enunas-black hover:text-enunas-purple'} ${justSaved ? 'animate-heart-pop' : ''}`}
               fill={saved ? 'currentColor' : 'none'}
               stroke="currentColor"
               viewBox="0 0 24 24"

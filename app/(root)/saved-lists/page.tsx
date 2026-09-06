@@ -1,96 +1,19 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import Link from 'next/link'
 import Navbar from '@/app/Homepage/components/navbar'
 import Footer from '@/app/Homepage/components/footer'
-import { useAuth } from '@/app/context/AuthContext'
-import { wardrobeApi, apiProductToCardShape } from '@/lib/api'
-import type { ProductCardShape } from '@/lib/api'
+import { useWishlist } from '@/app/context/WishlistContext'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 import { segmentBreakdown } from '@/lib/product'
-import type { ApiWardrobeItem } from '@/types/api'
 
 export default function SavedListsPage() {
-  const { isAuthenticated, isLoading } = useAuth()
-  const [items, setItems] = useState<ApiWardrobeItem[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setLoading(false)
-      return
-    }
-    wardrobeApi.getAll()
-      .then(setItems)
-      .catch(() => setItems([]))
-      .finally(() => setLoading(false))
-  }, [isAuthenticated])
+  const { items } = useWishlist()
 
   // Which catalogues the list leans towards. A product counts once per segment,
   // so the totals can exceed items.length when a piece sits in two catalogues.
-  const breakdown = useMemo(() => segmentBreakdown(items.map(i => i.product)), [items])
-
-  async function handleRemove(id: string) {
-    try {
-      await wardrobeApi.remove(id)
-      setItems(prev => prev.filter(i => i.id !== id))
-    } catch {
-      // silently fail
-    }
-  }
-
-  if (isLoading || loading) {
-    return (
-      <>
-        <Navbar />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="w-8 h-8 border-2 border-enunas-gray-light border-t-enunas-purple rounded-full animate-spin" />
-        </div>
-      </>
-    )
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <>
-        <Navbar />
-        <div className="flex flex-col items-center justify-center px-4 text-center" style={{ paddingTop: '200px', paddingBottom: '200px' }}>
-          <h1
-            className="text-3xl text-enunas-black mb-4"
-            style={{ fontFamily: 'var(--font-Cormorant-Garamond)' }}
-          >
-            Deine Favoriten
-          </h1>
-          <p className="font-league-spartan text-sm text-enunas-gray-medium mb-8">
-            Melde dich an, um deine gespeicherten Artikel zu sehen.
-          </p>
-          <Link
-            href="/account"
-            className="group relative inline-block overflow-hidden"
-            style={{
-              padding: '16px 32px',
-              background: '#370E4D',
-              fontFamily: 'var(--font-Cormorant-Garamond)',
-              fontSize: '18px',
-              fontWeight: 400,
-              letterSpacing: '0.06em',
-              color: 'white',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#250838' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#370E4D' }}
-          >
-            <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
-            <span className="relative z-10">Anmelden</span>
-            <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
-          </Link>
-        </div>
-        <footer className="bg-enunas-purple w-full px-4 sm:px-8 lg:px-16 pt-12 sm:pt-24 pb-8">
-          <Footer />
-        </footer>
-      </>
-    )
-  }
+  const breakdown = useMemo(() => segmentBreakdown(items), [items])
 
   return (
     <>
@@ -158,24 +81,9 @@ export default function SavedListsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6 max-w-[1800px] mx-auto">
-              {items.map(item => {
-                const card: ProductCardShape = apiProductToCardShape(item.product)
-                return (
-                  <div key={item.id} className="relative group">
-                    <PopularProductCard {...card} />
-                    <button
-                      onClick={() => handleRemove(item.id)}
-                      className="absolute top-2 right-2 z-10 w-7 h-7 bg-white border border-enunas-gray-light flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:border-enunas-error hover:text-enunas-error"
-                      aria-label="Aus Favoriten entfernen"
-                    >
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <line x1="1" y1="1" x2="11" y2="11" />
-                        <line x1="11" y1="1" x2="1" y2="11" />
-                      </svg>
-                    </button>
-                  </div>
-                )
-              })}
+              {items.map(item => (
+                <PopularProductCard key={item.id} {...item} />
+              ))}
             </div>
           )}
         </section>

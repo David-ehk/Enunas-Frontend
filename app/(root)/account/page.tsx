@@ -14,27 +14,10 @@ import Zahlungen from './components/Zahlungen'
 import Newsletter from './components/Newsletter'
 import Einstellungen from './components/Einstellungen'
 import { orderApi } from '@/lib/api/modules/orderApi'
-import { wardrobeApi } from '@/lib/api/modules/wardrobeApi'
 import { authApi } from '@/lib/api/modules/authApi'
 import GoogleLoginButton from '@/components/auth/GoogleLoginButton'
-import type { ApiOrder, ApiWardrobeItem } from '@/types/api'
-import type { WishlistEntry } from '@/lib/account'
-
-function wardrobeToWishlist(item: ApiWardrobeItem): WishlistEntry {
-  const p = item.product
-  return {
-    id: item.id,
-    imgURL: p.images[0] ?? '',
-    brandName: p.brandName,
-    productName: p.name,
-    price: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(p.price),
-    href: `/bekleidung/${p.category}/${p.slug}`,
-    colours: p.colours,
-    createdAt: item.addedAt,
-    sizes: p.sizes,
-    catalogue: p.catalogue,
-  }
-}
+import { useWishlist } from '@/app/context/WishlistContext'
+import type { ApiOrder } from '@/types/api'
 
 const SECTION_TITLES: Record<AccountSection, string> = {
   uebersicht:    'Übersicht',
@@ -186,9 +169,9 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
 export default function AccountPage() {
   const [activeSection, setActiveSection] = useState<AccountSection>('uebersicht')
   const [lastOrder, setLastOrder] = useState<ApiOrder | null | undefined>(undefined)
-  const [wishlistItems, setWishlistItems] = useState<WishlistEntry[]>([])
 
   const { user, customer, isAuthenticated, isLoading } = useAuth()
+  const { items: wishlistItems } = useWishlist()
   const greetingName = customer?.firstName ?? user?.email?.split('@')[0] ?? ''
 
   const loadOverview = useCallback(async () => {
@@ -197,12 +180,8 @@ export default function AccountPage() {
       return
     }
     try {
-      const [orderPage, wardrobe] = await Promise.all([
-        orderApi.getMyOrders(0, 1).catch(() => null),
-        wardrobeApi.getAll().catch((): ApiWardrobeItem[] => []),
-      ])
+      const orderPage = await orderApi.getMyOrders(0, 1).catch(() => null)
       setLastOrder(orderPage?.content[0] ?? null)
-      setWishlistItems(wardrobe.map(wardrobeToWishlist))
     } catch {
       setLastOrder(null)
     }
