@@ -14,7 +14,7 @@ import StockIndicator from './StockIndicator'
 import PflegeAccordionContent from './PflegeAccordionContent'
 import StickyAddToCart from './StickyAddToCart'
 import ComingSoonCountdown from '@/components/ComingSoonCountdown'
-import { formatReleaseDate } from '@/lib/preview'
+import { formatReleaseDate, previewReleaseMs } from '@/lib/preview'
 import Link from 'next/link'
 import { X } from 'lucide-react'
 import { Product, findVariant, uniqueColors } from '../types/product'
@@ -69,6 +69,12 @@ export default function ProductDetails({
   const [justSaved, setJustSaved] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
 
+  // The product arrives as preview; once the backend flips it (checked on focus/visibility after
+  // the release instant) we refetch and drop the preview UI in place — no navigation. Spec §6.
+  const [livePreview, setLivePreview] = useState(preview)
+  const [livePrice, setLivePrice] = useState<number>(price)
+  const [liveOriginalPrice, setLiveOriginalPrice] = useState<number | null>(originalPrice ?? null)
+
   // Listings tell us availability AND the price of the specific variant once one is picked.
   // The pairing hazard is only in AGGREGATING across listings — the cheapest current price and
   // the cheapest list price can come from different rows and produce a nonsense pair. Within a
@@ -86,14 +92,45 @@ export default function ProductDetails({
   const { isSaved, toggle: toggleWishlist } = useWishlist()
 
   useEffect(() => {
-    if (!productId || preview) return   // preview products have no listings (backend returns [])
+    if (!productId || livePreview) return   // preview products have no listings (backend returns [])
     setListingsLoading(true)
     setListingsFailed(false)
     productApi.getListings(productId)
       .then(setListings)
       .catch(() => setListingsFailed(true))
       .finally(() => setListingsLoading(false))
-  }, [productId, preview])
+  }, [productId, livePreview])
+
+  // Live transition at release time: once we're past the UTC release instant, re-check the
+  // backend on focus / visibility change. When it reports the product live, swap the preview UI
+  // for the buyable one in place. No polling — only focus/visibilitychange + one mount check.
+  useEffect(() => {
+    if (!livePreview || !product.releaseDate) return
+    const target = previewReleaseMs(product.releaseDate)
+
+    const check = async () => {
+      if (Date.now() < target) return
+      try {
+        const fresh = await productApi.getBySlug(productSlug)
+        if (!fresh.preview) {
+          setLivePreview(false)
+          setLivePrice(fresh.price)
+          setLiveOriginalPrice(fresh.originalPrice ?? null)
+        }
+      } catch {
+        /* transient — try again on the next focus */
+      }
+    }
+
+    const onVisible = () => { if (document.visibilityState === 'visible') check() }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('focus', check)
+    check() // in case the tab was already past the release when mounted
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('focus', check)
+    }
+  }, [livePreview, product.releaseDate, productSlug])
 
   const selectedVariant = findVariant(product.variants, selectedColor?.name ?? null, selectedSize)
   // SKU shown as soon as a color is selected — not size-dependent
@@ -125,18 +162,21 @@ export default function ProductDetails({
     if (activeListing) return listingPriceView(activeListing)
     // Otherwise the product-level pair, which the backend derives from the cheapest sellable
     // listing — the "ab €X" figure.
-    return { current: price, original: originalPrice ?? null }
-  }, [activeListing, price, originalPrice])
+    return { current: livePrice, original: liveOriginalPrice }
+  }, [activeListing, livePrice, liveOriginalPrice])
 
   const money = useMemo(
     () => new Intl.NumberFormat('de-DE', { style: 'currency', currency }),
     [currency],
   )
 
+  // While preview is live the product is never buyable, regardless of the server `available` prop.
+  const effectiveAvailable = livePreview ? false : available
+
   // Never render a null-priced product as 0,00 €.
-  const formattedPrice = available ? money.format(priceView.current) : 'Preis nicht verfügbar'
+  const formattedPrice = effectiveAvailable ? money.format(priceView.current) : 'Preis nicht verfügbar'
   const formattedOriginalPrice =
-    available && priceView.original != null ? money.format(priceView.original) : null
+    effectiveAvailable && priceView.original != null ? money.format(priceView.original) : null
   // Percentage is presentation only — the sale itself is decided by `originalPrice != null`,
   // never by comparing the two numbers.
   const discountPct =
@@ -177,13 +217,13 @@ export default function ProductDetails({
   }
 
   const handleAddToCart = (size: string) => {
-    if (!available) return
+    if (!effectiveAvailable) return
     addToCart(buildCartItem(size))
     openCart()
   }
 
   const handleCta = () => {
-    if (preview || !available || isOutOfStock || variantUnavailable) return
+    if (livePreview || !effectiveAvailable || isOutOfStock || variantUnavailable) return
     if (!selectedSize) { setShowSizeModal(true); return }
     handleAddToCart(selectedSize)
   }
@@ -241,10 +281,10 @@ export default function ProductDetails({
 
   const toggleAccordion = (key: string) => setOpenAccordion(prev => (prev === key ? null : key))
 
-  const ctaDisabled = preview || !available || isOutOfStock || variantUnavailable
-  const ctaLabel = preview
+  const ctaDisabled = livePreview || !effectiveAvailable || isOutOfStock || variantUnavailable
+  const ctaLabel = livePreview
     ? 'Coming Soon'
-    : !available
+    : !effectiveAvailable
     ? 'Derzeit nicht verfügbar'
     : isOutOfStock
     ? 'Ausverkauft'
@@ -322,7 +362,7 @@ export default function ProductDetails({
             <InspirationStory text={product.inspirationStory} />
 
             {/* 5. Price */}
-            {preview ? (
+            {livePreview ? (
               <div className="flex flex-col items-center gap-3 mb-10">
                 {product.releaseDate && (
                   <>
@@ -332,7 +372,11 @@ export default function ProductDetails({
                     >
                       Kommt am {formatReleaseDate(product.releaseDate)}
                     </span>
-                    <ComingSoonCountdown releaseDate={product.releaseDate} variant="pdp" />
+                    <ComingSoonCountdown
+                      releaseDate={product.releaseDate}
+                      variant="pdp"
+                      onElapsed={() => { /* focus/visibility listeners re-check on the next interaction */ }}
+                    />
                   </>
                 )}
               </div>
@@ -519,8 +563,8 @@ export default function ProductDetails({
       {/* ── Sticky add-to-cart bar ──────────────────────── */}
       <StickyAddToCart
         productName={product.name}
-        formattedPrice={preview && product.releaseDate ? `Kommt am ${formatReleaseDate(product.releaseDate)}` : formattedPrice}
-        selectedSize={preview ? null : selectedSize}
+        formattedPrice={livePreview && product.releaseDate ? `Kommt am ${formatReleaseDate(product.releaseDate)}` : formattedPrice}
+        selectedSize={livePreview ? null : selectedSize}
         ctaLabel={ctaLabel}
         isOutOfStock={ctaDisabled}
         onCta={handleCta}
