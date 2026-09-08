@@ -56,8 +56,11 @@ function mockToApiProduct(m: (typeof mockProducts)[number]): ApiProduct {
 // active listing comes back with a null price, which would otherwise render as 0,00 € and still
 // be addable to the basket. Detail routes deliberately do NOT use this — the PDP keeps rendering
 // an unavailable product so a direct link shows "Preis nicht verfügbar" rather than a 404.
+// Keep sellable products AND preview ("Coming Soon") products — the latter are deliberately
+// merchandised before release (no price, not buyable). Everything else with no active listing
+// is still dropped so it never renders as 0,00 € or reaches the basket.
 export function sellableOnly(raw: RawPagedProducts, content: ApiProduct[]): PagedProducts {
-  const sellable = content.filter(p => p.available);
+  const sellable = content.filter(p => p.available || p.preview);
   const removed = content.length - sellable.length;
   return {
     ...raw,

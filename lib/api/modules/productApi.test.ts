@@ -72,6 +72,16 @@ describe('sellableOnly', () => {
     const result = sellableOnly(paged(0), [product({ id: '1', price: 0, available: false })])
     expect(result.totalElements).toBe(0)
   })
+
+  it('keeps a preview product even though it is unavailable', () => {
+    const result = sellableOnly(paged(3), [
+      product({ id: '1' }),
+      product({ id: '2', price: 0, available: false, preview: true }),
+      product({ id: '3', price: 0, available: false }),
+    ])
+    expect(result.content.map(p => p.id)).toEqual(['1', '2'])
+    expect(result.totalElements).toBe(2)
+  })
 })
 
 describe('productApi.getListings', () => {
