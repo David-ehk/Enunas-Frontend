@@ -74,6 +74,7 @@ export default function ProductDetails({
   const [livePreview, setLivePreview] = useState(preview)
   const [livePrice, setLivePrice] = useState<number>(price)
   const [liveOriginalPrice, setLiveOriginalPrice] = useState<number | null>(originalPrice ?? null)
+  const [liveAvailable, setLiveAvailable] = useState<boolean>(available)
 
   // Listings tell us availability AND the price of the specific variant once one is picked.
   // The pairing hazard is only in AGGREGATING across listings — the cheapest current price and
@@ -116,6 +117,7 @@ export default function ProductDetails({
           setLivePreview(false)
           setLivePrice(fresh.price)
           setLiveOriginalPrice(fresh.originalPrice ?? null)
+          setLiveAvailable(fresh.available)
         }
       } catch {
         /* transient — try again on the next focus */
@@ -170,8 +172,9 @@ export default function ProductDetails({
     [currency],
   )
 
-  // While preview is live the product is never buyable, regardless of the server `available` prop.
-  const effectiveAvailable = livePreview ? false : available
+  // While preview is live the product is never buyable; after an in-place flip we trust the
+  // freshly-fetched availability, not the stale server prop (which was false at preview render).
+  const effectiveAvailable = livePreview ? false : liveAvailable
 
   // Never render a null-priced product as 0,00 €.
   const formattedPrice = effectiveAvailable ? money.format(priceView.current) : 'Preis nicht verfügbar'
@@ -205,7 +208,7 @@ export default function ProductDetails({
       productId: String(product.id),
       name: product.name,
       brand: product.brandName,
-      price,
+      price: livePrice,
       currency,
       size,
       color: selectedColor ? { id: selectedColor.id, name: selectedColor.name, hex: selectedColor.hex } : undefined,
