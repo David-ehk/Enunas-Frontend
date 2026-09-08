@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import ImageGallery from './ImageGallery'
 import BrandLink from './BrandLink'
@@ -105,24 +105,24 @@ export default function ProductDetails({
   // Live transition at release time: once we're past the UTC release instant, re-check the
   // backend on focus / visibility change. When it reports the product live, swap the preview UI
   // for the buyable one in place. No polling — only focus/visibilitychange + one mount check.
+  const check = useCallback(async () => {
+    if (!livePreview || !product.releaseDate) return
+    if (Date.now() < previewReleaseMs(product.releaseDate)) return
+    try {
+      const fresh = await productApi.getBySlug(productSlug)
+      if (!fresh.preview) {
+        setLivePreview(false)
+        setLivePrice(fresh.price)
+        setLiveOriginalPrice(fresh.originalPrice ?? null)
+        setLiveAvailable(fresh.available)
+      }
+    } catch {
+      /* transient — try again on the next focus */
+    }
+  }, [livePreview, product.releaseDate, productSlug])
+
   useEffect(() => {
     if (!livePreview || !product.releaseDate) return
-    const target = previewReleaseMs(product.releaseDate)
-
-    const check = async () => {
-      if (Date.now() < target) return
-      try {
-        const fresh = await productApi.getBySlug(productSlug)
-        if (!fresh.preview) {
-          setLivePreview(false)
-          setLivePrice(fresh.price)
-          setLiveOriginalPrice(fresh.originalPrice ?? null)
-          setLiveAvailable(fresh.available)
-        }
-      } catch {
-        /* transient — try again on the next focus */
-      }
-    }
 
     const onVisible = () => { if (document.visibilityState === 'visible') check() }
     document.addEventListener('visibilitychange', onVisible)
@@ -132,7 +132,7 @@ export default function ProductDetails({
       document.removeEventListener('visibilitychange', onVisible)
       window.removeEventListener('focus', check)
     }
-  }, [livePreview, product.releaseDate, productSlug])
+  }, [livePreview, product.releaseDate, check])
 
   const selectedVariant = findVariant(product.variants, selectedColor?.name ?? null, selectedSize)
   // SKU shown as soon as a color is selected — not size-dependent
@@ -380,7 +380,7 @@ export default function ProductDetails({
                     <ComingSoonCountdown
                       releaseDate={product.releaseDate}
                       variant="pdp"
-                      onElapsed={() => { /* focus/visibility listeners re-check on the next interaction */ }}
+                      onElapsed={check}
                     />
                   </>
                 )}

@@ -7,6 +7,7 @@ import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 import type { ProductCardShape } from '@/lib/api'
 import { useIsMobile } from '@/hooks/use-mobile'
 import FilterSidebar, { FilterState, CATEGORIES, catMatchesProduct, parsePriceNum, genderMatchesProduct } from './FilterSidebar'
+import { partitionPreview } from '@/lib/preview'
 import SortDropdown from './SortDropdown'
 import BlurFilterBar from './BlurFilterBar'
 import CategoryNavigation from './CategoryNavigation'
@@ -73,10 +74,10 @@ export default function CatalogueContent({ initialProducts, config }: Props) {
     ))
     if (filters.groessen.length > 0)    r = r.filter(p => p.sizes?.some(s => filters.groessen.includes(s)))
     if (filters.marken.length > 0)      r = r.filter(p => filters.marken.includes(p.brandName))
-    if (filters.sortieren === 'preis-auf') return [...r].sort((a, b) => parsePriceNum(a.price) - parsePriceNum(b.price))
-    if (filters.sortieren === 'preis-ab')  return [...r].sort((a, b) => parsePriceNum(b.price) - parsePriceNum(a.price))
-    if (filters.sortieren === 'name')      return [...r].sort((a, b) => a.productName.localeCompare(b.productName))
-    return r
+    if (filters.sortieren === 'preis-auf')      r = [...r].sort((a, b) => parsePriceNum(a.price) - parsePriceNum(b.price))
+    else if (filters.sortieren === 'preis-ab')  r = [...r].sort((a, b) => parsePriceNum(b.price) - parsePriceNum(a.price))
+    else if (filters.sortieren === 'name')      r = [...r].sort((a, b) => a.productName.localeCompare(b.productName))
+    return partitionPreview(r, 'show')
   }, [initialProducts, activeCat, gender, filters])
 
   const activeFilterCount = filters.kategorien.length + filters.farben.length + filters.groessen.length + filters.marken.length
