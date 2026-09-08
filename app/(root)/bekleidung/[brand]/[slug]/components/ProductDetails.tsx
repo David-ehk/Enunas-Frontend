@@ -76,6 +76,19 @@ export default function ProductDetails({
   const [liveOriginalPrice, setLiveOriginalPrice] = useState<number | null>(originalPrice ?? null)
   const [liveAvailable, setLiveAvailable] = useState<boolean>(available)
 
+  // Graceful entrance for the coming-soon price block: it starts blurred + faded and settles
+  // in on mount. Reduced-motion users get it fully revealed immediately, no transition.
+  const [revealed, setRevealed] = useState(false)
+  useEffect(() => {
+    if (!livePreview) return
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setRevealed(true)
+      return
+    }
+    const id = requestAnimationFrame(() => setRevealed(true))
+    return () => cancelAnimationFrame(id)
+  }, [livePreview])
+
   // Listings tell us availability AND the price of the specific variant once one is picked.
   // The pairing hazard is only in AGGREGATING across listings — the cheapest current price and
   // the cheapest list price can come from different rows and produce a nonsense pair. Within a
@@ -368,7 +381,40 @@ export default function ProductDetails({
 
             {/* 5. Price */}
             {livePreview ? (
-              <div className="flex flex-col items-center gap-3 mb-10">
+              <div
+                className="flex flex-col items-center gap-3 mb-10"
+                style={{
+                  transition:
+                    'opacity 500ms var(--ease-out-expo), filter 500ms var(--ease-out-expo), transform 500ms var(--ease-out-expo)',
+                  opacity: revealed ? 1 : 0,
+                  filter: revealed ? 'blur(0px)' : 'blur(8px)',
+                  transform: revealed ? 'translateY(0)' : 'translateY(6px)',
+                }}
+              >
+                {/* Blurred placeholder — the real price is withheld by the backend until release. */}
+                <div className="flex items-baseline gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="text-enunas-black"
+                    style={{
+                      fontFamily: 'var(--font-league-spartan)',
+                      fontSize: '22px',
+                      fontWeight: 300,
+                      filter: 'blur(5px)',
+                      userSelect: 'none',
+                    }}
+                  >
+                    € 000,00
+                  </span>
+                  <span
+                    className="text-enunas-gray-medium"
+                    style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '12px', letterSpacing: '0.02em' }}
+                  >
+                    inkl. MwSt.
+                  </span>
+                </div>
+                <span className="sr-only">Der Preis wird zum Release bekannt gegeben.</span>
+
                 {product.releaseDate && (
                   <>
                     <span
