@@ -7,6 +7,8 @@ import Image from "next/image"
 import { useAuth } from "@/app/context/AuthContext"
 import { useWishlist, type WishlistItem } from "@/app/context/WishlistContext"
 import { SEGMENT_LABELS } from "@/lib/product"
+import ComingSoonCountdown from "@/components/ComingSoonCountdown"
+import { formatReleaseDateShort } from "@/lib/preview"
 
 interface ProductColour {
   hex: string;
@@ -56,6 +58,11 @@ interface PopularProductCardProps {
   sizes?: string[];
   categories?: string[];
   catalogue?: string[]; // alias for categories
+  /** Renders the "Coming Soon" state: purple chip, "Kommt am …" instead of a price,
+   *  countdown on hover. */
+  preview?: boolean;
+  /** ISO "YYYY-MM-DD"; required visual data when `preview` is true. */
+  releaseDate?: string | null;
 }
 
 const isNewProduct = (createdAt: Date | string): boolean => {
@@ -77,7 +84,9 @@ const PopularProductCard = ({
   createdAt,
   sizes = [],
   categories = [],
-  catalogue = []
+  catalogue = [],
+  preview = false,
+  releaseDate = null
 }: PopularProductCardProps) => {
   // Use catalogue if categories is empty
   const displayCategories = categories.length > 0 ? categories : catalogue;
@@ -89,7 +98,7 @@ const PopularProductCard = ({
   useEffect(() => {
     setCanHover(window.matchMedia('(hover: hover)').matches);
   }, []);
-  const isNew = isNewProduct(createdAt);
+  const isNew = !preview && isNewProduct(createdAt);
 
   const router = useRouter();
   const { isAuthenticated } = useAuth();
@@ -137,6 +146,20 @@ const PopularProductCard = ({
               fill
               sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
+          )}
+
+          {preview && (
+            <span
+              className="absolute top-3 left-3 z-10 bg-enunas-purple text-white uppercase"
+              style={{
+                fontFamily: 'var(--font-league-spartan)',
+                fontSize: 9,
+                letterSpacing: '0.15em',
+                padding: '4px 10px',
+              }}
+            >
+              Coming Soon
+            </span>
           )}
 
           {/* Subtle Overlay on Hover */}
@@ -232,23 +255,34 @@ const PopularProductCard = ({
                 )}
               </div>
 
-              {/* Price — a non-null originalPrice means this product is reduced. */}
-              {price !== null && (
-                <p className={`text-sm font-light flex items-baseline gap-2 ${originalPrice ? 'text-enunas-error' : 'text-enunas-black'}`}>
-                  {price}
-                  {originalPrice && (
-                    <span
-                      className="text-enunas-gray-dark"
-                      style={{
-                        textDecorationLine: 'line-through',
-                        textDecorationColor: '#8B1E3F',
-                        textDecorationThickness: '1.5px',
-                      }}
-                    >
-                      {originalPrice}
-                    </span>
-                  )}
-                </p>
+              {/* Price — or, for a preview product, the release date. */}
+              {preview ? (
+                releaseDate && (
+                  <p
+                    className="text-sm font-light text-enunas-purple"
+                    style={{ fontFamily: 'var(--font-league-spartan)' }}
+                  >
+                    Kommt am {formatReleaseDateShort(releaseDate)}
+                  </p>
+                )
+              ) : (
+                price !== null && (
+                  <p className={`text-sm font-light flex items-baseline gap-2 ${originalPrice ? 'text-enunas-error' : 'text-enunas-black'}`}>
+                    {price}
+                    {originalPrice && (
+                      <span
+                        className="text-enunas-gray-dark"
+                        style={{
+                          textDecorationLine: 'line-through',
+                          textDecorationColor: '#8B1E3F',
+                          textDecorationThickness: '1.5px',
+                        }}
+                      >
+                        {originalPrice}
+                      </span>
+                    )}
+                  </p>
+                )
               )}
             </div>
 
@@ -261,6 +295,14 @@ const PopularProductCard = ({
                 ${isHovered ? 'opacity-100' : 'opacity-0'}
               `}
             >
+              {preview ? (
+                releaseDate && (
+                  <div className="pt-1">
+                    <ComingSoonCountdown releaseDate={releaseDate} variant="card" />
+                  </div>
+                )
+              ) : (
+                <>
               {/* Sizes */}
               {sizes.length > 0 && (
                 <div className="space-y-1">
@@ -293,6 +335,8 @@ const PopularProductCard = ({
                     )
                   })}
                 </div>
+              )}
+                </>
               )}
             </div>
           </div>
