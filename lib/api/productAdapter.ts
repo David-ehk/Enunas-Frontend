@@ -9,6 +9,11 @@ export interface ProductCardShape {
   price: string;
   /** Pre-formatted pre-discount price; null when not reduced. Non-null is the "on sale" flag. */
   originalPrice?: string | null;
+  /** True when the product is a not-yet-released "Coming Soon" item. Authoritative — the card
+   *  ignores price/originalPrice when this is set. */
+  preview: boolean;
+  /** ISO date "YYYY-MM-DD" the product releases; null when not a preview product. */
+  releaseDate: string | null;
   href: string;
   colours: { hex: string; name: string; colorFamily?: string }[];
   createdAt: Date | string;
@@ -25,14 +30,18 @@ export function apiProductToProduct(p: ApiProduct): ApiProduct {
 
 export function apiProductToCardShape(p: ApiProduct): ProductCardShape {
   const brandSlug = generateSlug(p.brandName);
+  const preview = p.preview ?? false;
   return {
     id: p.id,
     imgURL: p.images?.[0] ?? '',
     brandName: p.brandName,
     productName: p.name,
-    price: `${p.price.toFixed(2).replace('.', ',')}€`,
+    // A preview product has no price to format — the card renders "Kommt am …" instead.
+    price: preview ? '' : `${p.price.toFixed(2).replace('.', ',')}€`,
     originalPrice:
-      p.originalPrice != null ? `${p.originalPrice.toFixed(2).replace('.', ',')}€` : null,
+      preview || p.originalPrice == null
+        ? null
+        : `${p.originalPrice.toFixed(2).replace('.', ',')}€`,
     href: `/bekleidung/${brandSlug}/${p.slug}`,
     colours: p.colours.map(c => ({ hex: c.hex, name: c.name, colorFamily: c.colorFamily })),
     createdAt: p.createdAt,
@@ -41,5 +50,7 @@ export function apiProductToCardShape(p: ApiProduct): ProductCardShape {
     category: p.category,
     subcategory: p.subcategory,
     gender: p.gender,
+    preview,
+    releaseDate: p.releaseDate ?? null,
   };
 }

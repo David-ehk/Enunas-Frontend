@@ -163,6 +163,9 @@ export interface ApiProduct {
   inspirationStory?: string | null;
   /** Brand-set release date. Null when unset. */
   releaseDate?: string | null;
+  /** True while the product is published but not yet released. `price`/`originalPrice` are null,
+   *  `releaseDate` is in the future, and POST /orders for its listing returns 409. */
+  preview?: boolean;
   sku: string;
   slug: string;
   description?: string;
@@ -457,6 +460,7 @@ export interface AdminApiVariant {
 // looser AdminApiVariant shape (string ids, all fields optional), which is not assignable to the
 // storefront's stricter ApiProductVariant.
 export interface AdminApiProduct extends Omit<ApiProduct, 'status' | 'variants'> {
+  // `preview` inherited from ApiProduct — the admin product list badges it.
   status: string;
   brandId?: string;
   gender?: string;

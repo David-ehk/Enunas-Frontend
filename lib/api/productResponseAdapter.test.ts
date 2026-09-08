@@ -135,6 +135,20 @@ describe('adaptProduct', () => {
     expect(adaptProduct(raw()).sku).toBe('SKU-1')
   })
 
+  it('carries the preview flag through, defaulting to false', () => {
+    expect(adaptProduct(raw({ preview: true })).preview).toBe(true)
+    expect(adaptProduct(raw({ preview: false })).preview).toBe(false)
+    expect(adaptProduct(raw()).preview).toBe(false)
+  })
+
+  it('a preview product is unavailable with a null price coalesced to 0', () => {
+    const p = adaptProduct(raw({ preview: true, price: null, originalPrice: null }))
+    expect(p.preview).toBe(true)
+    expect(p.available).toBe(false)
+    expect(p.price).toBe(0)
+    expect(p.originalPrice).toBeNull()
+  })
+
   it('handles missing variants and images without throwing', () => {
     const p = adaptProduct(raw({ variants: undefined, images: undefined }))
     expect(p.colours).toEqual([])

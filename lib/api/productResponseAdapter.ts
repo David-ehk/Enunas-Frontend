@@ -42,6 +42,9 @@ export interface RawProductResponse {
   /** The brand's story for this product. Optional — plenty of products have none. */
   inspirationStory?: string | null;
   releaseDate?: string | null;
+  /** Backend "not yet released" flag. When true: price/originalPrice are null and releaseDate is
+   *  a future date. See docs/superpowers/specs/2026-09-08-coming-soon-preview-state-design.md §2. */
+  preview?: boolean;
   description?: string;
   category?: string;
   catalogueCategory?: string[];
@@ -135,6 +138,7 @@ export function adaptProduct(raw: RawProductResponse): ApiProduct {
     // not a story. The PDP used to hardcode this to null, so a brand's story never reached it.
     inspirationStory: raw.inspirationStory || null,
     releaseDate: raw.releaseDate || null,
+    preview: raw.preview ?? false,
     category: (raw.category ?? '').toLowerCase(),
     gender: raw.gender,
     images,
