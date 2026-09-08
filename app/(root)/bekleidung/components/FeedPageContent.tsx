@@ -8,6 +8,7 @@ import type { ProductCardShape } from '@/lib/api'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { generateSlug } from '@/lib/product'
 import FilterSidebar, { FilterState, CATEGORIES, catMatchesProduct, parsePriceNum, genderMatchesProduct } from './FilterSidebar'
+import { partitionPreview } from '@/lib/preview'
 import SortDropdown from './SortDropdown'
 import BlurFilterBar from './BlurFilterBar'
 import CategoryNavigation from './CategoryNavigation'
@@ -21,6 +22,8 @@ interface Props {
    *  brand/feed genuinely has zero products (not just zero matches for the
    *  current filter selection). */
   emptyStateMessage?: string
+  /** How preview ("Coming Soon") products are placed. Default 'show' (live first, then preview). */
+  previewMode?: import('@/lib/preview').PreviewMode
 }
 
 function ProductSkeleton() {
@@ -34,7 +37,7 @@ function ProductSkeleton() {
   )
 }
 
-export default function FeedPageContent({ basePath, HeroComponent, brandFilter, emptyStateMessage }: Props) {
+export default function FeedPageContent({ basePath, HeroComponent, brandFilter, emptyStateMessage, previewMode = 'show' }: Props) {
   const searchParams = useSearchParams()
   const isMobile     = useIsMobile()
   const filterBarRef = useRef<HTMLDivElement>(null)
@@ -105,11 +108,11 @@ export default function FeedPageContent({ basePath, HeroComponent, brandFilter, 
     ))
     if (filters.groessen.length > 0)    r = r.filter(p => p.sizes?.some(s => filters.groessen.includes(s)))
     if (filters.marken.length > 0)      r = r.filter(p => filters.marken.includes(p.brandName))
-    if (filters.sortieren === 'preis-auf') return [...r].sort((a, b) => parsePriceNum(a.price) - parsePriceNum(b.price))
-    if (filters.sortieren === 'preis-ab')  return [...r].sort((a, b) => parsePriceNum(b.price) - parsePriceNum(a.price))
-    if (filters.sortieren === 'name')      return [...r].sort((a, b) => a.productName.localeCompare(b.productName))
-    return r
-  }, [brandScopedProducts, activeCat, gender, filters])
+    if (filters.sortieren === 'preis-auf')      r = [...r].sort((a, b) => parsePriceNum(a.price) - parsePriceNum(b.price))
+    else if (filters.sortieren === 'preis-ab')  r = [...r].sort((a, b) => parsePriceNum(b.price) - parsePriceNum(a.price))
+    else if (filters.sortieren === 'name')      r = [...r].sort((a, b) => a.productName.localeCompare(b.productName))
+    return partitionPreview(r, previewMode)
+  }, [brandScopedProducts, activeCat, gender, filters, previewMode])
 
   const activeFilterCount = filters.kategorien.length + filters.farben.length + filters.groessen.length + filters.marken.length
 

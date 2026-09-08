@@ -11,6 +11,7 @@ import SortDropdown from './components/SortDropdown'
 import CatalogueDropdown from './components/CatalogueDropdown'
 import CategoryNavigation from './components/CategoryNavigation'
 import FilterSidebar, { FilterState, CATEGORIES, catMatchesProduct, parsePriceNum, genderMatchesProduct } from './components/FilterSidebar'
+import { partitionPreview } from '@/lib/preview'
 
 // ── Loading Skeletons ─────────────────────────────────────────────────────────
 
@@ -104,10 +105,10 @@ function BekleidungContent() {
     if (filters.groessen.length > 0)    r = r.filter(p => p.sizes?.some(s => filters.groessen.includes(s)))
     if (filters.marken.length > 0)      r = r.filter(p => filters.marken.includes(p.brandName))
     if (filters.catalogue)              r = r.filter(p => (p.catalogue ?? []).some(c => c.toLowerCase() === filters.catalogue.toLowerCase()))
-    if (filters.sortieren === 'preis-auf') return [...r].sort((a, b) => parsePriceNum(a.price) - parsePriceNum(b.price))
-    if (filters.sortieren === 'preis-ab')  return [...r].sort((a, b) => parsePriceNum(b.price) - parsePriceNum(a.price))
-    if (filters.sortieren === 'name')      return [...r].sort((a, b) => a.productName.localeCompare(b.productName))
-    return r
+    if (filters.sortieren === 'preis-auf')      r = [...r].sort((a, b) => parsePriceNum(a.price) - parsePriceNum(b.price))
+    else if (filters.sortieren === 'preis-ab')  r = [...r].sort((a, b) => parsePriceNum(b.price) - parsePriceNum(a.price))
+    else if (filters.sortieren === 'name')      r = [...r].sort((a, b) => a.productName.localeCompare(b.productName))
+    return partitionPreview(r, 'show')
   }, [allProducts, activeCat, gender, filters])
 
   const activeFilterCount = filters.kategorien.length + filters.farben.length + filters.groessen.length + filters.marken.length

@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { productApi, apiProductToCardShape } from '@/lib/api'
 import type { ApiProduct } from '@/types/api'
+import { partitionPreview } from '@/lib/preview'
 import CatalogueContent from './CatalogueContent'
 import type { CatalogueConfig } from './CatalogueContent'
 
@@ -16,9 +17,10 @@ function matchesCatalogue(p: ApiProduct, slug: string): boolean {
 
 export default async function CatalogueLandingPage({ config }: { config: CatalogueConfig }) {
   const res = await productApi.list({ size: 100 }).catch(() => ({ content: [] as ApiProduct[] }))
-  const products = res.content
-    .filter(p => matchesCatalogue(p, config.slug))
-    .map(apiProductToCardShape)
+  const products = partitionPreview(
+    res.content.filter(p => matchesCatalogue(p, config.slug)).map(apiProductToCardShape),
+    'show',
+  )
 
   return (
     <Suspense fallback={<div style={{ minHeight: '100vh', background: '#fff' }} />}>
