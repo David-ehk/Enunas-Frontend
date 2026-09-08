@@ -214,82 +214,85 @@ function SwatchBtn({ name, hex, border, selected, onClick }: {
 
 // ── FilterSidebar ─────────────────────────────────────────────────────────────
 
+// Hoisted to module scope so it isn't recreated on every FilterSidebar render
+// (react-hooks/static-components). Parent state it needs is passed as props.
+function Section({
+  label, children, animDelay = 0, isOpen, hasActive, revealed, onToggle,
+}: {
+  label: string
+  children: React.ReactNode
+  animDelay?: number
+  isOpen: boolean
+  hasActive: boolean
+  revealed: boolean
+  onToggle: () => void
+}) {
+  return (
+    <div style={{
+      borderBottom: '1px solid #EBEBEB',
+      opacity: revealed ? 1 : 0,
+      transform: revealed ? 'translateY(0)' : 'translateY(10px)',
+      transition: revealed
+        ? `opacity 420ms cubic-bezier(0.16,1,0.3,1) ${animDelay}ms, transform 420ms cubic-bezier(0.16,1,0.3,1) ${animDelay}ms`
+        : 'opacity 120ms ease, transform 120ms ease',
+    }}>
+      <button
+        onClick={onToggle}
+        style={{
+          width: '100%',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '19px 32px',
+          fontFamily: 'inherit',
+        }}
+      >
+        <span style={{
+          fontSize: 13,
+          color: '#0A0A0A',
+          letterSpacing: '0.02em',
+          fontWeight: hasActive ? 600 : 400,
+        }}>
+          {label}
+        </span>
+        <svg
+          width="10" height="6" viewBox="0 0 10 6" fill="none"
+          style={{
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 380ms cubic-bezier(0.16,1,0.3,1)',
+            flexShrink: 0,
+          }}
+        >
+          <path d="M1 1l4 4 4-4" stroke="#0A0A0A" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+
+      <div style={{
+        overflow: 'hidden',
+        maxHeight: isOpen ? 1200 : 0,
+        transition: `max-height ${isOpen ? '520ms' : '300ms'} cubic-bezier(0.16,1,0.3,1)`,
+      }}>
+        <div style={{
+          opacity: isOpen ? 1 : 0,
+          transform: isOpen ? 'translateY(0)' : 'translateY(-6px)',
+          transition: `opacity 260ms ease ${isOpen ? '90ms' : '0ms'}, transform 300ms cubic-bezier(0.16,1,0.3,1) ${isOpen ? '60ms' : '0ms'}`,
+          paddingBottom: 8,
+        }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function FilterSidebar({
   open, onClose, filters, setFilters,
   openSections, toggleSection, toggleFilter, resetFilters,
   resultCount, availableMarken,
 }: FilterSidebarProps) {
-
-  function Section({ id, label, children, animDelay = 0 }: {
-    id: string; label: string; children: React.ReactNode; animDelay?: number
-  }) {
-    const isOpen = openSections.includes(id)
-    const hasActive =
-      (id === 'kategorien' && filters.kategorien.length > 0) ||
-      (id === 'farben'     && filters.farben.length > 0)     ||
-      (id === 'groessen'   && filters.groessen.length > 0)   ||
-      (id === 'marken'     && filters.marken.length > 0)
-
-    return (
-      <div style={{
-        borderBottom: '1px solid #EBEBEB',
-        opacity: open ? 1 : 0,
-        transform: open ? 'translateY(0)' : 'translateY(10px)',
-        transition: open
-          ? `opacity 420ms cubic-bezier(0.16,1,0.3,1) ${animDelay}ms, transform 420ms cubic-bezier(0.16,1,0.3,1) ${animDelay}ms`
-          : 'opacity 120ms ease, transform 120ms ease',
-      }}>
-        <button
-          onClick={() => toggleSection(id)}
-          style={{
-            width: '100%',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '19px 32px',
-            fontFamily: 'inherit',
-          }}
-        >
-          <span style={{
-            fontSize: 13,
-            color: '#0A0A0A',
-            letterSpacing: '0.02em',
-            fontWeight: hasActive ? 600 : 400,
-          }}>
-            {label}
-          </span>
-          <svg
-            width="10" height="6" viewBox="0 0 10 6" fill="none"
-            style={{
-              transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 380ms cubic-bezier(0.16,1,0.3,1)',
-              flexShrink: 0,
-            }}
-          >
-            <path d="M1 1l4 4 4-4" stroke="#0A0A0A" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-
-        <div style={{
-          overflow: 'hidden',
-          maxHeight: isOpen ? 1200 : 0,
-          transition: `max-height ${isOpen ? '520ms' : '300ms'} cubic-bezier(0.16,1,0.3,1)`,
-        }}>
-          <div style={{
-            opacity: isOpen ? 1 : 0,
-            transform: isOpen ? 'translateY(0)' : 'translateY(-6px)',
-            transition: `opacity 260ms ease ${isOpen ? '90ms' : '0ms'}, transform 300ms cubic-bezier(0.16,1,0.3,1) ${isOpen ? '60ms' : '0ms'}`,
-            paddingBottom: 8,
-          }}>
-            {children}
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <>
@@ -395,7 +398,7 @@ export default function FilterSidebar({
         {/* Scrollable body */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
 
-          <Section id="kategorien" label="Kategorien" animDelay={90}>
+          <Section label="Kategorien" animDelay={90} revealed={open} isOpen={openSections.includes('kategorien')} hasActive={filters.kategorien.length > 0} onToggle={() => toggleSection('kategorien')}>
             {SIDEBAR_CATEGORIES.map(k => (
               <CheckRow
                 key={k.id}
@@ -406,7 +409,7 @@ export default function FilterSidebar({
             ))}
           </Section>
 
-          <Section id="farben" label="Farben" animDelay={130}>
+          <Section label="Farben" animDelay={130} revealed={open} isOpen={openSections.includes('farben')} hasActive={filters.farben.length > 0} onToggle={() => toggleSection('farben')}>
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
@@ -426,7 +429,7 @@ export default function FilterSidebar({
             </div>
           </Section>
 
-          <Section id="groessen" label="Größen" animDelay={170}>
+          <Section label="Größen" animDelay={170} revealed={open} isOpen={openSections.includes('groessen')} hasActive={filters.groessen.length > 0} onToggle={() => toggleSection('groessen')}>
             {GROESSEN.map(g => (
               <CheckRow
                 key={g}
@@ -437,7 +440,7 @@ export default function FilterSidebar({
             ))}
           </Section>
 
-          <Section id="marken" label="Marken" animDelay={210}>
+          <Section label="Marken" animDelay={210} revealed={open} isOpen={openSections.includes('marken')} hasActive={filters.marken.length > 0} onToggle={() => toggleSection('marken')}>
             {availableMarken.length === 0
               ? (
                 <p style={{
@@ -461,7 +464,7 @@ export default function FilterSidebar({
             }
           </Section>
 
-          <Section id="sortieren" label="Sortieren nach" animDelay={250}>
+          <Section label="Sortieren nach" animDelay={250} revealed={open} isOpen={openSections.includes('sortieren')} hasActive={false} onToggle={() => toggleSection('sortieren')}>
             {SORT_OPTIONS.map(s => (
               <CheckRow
                 key={s.id}

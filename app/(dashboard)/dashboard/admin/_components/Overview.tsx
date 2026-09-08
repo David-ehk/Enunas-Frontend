@@ -18,6 +18,61 @@ interface Props {
   customers: AdminCustomer[]
 }
 
+// Presentational helpers — hoisted to module scope so they aren't recreated on every
+// render of Overview (react-hooks/static-components).
+function ChartCard({ title, icon, children }: { title: string; icon?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <Card className="border-[#E8E8E8] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.04)] rounded-xl overflow-hidden">
+      <CardHeader className="pb-3 px-6 pt-5 border-b border-[#F0F0EB] bg-[#FAFAF8]">
+        <CardTitle className="text-[12px] font-semibold text-[#0A0A0A] flex items-center gap-2"
+          style={{ fontFamily: 'var(--font-league-spartan)', letterSpacing: '0.02em' }}>
+          {icon && <span className="text-[#370E4D]">{icon}</span>}
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="px-5 pt-5 pb-5">{children}</CardContent>
+    </Card>
+  )
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[10px] uppercase tracking-[0.18em] text-[#9B9B9B] mb-3 font-medium"
+      style={{ fontFamily: 'var(--font-league-spartan)' }}>
+      {children}
+    </p>
+  )
+}
+
+function ResultSection({ label, count, children }: { label: string; count: number; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="px-4 py-2 flex items-center gap-2" style={{ borderBottom: '1px solid #F5F5F0' }}>
+        <span className="text-[9px] uppercase tracking-[0.18em] font-medium text-[#9B9B9B]"
+          style={{ fontFamily: 'var(--font-league-spartan)' }}>{label}</span>
+        <span className="text-[9px] font-medium text-[#C0C0BC] bg-[#F5F5F0] rounded-full px-1.5 py-0.5">{count}</span>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+function ResultRow({ primary, secondary, badge, mono }: {
+  primary: string; secondary?: string; badge?: string; mono?: string
+}) {
+  return (
+    <div className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#FAFAF8] transition-colors duration-100 cursor-default"
+      style={{ borderBottom: '1px solid #F9F9F6' }}>
+      <div className="flex-1 min-w-0">
+        <p className="text-[12px] font-medium text-[#0A0A0A] truncate" style={{ fontFamily: 'var(--font-league-spartan)' }}>{primary}</p>
+        {secondary && <p className="text-[10px] text-[#9B9B9B] truncate mt-0.5" style={{ fontFamily: 'var(--font-league-spartan)' }}>{secondary}</p>}
+      </div>
+      {mono && <span className="font-mono text-[10px] text-[#6B6B6B] shrink-0">{mono}</span>}
+      {badge && <StatusBadge status={badge} />}
+    </div>
+  )
+}
+
 function dayKey(iso: string) { return iso?.slice(0, 10) ?? '' }
 function last30() {
   return Array.from({ length: 30 }, (_, i) => {
@@ -198,51 +253,6 @@ export default function Overview({ orders, brands, products, customers }: Props)
     const total = matchBrands.length + matchProducts.length + matchOrders.length + matchCustomers.length
     return { matchBrands, matchProducts, matchOrders, matchCustomers, total }
   }, [searchQuery, brands, products, orders, customers])
-
-  const ChartCard = ({ title, icon, children }: { title: string; icon?: React.ReactNode; children: React.ReactNode }) => (
-    <Card className="border-[#E8E8E8] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.04)] rounded-xl overflow-hidden">
-      <CardHeader className="pb-3 px-6 pt-5 border-b border-[#F0F0EB] bg-[#FAFAF8]">
-        <CardTitle className="text-[12px] font-semibold text-[#0A0A0A] flex items-center gap-2"
-          style={{ fontFamily: 'var(--font-league-spartan)', letterSpacing: '0.02em' }}>
-          {icon && <span className="text-[#370E4D]">{icon}</span>}
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-5 pt-5 pb-5">{children}</CardContent>
-    </Card>
-  )
-
-  const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-    <p className="text-[10px] uppercase tracking-[0.18em] text-[#9B9B9B] mb-3 font-medium"
-      style={{ fontFamily: 'var(--font-league-spartan)' }}>
-      {children}
-    </p>
-  )
-
-  const ResultSection = ({ label, count, children }: { label: string; count: number; children: React.ReactNode }) => (
-    <div>
-      <div className="px-4 py-2 flex items-center gap-2" style={{ borderBottom: '1px solid #F5F5F0' }}>
-        <span className="text-[9px] uppercase tracking-[0.18em] font-medium text-[#9B9B9B]"
-          style={{ fontFamily: 'var(--font-league-spartan)' }}>{label}</span>
-        <span className="text-[9px] font-medium text-[#C0C0BC] bg-[#F5F5F0] rounded-full px-1.5 py-0.5">{count}</span>
-      </div>
-      {children}
-    </div>
-  )
-
-  const ResultRow = ({ primary, secondary, badge, mono }: {
-    primary: string; secondary?: string; badge?: string; mono?: string
-  }) => (
-    <div className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#FAFAF8] transition-colors duration-100 cursor-default"
-      style={{ borderBottom: '1px solid #F9F9F6' }}>
-      <div className="flex-1 min-w-0">
-        <p className="text-[12px] font-medium text-[#0A0A0A] truncate" style={{ fontFamily: 'var(--font-league-spartan)' }}>{primary}</p>
-        {secondary && <p className="text-[10px] text-[#9B9B9B] truncate mt-0.5" style={{ fontFamily: 'var(--font-league-spartan)' }}>{secondary}</p>}
-      </div>
-      {mono && <span className="font-mono text-[10px] text-[#6B6B6B] shrink-0">{mono}</span>}
-      {badge && <StatusBadge status={badge} />}
-    </div>
-  )
 
   return (
     <div className="space-y-7">
