@@ -490,7 +490,7 @@ function SearchSidebar({
                 className="flex items-center justify-between w-full group focus:outline-none pt-1"
               >
                 <span className="font-league-spartan text-[10px] uppercase tracking-[0.22em] text-enunas-purple group-hover:text-enunas-purple-light transition-colors duration-150">
-                  Alle Ergebnisse für „{query}"
+                  Alle Ergebnisse für „{query}“
                 </span>
                 <ArrowRightIcon className="text-enunas-purple group-hover:translate-x-1 transition-transform duration-200 ease-out-expo" />
               </button>
@@ -504,7 +504,7 @@ function SearchSidebar({
                 Keine Ergebnisse.
               </p>
               <p className="font-league-spartan text-[11px] text-enunas-gray-medium tracking-[0.1em] mb-9">
-                Für „{query}" wurden keine Artikel gefunden.
+                Für „{query}“ wurden keine Artikel gefunden.
               </p>
               {highlights.length > 0 && (
                 <div>

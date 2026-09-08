@@ -30,7 +30,7 @@ export default function DatenschutzerklaerungPage() {
               1. Verantwortlicher
             </p>
             <p>
-              Verantwortlicher für die Datenverarbeitung ist David Emmanuel Hod Konan (Einzelunternehmen „Enunas"), Appenzellerstr. 113, 81475 München.
+              Verantwortlicher für die Datenverarbeitung ist David Emmanuel Hod Konan (Einzelunternehmen „Enunas“), Appenzellerstr. 113, 81475 München.
               Kontakt: info@enunas.com
             </p>
           </div>

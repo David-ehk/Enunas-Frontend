@@ -556,7 +556,7 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
                           <div className="flex-1 h-px" style={{ background: '#E8E8E8' }} />
                           <span className="text-[9px] uppercase tracking-[0.14em] text-[#9B9B9B] shrink-0"
                             style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                            nur auf "Weitere anzeigen"
+                            nur auf „Weitere anzeigen“
                           </span>
                           <div className="flex-1 h-px" style={{ background: '#E8E8E8' }} />
                         </div>

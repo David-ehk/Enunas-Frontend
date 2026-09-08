@@ -993,7 +993,7 @@ function ListingsSection({ product }: { product: AdminApiProduct }) {
                   <p className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Variante *</p>
                   {variants.length === 0 ? (
                     <p className="text-[11px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                      Keine Varianten vorhanden — bitte zuerst im Bereich „Varianten &amp; Bestand" anlegen.
+                      Keine Varianten vorhanden — bitte zuerst im Bereich „Varianten &amp; Bestand“ anlegen.
                     </p>
                   ) : (
                     <select value={variantSel} onChange={e => setVariantSel(e.target.value)}
