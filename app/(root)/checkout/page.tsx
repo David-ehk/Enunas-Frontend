@@ -242,8 +242,14 @@ export default function CheckoutPage() {
       clearCart()
       window.location.href = order.checkoutUrl
     } catch (err) {
+      const notReleased =
+        err instanceof FetchError &&
+        err.status === 409 &&
+        /not yet released/i.test(err.serverMessage ?? err.message)
       setError(
-        err instanceof FetchError
+        notReleased
+          ? 'Ein Artikel in deinem Warenkorb ist noch nicht erhältlich (Coming Soon). Bitte entferne ihn, um fortzufahren.'
+          : err instanceof FetchError
           ? err.message
           : 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.'
       )
