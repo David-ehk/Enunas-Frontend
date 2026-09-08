@@ -139,19 +139,12 @@ function DropCard({ drop, tick, onClick }: { drop: Drop; tick: number; onClick: 
   )
 }
 
-// ── DropPanel ─────────────────────────────────────────────────────────────────
-function DropPanel({ open, drop, onClose }: { open: boolean; drop: Drop | null; onClose: () => void }) {
-  const [openSec, setOpenSec] = useState<string[]>(['items'])
-
-  const toggleSec = (id: string) =>
-    setOpenSec(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])
-
-  function Acc({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
-    const isOpen = openSec.includes(id)
-    return (
+// ── Acc (accordion section) ──────────────────────────────────────────────────
+function Acc({ label, isOpen, onToggle, children }: { label: string; isOpen: boolean; onToggle: () => void; children: React.ReactNode }) {
+  return (
       <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <button
-          onClick={() => toggleSec(id)}
+          onClick={onToggle}
           style={{
             width: '100%', background: 'none', border: 'none', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -181,8 +174,15 @@ function DropPanel({ open, drop, onClose }: { open: boolean; drop: Drop | null; 
           <div style={{ paddingBottom: 20 }}>{children}</div>
         </div>
       </div>
-    )
-  }
+  )
+}
+
+// ── DropPanel ─────────────────────────────────────────────────────────────────
+function DropPanel({ open, drop, onClose }: { open: boolean; drop: Drop | null; onClose: () => void }) {
+  const [openSec, setOpenSec] = useState<string[]>(['items'])
+
+  const toggleSec = (id: string) =>
+    setOpenSec(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])
 
   return (
     <>
@@ -270,7 +270,7 @@ function DropPanel({ open, drop, onClose }: { open: boolean; drop: Drop | null; 
               </p>
 
               {/* Items accordion */}
-              <Acc id="items" label="Items in this drop">
+              <Acc label="Items in this drop" isOpen={openSec.includes('items')} onToggle={() => toggleSec('items')}>
                 {drop.items.map(item => (
                   <div key={item.name} style={{
                     display: 'flex', alignItems: 'center', gap: 14,
@@ -290,7 +290,7 @@ function DropPanel({ open, drop, onClose }: { open: boolean; drop: Drop | null; 
               </Acc>
 
               {/* Details accordion */}
-              <Acc id="details" label="Drop Details">
+              <Acc label="Drop Details" isOpen={openSec.includes('details')} onToggle={() => toggleSec('details')}>
                 {[
                   { l: 'Release format', v: 'First-come, first-served' },
                   { l: 'Authentication', v: 'Each piece individually numbered' },

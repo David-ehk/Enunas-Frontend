@@ -10,6 +10,22 @@ import Link from 'next/link'
 const RAIL_COPIES = 3
 const HOME_COPY = 1
 
+const ArrowLeft = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 12H5M11 6l-6 6 6 6" />
+  </svg>
+)
+const ArrowRight = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </svg>
+)
+const ArrowRightSm = () => (
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </svg>
+)
+
 export default function KategorieAuswahl() {
   // Desktop state
   const [activeKategorie, setActiveKategorie] = useState('kategorie1')
@@ -148,22 +164,6 @@ export default function KategorieAuswahl() {
   }
 
   const current = kategorie[idx]
-
-  const ArrowLeft = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 12H5M11 6l-6 6 6 6" />
-    </svg>
-  )
-  const ArrowRight = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12h14M13 6l6 6-6 6" />
-    </svg>
-  )
-  const ArrowRightSm = () => (
-    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12h14M13 6l6 6-6 6" />
-    </svg>
-  )
 
   return (
     <section className="w-full">
