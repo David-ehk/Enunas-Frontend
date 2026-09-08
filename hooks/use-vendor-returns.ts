@@ -31,6 +31,8 @@ export function useVendorReturns() {
       .finally(() => setLoading(false))
   }, [])
 
+  // Fetch on mount; `load` is also exposed as `reload` where the loading flip is wanted.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load() }, [load])
 
   return { returns, loading, error, reload: load }

@@ -48,6 +48,8 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
+      // Hydrate the wishlist from localStorage on mount (external state -> React).
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (saved) setItems(JSON.parse(saved))
     } catch {
       // corrupted or unavailable storage (private mode, quota) — start empty rather than crash

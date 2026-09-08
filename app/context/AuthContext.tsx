@@ -64,8 +64,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setCustomer(null);
     });
+    // Bootstrap auth state from the stored token once on mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refreshUser().finally(() => setIsLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function logout() {

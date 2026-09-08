@@ -27,6 +27,8 @@ export default function ComingSoonCountdown({ releaseDate, variant, onElapsed }:
   const firedRef = useRef(false)
 
   useEffect(() => {
+    // Deliberate SSR/hydration mount gate: `now` stays null until the client mounts.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNow(Date.now())
     const id = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(id)

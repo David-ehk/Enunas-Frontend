@@ -65,6 +65,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('cart')
     if (saved) {
       try {
+        // Hydrate the cart from localStorage on mount (external state -> React).
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCartItems(JSON.parse(saved))
       } catch (error) {
         console.error('Fehler beim Laden des Carts:', error)

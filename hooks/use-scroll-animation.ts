@@ -16,6 +16,8 @@ export function useScrollAnimation(options?: ScrollAnimationOptions): {
     // Respect reduced motion preference
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (prefersReducedMotion) {
+      // Reveal immediately when motion is disabled — syncing a browser preference into React.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsVisible(true)
       return
     }
