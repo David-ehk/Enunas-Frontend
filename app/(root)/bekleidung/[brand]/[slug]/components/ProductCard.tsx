@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { formatReleaseDateShort } from '@/lib/preview';
 
 export interface RecItem {
   brand: string;
@@ -15,6 +16,10 @@ export interface RecItem {
   /** Optional image src; if omitted, the card shows the plain tinted panel */
   image?: string;
   href: string;
+  /** True when this recommendation is a not-yet-released product. */
+  preview?: boolean;
+  /** ISO "YYYY-MM-DD" release date; shown instead of a price when `preview`. */
+  releaseDate?: string | null;
 }
 
 interface ProductCardProps {
@@ -73,26 +78,36 @@ export default function ProductCard({ item, aspect = '3/4', compact = false }: P
         </div>
       )}
 
-      {item.price !== null && (
-        <p className={`
-          font-league-spartan ${compact ? 'text-xs' : 'text-[13px]'}
-          font-light flex items-baseline gap-2
-          ${item.originalPrice ? 'text-enunas-error' : 'text-enunas-black'}
-        `}>
-          {item.price}
-          {item.originalPrice && (
-            <span
-              className="text-enunas-gray-dark"
-              style={{
-                textDecorationLine: 'line-through',
-                textDecorationColor: '#8B1E3F',
-                textDecorationThickness: '1.5px',
-              }}
-            >
-              {item.originalPrice}
-            </span>
-          )}
-        </p>
+      {item.preview ? (
+        item.releaseDate && (
+          <p
+            className={`font-league-spartan ${compact ? 'text-xs' : 'text-[13px]'} font-light text-enunas-purple`}
+          >
+            Kommt am {formatReleaseDateShort(item.releaseDate)}
+          </p>
+        )
+      ) : (
+        item.price !== null && (
+          <p className={`
+            font-league-spartan ${compact ? 'text-xs' : 'text-[13px]'}
+            font-light flex items-baseline gap-2
+            ${item.originalPrice ? 'text-enunas-error' : 'text-enunas-black'}
+          `}>
+            {item.price}
+            {item.originalPrice && (
+              <span
+                className="text-enunas-gray-dark"
+                style={{
+                  textDecorationLine: 'line-through',
+                  textDecorationColor: '#8B1E3F',
+                  textDecorationThickness: '1.5px',
+                }}
+              >
+                {item.originalPrice}
+              </span>
+            )}
+          </p>
+        )
       )}
     </Link>
   );

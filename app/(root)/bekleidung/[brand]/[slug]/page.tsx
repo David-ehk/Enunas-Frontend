@@ -98,6 +98,8 @@ function toRecItem(p: ApiProduct): RecItem {
     colors: (p.colours ?? []).map(c => c.hex),
     href: `/bekleidung/${generateSlug(p.brandName)}/${p.slug}`,
     image: p.images?.[0],
+    preview: p.preview ?? false,
+    releaseDate: p.releaseDate ?? null,
   }
 }
 
@@ -187,6 +189,7 @@ async function ProductPage({ params }: ProductPageProps) {
         productSlug={slug}
         colorHexMap={colorHexMap}
         productId={resolved.id}
+        preview={resolved.preview ?? false}
       />
       <CompleteTheLook items={relatedItems} heroImage={product.images[0]} />
       <MoreFromBrand brand={product.brandName} items={brandItems} />
