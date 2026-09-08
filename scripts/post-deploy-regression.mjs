@@ -87,7 +87,8 @@ const skip = (id, t, d) => record('SKIP', id, t, d)
 
 /** Assert helper: one line per check, never throws — a failed assertion must not stop the run. */
 function check(id, title, condition, detail) {
-  condition ? pass(id, title, detail) : fail(id, title, detail)
+  if (condition) pass(id, title, detail)
+  else fail(id, title, detail)
   return condition
 }
 

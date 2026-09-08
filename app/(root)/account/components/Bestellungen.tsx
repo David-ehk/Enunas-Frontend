@@ -390,6 +390,8 @@ export default function Bestellungen() {
   }, [])
 
   useEffect(() => {
+    // Re-fetches the order page once auth resolves and whenever the page changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!authLoading && user?.role === 'CUSTOMER') load(page)
     else if (!authLoading) setLoading(false)
   }, [authLoading, user, load, page])

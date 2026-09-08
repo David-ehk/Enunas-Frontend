@@ -77,6 +77,8 @@ export default function SettingsTab({
 
   useEffect(() => {
     if (brand) {
+      // Syncs the loaded brand-partner record into the editable form fields.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDescription(brand.description ?? '')
       setWebsiteUrl(brand.websiteUrl ?? '')
       setInstagramHandle(brand.instagramHandle ?? '')

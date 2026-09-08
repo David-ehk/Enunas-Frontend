@@ -114,6 +114,8 @@ export default function Discounts() {
     }
   }
 
+  // Initial data load on mount; refresh() is also invoked after mutations.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { refresh() }, [])
 
   const visible = useMemo(() => {

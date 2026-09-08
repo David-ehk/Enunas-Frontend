@@ -63,7 +63,6 @@ export default function ProductDetails({
 
   const [selectedColor, setSelectedColor] = useState<Color | null>(colorsForSelector[0] ?? null)
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
-  const [copiedSku, setCopiedSku] = useState(false)
   const [showSizeModal, setShowSizeModal] = useState(false)
   // Preview products aren't buyable yet — the CTA stays clickable and opens a cheeky "not so
   // fast" note instead of doing nothing.
@@ -85,6 +84,8 @@ export default function ProductDetails({
   useEffect(() => {
     if (!livePreview) return
     if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      // Reduced-motion: reveal immediately, no entrance transition.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRevealed(true)
       return
     }
@@ -110,6 +111,8 @@ export default function ProductDetails({
 
   useEffect(() => {
     if (!productId || livePreview) return   // preview products have no listings (backend returns [])
+    // Re-fetches variant listings when the product id changes or a preview product goes live.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setListingsLoading(true)
     setListingsFailed(false)
     productApi.getListings(productId)
@@ -143,6 +146,8 @@ export default function ProductDetails({
     const onVisible = () => { if (document.visibilityState === 'visible') check() }
     document.addEventListener('visibilitychange', onVisible)
     window.addEventListener('focus', check)
+    // Async backend re-check; any setState runs later in a promise callback, not synchronously.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     check() // in case the tab was already past the release when mounted
     return () => {
       document.removeEventListener('visibilitychange', onVisible)
@@ -246,14 +251,6 @@ export default function ProductDetails({
     if (!effectiveAvailable || isOutOfStock || variantUnavailable) return
     if (!selectedSize) { setShowSizeModal(true); return }
     handleAddToCart(selectedSize)
-  }
-
-  const copySku = async () => {
-    const skuToCopy = selectedVariant?.sku ?? ''
-    if (!skuToCopy) return
-    try { await navigator.clipboard.writeText(skuToCopy) } catch { /* noop */ }
-    setCopiedSku(true)
-    setTimeout(() => setCopiedSku(false), 1600)
   }
 
   // Same id + heart used on product cards (PopularProductCard.tsx) — saving here or there is
@@ -761,7 +758,7 @@ export default function ProductDetails({
 
 // ── PDP Accordion ─────────────────────────────────────
 function PdpAccordion({
-  id, title, open, onToggle, children, isLast = false,
+  title, open, onToggle, children, isLast = false,
 }: {
   id: string
   title: string

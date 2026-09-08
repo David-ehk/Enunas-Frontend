@@ -4,7 +4,7 @@ import { useState, useEffect, Fragment } from 'react'
 import { brandApi } from '@/lib/api/modules/brandApi'
 import { FetchError } from '@/lib/api'
 import { errorRemedies, type ErrorRemedy } from '@/lib/api/errorCopy'
-import type { CreateProductDto, CreateProductVariantDto, CreateListingDto, UpdateListingDto } from '@/lib/api/modules/brandApi'
+import type { CreateProductDto, CreateListingDto, UpdateListingDto } from '@/lib/api/modules/brandApi'
 import type { AdminApiProduct, AdminApiVariant, ApiListing, ApiProductImage, PriceInputMode } from '@/types/api'
 import {
   StatusBadge, SectionCard, EmptyState, Loader,

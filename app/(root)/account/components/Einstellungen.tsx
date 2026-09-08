@@ -68,6 +68,8 @@ export default function Einstellungen() {
   // Populate form once auth context has the customer data
   useEffect(() => {
     if (authCustomer) {
+      // Syncs the customer record from auth context into the editable fields.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFirstName(authCustomer.firstName ?? '')
       setLastName(authCustomer.lastName ?? '')
     }

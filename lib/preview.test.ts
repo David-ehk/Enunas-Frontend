@@ -4,7 +4,6 @@ import {
   formatReleaseDate, formatReleaseDateShort,
 } from './preview'
 
-const DAY = 86_400_000
 // Fixed "now": 2026-09-08T12:00:00Z
 const NOW = Date.UTC(2026, 8, 8, 12, 0, 0)
 

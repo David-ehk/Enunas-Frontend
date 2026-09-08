@@ -8,7 +8,7 @@ import {
   TH, TD, TableRow, FilterBar, SearchInput, fmt, fmtEur,
 } from '../../admin/_components/shared'
 import {
-  Truck, AlertTriangle, X, Check, Package,
+  Truck, AlertTriangle, X, Check,
   ChevronDown, ChevronUp, ExternalLink, RefreshCw,
 } from 'lucide-react'
 
@@ -508,6 +508,8 @@ export default function Fulfillment() {
     }
   }, [])
 
+  // Initial data load on mount; load() is also invoked to refresh after actions.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load() }, [load])
 
   function showToast(msg: string) {

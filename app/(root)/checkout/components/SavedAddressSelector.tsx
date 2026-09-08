@@ -71,6 +71,8 @@ export default function SavedAddressSelector({ onChange, isAuthenticated, openFo
   }, [])
 
   useEffect(() => {
+    // Loads saved addresses once the visitor is known to be authenticated.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isAuthenticated) load()
     // Guests skip the fetch entirely — `loading`/`view` above already default to the manual
     // entry form for them, so there's nothing to do here.

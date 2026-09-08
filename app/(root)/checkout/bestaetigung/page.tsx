@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import CheckoutNavbar from '@/app/(root)/cart/components/CheckoutNavbar'
 import CartFooter from '@/app/(root)/cart/components/CartFooter'
 import { orderApi } from '@/lib/api/modules/orderApi'
@@ -79,10 +80,12 @@ function UpsellCard({ product, discountPct }: { product: ProductCardShape; disco
     <Link href={product.href} className="group block">
       <div className="relative overflow-hidden aspect-[3/4] bg-enunas-off-white mb-3">
         {product.imgURL ? (
-          <img
+          <Image
             src={product.imgURL}
             alt={product.productName}
-            className="w-full h-full object-cover transition-transform duration-800 ease-out-expo group-hover:scale-105"
+            fill
+            sizes="(min-width: 768px) 25vw, 50vw"
+            className="object-cover transition-transform duration-800 ease-out-expo group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full bg-enunas-off-white" />
@@ -327,6 +330,8 @@ function BestaetiguungContent() {
   const [products, setProducts]   = useState<ProductCardShape[]>([])
 
   useEffect(() => {
+    // One-shot: fetch the confirmed order, or drop the loading state if there's no id.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!orderId) { setLoading(false); return }
     orderApi.getById(orderId)
       .then(setOrder)

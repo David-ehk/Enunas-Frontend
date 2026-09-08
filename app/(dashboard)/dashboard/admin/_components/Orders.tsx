@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { adminApi } from '@/lib/api'
 import type { ApiOrder, AdminCustomer } from '@/types/api'
 import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, SearchInput, SelectFilter, TH, TD, TableRow, fmt, fmtEur } from './shared'
-import { ChevronDown, ChevronUp, RotateCcw, XCircle } from 'lucide-react'
+import { ChevronDown, ChevronUp, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type Filter = 'all' | 'PENDING' | 'PAID' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'RETURN_REQUESTED' | 'REFUNDED'

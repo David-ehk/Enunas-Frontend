@@ -1,14 +1,8 @@
 "use client"
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 const Hero = () => {
-  const [loaded, setLoaded] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoaded(true), 800)
-    return () => clearTimeout(timer)
-  }, [])
 
   // Chrome (and other browsers) can fail to honor the muted/autoPlay JSX attributes on first
   // paint — React sets them as DOM attributes, but the browser's autoplay gate checks the live

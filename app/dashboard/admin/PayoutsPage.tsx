@@ -4,8 +4,6 @@ import { useState } from 'react'
 import { Send } from 'lucide-react'
 import { adminPayouts } from '../lib/mockData'
 
-type PayoutStatus = 'Pending' | 'Paid'
-
 interface Payout {
   id: string
   brand: string

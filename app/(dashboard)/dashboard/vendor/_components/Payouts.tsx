@@ -35,6 +35,8 @@ export default function Payouts() {
       .finally(() => setLoading(false))
   }
 
+  // Initial data load on mount; load() is also invoked to retry after an error.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load() }, [])
 
   const { openTotal, openCount, paidTotal, paidCount, lastPaid } = useMemo(() => {

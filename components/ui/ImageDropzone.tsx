@@ -88,8 +88,9 @@ export default function ImageDropzone({
         }}
       >
         {currentUrl && (
-          // eslint-disable-next-line @next/next/no-img-element -- preview of a freshly uploaded
-          // S3 asset; no known dimensions/priority to justify next/image here.
+          // Preview of a freshly uploaded S3 asset; no known dimensions/priority
+          // to justify next/image here.
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={currentUrl}
             alt=""

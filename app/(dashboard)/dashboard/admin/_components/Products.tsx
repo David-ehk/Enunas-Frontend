@@ -4,12 +4,14 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { adminApi, brandApi } from '@/lib/api'
 import type { AdminApiProduct, ApiOrder, ApiProductImage } from '@/types/api'
 import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, SearchInput, SelectFilter, TH, TD, TableRow, fmt, fmtEur } from './shared'
-import { Eye, EyeOff, Trash2, CheckCircle, XCircle, Flag, Pencil, RotateCcw, X, Download } from 'lucide-react'
+import { Eye, EyeOff, Archive, ArchiveRestore, CheckCircle, XCircle, Flag, Pencil, RotateCcw, X, Download } from 'lucide-react'
 import ImageDropzone from '@/components/ui/ImageDropzone'
 import { isProductLive } from '@/lib/product'
 
-type Filter = 'all' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'DEACTIVATED'
+type Filter = 'all' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'DEACTIVATED' | 'ARCHIVED'
 type Queue  = 'all' | 'moderation'
+
+const ARCHIVED_STORAGE_KEY = 'enunas_admin_archived'
 
 interface EditDraft {
   name: string
@@ -183,7 +185,24 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
   const [queue, setQueue]       = useState<Queue>('all')
   const [search, setSearch]     = useState('')
   const [acting, setActing]     = useState<string | null>(null)
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [confirmArchive, setConfirmArchive] = useState<string | null>(null)
+  const [actionErr, setActionErr] = useState<{ id: string; msg: string } | null>(null)
+  // Admin-side archive. The backend has no archive state, and DELETE /admin/products/{id}
+  // returns 409 "Data integrity violation" for any product that ever had a listing, variant
+  // or order line — i.e. effectively all of them. So "archived" is a local id set: archived
+  // products are filtered out of every tab except "Archiviert" and can be restored from there.
+  // Per-browser only — same stopgap tradeoff as the wishlist/save-lists localStorage lists.
+  // Hydrated in the initializer (not an effect) so the first persist can't race a late load
+  // and wipe the stored value.
+  const [archivedIds, setArchivedIds] = useState<Set<string>>(() => {
+    if (typeof window === 'undefined') return new Set()
+    try {
+      const raw = localStorage.getItem(ARCHIVED_STORAGE_KEY)
+      return raw ? new Set<string>(JSON.parse(raw)) : new Set()
+    } catch {
+      return new Set()
+    }
+  })
   const [editing, setEditing]   = useState<string | null>(null)
   const [draft, setDraft]       = useState<EditDraft | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -197,7 +216,17 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
     adminApi.products.getAll().catch(() => []).then(setProducts).finally(() => setLoading(false))
   }, [])
 
-  const pending = products.filter(p => p.status === 'PENDING').length
+  // Persist the local archive set. The mount run writes back the value the initializer just
+  // read (a no-op), so there's no race to guard against.
+  useEffect(() => {
+    try {
+      localStorage.setItem(ARCHIVED_STORAGE_KEY, JSON.stringify([...archivedIds]))
+    } catch {
+      // storage full/unavailable — archive still works this session, just won't persist
+    }
+  }, [archivedIds])
+
+  const pending = products.filter(p => p.status === 'PENDING' && !archivedIds.has(p.id)).length
 
   const uniqueBrands = useMemo(() =>
     [...new Set(products.map(p => p.brandName))].filter(Boolean).sort()
@@ -223,7 +252,11 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
     const result = products.filter(p => {
       const matchSearch = !q || p.name.toLowerCase().includes(q) || p.brandName.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)
       if (!matchSearch) return false
-      if (queue === 'moderation') return p.status === 'PENDING'
+      const isArch = archivedIds.has(p.id)
+      // "Archiviert" is the only view that shows archived products; every other tab hides them.
+      if (queue === 'moderation') return !isArch && p.status === 'PENDING'
+      if (filter === 'ARCHIVED') return isArch
+      if (isArch) return false
       if (filter !== 'all' && p.status !== filter) return false
       if (brandFilter !== 'all' && p.brandName !== brandFilter) return false
       if (catFilter !== 'all') {
@@ -240,33 +273,47 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
       if (sortBy === 'sales_desc') return (salesMap.get(b.id)?.count ?? 0) - (salesMap.get(a.id)?.count ?? 0)
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     })
-  }, [products, search, filter, queue, brandFilter, catFilter, sortBy])
+  }, [products, search, filter, queue, brandFilter, catFilter, sortBy, archivedIds, salesMap])
 
   async function act(id: string, action: 'approve' | 'hide') {
     setActing(id)
+    setActionErr(null)
     try {
       await adminApi.products[action](id)
       const nextStatus = action === 'approve' ? 'APPROVED' : 'HIDDEN'
       setProducts(prev => prev.map(p => p.id === id ? { ...p, status: nextStatus } : p))
-    } catch { /* silent */ } finally { setActing(null) }
+    } catch (e) {
+      setActionErr({ id, msg: e instanceof Error ? e.message : 'Aktion fehlgeschlagen.' })
+    } finally { setActing(null) }
   }
 
   async function rejectProduct(id: string, reason: string) {
     setActing(id)
+    setActionErr(null)
     try {
       await adminApi.products.reject(id, reason || undefined)
       setProducts(prev => prev.map(p => p.id === id ? { ...p, status: 'REJECTED' } : p))
       setRejectingId(null)
       setRejectReason('')
-    } catch { /* silent */ } finally { setActing(null) }
+    } catch (e) {
+      setActionErr({ id, msg: e instanceof Error ? e.message : 'Ablehnen fehlgeschlagen.' })
+    } finally { setActing(null) }
   }
 
-  async function del(id: string) {
-    setActing(id)
-    try {
-      await adminApi.products.delete(id)
-      setProducts(prev => prev.filter(p => p.id !== id))
-    } catch { /* silent */ } finally { setActing(null); setConfirmDelete(null) }
+  // Archive / restore are local only (see the archivedIds note). No API call, so no failure
+  // mode — a live product must be hidden first, which is enforced in the actions column.
+  function archive(id: string) {
+    setArchivedIds(prev => new Set(prev).add(id))
+    setConfirmArchive(null)
+    setActionErr(null)
+  }
+
+  function unarchive(id: string) {
+    setArchivedIds(prev => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
   }
 
   function startEdit(p: AdminApiProduct) {
@@ -319,12 +366,15 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
     } finally { setActing(null) }
   }
 
+  // Counts exclude archived products — they live under their own tab now.
+  const liveProducts = products.filter(p => !archivedIds.has(p.id))
   const STATUS_FILTERS: { id: Filter; label: string }[] = [
     { id: 'all',         label: 'Alle' },
     { id: 'PENDING',     label: `Ausstehend (${pending})` },
-    { id: 'APPROVED',    label: `Genehmigt (${products.filter(p => isProductLive(p.status)).length})` },
-    { id: 'REJECTED',    label: `Abgelehnt (${products.filter(p => p.status === 'REJECTED').length})` },
-    { id: 'DEACTIVATED', label: `Deaktiviert (${products.filter(p => p.status === 'DEACTIVATED').length})` },
+    { id: 'APPROVED',    label: `Genehmigt (${liveProducts.filter(p => isProductLive(p.status)).length})` },
+    { id: 'REJECTED',    label: `Abgelehnt (${liveProducts.filter(p => p.status === 'REJECTED').length})` },
+    { id: 'DEACTIVATED', label: `Deaktiviert (${liveProducts.filter(p => p.status === 'DEACTIVATED').length})` },
+    { id: 'ARCHIVED',    label: `Archiviert (${archivedIds.size})` },
   ]
 
   return (
@@ -408,8 +458,13 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
         </div>
       </div>
 
-      <SectionCard title={queue === 'moderation' ? 'Moderation Queue' : 'Produkte'} count={visible.length}>
-        {loading ? <Loader /> : visible.length === 0 ? <EmptyState message="Keine Produkte gefunden." /> : (
+      <SectionCard
+        title={queue === 'moderation' ? 'Moderation Queue' : filter === 'ARCHIVED' ? 'Archivierte Produkte' : 'Produkte'}
+        count={visible.length}
+      >
+        {loading ? <Loader /> : visible.length === 0 ? (
+          <EmptyState message={filter === 'ARCHIVED' ? 'Keine archivierten Produkte.' : 'Keine Produkte gefunden.'} />
+        ) : (
           <table className="w-full">
             <thead>
               <tr>
@@ -425,7 +480,9 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
               </tr>
             </thead>
             <tbody>
-              {visible.map(p => (
+              {visible.map(p => {
+                const isArch = archivedIds.has(p.id)
+                return (
                 <React.Fragment key={p.id}>
                   <TableRow>
                     <TD>
@@ -467,7 +524,7 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                         {/* Approve / Reject */}
-                        {p.status === 'PENDING' && (
+                        {!isArch && p.status === 'PENDING' && (
                           <>
                             <button
                               onClick={() => act(p.id, 'approve')} disabled={acting === p.id}
@@ -517,7 +574,7 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
                           </>
                         )}
                         {/* Hide */}
-                        {isProductLive(p.status) && (
+                        {!isArch && isProductLive(p.status) && (
                           <button
                             onClick={() => act(p.id, 'hide')} disabled={acting === p.id}
                             className="p-1.5 rounded-lg text-[#6B6B6B] hover:bg-[#F5F5F0] transition-all duration-200 disabled:opacity-40"
@@ -527,7 +584,7 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
                           </button>
                         )}
                         {/* Reactivate (hidden products) */}
-                        {(p.status === 'HIDDEN' || p.status === 'DEACTIVATED') && (
+                        {!isArch && (p.status === 'HIDDEN' || p.status === 'DEACTIVATED') && (
                           <button
                             onClick={() => act(p.id, 'approve')} disabled={acting === p.id}
                             className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-all duration-200 disabled:opacity-40"
@@ -536,34 +593,57 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
                             <RotateCcw className="w-3.5 h-3.5" />
                           </button>
                         )}
-                        {/* Delete */}
-                        {confirmDelete !== p.id ? (
+                        {/* Restore from archive */}
+                        {isArch && (
                           <button
-                            onClick={() => setConfirmDelete(p.id)}
-                            className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-all duration-200"
-                            title="Löschen"
+                            onClick={() => unarchive(p.id)}
+                            className="flex items-center gap-1.5 h-6 px-2.5 rounded-lg text-[11px] font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-all duration-200"
+                            style={{ fontFamily: 'var(--font-league-spartan)' }}
+                            title="Aus dem Archiv zurückholen"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <ArchiveRestore className="w-3.5 h-3.5" />
+                            Wiederherstellen
                           </button>
-                        ) : (
-                          <div className="flex items-center gap-1.5">
+                        )}
+                        {/* Archive — two-step: a live product must be hidden first, so the
+                            button only appears once the product is off the storefront. */}
+                        {!isArch && !isProductLive(p.status) && (
+                          confirmArchive !== p.id ? (
                             <button
-                              onClick={() => del(p.id)} disabled={acting === p.id}
-                              className="text-[11px] text-rose-600 font-medium hover:underline"
-                              style={{ fontFamily: 'var(--font-league-spartan)' }}
+                              onClick={() => setConfirmArchive(p.id)}
+                              className="p-1.5 rounded-lg text-[#9B9B9B] hover:bg-[#F5F5F0] hover:text-[#6B6B6B] transition-all duration-200"
+                              title="Archivieren"
                             >
-                              Löschen
+                              <Archive className="w-4 h-4" />
                             </button>
-                            <button
-                              onClick={() => setConfirmDelete(null)}
-                              className="text-[11px] text-[#6B6B6B] hover:underline"
-                              style={{ fontFamily: 'var(--font-league-spartan)' }}
-                            >
-                              Abbrechen
-                            </button>
-                          </div>
+                          ) : (
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => archive(p.id)}
+                                className="text-[11px] text-[#370E4D] font-medium hover:underline"
+                                style={{ fontFamily: 'var(--font-league-spartan)' }}
+                              >
+                                Archivieren
+                              </button>
+                              <button
+                                onClick={() => setConfirmArchive(null)}
+                                className="text-[11px] text-[#6B6B6B] hover:underline"
+                                style={{ fontFamily: 'var(--font-league-spartan)' }}
+                              >
+                                Abbrechen
+                              </button>
+                            </div>
+                          )
                         )}
                       </div>
+                      {actionErr?.id === p.id && (
+                        <p
+                          className="text-[10px] text-[#8B1E3F] mt-1 max-w-[200px] leading-snug"
+                          style={{ fontFamily: 'var(--font-league-spartan)' }}
+                        >
+                          {actionErr.msg}
+                        </p>
+                      )}
                     </TD>
                   </TableRow>
 
@@ -803,7 +883,8 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
                     </tr>
                   )}
                 </React.Fragment>
-              ))}
+                )
+              })}
             </tbody>
           </table>
         )}

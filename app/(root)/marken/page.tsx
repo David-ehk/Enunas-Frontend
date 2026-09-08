@@ -41,6 +41,8 @@ export default function MarkenPage() {
   // field. It reflects nothing for an actual site visitor unless that specific browser also
   // happens to be the admin's. See lib/topDesigners.ts.
   useEffect(() => {
+    // localStorage hydration — deferred past first render to avoid an SSR mismatch.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTopDesignerNames(getTopDesigners())
   }, []);
 

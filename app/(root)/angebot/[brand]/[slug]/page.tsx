@@ -71,7 +71,7 @@ export default function AngebotPage() {
 
   // `product.price` is the effective price and can already be a markdown, so it must not be
   // used as the strike-through figure nor as the base for the promo — see resolvePromoPricing.
-  const { promoPrice, listPrice, alreadyReduced } = resolvePromoPricing(
+  const { promoPrice, listPrice } = resolvePromoPricing(
     product?.price ?? 0,
     product?.originalPrice,
     DISCOUNT_PCT,

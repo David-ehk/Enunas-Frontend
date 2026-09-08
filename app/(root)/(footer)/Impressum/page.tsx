@@ -11,6 +11,7 @@ const sections: LegalSection[] = [
   {
     id: 'kontakt', num: '02', label: 'Kontakt', title: 'Kontakt',
     paras: [
+      ['Telefon', '+49 176 40484134'],
       ['E-Mail', 'info@enunas.com'],
       ['Web', 'www.enunas.com'],
     ],

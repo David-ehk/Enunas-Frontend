@@ -184,6 +184,8 @@ export default function AccountPage() {
   }, [user])
 
   useEffect(() => {
+    // Loads the account overview once auth resolves / when the user changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!isLoading) loadOverview()
   }, [isLoading, loadOverview])
 

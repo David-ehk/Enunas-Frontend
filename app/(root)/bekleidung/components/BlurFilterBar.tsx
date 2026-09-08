@@ -151,7 +151,6 @@ export default function BlurFilterBar({
   onGenderToggle,
   activeFilterCount,
   onOpenFilter,
-  onOpenAt,
   sortValue,
   onSort,
   catalogueValue,

@@ -272,7 +272,6 @@ export function GaugeArc({ pct, label, sub, size = 210 }: { pct: number; label: 
   const sw = 11
   const r = (size - sw * 2) / 2 - 6
   const cx = size / 2
-  const cy = size / 2
   const C = 2 * Math.PI * r
   const half = Math.PI * r
   const filled = Math.min(1, Math.max(0, pct / 100)) * half
@@ -602,7 +601,7 @@ export function VStackedBar({ data, labels, keys, fmt: fmtFn, height = 220 }: {
         <YAxis tick={{ fontFamily: 'monospace', fontSize: 9.5, fill: '#9B9B9B' }} tickLine={false} axisLine={false} tickFormatter={fmtFn} width={48} />
         <Tooltip contentStyle={{ fontFamily: 'var(--font-league-spartan)', fontSize: 11, border: '1px solid #E8E8E8', borderRadius: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
           formatter={(v: unknown, name: unknown) => [fmtFn ? fmtFn(Number(v)) : String(v), keys.find(k => k.key === String(name))?.label ?? String(name)]} />
-        {keys.map((k, i) => (
+        {keys.map((k) => (
           <Bar key={k.key} dataKey={k.key} stackId="s" fill={k.color} radius={undefined} />
         ))}
       </BarChart>

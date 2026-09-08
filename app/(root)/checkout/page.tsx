@@ -67,10 +67,13 @@ export default function CheckoutPage() {
   // Keeps the visible input in sync when a code was auto-applied above, without fighting the
   // user's own typing — this only fires when promoCode itself changes, not on every render.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (promoCode) setCouponInput(promoCode)
   }, [promoCode])
 
   useEffect(() => {
+    // Prefill the email field from the signed-in user when it becomes available.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (user?.email) setEmail(user.email)
   }, [user?.email])
 
@@ -90,6 +93,7 @@ export default function CheckoutPage() {
   // an invalid/expired/exhausted code instead of silently falling back to an undiscounted total.
   useEffect(() => {
     if (!addressSelection || cartItems.length === 0 || cartItems.some((item) => !item.defaultListingId)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPreview(null)
       return
     }
@@ -136,7 +140,6 @@ export default function CheckoutPage() {
     }
     // cartItems is compared by identity via CartContext's own state updates (add/remove/qty
     // change all produce a new array), so it's safe to depend on directly here.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cartItems, addressSelection, promoCode])
 
   const displaySubtotal = preview?.subtotal ?? totalPrice

@@ -102,6 +102,9 @@ export default function DiscountForm({
 
   useEffect(() => {
     if (!open) return
+    // Syncs the passed-in discount (or blank defaults) into the form fields each
+    // time the dialog opens or the target record changes — external-state sync.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(null)
     setFieldErrors({})
     if (initial) {

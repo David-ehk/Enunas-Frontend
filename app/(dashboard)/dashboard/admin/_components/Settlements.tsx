@@ -822,7 +822,10 @@ export default function Settlements() {
   }
 
   useEffect(() => {
+    // Deliberately re-fetches the active tab's data whenever the tab or period
+    // changes; loadPayouts/loadRows set their own loading flags synchronously.
     if (view === 'payouts') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       loadPayouts()
     } else {
       loadRows(period, view === 'settled')

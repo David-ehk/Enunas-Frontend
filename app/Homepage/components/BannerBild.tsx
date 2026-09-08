@@ -1,4 +1,5 @@
 "use client"
+import Image from 'next/image'
 import { useScrollAnimation } from '@/hooks/use-scroll-animation'
 import { cn } from '@/lib/utils'
 
@@ -8,11 +9,13 @@ const BannerBild = () => {
   return (
     <section ref={ref as React.RefObject<HTMLElement>}>
       <div className="relative w-full h-[420px] sm:h-[500px] md:h-[600px] overflow-hidden">
-        <img
+        <Image
           src="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbmGGkjmM2SZ6mLfKiMTvNxhP12XG85FDYdR7k"
           alt="New in"
+          fill
+          sizes="100vw"
           className={cn(
-            "w-full h-full object-cover transition-transform duration-1000 ease-out",
+            "object-cover transition-transform duration-1000 ease-out",
             isVisible ? "scale-100" : "scale-105"
           )}
         />

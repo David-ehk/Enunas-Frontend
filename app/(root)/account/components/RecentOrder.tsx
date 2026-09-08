@@ -42,7 +42,7 @@ function MetaCell({ label, children, toneClass }: {
   )
 }
 
-function EmptyState({ onSeeAll }: { onSeeAll: () => void }) {
+function EmptyState() {
   return (
     <div className="border border-enunas-gray-light p-12 text-center">
       <h3 className="font-cormorant text-2xl text-enunas-black mb-3">
@@ -83,7 +83,7 @@ export default function RecentOrder({ order, onSeeAll }: RecentOrderProps) {
       </div>
 
       {!order ? (
-        <EmptyState onSeeAll={onSeeAll} />
+        <EmptyState />
       ) : (
         <article className="border border-enunas-gray-light p-6 md:p-7">
           {/* Meta row */}

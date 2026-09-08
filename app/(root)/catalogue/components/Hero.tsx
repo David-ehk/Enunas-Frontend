@@ -1,16 +1,19 @@
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 const CatalogueHero = () => {
   return (
     <div className="w-full pt-20">
       {/* Hero image */}
-      <div className="w-full overflow-hidden" style={{ aspectRatio: '4/3' }}>
-        <img
+      <div className="relative w-full overflow-hidden" style={{ aspectRatio: '4/3' }}>
+        <Image
           src="https://i.imgur.com/VNHRUgU.jpeg"
           alt="Catalogue"
-          className="w-full h-full object-cover"
-          style={{ aspectRatio: '4/3' }}
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
         />
       </div>
 

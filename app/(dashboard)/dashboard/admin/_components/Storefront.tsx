@@ -261,6 +261,8 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
   const dragRef = useRef<DragState | null>(null)
 
   useEffect(() => {
+    // Reset the available-products filters whenever the section tab changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearch(''); setBrand('all'); setCat('all')
   }, [section])
 

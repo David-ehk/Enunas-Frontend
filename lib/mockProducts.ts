@@ -5,8 +5,7 @@
 import {
   MockProduct,
   mockProducts as apiMockProducts,
-  getProductBySlug as apiGetBySlug,
-  getAllProducts as apiGetAllProducts
+  getProductBySlug as apiGetBySlug
 } from './api/mockProducts';
 import { Product, generateSlug } from './product';
 

@@ -1,5 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface CatalogueSectionProps {
   color: string
@@ -17,9 +18,18 @@ function CatalogueSection({
 }: CatalogueSectionProps) {
   const image = (
     <div className="w-full lg:w-1/2 flex-shrink-0">
-      <div className="w-full overflow-hidden" style={{ aspectRatio: '3/4' }}>
+      <div className="relative w-full overflow-hidden" style={{ aspectRatio: '3/4' }}>
         {imageSrc ? (
-          <img src={imageSrc} alt={title} className="w-full h-full object-cover" />
+          <Image
+            src={imageSrc}
+            alt={title}
+            fill
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            className="object-cover"
+            // cdn.rickowens.eu rejects the Next image optimizer's server-side fetch (HTTP 530);
+            // load it straight from the browser instead. The ufs.sh sources stay optimized.
+            unoptimized={/rickowens\.eu/.test(imageSrc)}
+          />
         ) : (
           <div className="w-full h-full bg-enunas-off-white flex items-center justify-center">
             <span className="font-league-spartan text-[10px] tracking-[0.2em] uppercase text-enunas-gray-medium">Bild</span>

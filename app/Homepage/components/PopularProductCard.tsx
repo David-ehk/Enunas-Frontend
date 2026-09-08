@@ -96,6 +96,8 @@ const PopularProductCard = ({
   // hover actually exists.
   const [canHover, setCanHover] = useState(false);
   useEffect(() => {
+    // Reads a browser media-query into React state on mount (unavailable during SSR).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCanHover(window.matchMedia('(hover: hover)').matches);
   }, []);
   const isNew = !preview && isNewProduct(createdAt);

@@ -1,16 +1,17 @@
+import Image from 'next/image'
+
 const HeroTrendy = ({ count, loading = false }: { count?: number; loading?: boolean }) => {
   return (
     <section style={{ position: 'relative', width: '100%', height: '88vh', overflow: 'hidden', minHeight: 520, background: '#0a0a0a' }}>
 
       {/* Photo */}
-      <img
+      <Image
         src="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbEjpFAQkSvJt4go7bMAYej9qRVTcdUEW5PfGx"
         alt="Trendy"
+        fill
+        priority
+        sizes="100vw"
         style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
           objectFit: 'cover',
           objectPosition: 'center 35%',
         }}

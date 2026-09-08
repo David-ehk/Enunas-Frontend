@@ -4,10 +4,10 @@ import React, {
   useState,
   useRef,
   useEffect,
-  useId,
   KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
+import Image from 'next/image';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -118,12 +118,14 @@ function SidebarProductRow({ result, onSelect }: { result: SearchResult; onSelec
       onClick={onSelect}
       className="w-full flex items-center gap-4 py-4 border-b border-enunas-gray-light last:border-b-0 group text-left focus:outline-none"
     >
-      <div className="flex-none w-14 h-[72px] bg-enunas-gray-light overflow-hidden shrink-0">
+      <div className="relative flex-none w-14 h-[72px] bg-enunas-gray-light overflow-hidden shrink-0">
         {result.imageUrl && (
-          <img
+          <Image
             src={result.imageUrl}
             alt={result.title}
-            className="w-full h-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105"
+            fill
+            sizes="56px"
+            className="object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105"
           />
         )}
       </div>
@@ -207,6 +209,8 @@ function SearchSidebar({
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Portal mount gate — false during SSR / first client render, flips after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     return () => setMounted(false);
   }, []);
@@ -250,6 +254,8 @@ function SearchSidebar({
       const t = setTimeout(() => inputRef.current?.focus(), 120);
       return () => clearTimeout(t);
     } else {
+      // Clears the search field each time the overlay closes.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuery('');
       setFocused(false);
       onQueryChange?.('');

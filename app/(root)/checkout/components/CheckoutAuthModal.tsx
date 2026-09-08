@@ -15,6 +15,8 @@ interface CheckoutAuthModalProps {
 // form feeling like its own dedicated screen without leaving /checkout or losing the cart.
 export default function CheckoutAuthModal({ open, onClose }: CheckoutAuthModalProps) {
   const [mounted, setMounted] = useState(false)
+  // Portal mount gate — must start false on the server and flip after hydration.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {

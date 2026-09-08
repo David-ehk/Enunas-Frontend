@@ -674,6 +674,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [markenCount,  setMarkenCount] = useState<number | null>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
 
+  // Portal mount gate — false during SSR / first client render, flips after hydration.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMounted(true) }, [])
 
   // "Neu" kicker (current month + last-30-days count) and "Marken" kicker
@@ -695,6 +697,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   // On open: re-trigger tile animations, focus close button, reset mobile panel
   useEffect(() => {
     if (isOpen) {
+      // Re-trigger the tile entrance animations and reset the mobile panel on each open.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTileKey(k => k + 1)
       setMobilePanel('rail')
       setTimeout(() => closeRef.current?.focus(), 80)

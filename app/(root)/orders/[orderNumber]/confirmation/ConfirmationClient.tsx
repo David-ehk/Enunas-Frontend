@@ -279,6 +279,8 @@ export default function ConfirmationClient({ orderNumber, isUpsell }: Props) {
   useEffect(() => {
     if (hasTriggered.current || isUpsell) return
     hasTriggered.current = true
+    // One-shot random A/B trigger on mount, guarded by hasTriggered.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (Math.random() < 0.2) setShowUpsell(true)
   }, [isUpsell])
 

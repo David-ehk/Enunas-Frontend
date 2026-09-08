@@ -12,6 +12,9 @@ export const STANDARD_SHIPPING = 4.99
  * then. There is deliberately no order-value free-shipping threshold: the backend has no such
  * rule, and promising one the checkout will not honour is worse than a flat estimate.
  */
+// The param is kept so the call signature stays stable: the real backend prices shipping by
+// subtotal/brand, and POST /orders/preview is authoritative once an address exists.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function calcShipping(_subtotal: number): number {
   return STANDARD_SHIPPING
 }

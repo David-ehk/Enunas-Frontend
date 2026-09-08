@@ -245,6 +245,8 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
       .finally(() => setLoading(false))
   }, [])
 
+  // Initial data load on mount; load() is also invoked after each return action.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load() }, [load])
 
   /**
