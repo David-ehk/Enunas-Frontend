@@ -1,11 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { WishlistProvider } from '@/app/context/WishlistContext'
 import PopularProductCard from './PopularProductCard'
 
 // next/navigation's useRouter has no App Router context under jsdom — stub it.
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
+}))
+
+// Treat the viewer as logged in so the heart button saves rather than redirecting to /account.
+vi.mock('@/app/context/AuthContext', () => ({
+  useAuth: () => ({ isAuthenticated: true }),
 }))
 
 // The countdown owns its own timer behaviour (covered by ComingSoonCountdown.test.tsx).
@@ -62,6 +67,26 @@ describe('PopularProductCard — Coming Soon preview state', () => {
     expect(screen.queryByText(/€/)).not.toBeInTheDocument()
     expect(screen.queryByText('new in')).not.toBeInTheDocument()
     expect(screen.queryByText('€ 99,00')).not.toBeInTheDocument()
+  })
+
+  it('persists preview / releaseDate onto the saved wishlist item', () => {
+    renderCard({ preview: true, releaseDate: '2026-10-01', price: '€ 99,00' })
+
+    fireEvent.click(screen.getByLabelText('Zu Favoriten hinzufügen'))
+
+    const stored = JSON.parse(localStorage.getItem('enunas_wishlist') ?? '[]')
+    expect(stored).toHaveLength(1)
+    expect(stored[0]).toMatchObject({ id: 'p1', preview: true, releaseDate: '2026-10-01' })
+  })
+
+  it('saves a normal product with its price string and no preview fields', () => {
+    renderCard({ price: '€ 49,90' })
+
+    fireEvent.click(screen.getByLabelText('Zu Favoriten hinzufügen'))
+
+    const stored = JSON.parse(localStorage.getItem('enunas_wishlist') ?? '[]')
+    expect(stored[0]).toMatchObject({ id: 'p1', price: '€ 49,90', preview: false })
+    expect(stored[0].releaseDate).toBeNull()
   })
 
   it('renders the price and no chip for a normal (non-preview) product', () => {

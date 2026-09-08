@@ -20,6 +20,9 @@ export interface WishlistItem {
   createdAt: Date | string
   sizes?: string[]
   catalogue?: string[]
+  /** Set when the saved product was a "Coming Soon" preview at save time. */
+  preview?: boolean
+  releaseDate?: string | null
 }
 
 interface WishlistContextType {

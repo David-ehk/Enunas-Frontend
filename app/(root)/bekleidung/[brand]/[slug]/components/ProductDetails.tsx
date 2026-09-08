@@ -251,13 +251,15 @@ export default function ProductDetails({
       imgURL: product.images[0] ?? '',
       brandName: product.brandName,
       productName: product.name,
-      price: formattedPrice,
+      price: livePreview ? null : formattedPrice,
       originalPrice: formattedOriginalPrice,
       href: `/bekleidung/${brandSlug}/${productSlug}`,
       colours: colorsForSelector,
       createdAt: product.createdAt,
       sizes: [...new Set(product.variants.filter(v => v.stockQuantity > 0).map(v => v.size))],
       catalogue: product.catalogueCategory ?? undefined,
+      preview: livePreview,
+      releaseDate: product.releaseDate ?? null,
     }
     toggleWishlist(item)
     if (!wasSaved) {

@@ -121,6 +121,7 @@ const PopularProductCard = ({
     const item: WishlistItem = {
       id, imgURL, brandName, productName, price, originalPrice, href,
       colours, createdAt, sizes, catalogue: displayCategories,
+      preview, releaseDate,
     };
     toggle(item);
     if (!wasSaved) {
