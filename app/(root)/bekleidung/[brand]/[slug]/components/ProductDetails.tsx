@@ -740,7 +740,7 @@ export default function ProductDetails({
 
             <button
               onClick={() => setShowPreviewModal(false)}
-              className="w-full py-4 bg-enunas-purple text-white hover:bg-enunas-purple-dark transition-colors duration-300"
+              className="group relative w-full overflow-hidden py-4 bg-enunas-purple text-white hover:bg-enunas-purple-dark transition-colors duration-300"
               style={{
                 fontFamily: 'var(--font-league-spartan)',
                 fontSize: '12px',
@@ -748,7 +748,9 @@ export default function ProductDetails({
                 textTransform: 'uppercase',
               }}
             >
-              Na gut, ich warte
+              <span className="absolute left-1/2 -translate-x-1/2 top-[18%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[70%]" />
+              <span className="relative z-10">Na gut, ich warte</span>
+              <span className="absolute left-1/2 -translate-x-1/2 bottom-[18%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[70%]" />
             </button>
           </div>
         </div>
