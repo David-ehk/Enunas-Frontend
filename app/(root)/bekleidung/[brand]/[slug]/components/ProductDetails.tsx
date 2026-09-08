@@ -720,7 +720,7 @@ export default function ProductDetails({
 
             <p
               className="text-enunas-gray-dark mb-6"
-              style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '14px', lineHeight: 1.7 }}
+              style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: '17px', lineHeight: 1.7 }}
             >
               Uns auch. Aber sachte — der Drop ist noch nicht live. Warte, bis der
               Countdown durch ist, dann kannst du zuschlagen. Versprochen.
@@ -740,17 +740,17 @@ export default function ProductDetails({
 
             <button
               onClick={() => setShowPreviewModal(false)}
-              className="group relative w-full overflow-hidden py-4 bg-enunas-purple text-white hover:bg-enunas-purple-dark transition-colors duration-300"
+              className="group relative w-full overflow-hidden py-[18px] bg-enunas-purple text-white hover:bg-enunas-purple-dark transition-colors duration-300"
               style={{
-                fontFamily: 'var(--font-league-spartan)',
-                fontSize: '12px',
-                letterSpacing: '0.15em',
-                textTransform: 'uppercase',
+                fontFamily: 'var(--font-Cormorant-Garamond)',
+                fontSize: '18px',
+                fontWeight: 400,
+                letterSpacing: '0.04em',
               }}
             >
-              <span className="absolute left-1/2 -translate-x-1/2 top-[18%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[70%]" />
+              <span className="absolute left-1/2 -translate-x-1/2 top-[16%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[70%]" />
               <span className="relative z-10">Na gut, ich warte</span>
-              <span className="absolute left-1/2 -translate-x-1/2 bottom-[18%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[70%]" />
+              <span className="absolute left-1/2 -translate-x-1/2 bottom-[16%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[70%]" />
             </button>
           </div>
         </div>
