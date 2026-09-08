@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import PopularProductCard from "./PopularProductCard"
 import { productApi, apiProductToCardShape } from '@/lib/api'
 import type { ProductCardShape } from '@/lib/api'
+import { partitionPreview } from '@/lib/preview'
 
 const PopularProduct = () => {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 })
@@ -14,7 +15,7 @@ const PopularProduct = () => {
 
   useEffect(() => {
     productApi.list({ size: 8 })
-      .then(res => setProducts(res.content.map(apiProductToCardShape)))
+      .then(res => setProducts(partitionPreview(res.content.map(apiProductToCardShape), 'hide')))
       .catch(() => setProducts([]))
       .finally(() => setLoading(false))
   }, [])

@@ -6,6 +6,7 @@ import { useScrollAnimation } from '@/hooks/use-scroll-animation'
 import { cn } from '@/lib/utils'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 import { apiProductToCardShape } from '@/lib/api'
+import { partitionPreview, type PreviewMode } from '@/lib/preview'
 import type { ApiProduct } from '@/types/api'
 
 const SEGMENT_PRIORITY: Segment[] = ['star', 'streetwear', 'cultural', 'athleisure', 'experimental']
@@ -25,9 +26,11 @@ interface Props {
   dark?: boolean
   /** 'feed' matches the "Neue Arrivals" section styling (homepage). */
   variant?: 'default' | 'feed'
+  /** How preview products are placed. Homepage passes 'hide'; catalogue/PDP default to 'show'. */
+  previewMode?: PreviewMode
 }
 
-export default function CuratedRecommendations({ excludeId, title = 'Das könnte dir auch gefallen', dark = false, variant = 'default' }: Props) {
+export default function CuratedRecommendations({ excludeId, title = 'Das könnte dir auch gefallen', dark = false, variant = 'default', previewMode = 'show' }: Props) {
   const [products, setProducts] = useState<ApiProduct[]>([])
   const [expanded, setExpanded] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -35,9 +38,9 @@ export default function CuratedRecommendations({ excludeId, title = 'Das könnte
 
   useEffect(() => {
     resolveCuratedOrNewest(resolveIds(excludeId), 8)
-      .then(res => setProducts(res.filter(p => p.id !== excludeId)))
+      .then(res => setProducts(partitionPreview(res.filter(p => p.id !== excludeId), previewMode)))
       .finally(() => setLoading(false))
-  }, [excludeId])
+  }, [excludeId, previewMode])
 
   const visible = expanded ? products : products.slice(0, 4)
   const hiddenCount = products.length - 4

@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import PopularProductCard from './PopularProductCard'
 import { productApi, apiProductToCardShape } from '@/lib/api'
 import type { ProductCardShape } from '@/lib/api'
+import { partitionPreview } from '@/lib/preview'
 
 export default function NewProducts() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 })
@@ -18,7 +19,7 @@ export default function NewProducts() {
         const sorted = [...res.content].sort(
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         )
-        setProducts(sorted.map(apiProductToCardShape))
+        setProducts(partitionPreview(sorted.map(apiProductToCardShape), 'hide'))
       })
       .catch(() => setProducts([]))
       .finally(() => setLoading(false))
