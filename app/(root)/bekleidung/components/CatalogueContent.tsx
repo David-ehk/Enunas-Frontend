@@ -32,6 +32,8 @@ export default function CatalogueContent({ initialProducts, config }: Props) {
   const [navH, setNavH] = useState(60)
   useEffect(() => {
     const header = document.querySelector('header')
+    // Measure the real header height from the DOM once on mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (header) setNavH(header.getBoundingClientRect().height)
   }, [])
 
@@ -48,6 +50,8 @@ export default function CatalogueContent({ initialProducts, config }: Props) {
 
   useEffect(() => {
     const cat = searchParams.get('cat')
+    // Derive the active category from the URL when it changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveCat(cat && CATEGORIES.some(c => c.id === cat) ? cat : 'alle')
   }, [searchParams])
 
