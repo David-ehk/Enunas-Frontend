@@ -65,6 +65,9 @@ export default function ProductDetails({
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [copiedSku, setCopiedSku] = useState(false)
   const [showSizeModal, setShowSizeModal] = useState(false)
+  // Preview products aren't buyable yet — the CTA stays clickable and opens a cheeky "not so
+  // fast" note instead of doing nothing.
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [openAccordion, setOpenAccordion] = useState<string | null>('details')
   const [justSaved, setJustSaved] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
@@ -239,7 +242,8 @@ export default function ProductDetails({
   }
 
   const handleCta = () => {
-    if (livePreview || !effectiveAvailable || isOutOfStock || variantUnavailable) return
+    if (livePreview) { setShowPreviewModal(true); return }
+    if (!effectiveAvailable || isOutOfStock || variantUnavailable) return
     if (!selectedSize) { setShowSizeModal(true); return }
     handleAddToCart(selectedSize)
   }
@@ -299,7 +303,8 @@ export default function ProductDetails({
 
   const toggleAccordion = (key: string) => setOpenAccordion(prev => (prev === key ? null : key))
 
-  const ctaDisabled = livePreview || !effectiveAvailable || isOutOfStock || variantUnavailable
+  // A preview CTA is never "disabled" — it stays clickable and opens the countdown note.
+  const ctaDisabled = !livePreview && (!effectiveAvailable || isOutOfStock || variantUnavailable)
   const ctaLabel = livePreview
     ? 'Coming Soon'
     : !effectiveAvailable
@@ -682,6 +687,69 @@ export default function ProductDetails({
                   })}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── "Not so fast" preview modal ───────────────────── */}
+      {showPreviewModal && (
+        <div
+          className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center animate-fade-in"
+          onClick={() => setShowPreviewModal(false)}
+        >
+          <div
+            className="bg-white w-full sm:max-w-md relative px-8 py-10 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowPreviewModal(false)}
+              className="absolute top-4 right-4 p-1 text-enunas-gray-medium hover:text-enunas-black transition-colors duration-200"
+              aria-label="Schließen"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <p className="text-3xl mb-4" aria-hidden="true">👀</p>
+
+            <h3
+              className="text-enunas-black mb-3"
+              style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: '24px', fontWeight: 400 }}
+            >
+              Gefällt dir, was du siehst?
+            </h3>
+
+            <p
+              className="text-enunas-gray-dark mb-6"
+              style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '14px', lineHeight: 1.7 }}
+            >
+              Uns auch. Aber sachte — der Drop ist noch nicht live. Warte, bis der
+              Countdown durch ist, dann kannst du zuschlagen. Versprochen.
+            </p>
+
+            {product.releaseDate && (
+              <div className="flex flex-col items-center gap-3 mb-8">
+                <span
+                  className="text-enunas-gray-medium"
+                  style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: '14px', fontStyle: 'italic' }}
+                >
+                  Kommt am {formatReleaseDate(product.releaseDate)}
+                </span>
+                <ComingSoonCountdown releaseDate={product.releaseDate} variant="pdp" onElapsed={check} />
+              </div>
+            )}
+
+            <button
+              onClick={() => setShowPreviewModal(false)}
+              className="w-full py-4 bg-enunas-purple text-white hover:bg-enunas-purple-dark transition-colors duration-300"
+              style={{
+                fontFamily: 'var(--font-league-spartan)',
+                fontSize: '12px',
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Na gut, ich warte
+            </button>
           </div>
         </div>
       )}
