@@ -43,6 +43,9 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
   const [sortBy, setSortBy]           = useState<SortBy>('newest')
   const [search, setSearch]           = useState('')
   const [expanded, setExpanded]       = useState<string | null>(null)
+  // Captured once at mount so the "last 7 / 30 days" cut-offs below stay stable across
+  // re-renders instead of jumping whenever unrelated state changes (react-hooks/purity).
+  const [nowMs] = useState(() => Date.now())
 
   useEffect(() => {
     adminApi.customers.getAll().catch(() => []).then(setCustomers).finally(() => setLoading(false))
@@ -64,7 +67,7 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
 
   const visible = useMemo(() => {
     const q = search.toLowerCase()
-    const cutoff7d = new Date(Date.now() - 7 * 86400000)
+    const cutoff7d = new Date(nowMs - 7 * 86400000)
     const filtered = customers.filter(c => {
       const matchSearch = !q || c.email.toLowerCase().includes(q) || c.firstName?.toLowerCase().includes(q) || c.lastName?.toLowerCase().includes(q)
       if (!matchSearch) return false
@@ -95,7 +98,7 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
       }
       return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
     })
-  }, [customers, search, filter, spendFilter, sortBy, spendMap])
+  }, [customers, search, filter, spendFilter, sortBy, spendMap, nowMs])
 
   const kpiData = useMemo(() => {
     const now = new Date()
@@ -119,7 +122,7 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
     const avgLTV = buyingCount > 0 ? totalRev / buyingCount : 0
 
     // 30-day retention: buyers in prev 30d who also bought in latest 30d
-    const ts = Date.now()
+    const ts = nowMs
     const d30 = 30 * 86400000
     const buyersNow  = new Set(orders.filter(o => ts - new Date(o.createdAt).getTime() < d30).map(o => o.userId).filter(Boolean))
     const buyersPrev = new Set(orders.filter(o => { const t = ts - new Date(o.createdAt).getTime(); return t >= d30 && t < d30 * 2 }).map(o => o.userId).filter(Boolean))
@@ -139,7 +142,7 @@ export default function Customers({ orders = [] }: { orders?: ApiOrder[] }) {
       retentionBase: buyersPrev.size,
       customerSpark,
     }
-  }, [customers, orders])
+  }, [customers, orders, nowMs])
 
   return (
     <div className="space-y-5">

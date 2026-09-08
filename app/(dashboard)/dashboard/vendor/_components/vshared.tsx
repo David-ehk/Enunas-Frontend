@@ -316,21 +316,27 @@ export function WaterfallChart({ steps, fmt: fmtFn, height = 240 }: {
 }) {
   const gross = steps.find(s => s.type === 'base')?.value ?? 1
   const innerH = height - 52
-  let cursor = gross
 
-  const bars = steps.map(step => {
-    const color = step.type === 'base' ? '#0A0A0A' : step.type === 'total' ? '#370E4D' : '#8B1E3F'
-    let barH: number, bottomOffset: number
-    if (step.type === 'base') {
-      barH = (step.value / gross) * innerH; bottomOffset = 0
-    } else if (step.type === 'total') {
-      barH = (step.value / gross) * innerH; bottomOffset = 0
-    } else {
-      const from = cursor / gross; const to = (cursor - step.value) / gross
-      bottomOffset = to * innerH; barH = (from - to) * innerH; cursor -= step.value
-    }
-    return { ...step, barH: Math.max(barH, 3), bottomOffset, color }
-  })
+  // Threaded via reduce (not a mutable `cursor` var) so the running total stays pure across
+  // renders (react-hooks/immutability). Each 'sub' step drops the cursor by its value.
+  const bars = steps.reduce<{ out: (typeof steps[number] & { barH: number; bottomOffset: number; color: string })[]; cursor: number }>(
+    ({ out, cursor }, step) => {
+      const color = step.type === 'base' ? '#0A0A0A' : step.type === 'total' ? '#370E4D' : '#8B1E3F'
+      if (step.type === 'sub') {
+        const from = cursor / gross
+        const to = (cursor - step.value) / gross
+        return {
+          out: [...out, { ...step, barH: Math.max((from - to) * innerH, 3), bottomOffset: to * innerH, color }],
+          cursor: cursor - step.value,
+        }
+      }
+      return {
+        out: [...out, { ...step, barH: Math.max((step.value / gross) * innerH, 3), bottomOffset: 0, color }],
+        cursor,
+      }
+    },
+    { out: [], cursor: gross },
+  ).out
 
   return (
     <div style={{ display: 'flex', gap: 10, height, position: 'relative' }}>

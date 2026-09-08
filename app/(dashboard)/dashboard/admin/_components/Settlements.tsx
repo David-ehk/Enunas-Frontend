@@ -827,6 +827,9 @@ export default function Settlements() {
     } else {
       loadRows(period, view === 'settled')
     }
+    // loadPayouts / loadRows close only over stable setters and the same period/view values;
+    // this effect deliberately re-fetches only when the tab or period changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [period, view])
 
   // Load global payout dashboard stats once on mount

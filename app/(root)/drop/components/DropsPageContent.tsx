@@ -356,6 +356,8 @@ export default function DropsPageContent() {
   const [panelOpen,  setPanelOpen]  = useState(false)
   const [activeDrop, setActiveDrop] = useState<Drop | null>(null)
   const [tick,       setTick]       = useState(0)
+  // Captured once at mount so the drop timestamps below don't shift on re-render (react-hooks/purity).
+  const [mountMs] = useState(() => Date.now())
 
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 1000)
@@ -369,7 +371,7 @@ export default function DropsPageContent() {
 
   // Timestamps initialised once at mount so countdowns are stable across re-renders
   const DROPS = useMemo<Drop[]>(() => {
-    const now = Date.now()
+    const now = mountMs
     return [
       {
         id: 'nocturne', num: '001',
@@ -429,7 +431,7 @@ export default function DropsPageContent() {
         ],
       },
     ]
-  }, [])
+  }, [mountMs])
 
   const heroCD = DROPS[0].endsAt ? getCountdown(DROPS[0].endsAt) : null
   void tick // drives countdown re-renders
