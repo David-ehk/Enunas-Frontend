@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { brandApi } from '@/lib/api/modules/brandApi'
-import type { ApiOrder, ApiOrderItem } from '@/types/api'
+import type { ApiOrder, ApiOrderItem, ApiBrandPartner } from '@/types/api'
+import { ownShipment, brandOrderStatus } from '@/lib/brandRevenue'
 import {
   StatusBadge, SectionCard, EmptyState, Loader,
   TH, TD, TableRow, FilterBar, SearchInput, fmt, fmtEur,
@@ -34,6 +35,12 @@ function trackingUrl(carrier: Carrier, trackingNumber: string): string {
     default:      return ''
   }
 }
+
+// ─── Per-brand fulfilment state ──────────────────────────────────────────────
+// `ownShipment` / `brandOrderStatus` live in lib/brandRevenue so the Übersicht tiles read the
+// same per-brand status this view does — `/brand/orders` still leaks the GLOBAL `order.status`,
+// which flips to PARTIALLY_SHIPPED as soon as ANY one brand ships, and a check keyed on
+// `order.status === 'PAID'` would silently drop the brands that still owe a parcel.
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 const INPUT = 'w-full text-[13px] border border-[#E8E8E8] bg-white rounded-none px-3.5 py-2.5 focus:outline-none focus:border-[#370E4D]/50 focus:ring-2 focus:ring-[#370E4D]/8 transition-all duration-200 placeholder:text-[#C0C0BC]'
@@ -302,18 +309,25 @@ function ProblemModal({
 // ─── Order row ────────────────────────────────────────────────────────────────
 function OrderRow({
   order,
+  brandId,
   onShip,
   onProblem,
 }: {
   order: ApiOrder
+  brandId: string | null
   onShip: (o: ApiOrder) => void
   onProblem: (o: ApiOrder) => void
 }) {
   const [expanded, setExpanded] = useState(false)
-  const isPaid     = order.status === 'PAID'
-  const isShipped  = order.status === 'SHIPPED' || order.status === 'PROCESSING'
-  const trackingUrl = order.trackingNumber
-    ? `https://www.dhl.de/de/privatkunden/dhl-sendungsverfolgung.html?piececode=${order.trackingNumber}`
+  const mine       = ownShipment(order, brandId)
+  const status     = brandOrderStatus(order, brandId)
+  // "Can this brand act?" comes from its OWN shipment row, never the global order status.
+  // If there is no per-brand row (legacy single-brand order) fall back to the global status.
+  const isPaid     = mine ? mine.status === 'AWAITING_SHIPMENT' : status === 'PAID'
+  const isShipped  = status === 'SHIPPED'
+  const trackingNumber = mine?.trackingNumber ?? order.trackingNumber ?? null
+  const trackingUrl = trackingNumber
+    ? `https://www.dhl.de/de/privatkunden/dhl-sendungsverfolgung.html?piececode=${trackingNumber}`
     : null
 
   return (
@@ -334,11 +348,12 @@ function OrderRow({
             )}
           </div>
         </TD>
-        {/* Order-Gesamtsumme: bei Multi-Brand-Bestellungen inkl. fremder Positionen, bis
-            /brand/orders serverseitig auf die anfragende Marke gescopet ist. */}
+        {/* `/brand/orders` scopes items, totals and shipments[] to the requesting brand, so
+            `order.total` is already this brand's share. Only the top-level `order.status`
+            still leaks the global value — hence `brandOrderStatus()` for the badge. */}
         <TD className="font-semibold text-[#0A0A0A]">{fmtEur(order.total ?? order.totalAmount)}</TD>
         <TD className="text-[#9B9B9B]">{fmt(order.createdAt)}</TD>
-        <TD><StatusBadge status={order.status} /></TD>
+        <TD><StatusBadge status={status} /></TD>
         <TD>
           <div className="flex items-center gap-1">
             {isPaid && (
@@ -350,7 +365,7 @@ function OrderRow({
                 <Truck className="w-3 h-3" /> Versenden
               </button>
             )}
-            {isShipped && order.trackingNumber && (
+            {isShipped && trackingNumber && (
               <a
                 href={trackingUrl ?? '#'}
                 target="_blank"
@@ -420,9 +435,9 @@ function OrderRow({
               {/* Tracking */}
               <div>
                 <p className="text-[10px] uppercase tracking-[0.1em] text-[#9B9B9B] mb-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>Sendungsverfolgung</p>
-                {order.trackingNumber ? (
+                {trackingNumber ? (
                   <div className="space-y-1">
-                    <p className="font-mono text-[12px] font-semibold text-[#0A0A0A]">{order.trackingNumber}</p>
+                    <p className="font-mono text-[12px] font-semibold text-[#0A0A0A]">{trackingNumber}</p>
                     {trackingUrl && (
                       <a href={trackingUrl} target="_blank" rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-[11px] text-[#370E4D] hover:underline"
@@ -444,11 +459,16 @@ function OrderRow({
 }
 
 // ─── Stats bar ────────────────────────────────────────────────────────────────
-function StatsRow({ orders }: { orders: ApiOrder[] }) {
-  const paid      = orders.filter(o => o.status === 'PAID').length
-  const shipped   = orders.filter(o => o.status === 'SHIPPED' || o.status === 'PROCESSING').length
-  const delivered = orders.filter(o => o.status === 'DELIVERED').length
-  const returned  = orders.filter(o => o.status === 'RETURN_REQUESTED' || o.status === 'RETURN_APPROVED').length
+function StatsRow({ orders, brandId }: { orders: ApiOrder[]; brandId: string | null }) {
+  // Count by THIS brand's effective status, so a multi-brand order that is globally
+  // PARTIALLY_SHIPPED still lands under "Versandbereit" for a brand that has not shipped.
+  const paid      = orders.filter(o => brandOrderStatus(o, brandId) === 'PAID').length
+  const shipped   = orders.filter(o => brandOrderStatus(o, brandId) === 'SHIPPED').length
+  const delivered = orders.filter(o => brandOrderStatus(o, brandId) === 'DELIVERED').length
+  const returned  = orders.filter(o => {
+    const s = brandOrderStatus(o, brandId)
+    return s === 'RETURN_REQUESTED' || s === 'RETURN_APPROVED'
+  }).length
 
   const cells = [
     { label: 'Versandbereit', value: paid,      accent: true,          warn: false },
@@ -493,13 +513,21 @@ export default function Fulfillment() {
   const [shipOrder, setShipOrder]   = useState<ApiOrder | null>(null)
   const [problemOrder, setProblem]  = useState<ApiOrder | null>(null)
   const [toast, setToast]           = useState<string | null>(null)
+  // `/brand/orders` returns the GLOBAL order status; this brand's own progress lives in
+  // `order.shipments[]`. We need the brand id to read the right row off a shared order.
+  const [brand, setBrand]           = useState<ApiBrandPartner | null>(null)
+  const myBrandId = brand ? String(brand.id) : null
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
     else setRefreshing(true)
     try {
-      const data = await brandApi.orders.getAll()
+      const [data, b] = await Promise.all([
+        brandApi.orders.getAll(),
+        brandApi.getMe().catch(() => null),
+      ])
       setOrders(data)
+      if (b) setBrand(b)
     } catch {
       setOrders([])
     } finally {
@@ -529,10 +557,10 @@ export default function Fulfillment() {
   }
 
   const filtered = orders.filter(o => {
-    const matchStatus = filter === 'ALL' || o.status === filter
+    const matchStatus = filter === 'ALL' || brandOrderStatus(o, myBrandId) === filter
     const q = search.toLowerCase()
     const matchSearch = !q
-      || o.id.toLowerCase().includes(q)
+      || String(o.id).toLowerCase().includes(q)
       || (o.items ?? []).some(i => (i.productName ?? i.name ?? '').toLowerCase().includes(q))
       || (o.shippingAddress?.city?.toLowerCase().includes(q) ?? false)
     return matchStatus && matchSearch
@@ -544,13 +572,15 @@ export default function Fulfillment() {
 
   if (loading) return <Loader />
 
+  const readyToShip = orders.filter(o => brandOrderStatus(o, myBrandId) === 'PAID').length
+
   return (
     <div className="space-y-6">
       {/* Stats */}
-      <StatsRow orders={orders} />
+      <StatsRow orders={orders} brandId={myBrandId} />
 
       {/* Ready-to-ship highlight */}
-      {orders.filter(o => o.status === 'PAID').length > 0 && filter !== 'PAID' && (
+      {readyToShip > 0 && filter !== 'PAID' && (
         <div
           className="flex items-center justify-between px-5 py-4 rounded-none border cursor-pointer"
           style={{ background: '#FFFBEB', borderColor: '#FDE68A' }}
@@ -562,8 +592,7 @@ export default function Fulfillment() {
             </div>
             <div>
               <p className="text-[13px] font-semibold text-amber-800" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                {orders.filter(o => o.status === 'PAID').length} Bestellung
-                {orders.filter(o => o.status === 'PAID').length > 1 ? 'en' : ''} warten auf Versand
+                {readyToShip} Bestellung{readyToShip > 1 ? 'en' : ''} warten auf Versand
               </p>
               <p className="text-[11px] text-amber-700/70 mt-0.5">Bezahlt — bereit zum Versenden</p>
             </div>
@@ -616,6 +645,7 @@ export default function Fulfillment() {
                 <OrderRow
                   key={order.id}
                   order={order}
+                  brandId={myBrandId}
                   onShip={setShipOrder}
                   onProblem={setProblem}
                 />

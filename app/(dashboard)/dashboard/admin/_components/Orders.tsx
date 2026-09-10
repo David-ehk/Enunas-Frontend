@@ -73,7 +73,7 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
     const q = search.toLowerCase()
     let arr = orders.filter(o => {
       const cLabel = getCustomerLabel(o.userId).toLowerCase()
-      const matchSearch = !q || o.id.toLowerCase().includes(q) || o.userId?.toLowerCase().includes(q) || cLabel.includes(q)
+      const matchSearch = !q || String(o.orderNumber ?? '').toLowerCase().includes(q) || String(o.id).toLowerCase().includes(q) || String(o.userId ?? '').toLowerCase().includes(q) || cLabel.includes(q)
       if (!matchSearch) return false
       if (filter !== 'all') return o.status === filter
       return true
@@ -92,11 +92,23 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
     })
   })()
 
+  // The status/cancel endpoints answer with a trimmed OrderResponseDto that drops shipments[] and
+  // items[] — a blind `{ ...o, ...updated }` then wipes the tracking column and the item list.
+  // Keep the richer arrays we already have whenever the response doesn't bring its own.
+  function mergeOrder(o: ApiOrder, updated: Partial<ApiOrder>): ApiOrder {
+    return {
+      ...o,
+      ...updated,
+      shipments: updated.shipments?.length ? updated.shipments : o.shipments,
+      items:     updated.items?.length     ? updated.items     : o.items,
+    }
+  }
+
   async function changeStatus(orderId: string, status: string) {
     setActing(orderId)
     try {
       const updated = await adminApi.orders.updateStatus(orderId, status)
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o))
+      setOrders(prev => prev.map(o => o.id === orderId ? mergeOrder(o, updated) : o))
     } catch { /* silent */ } finally { setActing(null); setStatusInput('') }
   }
 
@@ -104,7 +116,7 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
     setActing(orderId)
     try {
       const updated = await adminApi.orders.cancel(orderId, 'OTHER', 'Storniert durch Admin')
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updated } : o))
+      setOrders(prev => prev.map(o => o.id === orderId ? mergeOrder(o, updated) : o))
     } catch { /* silent */ } finally { setActing(null) }
   }
 
@@ -225,14 +237,23 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
                           <div>
                             <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-2">Artikel</p>
                             <div className="space-y-1">
-                              {order.items?.map(item => (
-                                <div key={item.id} className="text-[12px] text-[#0A0A0A]">
-                                  {item.name} × {item.quantity}
-                                  {item.size && <span className="text-[#9B9B9B]"> · {item.size}</span>}
-                                  {item.color && <span className="text-[#9B9B9B]"> · {item.color}</span>}
-                                  <span className="text-[#6B6B6B]"> — {fmtEur(item.price)}</span>
-                                </div>
-                              ))}
+                              {order.items?.map(item => {
+                                // Backend OrderItemResponseDto sends productName / variantSize /
+                                // variantColor / priceAtPurchase — not the legacy name/size/color/
+                                // price, which is why every line used to render "€ 0,00".
+                                const label = item.productName ?? item.name ?? '—'
+                                const size  = item.variantSize ?? item.size
+                                const color = item.variantColor ?? item.color
+                                const unit  = item.discountPriceAtPurchase ?? item.priceAtPurchase ?? item.price
+                                return (
+                                  <div key={item.id} className="text-[12px] text-[#0A0A0A]">
+                                    {label} × {item.quantity}
+                                    {size && <span className="text-[#9B9B9B]"> · {size}</span>}
+                                    {color && <span className="text-[#9B9B9B]"> · {color}</span>}
+                                    {unit != null && <span className="text-[#6B6B6B]"> — {fmtEur(unit)}</span>}
+                                  </div>
+                                )
+                              })}
                             </div>
                           </div>
 

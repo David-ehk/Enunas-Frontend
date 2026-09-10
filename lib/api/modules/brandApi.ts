@@ -246,8 +246,11 @@ export const brandApi = {
   },
 
   images: {
-    async list(productId: string): Promise<ApiProductImage[]> {
-      return fetcher<ApiProductImage[]>(`/products/${productId}/media/images`)
+    // Omit `colorId` for the vendor dashboard (all images). Pass it to preview a single
+    // colourway's gallery: the backend returns that colour's own images PLUS all shared ones.
+    async list(productId: string, colorId?: number): Promise<ApiProductImage[]> {
+      const q = colorId != null ? `?colorId=${colorId}` : ''
+      return fetcher<ApiProductImage[]>(`/products/${productId}/media/images${q}`)
     },
     // purpose is always PRODUCT_IMAGE — image/jpeg, image/png, image/webp only.
     async getUploadUrl(productId: string, contentType: string, contentLength: number): Promise<MediaUploadUrlResponse> {
@@ -259,10 +262,36 @@ export const brandApi = {
     // Backend ProductImageDto expects `storageKey` (the S3 object key from getUploadUrl),
     // NOT a URL — the backend constructs and returns the public imageUrl itself. Live-verified;
     // an older version of this method sent `imageUrl` and always failed with a 400.
-    async add(productId: string, storageKey: string): Promise<ApiProductImage> {
+    // `opts.productColorId` tags the image to one colourway; omit it (or pass null) for a shared
+    // image shown on every colourway.
+    async add(
+      productId: string,
+      storageKey: string,
+      opts: { productColorId?: number | null; primary?: boolean; altText?: string; displayOrder?: number } = {},
+    ): Promise<ApiProductImage> {
       return fetcher<ApiProductImage>(`/products/${productId}/media/images`, {
         method: 'POST',
-        body: JSON.stringify({ storageKey }),
+        body: JSON.stringify({ storageKey, ...opts }),
+      })
+    },
+    // PATCH — edit image metadata without re-uploading. Every field optional; an omitted field is
+    // left unchanged. `productColorId` reassigns the colourway; `unassignColor: true` moves the
+    // image back to the shared group. `primary: true` makes it the cover of its (post-update)
+    // colour group. Changing the colour drops `primary` unless `primary: true` is also sent.
+    async update(
+      productId: string,
+      imageId: string,
+      dto: {
+        productColorId?: number
+        unassignColor?: boolean
+        primary?: boolean
+        altText?: string
+        displayOrder?: number
+      },
+    ): Promise<ApiProductImage> {
+      return fetcher<ApiProductImage>(`/products/${productId}/media/images/${imageId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
       })
     },
     async delete(productId: string, imageId: string): Promise<void> {

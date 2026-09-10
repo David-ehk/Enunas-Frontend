@@ -3,11 +3,20 @@ export type ProductStatus = 'ACTIVE' | 'INACTIVE' | 'DRAFT';
 
 export interface Variant {
   color: string;
+  /** ProductColor id — the join key for colourway-specific gallery images. */
+  colorId?: number;
   id: number;
   size: string;
   sku: string;
   stockQuantity: number;
   weightGrams: number;
+}
+
+/** A gallery image with its colourway link. `productColorId === null` = shared (all colourways). */
+export interface ProductImageObject {
+  url: string;
+  productColorId: number | null;
+  primary: boolean;
 }
 
 export interface Product {
@@ -24,6 +33,9 @@ export interface Product {
   gender: Gender;
   id: number;
   images: string[];
+  /** Present once the backend returns per-image colour metadata; the gallery filters this by the
+   *  selected colourway. Absent → gallery shows `images` unchanged. */
+  imageObjects?: ProductImageObject[];
   inspirationStory: string | null;
   material: string;
   name: string;

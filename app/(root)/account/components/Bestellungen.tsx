@@ -69,6 +69,7 @@ function OrderRow({
   const [returnOpen, setReturnOpen] = useState(false)
   const [returnReason, setReturnReason] = useState<ReturnReason>('WRONG_SIZE')
   const [returnDesc, setReturnDesc] = useState('')
+  const [returnItemIds, setReturnItemIds] = useState<string[]>([])
   const [returnLoading, setReturnLoading] = useState(false)
   const [returnError, setReturnError] = useState<string | null>(null)
 
@@ -78,18 +79,32 @@ function OrderRow({
   async function submitReturn(e: React.FormEvent) {
     e.preventDefault()
     setReturnError(null)
+    if (returnItemIds.length === 0) {
+      setReturnError('Bitte wähle mindestens einen Artikel aus.')
+      return
+    }
     setReturnLoading(true)
     try {
-      const updated = await orderApi.requestReturn(order.id, {
-        reason: returnReason,
-        description: returnDesc.trim() || undefined,
-      })
-      onUpdated(updated)
+      // The API accepts one orderItemId per request; send one per selected item so
+      // the customer returns only what they picked, not the whole order. The backend
+      // groups them into one return per brand.
+      let updated: ApiOrder | null = null
+      for (const itemId of returnItemIds) {
+        updated = await orderApi.requestReturn(order.id, {
+          orderItemId: Number(itemId),
+          reason: returnReason,
+          description: returnDesc.trim() || undefined,
+        })
+      }
+      if (updated) onUpdated(updated)
       setReturnOpen(false)
       setReturnDesc('')
+      setReturnItemIds([])
     } catch (err) {
       setReturnError(
-        err instanceof FetchError ? err.message : 'Retoure konnte nicht beantragt werden.'
+        err instanceof FetchError
+          ? err.message
+          : 'Retoure konnte nicht vollständig beantragt werden.'
       )
     } finally {
       setReturnLoading(false)
@@ -240,7 +255,10 @@ function OrderRow({
             )}
             {canReturn && !returnOpen && (
               <button
-                onClick={() => setReturnOpen(true)}
+                onClick={() => {
+                  setReturnItemIds(order.items.length === 1 ? order.items.map((i) => i.id) : [])
+                  setReturnOpen(true)
+                }}
                 className="font-league-spartan text-[11px] tracking-[0.2em] uppercase text-enunas-gray-medium hover:text-enunas-black transition-colors duration-300"
               >
                 Retoure einleiten
@@ -254,6 +272,45 @@ function OrderRow({
               <p className="font-league-spartan text-[11px] tracking-[0.15em] uppercase text-enunas-gray-medium">
                 Retoure beantragen
               </p>
+              {order.items.length > 0 && (
+                <div>
+                  <label className="font-league-spartan text-[11px] text-enunas-gray-medium mb-1.5 block">
+                    Artikel auswählen *
+                  </label>
+                  <div className="space-y-1.5">
+                    {order.items.map((item) => (
+                      <label key={item.id} className="flex items-start gap-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={returnItemIds.includes(item.id)}
+                          onChange={(e) =>
+                            setReturnItemIds((prev) =>
+                              e.target.checked
+                                ? [...prev, item.id]
+                                : prev.filter((id) => id !== item.id)
+                            )
+                          }
+                          className="mt-0.5 accent-enunas-purple"
+                        />
+                        <span className="font-league-spartan text-xs text-enunas-black leading-snug">
+                          {item.productName ?? item.name ?? '—'}
+                          {(item.variantSize || item.variantColor || item.size || item.color) && (
+                            <span className="text-enunas-gray-medium">
+                              {' · '}
+                              {[item.variantSize ?? item.size, item.variantColor ?? item.color]
+                                .filter(Boolean)
+                                .join(' · ')}
+                            </span>
+                          )}
+                          {item.quantity > 1 && (
+                            <span className="text-enunas-gray-medium">{` · ×${item.quantity}`}</span>
+                          )}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div>
                 <label className="font-league-spartan text-[11px] text-enunas-gray-medium mb-1 block">
                   Grund *
@@ -293,7 +350,7 @@ function OrderRow({
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setReturnOpen(false); setReturnError(null) }}
+                  onClick={() => { setReturnOpen(false); setReturnError(null); setReturnItemIds([]) }}
                   className="font-league-spartan text-[11px] tracking-[0.15em] uppercase px-5 py-2.5 border border-enunas-gray-light text-enunas-gray-medium hover:text-enunas-black hover:border-enunas-black transition-colors duration-200"
                 >
                   Abbrechen

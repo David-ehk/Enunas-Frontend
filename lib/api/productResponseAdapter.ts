@@ -10,6 +10,8 @@ interface RawVariant {
   sku: string;
   color: string;
   colorFamily: string;
+  /** ProductColor id — added alongside the colourway-specific images work. */
+  colorId?: number;
   size: string;
   stockQuantity: number;
   weightGrams?: number;
@@ -21,6 +23,16 @@ interface RawImage {
   altText?: string;
   primary: boolean;
   displayOrder: number;
+  /** null = shared image (shown for every colourway). */
+  productColorId?: number | null;
+  color?: string | null;
+}
+
+interface RawColor {
+  id: number;
+  color: string;
+  colorFamily?: string;
+  sku?: string;
 }
 
 export interface RawProductResponse {
@@ -57,6 +69,8 @@ export interface RawProductResponse {
   returnPeriodDays?: number;
   variants?: RawVariant[];
   images?: RawImage[];
+  /** Backend colourways with their real ProductColor ids. Absent on older responses. */
+  colors?: RawColor[];
   // The backend sends a trimmed product shape here; only id/name/price are guaranteed.
   // Verified live 2 Sep 2026: it actually sends `{ brandName, id, image, name, price }` — a
   // SINGULAR `image` string, and no `slug`. `images` is kept for the full-shape case.
@@ -95,12 +109,23 @@ const COLOR_FAMILY_HEX: Record<string, string> = {
 export function adaptProduct(raw: RawProductResponse): ApiProduct {
   const variants = raw.variants ?? [];
 
-  // Distinct colours by color name, first-seen order.
+  // Colourways. Prefer the backend's `colors[]` — it carries the real ProductColor id, which is
+  // the join key for colourway-specific images. Fall back to deriving them from the variants
+  // (first-seen order, id = variant id) for older responses that don't send `colors[]`.
+  const rawColors = raw.colors ?? [];
+  const colors = rawColors.map(c => ({
+    id: c.id,
+    color: c.color,
+    colorFamily: c.colorFamily,
+    sku: c.sku,
+  }));
+  const colourIdByName = new Map<string, number>(rawColors.map(c => [c.color, c.id]));
+
   const seenColor = new Set<string>();
   const colours = variants
     .filter(v => (seenColor.has(v.color) ? false : (seenColor.add(v.color), true)))
     .map(v => ({
-      id: String(v.id),
+      id: String(colourIdByName.get(v.color) ?? v.colorId ?? v.id),
       hex: COLOR_FAMILY_HEX[v.colorFamily] ?? '#6B6B6B',
       name: v.color,
       colorFamily: v.colorFamily,
@@ -111,9 +136,20 @@ export function adaptProduct(raw: RawProductResponse): ApiProduct {
   const sizes = variants.map(v => v.size).filter(s => (seenSize.has(s) ? false : (seenSize.add(s), true)));
 
   // Images: primary first, then displayOrder.
-  const images = [...(raw.images ?? [])]
-    .sort((a, b) => Number(b.primary) - Number(a.primary) || a.displayOrder - b.displayOrder)
-    .map(i => i.imageUrl);
+  const sortedImages = [...(raw.images ?? [])]
+    .sort((a, b) => Number(b.primary) - Number(a.primary) || a.displayOrder - b.displayOrder);
+  const images = sortedImages.map(i => i.imageUrl);
+  // Same list, carrying each image's colourway link so the PDP can filter on colour selection.
+  // Only emitted when at least one image reports colour metadata — otherwise consumers just use
+  // `images` and the gallery behaves exactly as before.
+  const anyColourMeta = sortedImages.some(i => i.productColorId != null || 'productColorId' in i);
+  const imageObjects = anyColourMeta
+    ? sortedImages.map(i => ({
+        url: i.imageUrl,
+        productColorId: i.productColorId ?? null,
+        primary: i.primary,
+      }))
+    : undefined;
 
   return {
     id: String(raw.id),
@@ -142,7 +178,9 @@ export function adaptProduct(raw: RawProductResponse): ApiProduct {
     category: (raw.category ?? '').toLowerCase(),
     gender: raw.gender,
     images,
+    ...(imageObjects ? { imageObjects } : {}),
     colours,
+    ...(colors.length > 0 ? { colors } : {}),
     sizes,
     // Carried through verbatim: `colours`/`sizes` above flatten these for swatches and filters
     // and drop stockQuantity, which the PDP needs to gate sold-out sizes.
@@ -151,6 +189,7 @@ export function adaptProduct(raw: RawProductResponse): ApiProduct {
       sku: v.sku,
       color: v.color,
       colorFamily: v.colorFamily,
+      colorId: v.colorId ?? colourIdByName.get(v.color),
       size: v.size,
       stockQuantity: v.stockQuantity,
       weightGrams: v.weightGrams,

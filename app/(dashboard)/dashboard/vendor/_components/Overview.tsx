@@ -5,7 +5,7 @@ import { brandApi } from '@/lib/api/modules/brandApi'
 import type { AdminApiProduct, ApiOrder, AdminApiVariant, AdminPayout, ApiBrandPartner } from '@/types/api'
 import {
   ownSkus, ownItems, itemGross, isRevenueOrder, participatesIn,
-  grossProductAmount, refundedAmount, summarise, partnerSettlementAmount,
+  grossProductAmount, refundedAmount, summarise, partnerSettlementAmount, brandOrderStatus,
 } from '@/lib/brandRevenue'
 import {
   VPageHeader, VKPIGrid, VKPI, VCard, VAreaChart, DonutMulti,
@@ -73,10 +73,13 @@ export default function Overview({ onNavigate }: { onNavigate: (tab: string) => 
     const settlementAmount = partnerSettlementAmount(payouts)
 
     // Auch diese Zähler nur über die eigenen Bestellungen — sonst zeigt eine Marke Aufgaben an,
-    // die zu einer anderen Marke derselben Bestellung gehören.
+    // die zu einer anderen Marke derselben Bestellung gehören. Status pro Marke aus der eigenen
+    // shipments[]-Zeile (brandOrderStatus) — der globale `order.status` kippt bei Multi-Brand-
+    // Bestellungen auf PARTIALLY_SHIPPED, sobald eine andere Marke versendet, und die Kachel
+    // würde die noch offene eigene Bestellung nicht mehr zählen.
     const ownOrders      = revenueOrders
-    const openOrders     = ownOrders.filter(o => o.status === 'PAID').length
-    const toShip         = ownOrders.filter(o => o.status === 'PAID').slice(0, 3)
+    const openOrders     = ownOrders.filter(o => brandOrderStatus(o, brandId) === 'PAID').length
+    const toShip         = ownOrders.filter(o => brandOrderStatus(o, brandId) === 'PAID').slice(0, 3)
     // Retouren gehören einer Marke, nicht der Bestellung — deshalb über returns[].brandId
     // zählen statt über den Order-Status.
     const pendingReturns = ownOrders.reduce((n, o) =>

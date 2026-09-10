@@ -133,9 +133,31 @@ export interface ApiProductVariant {
   sku: string;
   color: string;
   colorFamily?: string;
+  /** ProductColor id this variant belongs to — the join key for colourway-specific images.
+   *  Absent on mock/pre-connect data. */
+  colorId?: number;
   size: string;
   stockQuantity: number;
   weightGrams?: number;
+}
+
+// One colourway of a product (backend ProductColorDto). The swatch source and the
+// image-colour picker source in the vendor dashboard. `color` is the display name / enum
+// value (e.g. "BLACK"); `colorFamily` the coarse family used for the hex swatch.
+export interface ApiProductColor {
+  id: number;
+  color: string;
+  colorFamily?: string;
+  sku?: string;
+}
+
+// A product image with its colourway link. `productColorId === null` means the image is
+// shared — shown for every colourway. Used by the PDP gallery filter and the dashboard's
+// grouped upload panel.
+export interface ApiProductImageObject {
+  url: string;
+  productColorId: number | null;
+  primary: boolean;
 }
 
 // One "Vervollständige den Look" reference. The backend used to 500 when a referenced product
@@ -180,7 +202,14 @@ export interface ApiProduct {
   subcategory?: string;
   gender?: string;
   images: string[];
+  /** Same images as `images`, but each carrying its colourway link + primary flag. Present only
+   *  once the backend returns per-image colour metadata; consumers that only need URLs keep
+   *  using `images`. The PDP gallery filters this by the selected colour. */
+  imageObjects?: ApiProductImageObject[];
   colours: { id?: string; hex: string; name: string; colorFamily?: string }[];
+  /** Backend colourways (`colors[]`), carrying the real ProductColor ids. Absent on
+   *  mock/pre-connect data — fall back to `colours` (name-keyed) then. */
+  colors?: ApiProductColor[];
   sizes: string[];
   /** Real backend variants, carrying per-variant stock. Absent only for mock/pre-connect data. */
   variants?: ApiProductVariant[];
@@ -450,6 +479,9 @@ export interface PayoutDashboard {
 export interface AdminApiVariant {
   id: string;
   color?: string;
+  colorFamily?: string;
+  /** ProductColor id — groups variants (and colourway-specific images) by colourway. */
+  colorId?: number;
   size?: string;
   sku?: string;
   stockQuantity?: number;
@@ -524,6 +556,10 @@ export interface ApiProductImage {
   primary?: boolean;
   displayOrder?: number;
   createdAt?: string;
+  /** ProductColor id this image is tagged to; null/absent = shared (shown for every colourway). */
+  productColorId?: number | null;
+  /** Display name of the tagged colourway, echoed by the backend for convenience. */
+  color?: string | null;
 }
 
 export type DiscountType = 'ADMIN' | 'BRAND';

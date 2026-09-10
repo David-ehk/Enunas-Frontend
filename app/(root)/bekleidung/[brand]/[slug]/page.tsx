@@ -34,6 +34,7 @@ function toNewProduct(p: ApiProduct): PdpProduct {
   if (p.variants && p.variants.length > 0) {
     variants = p.variants.map(v => ({
       color: v.color,
+      colorId: v.colorId,
       id: v.id,
       size: v.size,
       sku: v.sku,
@@ -74,6 +75,7 @@ function toNewProduct(p: ApiProduct): PdpProduct {
     gender: GENDERS.includes(p.gender as Gender) ? (p.gender as Gender) : null,
     id: parseInt(p.id) || 0,
     images: p.images ?? [],
+    imageObjects: p.imageObjects,
     inspirationStory: p.inspirationStory ?? null,
     material: p.details?.material ?? '',
     name: p.name,

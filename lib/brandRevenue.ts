@@ -30,7 +30,7 @@
 // radius to orders this brand demonstrably has a line on, but the real fix is a brandId (or
 // productId) on OrderItemResponseDto. Tracked with the /brand/orders scoping work.
 
-import type { ApiOrder, ApiOrderItem, AdminApiProduct, AdminPayout } from '@/types/api'
+import type { ApiOrder, ApiOrderItem, ApiOrderShipment, AdminApiProduct, AdminPayout } from '@/types/api'
 
 /** Round once, at the end, to whole cents — never to whole euros. */
 export function toCents(value: number): number {
@@ -107,6 +107,38 @@ export function shippingAmount(order: ApiOrder, brandId: string | number | null)
   if (brandId == null) return 0
   const snap = (order.shippingSnapshots ?? []).find(s => String(s.brandId) === String(brandId))
   return snap?.amount ?? 0
+}
+
+/**
+ * This brand's shipment row on an order, or undefined (single-brand orders predating per-brand
+ * fulfilment, or brand identity not yet loaded).
+ */
+export function ownShipment(order: ApiOrder, brandId: string | number | null): ApiOrderShipment | undefined {
+  if (brandId == null) return undefined
+  return (order.shipments ?? []).find(s => String(s.brandId) === String(brandId))
+}
+
+/**
+ * This brand's effective status for a shared order — what it should see in badges, tab filters
+ * and stat counters. `/brand/orders` still returns the GLOBAL `order.status`, which flips to
+ * PARTIALLY_SHIPPED the moment ANY one brand ships, so a check keyed on `order.status === 'PAID'`
+ * silently drops the brands that still owe a parcel. Derive it from the brand's own
+ * `shipments[]` row instead, falling back to the global status only when there is no per-brand
+ * row (legacy orders) or the order is in a state with no per-brand nuance.
+ */
+export function brandOrderStatus(order: ApiOrder, brandId: string | number | null): string {
+  const global = order.status
+  if (global === 'PENDING' || global === 'CANCELLED' || global === 'REFUNDED') return global
+  const mine = ownShipment(order, brandId)
+  if (!mine) return global
+  if (mine.status === 'AWAITING_SHIPMENT') return 'PAID'   // this brand still owes a shipment
+  if (mine.status === 'SHIPPED') {
+    // this brand is done dispatching — surface the furthest global progress past SHIPPED
+    return (global === 'DELIVERED' || global === 'RETURN_REQUESTED' || global === 'RETURN_APPROVED')
+      ? global
+      : 'SHIPPED'
+  }
+  return global   // PROBLEM etc.
 }
 
 export interface BrandRevenue {
