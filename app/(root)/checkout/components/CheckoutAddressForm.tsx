@@ -133,6 +133,7 @@ export default function CheckoutAddressForm({
                 houseNumber: sel.houseNumber ?? prev.houseNumber,
                 postalCode: sel.postalCode ?? prev.postalCode,
                 city: sel.city ?? prev.city,
+                country: sel.country ?? prev.country,
               }))
             }}
             aria-invalid={!!fieldError('street')}

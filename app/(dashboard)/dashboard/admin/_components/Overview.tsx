@@ -224,7 +224,16 @@ export default function Overview({ orders, brands, products, customers }: Props)
       })
     products.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 6)
       .forEach(p => {
-        events.push({ id: `product-${p.id}`, title: p.status === 'PENDING' ? 'Produkt eingereicht' : p.status === 'APPROVED' ? 'Produkt freigegeben' : 'Produkt abgelehnt', sub: p.name.length > 32 ? p.name.slice(0, 30) + '…' : p.name, at: p.createdAt, dot: p.status === 'PENDING' ? '#7A5C1E' : p.status === 'APPROVED' ? '#1A5A3C' : '#8B1E3F' })
+        // ACTIVE is the backend's resting state for a published product — only REJECTED is a
+        // rejection. Anything else (ARCHIVED/HIDDEN) gets a neutral label, never "abgelehnt".
+        const live = isProductLive(p.status)
+        const title = p.status === 'PENDING' ? 'Produkt eingereicht'
+          : live ? 'Produkt freigegeben'
+          : p.status === 'REJECTED' ? 'Produkt abgelehnt'
+          : p.status === 'ARCHIVED' ? 'Produkt archiviert'
+          : p.status === 'HIDDEN' ? 'Produkt ausgeblendet'
+          : 'Produkt aktualisiert'
+        events.push({ id: `product-${p.id}`, title, sub: p.name.length > 32 ? p.name.slice(0, 30) + '…' : p.name, at: p.createdAt, dot: p.status === 'PENDING' ? '#7A5C1E' : live ? '#1A5A3C' : '#8B1E3F' })
       })
     return events.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 18)
   }, [orders, brands, products])

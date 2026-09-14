@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { loadGooglePlaces } from '@/lib/googleMaps'
-import { parseGooglePlaceComponents } from '@/lib/address'
+import { ALLOWED_SHIPPING_COUNTRIES, parseGooglePlaceComponents } from '@/lib/address'
 
 export interface GooglePlaceSelection {
   street?: string
   houseNumber?: string
   postalCode?: string
   city?: string
+  country?: string
 }
 
 interface AddressAutocompleteProps {
@@ -87,7 +88,7 @@ export default function AddressAutocomplete({
       const { suggestions: results } = await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
         input: query,
         sessionToken: sessionTokenRef.current,
-        includedRegionCodes: ['de'],
+        includedRegionCodes: ALLOWED_SHIPPING_COUNTRIES.map((c) => c.toLowerCase()),
         language: 'de',
       })
       // Stale response from an earlier keystroke — drop it.
@@ -172,7 +173,11 @@ export default function AddressAutocomplete({
         onBlur={() => {
           // onMouseDown on a suggestion already preventDefault()s to stop this from firing on
           // click-select; the short delay is just a safety net for touch/other edge cases.
-          setTimeout(() => setOpen(false), 120)
+          // Leaving the field without a selection completes the session: drop any pending or
+          // in-flight lookup and discard the token so the next search bills as a new session.
+          if (debounceRef.current) clearTimeout(debounceRef.current)
+          requestIdRef.current++
+          setTimeout(endSession, 120)
         }}
         placeholder={placeholder}
         required={required}

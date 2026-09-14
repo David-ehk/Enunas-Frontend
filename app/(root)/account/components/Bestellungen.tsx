@@ -8,6 +8,7 @@ import { useAuth } from '@/app/context/AuthContext'
 import type { ApiOrder, ApiOrderItem, ReturnReason } from '@/types/api'
 import { formatDateLong } from '@/lib/account'
 import { describeShipment } from '@/lib/orderShipments'
+import OrderItemThumb from '@/components/ui/OrderItemThumb'
 import AccountButton from './AccountButton'
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -166,9 +167,14 @@ function OrderRow({
 
           {/* Items list */}
           {order.items.length > 0 && (
-            <div className="mb-4 space-y-2">
+            <div className="mb-4 space-y-3">
               {order.items.map((item) => (
                 <div key={item.id} className="flex items-start justify-between gap-4">
+                  <OrderItemThumb
+                    src={item.imageUrl}
+                    alt={item.productName ?? item.name ?? ''}
+                    width={44}
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="font-league-spartan text-sm text-enunas-black leading-snug">
                       {item.productName ?? item.name ?? '—'}

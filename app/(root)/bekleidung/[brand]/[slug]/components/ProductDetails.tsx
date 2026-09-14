@@ -322,8 +322,10 @@ export default function ProductDetails({
 
   const toggleAccordion = (key: string) => setOpenAccordion(prev => (prev === key ? null : key))
 
-  // A preview CTA is never "disabled" — it stays clickable and opens the countdown note.
+  // A preview CTA is never "disabled" — it stays clickable and opens the countdown note — but it
+  // is visually muted so it never reads as a live "add to cart" button.
   const ctaDisabled = !livePreview && (!effectiveAvailable || isOutOfStock || variantUnavailable)
+  const ctaMuted = livePreview
   const ctaLabel = livePreview
     ? 'Coming Soon'
     : !effectiveAvailable
@@ -547,10 +549,11 @@ export default function ProductDetails({
                 letterSpacing: '0.04em',
                 border: 'none',
                 color: 'white',
+                opacity: ctaMuted ? 0.55 : 1,
                 cursor: ctaDisabled ? 'not-allowed' : 'pointer',
-                transition: 'background-color 300ms',
+                transition: 'background-color 300ms, opacity 300ms',
               }}
-              onMouseEnter={e => { if (!ctaDisabled) e.currentTarget.style.backgroundColor = '#250838' }}
+              onMouseEnter={e => { if (!ctaDisabled && !ctaMuted) e.currentTarget.style.backgroundColor = '#250838' }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#370E4D' }}
             >
               <span className="absolute left-1/2 -translate-x-1/2 top-[10%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[75%]" />
@@ -643,6 +646,7 @@ export default function ProductDetails({
         selectedSize={livePreview ? null : selectedSize}
         ctaLabel={ctaLabel}
         isOutOfStock={ctaDisabled}
+        ctaMuted={ctaMuted}
         onCta={handleCta}
         watchRef={ctaRef}
       />

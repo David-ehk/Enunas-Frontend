@@ -8,6 +8,8 @@ interface StickyAddToCartProps {
   selectedSize: string | null
   ctaLabel: string
   isOutOfStock: boolean
+  /** Preview ("Coming Soon") CTA: clickable (opens the countdown note) but visually muted. */
+  ctaMuted?: boolean
   onCta: () => void
   watchRef: RefObject<HTMLButtonElement | null>
 }
@@ -18,6 +20,7 @@ export default function StickyAddToCart({
   selectedSize,
   ctaLabel,
   isOutOfStock,
+  ctaMuted = false,
   onCta,
   watchRef,
 }: StickyAddToCartProps) {
@@ -74,7 +77,7 @@ export default function StickyAddToCart({
         <button
           onClick={onCta}
           disabled={isOutOfStock}
-          className="group relative overflow-hidden shrink-0 px-6 sm:px-10 py-3 sm:py-3.5 bg-enunas-purple text-white hover:bg-enunas-purple-dark transition-colors duration-300 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
+          className={`group relative overflow-hidden shrink-0 px-6 sm:px-10 py-3 sm:py-3.5 bg-enunas-purple text-white transition-[background-color,opacity] duration-300 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed ${ctaMuted ? 'opacity-60' : 'hover:bg-enunas-purple-dark'}`}
           style={{
             fontFamily: 'var(--font-Cormorant-Garamond)',
             fontSize: 'clamp(14px, 3.6vw, 18px)',

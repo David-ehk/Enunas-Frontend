@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { brandApi } from '@/lib/api/modules/brandApi'
 import type { ApiOrder, ApiOrderItem, ApiBrandPartner } from '@/types/api'
 import { ownShipment, brandOrderStatus } from '@/lib/brandRevenue'
+import OrderItemThumb from '@/components/ui/OrderItemThumb'
 import {
   StatusBadge, SectionCard, EmptyState, Loader,
   TH, TD, TableRow, FilterBar, SearchInput, fmt, fmtEur,
@@ -326,9 +327,10 @@ function OrderRow({
   const isPaid     = mine ? mine.status === 'AWAITING_SHIPMENT' : status === 'PAID'
   const isShipped  = status === 'SHIPPED'
   const trackingNumber = mine?.trackingNumber ?? order.trackingNumber ?? null
-  const trackingUrl = trackingNumber
-    ? `https://www.dhl.de/de/privatkunden/dhl-sendungsverfolgung.html?piececode=${trackingNumber}`
-    : null
+  // Build the link from THIS brand's own shipment carrier — never assume DHL. Legacy orders with
+  // only the order scalar and no per-brand carrier fall back to DHL, the previous behaviour.
+  const trackingCarrier = (mine?.carrier ?? 'DHL') as Carrier
+  const trackingHref = trackingNumber ? trackingUrl(trackingCarrier, trackingNumber) || null : null
 
   return (
     <>
@@ -341,11 +343,18 @@ function OrderRow({
           </div>
         </TD>
         <TD>
-          <div className="text-[12px] text-[#6B6B6B] max-w-[200px]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-            {(order.items ?? []).slice(0, 2).map(i => i.productName ?? i.name).filter(Boolean).join(', ') || '—'}
-            {(order.items ?? []).length > 2 && (
-              <span className="text-[#9B9B9B]"> +{order.items.length - 2}</span>
-            )}
+          <div className="flex items-center gap-2.5 max-w-[240px]">
+            <div className="flex items-center gap-1 shrink-0">
+              {(order.items ?? []).slice(0, 3).map(i => (
+                <OrderItemThumb key={i.id} src={i.imageUrl} alt={i.productName ?? i.name ?? ''} width={26} />
+              ))}
+            </div>
+            <div className="text-[12px] text-[#6B6B6B] min-w-0" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+              {(order.items ?? []).slice(0, 2).map(i => i.productName ?? i.name).filter(Boolean).join(', ') || '—'}
+              {(order.items ?? []).length > 2 && (
+                <span className="text-[#9B9B9B]"> +{order.items.length - 2}</span>
+              )}
+            </div>
           </div>
         </TD>
         {/* `/brand/orders` scopes items, totals and shipments[] to the requesting brand, so
@@ -365,9 +374,9 @@ function OrderRow({
                 <Truck className="w-3 h-3" /> Versenden
               </button>
             )}
-            {isShipped && trackingNumber && (
+            {isShipped && trackingHref && (
               <a
-                href={trackingUrl ?? '#'}
+                href={trackingHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1.5 h-7 px-3 rounded-none text-[11px] font-medium border border-[#E8E8E8] text-[#370E4D] hover:bg-[#F5F5F0] transition-all duration-150"
@@ -402,16 +411,21 @@ function OrderRow({
               {/* Items */}
               <div>
                 <p className="text-[10px] uppercase tracking-[0.1em] text-[#9B9B9B] mb-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>Artikel</p>
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   {(order.items ?? []).map(item => (
-                    <div key={item.id} className="flex items-center justify-between text-[12px]">
-                      <span className="text-[#2D2D2D]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                        {item.name}
-                        {item.size ? <span className="text-[#9B9B9B]"> — {item.size}</span> : null}
-                        {item.color ? <span className="text-[#9B9B9B]"> / {item.color}</span> : null}
+                    <div key={item.id} className="flex items-center gap-2.5 text-[12px]">
+                      <OrderItemThumb src={item.imageUrl} alt={item.productName ?? item.name ?? ''} width={30} />
+                      {/* productName/variantSize/variantColor are what OrderItemResponseDto actually
+                          sends; name/size/color exist only in pre-connect mock data (see
+                          ApiOrderItem). Reading the legacy names left this row blank against the
+                          real API — which in a packing view means no garment and no size. */}
+                      <span className="text-[#2D2D2D] flex-1 min-w-0" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                        {item.productName ?? item.name}
+                        {(item.variantSize ?? item.size) ? <span className="text-[#9B9B9B]"> — {item.variantSize ?? item.size}</span> : null}
+                        {(item.variantColor ?? item.color) ? <span className="text-[#9B9B9B]"> / {item.variantColor ?? item.color}</span> : null}
                         <span className="text-[#9B9B9B]"> × {item.quantity}</span>
                       </span>
-                      <span className="font-medium text-[#0A0A0A] tabular-nums">{fmtEur((item.priceAtPurchase ?? item.price ?? 0) * item.quantity)}</span>
+                      <span className="font-medium text-[#0A0A0A] tabular-nums shrink-0">{fmtEur((item.priceAtPurchase ?? item.price ?? 0) * item.quantity)}</span>
                     </div>
                   ))}
                 </div>
@@ -438,8 +452,8 @@ function OrderRow({
                 {trackingNumber ? (
                   <div className="space-y-1">
                     <p className="font-mono text-[12px] font-semibold text-[#0A0A0A]">{trackingNumber}</p>
-                    {trackingUrl && (
-                      <a href={trackingUrl} target="_blank" rel="noopener noreferrer"
+                    {trackingHref && (
+                      <a href={trackingHref} target="_blank" rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-[11px] text-[#370E4D] hover:underline"
                         style={{ fontFamily: 'var(--font-league-spartan)' }}>
                         <ExternalLink className="w-3 h-3" /> Tracking öffnen

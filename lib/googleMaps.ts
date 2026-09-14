@@ -24,7 +24,7 @@ export function loadGooglePlaces(): Promise<boolean> {
   if (typeof window === 'undefined') return Promise.resolve(false);
   if (placesReady()) return Promise.resolve(true);
 
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_MAPS_PLATFORM_API_KEY;
   if (!apiKey) return Promise.resolve(false);
 
   if (loadPromise) return loadPromise;

@@ -245,6 +245,12 @@ export interface ApiOrderItem {
   priceAtPurchase?: number;
   discountPriceAtPurchase?: number;
   lineTotal?: number;
+  // Purchase-time thumbnail, frozen at order creation from the ordered colourway's own cover
+  // image, falling back to the product's shared cover — never to a different colourway's photo
+  // (a wrong-colourway photo reads as a picking error, which is worse than no photo).
+  // Null/absent on rows predating the snapshot column and on lines whose product had no image
+  // at purchase; there is no backfill. Render the placeholder, never a substitute image.
+  imageUrl?: string | null;
   // Legacy fields — not returned by the backend; present only in pre-connect mock data.
   productId?: string;
   name?: string;

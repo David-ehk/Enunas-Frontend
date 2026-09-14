@@ -33,9 +33,17 @@ const GENDERS = [
   { id: 'UNISEX', label: 'Unisex' },
 ]
 
+// Full backend ProductType enum (23 values) — the dropdown submits the value verbatim, so any
+// value not in the backend enum hard-fails product creation. Order/grouping mirrors the backend
+// source: tops, bottoms, dress, outerwear, footwear, accessories, other.
 const PRODUCT_TYPES = [
-  'T_SHIRT', 'HOODIE', 'JACKET', 'PANTS', 'SHORTS',
-  'DRESS', 'SHIRT', 'COAT', 'SWEATER', 'SKIRT', 'OTHER',
+  'T_SHIRT', 'LONGSLEEVE', 'SHIRT', 'HOODIE', 'ZIP_HOODIE', 'SWEATER',
+  'JEANS', 'CARGO_PANTS', 'JOGGER', 'SHORTS', 'PANTS', 'SKIRT',
+  'DRESS',
+  'JACKET', 'COAT',
+  'SNEAKERS', 'BOOTS',
+  'CAP', 'BEANIE', 'BAG', 'BELT', 'JEWELRY',
+  'OTHER',
 ]
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL']

@@ -34,6 +34,10 @@ export const EMPTY_ADDRESS_FORM: AddressFormValues = {
   phone: '',
 };
 
+// Mirrors the backend's AllowedShippingCountries check (ISO 3166-1 alpha-2). UX only — used to
+// restrict Places suggestions; the backend recheck on order creation stays authoritative.
+export const ALLOWED_SHIPPING_COUNTRIES = ['DE'] as const;
+
 export type AddressFormErrors = Partial<Record<keyof AddressFormValues, string>>;
 
 // The resolved choice a customer has made at checkout — maps 1:1 onto the backend's
@@ -116,18 +120,23 @@ export function isAddressFormValid(values: AddressFormValues): boolean {
 /**
  * Parses a Google Places (New) `Place.addressComponents` array into partial address form values.
  * Never throws — an unparseable or missing component is simply omitted, leaving that field for
- * the user to fill in manually. Country is deliberately not trusted from Google: the MVP only
- * ships within Germany, so callers should keep `country: 'DE'` fixed regardless of the result.
+ * the user to fill in manually. Country is only returned when it is in ALLOWED_SHIPPING_COUNTRIES,
+ * so a result outside the shipping area never overwrites the form's country.
  */
 export function parseGooglePlaceComponents(
   components: google.maps.places.AddressComponent[] | undefined | null
-): Partial<Pick<AddressFormValues, 'street' | 'houseNumber' | 'postalCode' | 'city'>> {
+): Partial<Pick<AddressFormValues, 'street' | 'houseNumber' | 'postalCode' | 'city' | 'country'>> {
   if (!components?.length) return {};
 
   const byType = (type: string) =>
     components.find((c) => c.types.includes(type))?.longText ?? undefined;
 
-  const result: Partial<Pick<AddressFormValues, 'street' | 'houseNumber' | 'postalCode' | 'city'>> = {};
+  const result: Partial<Pick<AddressFormValues, 'street' | 'houseNumber' | 'postalCode' | 'city' | 'country'>> = {};
+
+  const countryCode = components.find((c) => c.types.includes('country'))?.shortText?.toUpperCase();
+  if (countryCode && (ALLOWED_SHIPPING_COUNTRIES as readonly string[]).includes(countryCode)) {
+    result.country = countryCode;
+  }
 
   const route = byType('route');
   if (route) result.street = route;
