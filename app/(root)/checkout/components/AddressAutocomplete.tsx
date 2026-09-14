@@ -37,9 +37,36 @@ const KEYSTROKE_INPUT_TYPES = new Set(['insertText', 'deleteContentBackward', 'd
 const DEBOUNCE_MS = 300
 const MIN_QUERY_LENGTH = 3
 
+// Deliverable addresses only — keeps shops, landmarks and other businesses out of the list.
+const ADDRESS_PRIMARY_TYPES = ['street_address', 'premise', 'subpremise', 'route']
+
 interface Suggestion {
   label: string
+  mainText?: google.maps.places.FormattableText
+  secondaryText?: string
   placePrediction: google.maps.places.PlacePrediction
+}
+
+// Emphasises the parts of Google's text that match what the customer typed.
+function HighlightedText({ text }: { text: google.maps.places.FormattableText }) {
+  const parts: { value: string; match: boolean }[] = []
+  let cursor = 0
+  for (const { startOffset, endOffset } of text.matches) {
+    if (startOffset > cursor) parts.push({ value: text.text.slice(cursor, startOffset), match: false })
+    parts.push({ value: text.text.slice(startOffset, endOffset), match: true })
+    cursor = endOffset
+  }
+  if (cursor < text.text.length) parts.push({ value: text.text.slice(cursor), match: false })
+
+  return (
+    <>
+      {parts.map((part, i) => (
+        <span key={i} className={part.match ? 'font-medium' : undefined}>
+          {part.value}
+        </span>
+      ))}
+    </>
+  )
 }
 
 export default function AddressAutocomplete({
@@ -88,6 +115,7 @@ export default function AddressAutocomplete({
       const { suggestions: results } = await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
         input: query,
         sessionToken: sessionTokenRef.current,
+        includedPrimaryTypes: ADDRESS_PRIMARY_TYPES,
         includedRegionCodes: ALLOWED_SHIPPING_COUNTRIES.map((c) => c.toLowerCase()),
         language: 'de',
       })
@@ -96,7 +124,15 @@ export default function AddressAutocomplete({
 
       const next = results
         .filter((s) => s.placePrediction)
-        .map((s) => ({ label: s.placePrediction!.text?.text ?? '', placePrediction: s.placePrediction! }))
+        .map((s) => {
+          const prediction = s.placePrediction!
+          return {
+            label: prediction.text.text,
+            mainText: prediction.mainText,
+            secondaryText: prediction.secondaryText?.text,
+            placePrediction: prediction,
+          }
+        })
       setSuggestions(next)
       setOpen(next.length > 0)
       setActiveIndex(-1)
@@ -186,26 +222,36 @@ export default function AddressAutocomplete({
         {...aria}
       />
       {open && suggestions.length > 0 && (
-        <ul
-          id={`${id}-listbox`}
-          role="listbox"
-          className="absolute z-20 left-0 right-0 mt-1 bg-white border border-enunas-gray-light shadow-sm max-h-64 overflow-y-auto"
+        <div
+          onMouseDown={(e) => e.preventDefault()}
+          className="absolute z-20 left-0 right-0 mt-1 bg-white border border-enunas-gray-light shadow-sm"
         >
-          {suggestions.map((s, i) => (
-            <li key={s.label + i} role="option" aria-selected={i === activeIndex}>
-              <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => handleSelect(s)}
-                className={`w-full text-left px-4 py-2.5 font-league-spartan text-sm text-enunas-black transition-colors duration-150 ${
-                  i === activeIndex ? 'bg-enunas-off-white' : 'hover:bg-enunas-off-white'
-                }`}
-              >
-                {s.label}
-              </button>
-            </li>
-          ))}
-        </ul>
+          <ul id={`${id}-listbox`} role="listbox" className="max-h-72 overflow-y-auto">
+            {suggestions.map((s, i) => (
+              <li key={s.label + i} role="option" aria-selected={i === activeIndex}>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => handleSelect(s)}
+                  className={`w-full text-left px-4 py-3 font-league-spartan transition-colors duration-150 ${
+                    i === activeIndex ? 'bg-enunas-off-white' : 'hover:bg-enunas-off-white'
+                  }`}
+                >
+                  <span className="block text-sm text-enunas-black">
+                    {s.mainText ? <HighlightedText text={s.mainText} /> : s.label}
+                  </span>
+                  {s.secondaryText && (
+                    <span className="block mt-0.5 text-xs text-enunas-gray-medium">{s.secondaryText}</span>
+                  )}
+                </button>
+              </li>
+            ))}
+          </ul>
+          {/* Google Maps Platform attribution — required when showing Places results without a Google map. */}
+          <div aria-hidden="true" className="flex justify-end border-t border-enunas-gray-light px-4 py-2">
+            <span className="font-league-spartan text-xs text-enunas-gray-medium">Google Maps</span>
+          </div>
+        </div>
       )}
     </div>
   )

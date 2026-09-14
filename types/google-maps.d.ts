@@ -22,8 +22,19 @@ declare namespace google.maps.places {
   interface AutocompleteSuggestionRequest {
     input: string;
     sessionToken?: AutocompleteSessionToken;
+    includedPrimaryTypes?: string[];
     includedRegionCodes?: string[];
     language?: string;
+  }
+
+  interface StringRange {
+    startOffset: number;
+    endOffset: number;
+  }
+
+  interface FormattableText {
+    text: string;
+    matches: StringRange[];
   }
 
   class Place {
@@ -33,7 +44,9 @@ declare namespace google.maps.places {
   }
 
   class PlacePrediction {
-    text?: { text: string };
+    text: FormattableText;
+    mainText?: FormattableText;
+    secondaryText?: FormattableText;
     toPlace(): Place;
   }
 

@@ -8,17 +8,24 @@
 // resolves to `false` rather than throwing, so callers can just no-op and fall back to a plain
 // input.
 
+const SCRIPT_ID = 'enunas-google-maps-script';
+const READY_CALLBACK = '__enunasGoogleMapsReady';
+
 let loadPromise: Promise<boolean> | null = null;
 
 function placesReady(): boolean {
   return typeof google !== 'undefined' && typeof google.maps?.places?.AutocompleteSuggestion === 'function';
 }
 
+function mapsBootstrapped(): boolean {
+  return typeof google !== 'undefined' && typeof google.maps?.importLibrary === 'function';
+}
+
 /**
  * Loads the Maps JS SDK and its Places (New) library, once, on first call. Cached across
  * repeated calls (e.g. multiple AddressAutocomplete instances) so the script is never injected
  * twice. Resolves `false` — never rejects — when no API key is configured or loading fails for
- * any reason.
+ * any reason; a failed load is not cached, so the next call retries.
  */
 export function loadGooglePlaces(): Promise<boolean> {
   if (typeof window === 'undefined') return Promise.resolve(false);
@@ -30,40 +37,42 @@ export function loadGooglePlaces(): Promise<boolean> {
   if (loadPromise) return loadPromise;
 
   loadPromise = new Promise<boolean>((resolve) => {
+    const importPlaces = () => {
+      google.maps
+        .importLibrary('places')
+        .then(() => resolve(placesReady()))
+        .catch(() => resolve(false));
+    };
+
     try {
-      const finishWithImportLibrary = () => {
-        if (typeof google === 'undefined' || typeof google.maps?.importLibrary !== 'function') {
-          resolve(false);
-          return;
-        }
-        google.maps
-          .importLibrary('places')
-          .then(() => resolve(placesReady()))
-          .catch(() => resolve(false));
-      };
-
-      if (typeof google !== 'undefined' && typeof google.maps?.importLibrary === 'function') {
-        finishWithImportLibrary();
+      if (mapsBootstrapped()) {
+        importPlaces();
         return;
       }
 
-      const existing = document.getElementById('enunas-google-maps-script');
-      if (existing) {
-        existing.addEventListener('load', finishWithImportLibrary);
-        existing.addEventListener('error', () => resolve(false));
-        return;
-      }
+      // With `loading=async`, the script's `onload` fires before google.maps.importLibrary is
+      // defined, so it can't be used as the ready signal. Google invokes the `callback` param
+      // once the bootstrap is ready.
+      (window as unknown as Record<string, unknown>)[READY_CALLBACK] = importPlaces;
+
+      // Script already injected and still loading — the callback above fires when it's ready.
+      if (document.getElementById(SCRIPT_ID)) return;
 
       const script = document.createElement('script');
-      script.id = 'enunas-google-maps-script';
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&loading=async&libraries=places&v=weekly`;
+      script.id = SCRIPT_ID;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&loading=async&v=weekly&callback=${READY_CALLBACK}`;
       script.async = true;
-      script.onerror = () => resolve(false);
-      script.onload = finishWithImportLibrary;
+      script.onerror = () => {
+        script.remove();
+        resolve(false);
+      };
       document.head.appendChild(script);
     } catch {
       resolve(false);
     }
+  }).then((ready) => {
+    if (!ready) loadPromise = null;
+    return ready;
   });
 
   return loadPromise;
