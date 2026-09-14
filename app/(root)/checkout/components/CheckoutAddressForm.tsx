@@ -127,14 +127,19 @@ export default function CheckoutAddressForm({
             value={values.street}
             onChange={set('street')}
             onSelect={(sel) => {
+              // A selection replaces the whole address — keeping an earlier PLZ or house number
+              // for fields Google didn't return produced mixed addresses (e.g. a Munich PLZ
+              // with a Dortmund street).
               setValues((prev) => ({
                 ...prev,
                 street: sel.street ?? prev.street,
-                houseNumber: sel.houseNumber ?? prev.houseNumber,
-                postalCode: sel.postalCode ?? prev.postalCode,
-                city: sel.city ?? prev.city,
+                houseNumber: sel.houseNumber ?? '',
+                postalCode: sel.postalCode ?? '',
+                city: sel.city ?? '',
                 country: sel.country ?? prev.country,
               }))
+              const incompleteField = !sel.houseNumber ? 'af-houseNumber' : !sel.postalCode ? 'af-postalCode' : null
+              if (incompleteField) requestAnimationFrame(() => document.getElementById(incompleteField)?.focus())
             }}
             aria-invalid={!!fieldError('street')}
             className={`${inputClass} ${fieldError('street') ? errorClass : ''}`}

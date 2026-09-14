@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { loadGooglePlaces } from '@/lib/googleMaps'
 import { ALLOWED_SHIPPING_COUNTRIES, parseGooglePlaceComponents } from '@/lib/address'
 
@@ -38,7 +39,29 @@ const DEBOUNCE_MS = 300
 const MIN_QUERY_LENGTH = 3
 
 // Deliverable addresses only — keeps shops, landmarks and other businesses out of the list.
-const ADDRESS_PRIMARY_TYPES = ['street_address', 'premise', 'subpremise', 'route']
+// Until a house number is typed, whole streets are included so partial input still gets
+// suggestions; once one is typed, only exact addresses are returned.
+const STREET_OR_ADDRESS_TYPES = ['street_address', 'premise', 'subpremise', 'route']
+const EXACT_ADDRESS_TYPES = ['street_address', 'premise', 'subpremise']
+
+// Trailing house number in what the customer typed, e.g. "Leopoldstraße 50", "Hauptstr. 12a", "Weg 3-5".
+const TRAILING_HOUSE_NUMBER = /\s(\d+\s?[a-zA-Z]?(?:\s?[-/]\s?\d+\s?[a-zA-Z]?)?)\s*$/
+
+function typedHouseNumber(query: string): string | undefined {
+  return query.match(TRAILING_HOUSE_NUMBER)?.[1].replace(/\s+/g, '')
+}
+
+// Read-back of what was filled in, so the customer can see which suggestion was taken and
+// whether anything still needs adding.
+function describeSelection({ street, houseNumber, postalCode, city }: GooglePlaceSelection) {
+  const address = [[street, houseNumber].filter(Boolean).join(' '), [postalCode, city].filter(Boolean).join(' ')]
+    .filter(Boolean)
+    .join(', ')
+  const missing = [!houseNumber && 'Hausnummer', !postalCode && 'PLZ'].filter(Boolean)
+  return missing.length
+    ? { text: `${address} — bitte ${missing.join(' und ')} ergänzen`, complete: false }
+    : { text: `Übernommen: ${address}`, complete: true }
+}
 
 interface Suggestion {
   label: string
@@ -85,6 +108,7 @@ export default function AddressAutocomplete({
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
+  const [confirmation, setConfirmation] = useState<{ text: string; complete: boolean } | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null)
   const requestIdRef = useRef(0)
@@ -115,7 +139,7 @@ export default function AddressAutocomplete({
       const { suggestions: results } = await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
         input: query,
         sessionToken: sessionTokenRef.current,
-        includedPrimaryTypes: ADDRESS_PRIMARY_TYPES,
+        includedPrimaryTypes: typedHouseNumber(query) ? EXACT_ADDRESS_TYPES : STREET_OR_ADDRESS_TYPES,
         includedRegionCodes: ALLOWED_SHIPPING_COUNTRIES.map((c) => c.toLowerCase()),
         language: 'de',
       })
@@ -146,6 +170,7 @@ export default function AddressAutocomplete({
   function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
     const nextValue = e.target.value
     onChange(nextValue)
+    setConfirmation(null)
 
     const inputType = (e.nativeEvent as InputEvent).inputType
     const isKeystroke = inputType ? KEYSTROKE_INPUT_TYPES.has(inputType) : false
@@ -167,8 +192,11 @@ export default function AddressAutocomplete({
       const place = suggestion.placePrediction.toPlace()
       const { place: detailed } = await place.fetchFields({ fields: ['addressComponents'] })
       const parsed = parseGooglePlaceComponents(detailed.addressComponents)
-      onSelect(parsed)
-      if (parsed.street) onChange(parsed.street)
+      // Google omits the number when a whole street was picked — keep the one the customer typed.
+      const selection = { ...parsed, houseNumber: parsed.houseNumber ?? typedHouseNumber(value) }
+      onSelect(selection)
+      if (selection.street) onChange(selection.street)
+      setConfirmation(describeSelection(selection))
     } catch {
       // Detail lookup failed — keep whatever the user had typed, no disruption.
     } finally {
@@ -226,7 +254,12 @@ export default function AddressAutocomplete({
           onMouseDown={(e) => e.preventDefault()}
           className="absolute z-20 left-0 right-0 mt-1 bg-white border border-enunas-gray-light shadow-sm"
         >
-          <ul id={`${id}-listbox`} role="listbox" className="max-h-72 overflow-y-auto">
+          {!typedHouseNumber(value) && (
+            <p className="px-4 pt-3 pb-1 font-league-spartan text-[11px] text-enunas-gray-medium">
+              Hausnummer eingeben für genaue Adressen
+            </p>
+          )}
+          <ul id={`${id}-listbox`} role="listbox" className="max-h-80 overflow-y-auto">
             {suggestions.map((s, i) => (
               <li key={s.label + i} role="option" aria-selected={i === activeIndex}>
                 <button
@@ -247,11 +280,27 @@ export default function AddressAutocomplete({
               </li>
             ))}
           </ul>
-          {/* Google Maps Platform attribution — required when showing Places results without a Google map. */}
-          <div aria-hidden="true" className="flex justify-end border-t border-enunas-gray-light px-4 py-2">
-            <span className="font-league-spartan text-xs text-enunas-gray-medium">Google Maps</span>
+          {/* Google Maps Platform attribution — required when showing Places results without a Google
+              map. Official logo at 16px tall, with Google's minimum clear space (10px sides/top, 5px bottom). */}
+          <div className="flex justify-end border-t border-enunas-gray-light px-2.5 pt-2.5 pb-1.5">
+            <Image
+              src="/assets/icons/google-maps-logo-gray.svg"
+              alt="Google Maps"
+              width={98}
+              height={18}
+              unoptimized
+              className="h-4 w-auto"
+            />
           </div>
         </div>
+      )}
+      {confirmation && (
+        <p
+          aria-live="polite"
+          className={`font-league-spartan text-[11px] mt-1 ${confirmation.complete ? 'text-enunas-success' : 'text-enunas-warning'}`}
+        >
+          {confirmation.text}
+        </p>
       )}
     </div>
   )
