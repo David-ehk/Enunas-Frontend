@@ -8,6 +8,7 @@ import { isItemActive } from '@/lib/orderItemCancellation'
 import { describeOrderItem } from '@/lib/orderItemDisplay'
 import { mergeOrderUpdate } from '@/lib/mergeOrderUpdate'
 import OrderItemThumb from '@/components/ui/OrderItemThumb'
+import { CARRIERS as TRACKED_CARRIERS, trackingUrl as carrierTrackingUrl } from '@/lib/carrierTracking'
 import {
   StatusBadge, ItemCancellationBadge, SectionCard, EmptyState, Loader,
   TH, TD, TableRow, FilterBar, SearchInput, fmt, fmtEur,
@@ -18,7 +19,9 @@ import {
 } from 'lucide-react'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
-const CARRIERS = ['DHL', 'UPS', 'DPD', 'FedEx', 'Other'] as const
+// 'Other' is a real option here (a brand can ship with a carrier we don't deep-link), which the
+// canonical carrier list in lib/carrierTracking.ts deliberately excludes.
+const CARRIERS = [...TRACKED_CARRIERS, 'Other'] as const
 type Carrier = typeof CARRIERS[number]
 
 const STATUS_TABS = [
@@ -30,13 +33,7 @@ const STATUS_TABS = [
 ]
 
 function trackingUrl(carrier: Carrier, trackingNumber: string): string {
-  switch (carrier) {
-    case 'DHL':   return `https://www.dhl.de/de/privatkunden/dhl-sendungsverfolgung.html?piececode=${trackingNumber}`
-    case 'UPS':   return `https://www.ups.com/track?loc=de_DE&tracknum=${trackingNumber}`
-    case 'DPD':   return `https://tracking.dpd.de/status/de_DE/parcel/${trackingNumber}`
-    case 'FedEx': return `https://www.fedex.com/de-de/tracking.html?trknbr=${trackingNumber}`
-    default:      return ''
-  }
+  return carrier === 'Other' ? '' : carrierTrackingUrl(carrier, trackingNumber)
 }
 
 // ─── Per-brand fulfilment state ──────────────────────────────────────────────

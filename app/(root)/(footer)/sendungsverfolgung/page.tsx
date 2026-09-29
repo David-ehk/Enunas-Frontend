@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { CARRIERS, trackingUrl } from '@/lib/carrierTracking'
 
 function TrackingContent() {
   const searchParams = useSearchParams()
@@ -9,24 +10,9 @@ function TrackingContent() {
   const [trackingNumber, setTrackingNumber] = useState(initialNumber)
   const [copied, setCopied] = useState(false)
 
-  const carriers = [
-    {
-      name: 'DHL',
-      url: `https://www.dhl.de/de/privatkunden/pakete-empfangen/verfolgen.html?idc=${encodeURIComponent(trackingNumber)}`,
-    },
-    {
-      name: 'UPS',
-      url: `https://www.ups.com/track?tracknum=${encodeURIComponent(trackingNumber)}`,
-    },
-    {
-      name: 'DPD',
-      url: `https://www.dpd.com/de/de/empfangen/wo-ist-mein-paket/?parcelNumber=${encodeURIComponent(trackingNumber)}`,
-    },
-    {
-      name: 'FedEx',
-      url: `https://www.fedex.com/fedextrack/?tracknumbers=${encodeURIComponent(trackingNumber)}`,
-    },
-  ]
+  // Same carrier links the vendor dashboard hands out on "Versenden" — a customer and a brand
+  // looking at the same shipment now land on the same DHL/UPS/DPD/FedEx page.
+  const carriers = CARRIERS.map(name => ({ name, url: trackingUrl(name, trackingNumber) }))
 
   const handleCopy = () => {
     if (!trackingNumber) return

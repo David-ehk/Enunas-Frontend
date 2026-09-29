@@ -173,7 +173,7 @@ export default function UeberUnsPage() {
     <div className="bg-white min-h-screen" style={{ fontFamily: 'var(--font-league-spartan)', color: '#0A0A0A' }}>
 
       {/* Pinned tinted hero — scroll slides the text columns sideways */}
-      <HorizontalHero image={STORY_IMAGE} title={<>Wir sind<br />Enunas</>} tagline={tagline} paragraphs={missionParagraphs} />
+      <HorizontalHero video="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbpR5K1iOCwcgFKdqleIRySxzn6ZXroN0M3Ha7" title={<>Wir sind<br />Enunas</>} tagline={tagline} paragraphs={missionParagraphs} />
 
       {/* Werte — giant title, then staggered image/text rows */}
       <section className="pt-24 lg:pt-32 pb-24 lg:pb-32 overflow-x-clip">
@@ -208,6 +208,21 @@ export default function UeberUnsPage() {
             body="2026 entstand Enunas aus unserer Frustration über die fehlende Kuration im deutschen Streetwear-Markt. Wir wollten einen Ort schaffen, an dem besondere Brands, hochwertige Designs und eine echte Community zusammenkommen. Für uns geht es nicht nur darum, Kleidung anzubieten, sondern eine neue Art zu entdecken, was Stil bedeuten kann."
             reverse
           />
+        </div>
+      </section>
+
+      {/* Overture — brand film */}
+      <section className="pb-24 lg:pb-32">
+        <div className="max-w-[1800px] mx-auto px-6 lg:px-12">
+          <video
+            src="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbpJX24hROCwcgFKdqleIRySxzn6ZXroN0M3Ha"
+            controls
+            playsInline
+            preload="metadata"
+            className="block w-full aspect-[3840/1608] bg-enunas-off-white object-cover"
+          >
+            Dein Browser unterstützt dieses Video nicht.
+          </video>
         </div>
       </section>
 

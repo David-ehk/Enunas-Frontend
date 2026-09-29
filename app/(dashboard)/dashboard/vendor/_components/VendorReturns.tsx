@@ -1,9 +1,9 @@
 'use client'
 
 import { useVendorReturns } from '@/hooks/use-vendor-returns'
-import { RETURN_LIFECYCLE, returnStageIndex } from '@/lib/api/modules/returnsApi'
 import type { ReturnWithOrder, ReturnStatus } from '@/types/api'
 import OrderItemThumb from '@/components/ui/OrderItemThumb'
+import ReturnTimeline from '@/components/ui/ReturnTimeline'
 import {
   VPageHeader, VKPIGrid, VKPI, VCard,
   VStatus, fmtEur, fmt, Loader, EmptyState, Phase2Tile,
@@ -27,10 +27,6 @@ const STATUS_META: Record<ReturnStatus, { label: string; tone: 'warn' | 'purple'
   REFUNDED:  { label: 'Erstattet',   tone: 'muted'  },
 }
 
-const LIFECYCLE_LABELS: Record<string, string> = {
-  REQUESTED: 'Beantragt', APPROVED: 'Genehmigt', RECEIVED: 'Eingegangen', REFUNDED: 'Erstattet',
-}
-
 // A status alone does not tell a brand what to do. Approval and refund sit with
 // Enunas, so most states are genuinely "wait" — saying so explicitly is what
 // stops the page reading as a to-do list the brand is failing to action.
@@ -48,35 +44,6 @@ function statusMeta(s: ReturnStatus) {
 function itemLabel(it: ReturnWithOrder['items'][number]): string {
   const d = describeOrderItem(it)
   return d.variant ? `${d.label} — ${d.variant}` : d.label
-}
-
-/** Per-return lifecycle. Each return advances independently of every other one. */
-function Timeline({ status }: { status: ReturnStatus }) {
-  const current = returnStageIndex(status)
-  return (
-    <div className="flex items-center gap-1.5">
-      {RETURN_LIFECYCLE.map((stage, i) => {
-        const done = current >= i
-        return (
-          <div key={stage} className="flex items-center gap-1.5">
-            <span
-              className="text-[9.5px] uppercase tracking-[0.14em]"
-              style={{
-                fontFamily: 'var(--font-league-spartan)',
-                color: done ? '#370E4D' : '#C9C9C9',
-                fontWeight: current === i ? 600 : 400,
-              }}
-            >
-              {LIFECYCLE_LABELS[stage]}
-            </span>
-            {i < RETURN_LIFECYCLE.length - 1 && (
-              <span className="w-4 h-[1px]" style={{ background: current > i ? '#370E4D' : '#E8E8E8' }} />
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
 }
 
 function ReturnCard({ r }: { r: ReturnWithOrder }) {
@@ -100,7 +67,7 @@ function ReturnCard({ r }: { r: ReturnWithOrder }) {
           <VStatus tone={tone}>{label}</VStatus>
         </div>
         <div className="mt-3">
-          <Timeline status={r.status} />
+          <ReturnTimeline status={r.status} />
         </div>
       </div>
 

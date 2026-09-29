@@ -11,17 +11,22 @@ const serif = { fontFamily: 'var(--font-Cormorant-Garamond)' }
  */
 export default function HorizontalHero({
   image,
+  video,
+  poster,
   title,
   tagline,
   paragraphs,
 }: {
-  image: string
+  image?: string
+  video?: string
+  poster?: string
   title: React.ReactNode
   tagline: string
   paragraphs: string[]
 }) {
   const outerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
   const [enabled, setEnabled] = useState(false)
   const [distance, setDistance] = useState(0)
 
@@ -38,6 +43,20 @@ export default function HorizontalHero({
       desktop.removeEventListener('change', measure)
       reduced.removeEventListener('change', measure)
     }
+  }, [])
+
+  // Reduced motion: show the still poster instead of a looping video.
+  useEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const sync = () => {
+      const v = videoRef.current
+      if (!v) return
+      if (reduced.matches) v.pause()
+      else void v.play().catch(() => {})
+    }
+    sync()
+    reduced.addEventListener('change', sync)
+    return () => reduced.removeEventListener('change', sync)
   }, [])
 
   // Measured after the wide layout is applied (enabled toggles the track to w-max).
@@ -89,14 +108,29 @@ export default function HorizontalHero({
             : 'relative overflow-hidden'
         }
       >
-        <Image
-          src={image}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover grayscale brightness-[1.35] contrast-[0.9]"
-        />
+        {video ? (
+          <video
+            ref={videoRef}
+            src={video}
+            poster={poster}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-hidden
+            className="absolute inset-0 h-full w-full object-cover brightness-[1.9] contrast-[0.9]"
+          />
+        ) : (
+          <Image
+            src={image!}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover grayscale brightness-[1.35] contrast-[0.9]"
+          />
+        )}
         <div className="absolute inset-0 bg-[#5B1F80] mix-blend-multiply" aria-hidden />
 
         <div

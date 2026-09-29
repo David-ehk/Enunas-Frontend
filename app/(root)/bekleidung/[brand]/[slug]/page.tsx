@@ -156,9 +156,18 @@ async function ProductPage({ params }: ProductPageProps) {
     allRes.content.map((p: ApiProduct) => [String(p.id), p.slug]),
   )
 
+  const productById = new Map<string, ApiProduct>(
+    allRes.content.map((p: ApiProduct) => [String(p.id), p]),
+  )
+
+  // Curated items are rendered from the catalogue product when it is known, so they carry the
+  // same image, price and colour swatches as the cards in "Ähnliche Produkte".
   const curated = resolved.completeTheLookProducts ?? []
   const relatedItems: RecItem[] = curated.length > 0
-    ? curated.slice(0, 4).map(c => completeTheLookToRecItem(c, slugById))
+    ? curated.slice(0, 4).map(c => {
+        const full = productById.get(String(c.id))
+        return full ? toRecItem(full) : completeTheLookToRecItem(c, slugById)
+      })
     : categoryRes.content
         .filter((p: ApiProduct) => p.id !== resolved.id)
         .slice(0, 4)

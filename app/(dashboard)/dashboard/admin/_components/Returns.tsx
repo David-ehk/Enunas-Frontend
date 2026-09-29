@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { adminReturnsApi, returnActionErrorMessage } from '@/lib/api/modules/adminReturnsApi'
-import { RETURN_LIFECYCLE, returnStageIndex, nextAction, type ReturnAction } from '@/lib/api/modules/returnsApi'
+import { RETURN_LIFECYCLE, RETURN_STAGE_LABELS, nextAction, type ReturnAction } from '@/lib/api/modules/returnsApi'
+import ReturnTimeline from '@/components/ui/ReturnTimeline'
 import { FetchError } from '@/lib/api'
 import type { AdminCustomer, ReturnStatus, ReturnWithOrder } from '@/types/api'
 import {
@@ -21,10 +22,6 @@ const REASON_LABELS: Record<string, string> = {
   NOT_AS_DESCRIBED:  'Nicht wie beschrieben',
   NO_LONGER_WANTED:  'Nicht mehr gewünscht',
   OTHER:             'Sonstiges',
-}
-
-const STATUS_LABELS: Record<ReturnStatus, string> = {
-  REQUESTED: 'Beantragt', APPROVED: 'Genehmigt', RECEIVED: 'Eingegangen', REFUNDED: 'Erstattet',
 }
 
 const LABEL_STATUS_LABELS: Record<string, string> = {
@@ -49,31 +46,8 @@ function StatusPill({ status }: { status: ReturnStatus }) {
   return (
     <span className="text-[10px] uppercase tracking-[0.14em] px-2 py-1 rounded"
       style={{ fontFamily: 'var(--font-league-spartan)', background: t.bg, color: t.fg }}>
-      {STATUS_LABELS[status]}
+      {RETURN_STAGE_LABELS[status]}
     </span>
-  )
-}
-
-function Timeline({ status }: { status: ReturnStatus }) {
-  const current = returnStageIndex(status)
-  return (
-    <div className="flex items-center gap-1.5">
-      {RETURN_LIFECYCLE.map((stage, i) => (
-        <div key={stage} className="flex items-center gap-1.5">
-          <span className="text-[9.5px] uppercase tracking-[0.14em]"
-            style={{
-              fontFamily: 'var(--font-league-spartan)',
-              color: current >= i ? '#370E4D' : '#C9C9C9',
-              fontWeight: current === i ? 600 : 400,
-            }}>
-            {STATUS_LABELS[stage]}
-          </span>
-          {i < RETURN_LIFECYCLE.length - 1 && (
-            <span className="w-4 h-[1px]" style={{ background: current > i ? '#370E4D' : '#E8E8E8' }} />
-          )}
-        </div>
-      ))}
-    </div>
   )
 }
 
@@ -111,7 +85,7 @@ function ReturnRow({
           </div>
           <StatusPill status={r.status} />
         </div>
-        <div className="mt-3"><Timeline status={r.status} /></div>
+        <div className="mt-3"><ReturnTimeline status={r.status} /></div>
       </div>
 
       <div className="px-5 py-4 grid md:grid-cols-2 gap-6">
@@ -340,7 +314,7 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
               background: filter === f ? '#370E4D' : 'transparent',
             }}
           >
-            {f === 'ALL' ? `Alle (${returns.length})` : `${STATUS_LABELS[f as ReturnStatus]} (${returns.filter(r => r.status === f).length})`}
+            {f === 'ALL' ? `Alle (${returns.length})` : `${RETURN_STAGE_LABELS[f as ReturnStatus]} (${returns.filter(r => r.status === f).length})`}
           </button>
         ))}
       </div>

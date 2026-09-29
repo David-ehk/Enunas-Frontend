@@ -16,6 +16,11 @@ export function returnStageIndex(status: ReturnStatus): number {
   return RETURN_LIFECYCLE.indexOf(status)
 }
 
+/** German label for each lifecycle stage — the one wording admin and vendor both show. */
+export const RETURN_STAGE_LABELS: Record<ReturnStatus, string> = {
+  REQUESTED: 'Beantragt', APPROVED: 'Genehmigt', RECEIVED: 'Eingegangen', REFUNDED: 'Erstattet',
+}
+
 /** The single action valid in each state. Anything else must not be offered. */
 export type ReturnAction = 'approve' | 'receive' | 'refund' | null
 

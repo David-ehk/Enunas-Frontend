@@ -7,36 +7,9 @@ import { X } from 'lucide-react'
 import { isItemActive, canReconcileItem } from '@/lib/orderItemCancellation'
 import type { ApiOrderItem } from '@/types/api'
 
-export const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  APPROVED:          { label: 'Genehmigt',        cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  VERIFIED:          { label: 'Verifiziert',       cls: 'bg-sky-50 text-sky-700 border-sky-200' },
-  ACTIVE:            { label: 'Aktiv',             cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  PENDING:           { label: 'Ausstehend',        cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  PENDING_REVIEW:    { label: 'In Prüfung',        cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  REJECTED:          { label: 'Abgelehnt',         cls: 'bg-rose-50 text-rose-700 border-rose-200' },
-  SUSPENDED:         { label: 'Gesperrt',          cls: 'bg-rose-50 text-rose-600 border-rose-200' },
-  DEACTIVATED:       { label: 'Deaktiviert',       cls: 'bg-gray-100 text-gray-500 border-gray-200' },
-  HIDDEN:            { label: 'Versteckt',         cls: 'bg-gray-100 text-gray-500 border-gray-200' },
-  FLAGGED:           { label: 'Markiert',          cls: 'bg-orange-50 text-orange-700 border-orange-200' },
-  PAID:              { label: 'Bezahlt',           cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  PROCESSING:        { label: 'In Bearbeitung',    cls: 'bg-sky-50 text-sky-700 border-sky-200' },
-  SHIPPED:           { label: 'Versandt',          cls: 'bg-violet-50 text-violet-700 border-violet-200' },
-  PARTIALLY_SHIPPED: { label: 'Teilweise versandt', cls: 'bg-violet-50 text-violet-700 border-violet-200' },
-  DELIVERED:         { label: 'Geliefert',         cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  CANCELLED:         { label: 'Storniert',         cls: 'bg-rose-50 text-rose-700 border-rose-200' },
-  REFUNDED:          { label: 'Erstattet',         cls: 'bg-gray-100 text-gray-500 border-gray-200' },
-  SHIPPING_PROBLEM:  { label: 'Versandproblem',    cls: 'bg-orange-50 text-orange-700 border-orange-200' },
-  AWAITING_ADMIN:    { label: 'Auf Admin wartend', cls: 'bg-orange-50 text-orange-700 border-orange-200' },
-  MANUAL_REVIEW:     { label: 'Manuelle Überpr.',  cls: 'bg-orange-50 text-orange-700 border-orange-200' },
-  RETURN_REQUESTED:  { label: 'Rückgabe bean.',    cls: 'bg-orange-50 text-orange-700 border-orange-200' },
-  RETURN_APPROVED:   { label: 'Rückgabe gen.',     cls: 'bg-sky-50 text-sky-700 border-sky-200' },
-  RETURN_RECEIVED:   { label: 'Rückgabe erh.',     cls: 'bg-sky-50 text-sky-700 border-sky-200' },
-  FAILED:            { label: 'Fehlgeschlagen',    cls: 'bg-rose-50 text-rose-700 border-rose-200' },
-  LOW:               { label: 'Niedrig',           cls: 'bg-orange-50 text-orange-700 border-orange-200' },
-  MEDIUM:            { label: 'Mittel',            cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  HIGH:              { label: 'Hoch',              cls: 'bg-rose-50 text-rose-700 border-rose-200' },
-}
-
+// `StatusBadge` below is the only renderer for platform-wide status — the equivalent
+// {label, badge-class} shaped map that used to sit here was never imported anywhere; deleted
+// rather than kept "in sync" with this one.
 const STATUS_DOT: Record<string, { color: string; label: string }> = {
   APPROVED:          { color: '#1A5A3C', label: 'Genehmigt' },
   VERIFIED:          { color: '#0284C7', label: 'Verifiziert' },
