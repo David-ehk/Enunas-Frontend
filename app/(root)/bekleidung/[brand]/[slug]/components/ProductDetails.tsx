@@ -342,7 +342,7 @@ export default function ProductDetails({
   return (
     <>
       {/* ── PDP grid — full-bleed so gallery touches the left edge ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2">
+      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
 
           {/* LEFT — Gallery + Breadcrumb */}
           <div>
@@ -379,7 +379,7 @@ export default function ProductDetails({
           </div>
 
           {/* RIGHT — Details */}
-          <div className="flex flex-col items-center text-center px-6 pt-10 pb-16 sm:px-12 md:px-[72px] md:pt-14 md:pb-20">
+          <div className="flex flex-col items-center text-center px-6 pt-10 pb-16 sm:px-12 md:px-10 lg:px-14 md:pt-14 md:pb-20">
             {/* 1. Brand + Gender */}
             <div className="flex items-center gap-3.5 mb-3.5">
               <BrandLink brand={product.brandName} />
@@ -505,7 +505,7 @@ export default function ProductDetails({
 
             {/* 6. Color + SKU */}
             {colorsForSelector.length > 0 && (
-              <div className="w-full max-w-[460px] mb-[14px]">
+              <div className="w-full max-w-[540px] mb-[14px]">
                 <ColorSelector
                   colors={colorsForSelector}
                   selectedColor={selectedColor}
@@ -540,7 +540,7 @@ export default function ProductDetails({
               ref={ctaRef}
               onClick={handleCta}
               disabled={ctaDisabled}
-              className="group relative w-full max-w-[460px] overflow-hidden mb-6 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="group relative w-full max-w-[540px] overflow-hidden mb-6 disabled:opacity-60 disabled:cursor-not-allowed"
               style={{
                 padding: 'clamp(13px, 3.4vw, 22px) 32px',
                 background: '#370E4D',
@@ -566,7 +566,7 @@ export default function ProductDetails({
             <StockIndicator stockQuantity={selectedVariant?.stockQuantity} />
 
             {/* 12. Accordions */}
-            <div className="w-full max-w-[480px] text-left mt-4">
+            <div className="w-full max-w-[560px] text-left mt-4">
 
               <PdpAccordion
                 id="details"
