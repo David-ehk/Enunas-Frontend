@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
-import { productApi, apiProductToCardShape } from '@/lib/api'
+import { productApi, apiProductToColourwayCards } from '@/lib/api'
 import type { ProductCardShape } from '@/lib/api'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { generateSlug } from '@/lib/product'
@@ -76,7 +76,7 @@ export default function FeedPageContent({ basePath, HeroComponent, brandFilter, 
 
   useEffect(() => {
     productApi.list({ size: 200 })
-      .then(r => setAllProducts(r.content.map(apiProductToCardShape)))
+      .then(r => setAllProducts(r.content.flatMap(apiProductToColourwayCards)))
       .catch(() => setAllProducts([]))
       .finally(() => setLoading(false))
   }, [])

@@ -42,6 +42,8 @@ interface ProductDetailsProps {
   productId: string
   /** True when the product is not yet released — PDP shows the "Coming Soon" state. */
   preview: boolean
+  /** Colour name to start on (from a per-colour card's `?color=`); unknown names are ignored. */
+  initialColor?: string
 }
 
 export default function ProductDetails({
@@ -55,6 +57,7 @@ export default function ProductDetails({
   colorHexMap,
   productId,
   preview,
+  initialColor,
 }: ProductDetailsProps) {
   const colorList = useMemo(() => uniqueColors(product.variants), [product.variants])
   const colorsForSelector: Color[] = useMemo(
@@ -62,7 +65,9 @@ export default function ProductDetails({
     [colorList, colorHexMap]
   )
 
-  const [selectedColor, setSelectedColor] = useState<Color | null>(colorsForSelector[0] ?? null)
+  const [selectedColor, setSelectedColor] = useState<Color | null>(
+    colorsForSelector.find(c => c.name.toLowerCase() === initialColor?.toLowerCase()) ?? colorsForSelector[0] ?? null,
+  )
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [showSizeModal, setShowSizeModal] = useState(false)
   // Preview products aren't buyable yet — the CTA stays clickable and opens a cheeky "not so
@@ -342,7 +347,7 @@ export default function ProductDetails({
   return (
     <>
       {/* ── PDP grid — full-bleed so gallery touches the left edge ── */}
-      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 md:grid-cols-2">
 
           {/* LEFT — Gallery + Breadcrumb */}
           <div>

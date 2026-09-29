@@ -2,7 +2,6 @@ import React from 'react'
 import ProductDetails from './components/ProductDetails'
 import CompleteTheLook from './components/CompleteTheLook'
 import MoreFromBrand from './components/MoreFromBrand'
-import SimilarProducts from './components/SimilarProducts'
 import CuratedRecommendations from '@/components/CuratedRecommendations'
 import { notFound } from 'next/navigation'
 import { productApi, resolveProductWithMeta } from '@/lib/api'
@@ -18,6 +17,8 @@ interface ProductPageProps {
     brand: string
     slug: string
   }>
+  /** `?color=<name>` — set by the per-colour product cards so the page opens on that colour. */
+  searchParams?: Promise<{ color?: string }>
 }
 
 const GENDERS: Gender[] = ['UNISEX', 'MEN', 'WOMEN']
@@ -127,8 +128,9 @@ function completeTheLookToRecItem(
   }
 }
 
-async function ProductPage({ params }: ProductPageProps) {
+async function ProductPage({ params, searchParams }: ProductPageProps) {
   const { brand, slug } = await params
+  const { color: initialColor } = (await searchParams) ?? {}
 
   // No blanket catch here: the resolver returns null only for a genuine 404 (→ notFound),
   // and throws for real backend errors so they reach error.tsx instead of masquerading as a
@@ -178,16 +180,6 @@ async function ProductPage({ params }: ProductPageProps) {
     .slice(0, 12)
     .map(toRecItem)
 
-  const catalogueTags = resolved.catalogue ?? []
-  const similarItems: RecItem[] = allRes.content
-    .filter((p: ApiProduct) => {
-      if (p.id === resolved.id) return false
-      const tags = p.catalogue ?? []
-      return tags.some((t: string) => catalogueTags.includes(t))
-    })
-    .slice(0, 12)
-    .map(toRecItem)
-
   return (
     <div className="min-h-screen">
       <ProductDetails
@@ -201,10 +193,10 @@ async function ProductPage({ params }: ProductPageProps) {
         colorHexMap={colorHexMap}
         productId={resolved.id}
         preview={resolved.preview ?? false}
+        initialColor={initialColor}
       />
       <CompleteTheLook items={relatedItems} heroImage={product.images[0]} />
       <MoreFromBrand brand={product.brandName} items={brandItems} />
-      <SimilarProducts items={similarItems} allHref={catalogueTags[0] ? `/bekleidung/${catalogueTags[0].toLowerCase()}` : '/bekleidung'} />
       <CuratedRecommendations excludeId={resolved.id} />
     </div>
   )

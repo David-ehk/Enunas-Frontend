@@ -155,12 +155,11 @@ const PopularProductCard = ({
 
           {preview && (
             <span
-              className="absolute top-3 left-3 z-10 bg-enunas-purple text-white uppercase"
+              className="absolute top-3 left-3 z-10 text-white mix-blend-difference uppercase"
               style={{
                 fontFamily: 'var(--font-league-spartan)',
                 fontSize: 9,
-                letterSpacing: '0.15em',
-                padding: '4px 10px',
+                letterSpacing: '0.12em',
               }}
             >
               Coming Soon
@@ -172,7 +171,7 @@ const PopularProductCard = ({
 
           {/* Favorite Icon */}
           <button
-            className={`absolute top-3 right-3 p-2 transition-opacity duration-300 ${
+            className={`absolute top-1.5 right-1.5 p-2 transition-opacity duration-300 ${
               canHover ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
             }`}
             onClick={handleToggleSaved}
@@ -180,7 +179,7 @@ const PopularProductCard = ({
             aria-pressed={saved}
           >
             <svg
-              className={`w-5 h-5 transition-colors ${saved ? 'text-enunas-purple' : 'text-enunas-black hover:text-enunas-purple'} ${justSaved ? 'animate-heart-pop' : ''}`}
+              className={`w-4 h-4 transition-colors ${saved ? 'text-enunas-purple' : 'text-enunas-black hover:text-enunas-purple'} ${justSaved ? 'animate-heart-pop' : ''}`}
               fill={saved ? 'currentColor' : 'none'}
               stroke="currentColor"
               viewBox="0 0 24 24"

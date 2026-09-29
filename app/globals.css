@@ -469,3 +469,21 @@ main {
     @apply bg-background text-foreground;
   }
 }
+
+/* Gallery glass cursor (components/GlassCursor.tsx): the two purple line rings turn slowly back
+   and forth against each other. Transform only; stilled under prefers-reduced-motion below. */
+@keyframes glassCursorTurn {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(200deg); }
+}
+@keyframes glassCursorTurnReverse {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-260deg); }
+}
+.glass-cursor-ring-a { transform-origin: 48px 48px; animation: glassCursorTurn 9s ease-in-out infinite alternate; }
+.glass-cursor-ring-b { transform-origin: 48px 48px; animation: glassCursorTurnReverse 13s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) {
+  .glass-cursor-ring-a, .glass-cursor-ring-b { animation: none; }
+}
+/* The native cursor is hidden only where GlassCursor is running (it sets this attribute). */
+[data-glass-cursor="on"], [data-glass-cursor="on"] * { cursor: none !important; }

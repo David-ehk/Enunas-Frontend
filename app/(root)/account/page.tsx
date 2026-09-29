@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Navbar from '@/app/Homepage/components/navbar'
 import Footer from '@/app/Homepage/components/footer'
 import { useAuth } from '@/app/context/AuthContext'
@@ -13,6 +13,8 @@ import Adressen from './components/Adressen'
 import Einstellungen from './components/Einstellungen'
 import { orderApi } from '@/lib/api/modules/orderApi'
 import { authApi } from '@/lib/api/modules/authApi'
+import { customerApi } from '@/lib/api/modules/customerApi'
+import { resolveAccountName } from '@/lib/accountName'
 import GoogleLoginButton from '@/components/auth/GoogleLoginButton'
 import { useWishlist } from '@/app/context/WishlistContext'
 import type { ApiOrder } from '@/types/api'
@@ -27,8 +29,9 @@ const SECTION_TITLES: Record<AccountSection, string> = {
 
 function AuthGate({ onSuccess }: { onSuccess: () => void }) {
   const [tab, setTab] = useState<'login' | 'register'>('login')
-  // Backend RegisterUserDto only accepts { email, password } — no firstName/lastName.
-  const [form, setForm] = useState({ email: '', password: '' })
+  // Backend RegisterUserDto only accepts { email, password } — no firstName/lastName. The name is
+  // optional here and saved through the profile update right after the first login.
+  const [form, setForm] = useState({ email: '', password: '', firstName: '', lastName: '' })
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const { refreshUser } = useAuth()
@@ -59,6 +62,12 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
       // Signup returns UserResponseDto (no token). Login separately to get token.
       await authApi.signup({ email: form.email, password: form.password })
       await authApi.login({ email: form.email, password: form.password })
+      const firstName = form.firstName.trim()
+      const lastName = form.lastName.trim()
+      if (firstName || lastName) {
+        // The account exists at this point; a failed name save must not read as a failed sign-up.
+        await customerApi.updateProfile({ firstName, lastName }).catch(() => {})
+      }
       await refreshUser()
       onSuccess()
     } catch (err: unknown) {
@@ -126,10 +135,14 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
         <>
         <GoogleLoginButton context="register" onError={setError} onSuccess={onSuccess} />
         <form onSubmit={handleRegister} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <input type="text" placeholder="Vorname" value={form.firstName} onChange={set('firstName')} autoComplete="given-name" className={inputClass} />
+            <input type="text" placeholder="Nachname" value={form.lastName} onChange={set('lastName')} autoComplete="family-name" className={inputClass} />
+          </div>
           <input type="email" placeholder="E-Mail" value={form.email} onChange={set('email')} required className={inputClass} />
           <input type="password" placeholder="Passwort (mind. 8 Zeichen)" value={form.password} onChange={set('password')} required minLength={8} className={inputClass} />
           <p className="text-[12px] text-[#6B6B6B]">
-            Du kannst deinen Namen nach der Anmeldung unter Einstellungen ergänzen.
+            Name optional. Du kannst ihn jederzeit unter Einstellungen ändern.
           </p>
           {error && <p className="text-[13px] text-[#8B1E3F]">{error}</p>}
           <button
@@ -166,9 +179,24 @@ export default function AccountPage() {
   const [activeSection, setActiveSection] = useState<AccountSection>('uebersicht')
   const [lastOrder, setLastOrder] = useState<ApiOrder | null | undefined>(undefined)
 
-  const { user, customer, isAuthenticated, isLoading } = useAuth()
+  const { user, customer, isAuthenticated, isLoading, refreshUser } = useAuth()
   const { items: wishlistItems } = useWishlist()
-  const greetingName = customer?.firstName ?? user?.email?.split('@')[0] ?? ''
+  // No profile name yet: borrow the one from the latest order's shipping address.
+  const accountName = resolveAccountName(customer, lastOrder?.shippingAddress)
+  const greetingName = accountName.firstName || user?.email?.split('@')[0] || ''
+
+  // Save that order name to the profile once, so the account keeps it everywhere (menu,
+  // Einstellungen) and not just on this page. One attempt per visit — a failure just leaves
+  // the fallback display in place.
+  const nameSaveTried = useRef(false)
+  useEffect(() => {
+    if (nameSaveTried.current || !customer || accountName.source !== 'order') return
+    nameSaveTried.current = true
+    customerApi
+      .updateProfile({ firstName: accountName.firstName, lastName: accountName.lastName })
+      .then(() => refreshUser())
+      .catch(() => {})
+  }, [customer, accountName.source, accountName.firstName, accountName.lastName, refreshUser])
 
   const loadOverview = useCallback(async () => {
     if (!user || user.role !== 'CUSTOMER') {

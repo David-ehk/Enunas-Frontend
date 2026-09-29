@@ -4,8 +4,8 @@ import { useScrollAnimation } from '@/hooks/use-scroll-animation'
 import { cn } from '@/lib/utils'
 
 const LINES = [
-  'Die besten Fits entstehen, wenn Kleidung',
-  ' deine Persönlichkeit matcht.',
+  'F*ck looking ordinary',
+  ' you are unique so match it.',
 ]
 
 const PILL_VIDEO = 'https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbpR5K1iOCwcgFKdqleIRySxzn6ZXroN0M3Ha7'

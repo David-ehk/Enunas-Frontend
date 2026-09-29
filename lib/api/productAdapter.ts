@@ -1,5 +1,6 @@
 import type { ApiProduct } from '@/types/api';
 import { generateSlug } from '@/lib/product';
+import { colourwayCoverImage } from '@/lib/colourwayImage';
 
 export interface ProductCardShape {
   id: string;
@@ -26,6 +27,30 @@ export interface ProductCardShape {
 
 export function apiProductToProduct(p: ApiProduct): ApiProduct {
   return p;
+}
+
+/**
+ * One card per colourway: a product that comes in several colours is listed once per colour, each
+ * with that colour's own cover photo, only its own swatch and sizes, and a link that opens the
+ * product page on that colour. A single-colour product stays one ordinary card.
+ */
+export function apiProductToColourwayCards(p: ApiProduct): ProductCardShape[] {
+  const base = apiProductToCardShape(p);
+  if (p.colours.length <= 1) return [base];
+
+  return p.colours.map(c => {
+    const variants = (p.variants ?? []).filter(v => v.color === c.name);
+    const colorId = variants.find(v => v.colorId != null)?.colorId ?? null;
+    const sizes = [...new Set(variants.map(v => v.size.trim().toUpperCase()))];
+    return {
+      ...base,
+      id: `${p.id}:${c.name}`,
+      imgURL: colourwayCoverImage(p.imageObjects, colorId, base.imgURL),
+      colours: [{ hex: c.hex, name: c.name, colorFamily: c.colorFamily }],
+      sizes: sizes.length > 0 ? sizes : base.sizes,
+      href: `${base.href}?color=${encodeURIComponent(c.name)}`,
+    };
+  });
 }
 
 export function apiProductToCardShape(p: ApiProduct): ProductCardShape {

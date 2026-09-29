@@ -51,8 +51,9 @@ export default function PageTransition() {
       })
       if (!to) return
 
+      // preventDefault makes Next's <Link> skip its own navigation, while the link's own onClick
+      // (e.g. closing the cart sidebar) still runs. The push happens after the curtain is down.
       e.preventDefault()
-      e.stopPropagation()
       busy.current = true
       setPhase('cover')
       later(() => router.push(to), DURATION_MS)

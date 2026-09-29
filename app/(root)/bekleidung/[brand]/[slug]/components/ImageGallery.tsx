@@ -1,6 +1,8 @@
 "use client"
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
+import GlassCursor from '@/components/GlassCursor'
 
 interface ImageGalleryProps {
   images: string[];
@@ -32,10 +34,10 @@ function GalleryActions({ saved, onToggleSaved, justSaved, onShare, shareCopied 
           onClick={onToggleSaved}
           aria-label={saved ? 'Von Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
           aria-pressed={saved}
-          className="w-10 h-10 rounded-full bg-white/85 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-colors duration-200"
+          className="w-8 h-8 rounded-full bg-white/70 backdrop-blur-sm flex items-center justify-center hover:bg-white/90 transition-colors duration-200"
         >
           <svg
-            className={`w-5 h-5 transition-colors ${saved ? 'text-enunas-purple' : 'text-enunas-black'} ${justSaved ? 'animate-heart-pop' : ''}`}
+            className={`w-4 h-4 transition-colors ${saved ? 'text-enunas-purple' : 'text-enunas-black'} ${justSaved ? 'animate-heart-pop' : ''}`}
             fill={saved ? 'currentColor' : 'none'}
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -55,9 +57,9 @@ function GalleryActions({ saved, onToggleSaved, justSaved, onShare, shareCopied 
             type="button"
             onClick={onShare}
             aria-label="Seite teilen"
-            className="w-10 h-10 rounded-full bg-white/85 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-colors duration-200"
+            className="w-8 h-8 rounded-full bg-white/70 backdrop-blur-sm flex items-center justify-center hover:bg-white/90 transition-colors duration-200"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-enunas-black">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-enunas-black">
               <circle cx="18" cy="5" r="3" />
               <circle cx="6" cy="12" r="3" />
               <circle cx="18" cy="19" r="3" />
@@ -75,8 +77,87 @@ function GalleryActions({ saved, onToggleSaved, justSaved, onShare, shareCopied 
   )
 }
 
+// Small magnifier used for both "zoom in" (on the gallery) and "zoom out" (in the viewer).
+function ZoomIcon({ minus }: { minus?: boolean }) {
+  return (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden>
+      <circle cx="6.25" cy="6.25" r="5.4" stroke="currentColor" strokeWidth="1.2" />
+      <path d="m10.3 10.3 3.6 3.6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+      <path d={minus ? 'M3.9 6.25h4.7' : 'M3.9 6.25h4.7M6.25 3.9v4.7'} stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+// Full-width viewer: every image takes the whole viewport width and the column scrolls
+// vertically, opened at the image that was clicked. Click an image, press Escape or use the
+// corner icon to go back. Pinch zoom stays available on touch.
+function ZoomViewer({ images, productName, startIndex, onClose }: {
+  images: string[]
+  productName: string
+  startIndex: number
+  onClose: () => void
+}) {
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    const previousFocus = document.activeElement as HTMLElement | null
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const target = scrollerRef.current?.children[startIndex] as HTMLElement | undefined
+    if (scrollerRef.current && target) scrollerRef.current.scrollTop = target.offsetTop
+    closeRef.current?.focus()
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = previousOverflow
+      previousFocus?.focus?.()
+    }
+  }, [startIndex, onClose])
+
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${productName} – Bildzoom`}
+      className="fixed inset-0 z-[9000] bg-white animate-fade-in"
+    >
+      <div
+        ref={scrollerRef}
+        className="h-full w-full overflow-y-auto"
+        style={{ touchAction: 'pan-x pan-y pinch-zoom', scrollbarWidth: 'none' }}
+      >
+        {images.map((image, index) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={index}
+            src={image}
+            alt={`${productName} - Ansicht ${index + 1}`}
+            onClick={onClose}
+            className="block w-full h-auto cursor-zoom-out"
+          />
+        ))}
+      </div>
+      <GlassCursor targetRef={scrollerRef} mode="minus" />
+      <button
+        ref={closeRef}
+        type="button"
+        onClick={onClose}
+        aria-label="Zoom schließen"
+        className="fixed bottom-4 left-4 z-10 p-2 text-white mix-blend-difference focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+      >
+        <ZoomIcon minus />
+      </button>
+    </div>,
+    document.body,
+  )
+}
+
 function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, onShare, shareCopied }: ImageGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0)
+  const [zoomIndex, setZoomIndex] = useState<number | null>(null)
+  const closeZoom = useCallback(() => setZoomIndex(null), [])
   const containerRef = useRef<HTMLDivElement>(null)
   const imageRefs = useRef<(HTMLDivElement | null)[]>([])
 
@@ -197,11 +278,27 @@ function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, on
             <img
               src={image}
               alt={`${productName} - Ansicht ${index + 1}`}
-              className="w-full h-full object-cover"
+              onClick={() => setZoomIndex(index)}
+              className="w-full h-full object-cover cursor-zoom-in"
             />
           </div>
         ))}
       </div>
+
+      <button
+        type="button"
+        onClick={() => setZoomIndex(activeIndex)}
+        aria-label="Bild vergrößern"
+        className="absolute top-3 left-3 z-20 p-2 text-white mix-blend-difference focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+      >
+        <ZoomIcon />
+      </button>
+
+      <GlassCursor targetRef={containerRef} mode="plus" />
+
+      {zoomIndex !== null && (
+        <ZoomViewer images={images} productName={productName} startIndex={zoomIndex} onClose={closeZoom} />
+      )}
 
       {/* CSS zum Verstecken der Scrollbar */}
       <style jsx>{`
