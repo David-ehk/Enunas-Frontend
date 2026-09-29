@@ -5,9 +5,12 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { orderApi, FetchError } from '@/lib/api'
 import { useAuth } from '@/app/context/AuthContext'
-import type { ApiOrder, ApiOrderItem, ReturnReason } from '@/types/api'
+import type { ApiOrder, ReturnReason } from '@/types/api'
 import { formatDateLong } from '@/lib/account'
 import { describeShipment } from '@/lib/orderShipments'
+import { isItemActive } from '@/lib/orderItemCancellation'
+import { describeOrderItem } from '@/lib/orderItemDisplay'
+import { mergeOrderUpdate } from '@/lib/mergeOrderUpdate'
 import OrderItemThumb from '@/components/ui/OrderItemThumb'
 import AccountButton from './AccountButton'
 
@@ -22,16 +25,11 @@ function formatEuroDecimal(amount?: number | null): string {
   }).format(amount)
 }
 
-function resolveItemTotal(item: ApiOrderItem): number | undefined {
-  if (item.lineTotal != null) return item.lineTotal
-  const unit = item.priceAtPurchase ?? item.price
-  return unit != null ? unit * item.quantity : undefined
-}
-
 const STATUS_META: Record<string, { label: string; toneClass: string }> = {
   PENDING:          { label: 'Zahlung ausstehend',  toneClass: 'text-enunas-warning' },
   PAID:             { label: 'Bezahlt',             toneClass: 'text-enunas-success' },
   SHIPPED:          { label: 'Versandt',            toneClass: 'text-enunas-success' },
+  PARTIALLY_SHIPPED: { label: 'Teilweise versandt', toneClass: 'text-enunas-success' },
   DELIVERED:        { label: 'Zugestellt',          toneClass: 'text-enunas-success' },
   SHIPPING_PROBLEM: { label: 'Versandproblem',      toneClass: 'text-enunas-error' },
   AWAITING_ADMIN:   { label: 'In Prüfung',          toneClass: 'text-enunas-warning' },
@@ -112,7 +110,10 @@ function OrderRow({
     }
   }
 
-  const canReturn = order.status === 'DELIVERED'
+  // An admin-cancelled (refunded) item must never be offered for a return — that would
+  // double-refund it. Items with no cancellationState predate the feature and count as active.
+  const returnableItems = order.items.filter(isItemActive)
+  const canReturn = order.status === 'DELIVERED' && returnableItems.length > 0
   const hasReturn = [
     'RETURN_REQUESTED', 'RETURN_APPROVED', 'RETURN_RECEIVED', 'REFUNDED',
   ].includes(String(order.status))
@@ -165,34 +166,52 @@ function OrderRow({
             </p>
           )}
 
+          {/* Cancelled order: if it was paid, show refund status. */}
+          {order.status === 'CANCELLED' && order.paidAt && (
+            <p className="mb-4 pb-3 border-b border-enunas-gray-light font-league-spartan text-xs text-enunas-gray-medium leading-relaxed">
+              Diese Bestellung wurde storniert. Die Erstattung ist unterwegs und sollte innerhalb von
+              5–10 Werktagen auf deiner ursprünglichen Zahlungsmethode erscheinen.
+            </p>
+          )}
+
           {/* Items list */}
           {order.items.length > 0 && (
             <div className="mb-4 space-y-3">
-              {order.items.map((item) => (
-                <div key={item.id} className="flex items-start justify-between gap-4">
-                  <OrderItemThumb
-                    src={item.imageUrl}
-                    alt={item.productName ?? item.name ?? ''}
-                    width={44}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-league-spartan text-sm text-enunas-black leading-snug">
-                      {item.productName ?? item.name ?? '—'}
-                    </p>
-                    {(item.variantSize || item.variantColor || item.size || item.color) && (
-                      <p className="font-league-spartan text-[11px] text-enunas-gray-medium mt-0.5">
-                        {[item.variantSize ?? item.size, item.variantColor ?? item.color]
-                          .filter(Boolean)
-                          .join(' · ')}
-                        {item.quantity > 1 && ` · ×${item.quantity}`}
+              {order.items.map((item) => {
+                const active = isItemActive(item)
+                const d = describeOrderItem(item)
+                return (
+                  <div key={item.id} className="flex items-start justify-between gap-4">
+                    <OrderItemThumb
+                      src={item.imageUrl}
+                      alt={d.label}
+                      width={44}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className={cn(
+                        'font-league-spartan text-sm leading-snug',
+                        active ? 'text-enunas-black' : 'text-enunas-gray-medium line-through'
+                      )}>
+                        {d.label}
                       </p>
-                    )}
+                      {(d.variant || item.quantity > 1) && (
+                        <p className="font-league-spartan text-[11px] text-enunas-gray-medium mt-0.5">
+                          {d.variant}
+                          {item.quantity > 1 && (d.variant ? ` · ×${item.quantity}` : `×${item.quantity}`)}
+                        </p>
+                      )}
+                      {!active && (
+                        <p className="font-league-spartan text-[11px] text-enunas-error mt-0.5">
+                          Storniert &amp; erstattet
+                        </p>
+                      )}
+                    </div>
+                    <p className="font-league-spartan text-xs text-enunas-black flex-shrink-0">
+                      {formatEuroDecimal(d.lineTotal)}
+                    </p>
                   </div>
-                  <p className="font-league-spartan text-xs text-enunas-black flex-shrink-0">
-                    {formatEuroDecimal(resolveItemTotal(item))}
-                  </p>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
 
@@ -262,7 +281,7 @@ function OrderRow({
             {canReturn && !returnOpen && (
               <button
                 onClick={() => {
-                  setReturnItemIds(order.items.length === 1 ? order.items.map((i) => i.id) : [])
+                  setReturnItemIds(returnableItems.length === 1 ? returnableItems.map((i) => i.id) : [])
                   setReturnOpen(true)
                 }}
                 className="font-league-spartan text-[11px] tracking-[0.2em] uppercase text-enunas-gray-medium hover:text-enunas-black transition-colors duration-300"
@@ -278,42 +297,45 @@ function OrderRow({
               <p className="font-league-spartan text-[11px] tracking-[0.15em] uppercase text-enunas-gray-medium">
                 Retoure beantragen
               </p>
-              {order.items.length > 0 && (
+              {returnableItems.length > 0 && (
                 <div>
                   <label className="font-league-spartan text-[11px] text-enunas-gray-medium mb-1.5 block">
                     Artikel auswählen *
                   </label>
                   <div className="space-y-1.5">
-                    {order.items.map((item) => (
-                      <label key={item.id} className="flex items-start gap-2.5 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={returnItemIds.includes(item.id)}
-                          onChange={(e) =>
-                            setReturnItemIds((prev) =>
-                              e.target.checked
-                                ? [...prev, item.id]
-                                : prev.filter((id) => id !== item.id)
-                            )
-                          }
-                          className="mt-0.5 accent-enunas-purple"
-                        />
-                        <span className="font-league-spartan text-xs text-enunas-black leading-snug">
-                          {item.productName ?? item.name ?? '—'}
-                          {(item.variantSize || item.variantColor || item.size || item.color) && (
-                            <span className="text-enunas-gray-medium">
-                              {' · '}
-                              {[item.variantSize ?? item.size, item.variantColor ?? item.color]
-                                .filter(Boolean)
-                                .join(' · ')}
-                            </span>
-                          )}
-                          {item.quantity > 1 && (
-                            <span className="text-enunas-gray-medium">{` · ×${item.quantity}`}</span>
-                          )}
-                        </span>
-                      </label>
-                    ))}
+                    {returnableItems.map((item) => {
+                      const d = describeOrderItem(item)
+                      return (
+                        <label key={item.id} className="flex items-start gap-2.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={returnItemIds.includes(item.id)}
+                            onChange={(e) =>
+                              setReturnItemIds((prev) =>
+                                e.target.checked
+                                  ? [...prev, item.id]
+                                  : prev.filter((id) => id !== item.id)
+                              )
+                            }
+                            className="mt-0.5 accent-enunas-purple"
+                          />
+                          <OrderItemThumb
+                            src={item.imageUrl}
+                            alt={d.label}
+                            width={32}
+                          />
+                          <span className="font-league-spartan text-xs text-enunas-black leading-snug">
+                            {d.label}
+                            {d.variant && (
+                              <span className="text-enunas-gray-medium">{' · '}{d.variant}</span>
+                            )}
+                            {item.quantity > 1 && (
+                              <span className="text-enunas-gray-medium">{` · ×${item.quantity}`}</span>
+                            )}
+                          </span>
+                        </label>
+                      )
+                    })}
                   </div>
                 </div>
               )}
@@ -461,7 +483,7 @@ export default function Bestellungen() {
 
   const handleUpdated = (updated: ApiOrder) => {
     setOrders((prev) =>
-      prev.map((o) => String(o.id) === String(updated.id) ? updated : o)
+      prev.map((o) => String(o.id) === String(updated.id) ? mergeOrderUpdate(o, updated) : o)
     )
   }
 

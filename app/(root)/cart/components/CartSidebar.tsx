@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useCart } from '@/app/context/CartContext'
 import Image from 'next/image'
 import Link from 'next/link'
-import { STANDARD_SHIPPING_COST } from '../constants'
+import { estimateShipping } from '@/lib/pricing'
 
 /* ─────────────────────────────────────────────────────────────────
    CSS from design_handoff_cart/cart/cart.css — embedded so it loads
@@ -417,7 +417,7 @@ export default function CartSidebar() {
   const [removingId, setRemovingId] = useState<string | null>(null)
 
   // Estimate only — the backend prices shipping per brand and confirms it at checkout.
-  const shipping  = STANDARD_SHIPPING_COST
+  const shipping  = estimateShipping(cartItems)
   const total     = totalPrice + shipping
 
   function handleRemove(id: string) {

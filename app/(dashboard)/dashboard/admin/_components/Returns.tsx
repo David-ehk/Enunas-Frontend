@@ -10,6 +10,8 @@ import {
   fmt, fmtEur, dailyCounts, weekDeltaStr,
 } from './shared'
 import { RotateCcw, CheckCircle, PackageCheck, Euro } from 'lucide-react'
+import OrderItemThumb from '@/components/ui/OrderItemThumb'
+import { describeOrderItem } from '@/lib/orderItemDisplay'
 
 const REASON_LABELS: Record<string, string> = {
   WRONG_SIZE:        'Falsche Größe',
@@ -121,13 +123,19 @@ function ReturnRow({
               {r.orderItemIds?.length ? `${r.orderItemIds.length} Position(en) — Details nicht in der Bestellung gefunden` : '—'}
             </p>
           ) : (
-            <ul className="space-y-1">
-              {r.items.map(it => (
-                <li key={it.id} className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
-                  {it.quantity ? `${it.quantity}× ` : ''}{it.productName ?? it.name ?? 'Artikel'}
-                  {(it.variantSize || it.variantColor) ? ` — ${[it.variantSize, it.variantColor].filter(Boolean).join(' · ')}` : ''}
-                </li>
-              ))}
+            <ul className="space-y-2">
+              {r.items.map(it => {
+                const d = describeOrderItem(it)
+                return (
+                  <li key={it.id} className="flex items-center gap-2.5 text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
+                    <OrderItemThumb src={it.imageUrl} alt={d.label} width={30} />
+                    <span>
+                      {it.quantity ? `${it.quantity}× ` : ''}{d.label}
+                      {d.variant ? ` — ${d.variant}` : ''}
+                    </span>
+                  </li>
+                )
+              })}
             </ul>
           )}
 

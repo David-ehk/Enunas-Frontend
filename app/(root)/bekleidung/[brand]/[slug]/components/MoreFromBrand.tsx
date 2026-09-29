@@ -14,6 +14,7 @@ export default function MoreFromBrand({ brand, items, allHref }: MoreFromBrandPr
       titleAccent={brand}
       items={items}
       allHref={allHref ?? `/marken/${brand.toLowerCase().replace(/\s+/g, '-')}`}
+      allLabel="Ganze Marke ansehen →"
     />
   );
 }

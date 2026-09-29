@@ -5,6 +5,7 @@ import { getCuration, resolveCuratedOrNewest, type Segment } from '@/lib/curatio
 import { useScrollAnimation } from '@/hooks/use-scroll-animation'
 import { cn } from '@/lib/utils'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
+import Rail from '@/app/(root)/bekleidung/[brand]/[slug]/components/Rail'
 import { apiProductToCardShape } from '@/lib/api'
 import { partitionPreview, type PreviewMode } from '@/lib/preview'
 import type { ApiProduct } from '@/types/api'
@@ -121,7 +122,6 @@ export default function CuratedRecommendations({ excludeId, title = 'Das könnte
 
   const borderColor = dark ? 'rgba(255,255,255,0.1)' : '#E8E8E8'
   const headingColor = dark ? '#ffffff' : '#0A0A0A'
-  const btnColor     = dark ? 'rgba(255,255,255,0.55)' : '#0A0A0A'
 
   // Section rhythm, heading scale and grid gutters mirror RecRow so this row and the
   // "Mehr von …" / "Ähnliche Produkte" rows above it render identically sized cards.
@@ -132,22 +132,15 @@ export default function CuratedRecommendations({ excludeId, title = 'Das könnte
         <h2 className="font-cormorant text-[22px] sm:text-[32px] leading-tight font-light" style={{ color: headingColor }}>
           {title}
         </h2>
-        {!expanded && hiddenCount > 0 && (
-          <button
-            onClick={() => setExpanded(true)}
-            className="shrink-0 whitespace-nowrap font-league-spartan text-[10px] sm:text-[11px] tracking-[0.18em] sm:tracking-[0.22em] uppercase border-b pb-0.5 transition-colors hover:opacity-60"
-            style={{ color: btnColor, borderColor: btnColor }}
-          >
-            +{hiddenCount} weitere →
-          </button>
-        )}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2">
-        {visible.map(product => (
-          <PopularProductCard key={product.id} {...apiProductToCardShape(product)} />
+      <Rail label={title}>
+        {products.map(product => (
+          <div key={product.id} className="snap-start shrink-0 basis-[58%] sm:basis-[34%] lg:basis-[23.5%]">
+            <PopularProductCard {...apiProductToCardShape(product)} />
+          </div>
         ))}
-      </div>
+      </Rail>
     </section>
   )
 }

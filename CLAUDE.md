@@ -67,7 +67,7 @@ Before generating any code, verify:
 
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | Next.js 15 (App Router) with TypeScript and Tailwind CSS v4 |
+| **Frontend** | Next.js 16 (App Router) with TypeScript and Tailwind CSS v4 |
 | **Backend** | Spring Boot (Java) |
 | **Database** | PostgreSQL |
 | **Payment** | Mollie |
@@ -373,8 +373,9 @@ All protected routes require: `Authorization: Bearer <token>` — handled automa
 | `GET` | `/admin/orders?page=&size=50` | — | `Page<OrderResponseDto>` |
 | `GET` | `/admin/orders/{orderId}` | — | `OrderResponseDto` |
 | `GET` | `/admin/orders/status/{status}` | — | `Page<OrderResponseDto>` |
-| `PATCH` | `/admin/orders/{orderId}/status?status=` | — | `OrderResponseDto` |
-| `POST` | `/admin/orders/{orderId}/cancel` | `CancelOrderDto` | `OrderResponseDto` |
+| `POST` | `/admin/orders/{orderId}/cancel` | `{ reason: CancelReason, note?: string }` | `OrderResponseDto` |
+
+> `CancelReason` = `'FRAUD_SUSPICION' | 'OUT_OF_STOCK' | 'CUSTOMER_REQUEST' | 'TECHNICAL_ERROR' | 'OTHER'`. When cancelling a PAID order, the backend refunds via Mollie. `OrderResponseDto` includes `paidAt`, `cancellationReason`, and `refundTransactionId`. The deprecated `PATCH /admin/orders/{orderId}/status?status=` endpoint is removed next release.
 
 ---
 
@@ -569,6 +570,26 @@ This project uses **Tailwind CSS v4** with CSS-based configuration via `@theme` 
 - Easing: `ease-out-expo`, `ease-out-quart`
 - Durations: `duration-800`, `duration-1200`
 - Animations: `animate-fade-in-up`, `animate-fade-in-scale`
+
+---
+
+## Testing: test first, only what is necessary
+
+### Procedure (mandatory order)
+
+1. **Write the test file first** — before any implementation code exists.
+2. **Run the test** — `pnpm run test:run <test-file>` — and **confirm it fails** (red phase).
+3. **Write the implementation** — minimum code to pass the test.
+4. **Run the test again** — and **confirm it passes** (green phase).
+5. **Report both phases** in your final message — show the failing test output, then the passing output. Proof, not claim.
+
+### Guidelines
+
+- **Never change a test to make it pass** or to fit the code. If a test looks wrong, stop and say why before touching it. Never edit the test and the code it guards in the same step.
+- **Derive expected values from the requirement**, not from running the code.
+- **Do not weaken assertions:** no loosening to `toBeTruthy`, no deleted assertions, no `.skip`, no mocks that make the real code path unreachable.
+- **Only necessary tests:** one per behaviour or branch that could genuinely break. None for styling, trivial pass-through code, or duplicate coverage. No snapshot tests.
+- **Put logic in pure functions** so it can be tested without component infrastructure.
 
 ---
 

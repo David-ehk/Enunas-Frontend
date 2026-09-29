@@ -3,20 +3,20 @@
 // only live discount code (UPSELL10) is auto-attached and the backend is the source of truth
 // for money. Keep this free of React / side effects.
 
-export const STANDARD_SHIPPING = 4.99
+/** The backend's GLOBAL_DEFAULT shipping rate, charged once per brand in the order. */
+export const STANDARD_SHIPPING = 5
 
 /**
  * Pre-address placeholder only. The backend prices shipping per brand
  * (GLOBAL_DEFAULT / BRAND_FLAT_RATE / BRAND_FREE_SHIPPING) and POST /orders/preview is the
  * authoritative answer the moment an address exists — this is what the summary shows before
- * then. There is deliberately no order-value free-shipping threshold: the backend has no such
- * rule, and promising one the checkout will not honour is worse than a flat estimate.
+ * then. It mirrors the default rule, one rate per brand, so a multi-brand cart does not jump
+ * from one shipping line to several at checkout. A brand's own flat or free rate can still move
+ * the confirmed figure. There is deliberately no order-value free-shipping threshold: the backend
+ * has no such rule, and promising one the checkout will not honour is worse than an estimate.
  */
-// The param is kept so the call signature stays stable: the real backend prices shipping by
-// subtotal/brand, and POST /orders/preview is authoritative once an address exists.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function calcShipping(_subtotal: number): number {
-  return STANDARD_SHIPPING
+export function estimateShipping(items: { brand: string }[]): number {
+  return new Set(items.map(i => i.brand)).size * STANDARD_SHIPPING
 }
 
 /**

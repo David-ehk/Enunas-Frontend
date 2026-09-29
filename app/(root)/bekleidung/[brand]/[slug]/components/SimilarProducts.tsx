@@ -7,5 +7,5 @@ interface SimilarProductsProps {
 }
 
 export default function SimilarProducts({ items, allHref }: SimilarProductsProps) {
-  return <RecRow title="Ähnliche Produkte" items={items} allHref={allHref} />;
+  return <RecRow title="Ähnliche Produkte" items={items} allHref={allHref} allLabel="Mehr davon →" />;
 }

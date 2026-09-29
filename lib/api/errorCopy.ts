@@ -85,3 +85,47 @@ export function germanErrorMessage(
 
   return serverMessage || GENERIC;
 }
+
+// Domain-specific error messages for POST /admin/orders/{id}/cancel.
+// `status` is the order's OrderStatus (used to infer 400 vs 409 context).
+// `serverMessage` is the backend error message.
+export function cancelOrderErrorMessage(
+  orderStatus: string | undefined,
+  serverMessage: string,
+): string {
+  // 400: Mollie refund failed — the order was NOT cancelled, safe to retry.
+  if (serverMessage.toLowerCase().includes('mollie') || serverMessage.toLowerCase().includes('refund')) {
+    return 'Erstattung bei Mollie fehlgeschlagen — die Bestellung wurde NICHT storniert. Bitte erneut versuchen.';
+  }
+
+  // 409: Cannot cancel (already shipped, already refunded, race condition, etc). Pass through verbatim.
+  if (serverMessage) {
+    return serverMessage;
+  }
+
+  return GENERIC;
+}
+
+// Domain-specific error messages for POST /admin/orders/{id}/cancel-items.
+export function cancelItemsErrorMessage(status: number, serverMessage: string): string {
+  switch (status) {
+    // Unknown item / item of another order / mixed brands / invalid body, OR Mollie
+    // definitively rejected the refund — either way nothing was cancelled, retry is safe.
+    case 400: return serverMessage || 'Ungültige Anfrage — die Artikel wurden NICHT storniert.';
+    // Order not cancellable/not paid, item has no recorded paid amount, brand already shipped,
+    // item already cancelled/being cancelled, OR the refund outcome is unknown and the items
+    // are now PENDING — the caller reloads the order so a PENDING item becomes visible.
+    case 409: return serverMessage || 'Status-Konflikt — bitte Bestellung neu laden.';
+    default: return serverMessage || 'Stornierung der Artikel fehlgeschlagen.';
+  }
+}
+
+// Domain-specific error messages for POST /admin/orders/{id}/cancel-items/reconcile.
+export function reconcileCancelErrorMessage(status: number, serverMessage: string): string {
+  switch (status) {
+    // Claim under 5 minutes old, already settled, claim key not on this order, missing
+    // refundId for RECORD, or the refundId is already used by another refund.
+    case 409: return serverMessage || 'Die Klärung ist noch nicht möglich — bitte erneut versuchen.';
+    default: return serverMessage || 'Aktion fehlgeschlagen.';
+  }
+}

@@ -75,6 +75,15 @@ export const orderApi = {
     return fetcher<ApiOrder>(`/orders/${orderId}`);
   },
 
+  // Mollie returns the customer to /orders/{orderNumber}/confirmation, but GET /orders/{id} only
+  // accepts the numeric id — an order number answers 400. Resolve it through the customer's own
+  // list instead; /orders/me is newest first, so a just-placed order is always on the first page.
+  async getByOrderNumber(orderNumber: string): Promise<ApiOrder | null> {
+    if (/^\d+$/.test(orderNumber)) return orderApi.getById(orderNumber);
+    const page = await orderApi.getMyOrders(0, 20);
+    return page.content.find((o) => o.orderNumber === orderNumber) ?? null;
+  },
+
   async create(dto: CreateOrderDto): Promise<ApiOrder> {
     return fetcher<ApiOrder>('/orders', { method: 'POST', body: JSON.stringify(dto) });
   },

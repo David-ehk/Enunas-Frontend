@@ -24,6 +24,7 @@ import { useAuth } from '@/app/context/AuthContext'
 import { useWishlist, type WishlistItem } from '@/app/context/WishlistContext'
 import { productApi } from '@/lib/api'
 import { listingPriceView } from '@/lib/pricing'
+import { colourwayCoverImage } from '@/lib/colourwayImage'
 import type { ApiListing } from '@/types/api'
 
 interface ProductDetailsProps {
@@ -255,7 +256,7 @@ export default function ProductDetails({
       currency,
       size,
       color: selectedColor ? { id: selectedColor.id, name: selectedColor.name, hex: selectedColor.hex } : undefined,
-      image: product.images[0] ?? '',
+      image: colourwayCoverImage(product.imageObjects, selectedColorId, galleryImages[0] ?? product.images[0] ?? ''),
       defaultListingId: listing?.id ? String(listing.id) : undefined,
       stockQuantity: variant?.stockQuantity,
       productPath: `/bekleidung/${brandSlug}/${productSlug}`,
@@ -284,7 +285,7 @@ export default function ProductDetails({
     const wasSaved = saved
     const item: WishlistItem = {
       id: String(product.id),
-      imgURL: product.images[0] ?? '',
+      imgURL: colourwayCoverImage(product.imageObjects, selectedColorId, galleryImages[0] ?? product.images[0] ?? ''),
       brandName: product.brandName,
       productName: product.name,
       price: livePreview ? null : formattedPrice,

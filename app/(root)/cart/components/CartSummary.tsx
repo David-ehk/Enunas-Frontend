@@ -3,10 +3,12 @@
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { formatEuro } from '@/lib/format'
-import { STANDARD_SHIPPING_COST, PAYMENT_BADGES } from '../constants'
+import { estimateShipping } from '@/lib/pricing'
+import { PAYMENT_BADGES } from '../constants'
 
 interface CartSummaryProps {
   subtotal: number;
+  items: { brand: string }[];
 }
 
 function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
@@ -23,9 +25,9 @@ function Row({ label, value, bold }: { label: string; value: string; bold?: bool
   )
 }
 
-export default function CartSummary({ subtotal }: CartSummaryProps) {
+export default function CartSummary({ subtotal, items }: CartSummaryProps) {
   // Estimate only — the backend prices shipping per brand and confirms it at checkout.
-  const shipping = STANDARD_SHIPPING_COST
+  const shipping = estimateShipping(items)
   const total = subtotal + shipping
 
   return (

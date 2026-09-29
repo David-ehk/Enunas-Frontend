@@ -3,10 +3,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { brandApi } from '@/lib/api/modules/brandApi'
 import type { ApiOrder, ApiOrderItem, ApiBrandPartner } from '@/types/api'
-import { ownShipment, brandOrderStatus } from '@/lib/brandRevenue'
+import { ownShipment, brandOrderStatus, brandCanShip } from '@/lib/brandRevenue'
+import { isItemActive } from '@/lib/orderItemCancellation'
+import { describeOrderItem } from '@/lib/orderItemDisplay'
+import { mergeOrderUpdate } from '@/lib/mergeOrderUpdate'
 import OrderItemThumb from '@/components/ui/OrderItemThumb'
 import {
-  StatusBadge, SectionCard, EmptyState, Loader,
+  StatusBadge, ItemCancellationBadge, SectionCard, EmptyState, Loader,
   TH, TD, TableRow, FilterBar, SearchInput, fmt, fmtEur,
 } from '../../admin/_components/shared'
 import {
@@ -24,7 +27,6 @@ const STATUS_TABS = [
   { id: 'SHIPPED',          label: 'Versandt' },
   { id: 'DELIVERED',        label: 'Geliefert' },
   { id: 'RETURN_REQUESTED', label: 'Rückgabe' },
-  { id: 'CANCELLED',        label: 'Storniert' },
 ]
 
 function trackingUrl(carrier: Carrier, trackingNumber: string): string {
@@ -115,14 +117,17 @@ function ShipModal({
             Bestellte Artikel
           </p>
           <div className="space-y-1">
-            {(order.items ?? []).slice(0, 3).map((item: ApiOrderItem) => (
-              <div key={item.id} className="flex items-center justify-between text-[12px]">
-                <span className="text-[#2D2D2D]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                  {item.name} {item.size ? `(${item.size})` : ''} × {item.quantity}
-                </span>
-                <span className="font-medium text-[#0A0A0A]">{fmtEur((item.priceAtPurchase ?? item.price ?? 0) * item.quantity)}</span>
-              </div>
-            ))}
+            {(order.items ?? []).slice(0, 3).map((item: ApiOrderItem) => {
+              const d = describeOrderItem(item)
+              return (
+                <div key={item.id} className="flex items-center justify-between text-[12px]">
+                  <span className="text-[#2D2D2D]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                    {d.label} {d.variant ? `(${d.variant})` : ''} × {item.quantity}
+                  </span>
+                  <span className="font-medium text-[#0A0A0A]">{fmtEur(d.lineTotal ?? 0)}</span>
+                </div>
+              )
+            })}
             {(order.items ?? []).length > 3 && (
               <p className="text-[11px] text-[#9B9B9B]">+{order.items.length - 3} weitere Artikel</p>
             )}
@@ -322,9 +327,9 @@ function OrderRow({
   const [expanded, setExpanded] = useState(false)
   const mine       = ownShipment(order, brandId)
   const status     = brandOrderStatus(order, brandId)
-  // "Can this brand act?" comes from its OWN shipment row, never the global order status.
-  // If there is no per-brand row (legacy single-brand order) fall back to the global status.
-  const isPaid     = mine ? mine.status === 'AWAITING_SHIPMENT' : status === 'PAID'
+  // "Can this brand act?" needs its OWN shipment row to still await dispatch AND the order to
+  // still be live — a cancelled/refunded order keeps a stale AWAITING_SHIPMENT row.
+  const isPaid     = brandCanShip(order, brandId)
   const isShipped  = status === 'SHIPPED'
   const trackingNumber = mine?.trackingNumber ?? order.trackingNumber ?? null
   // Build the link from THIS brand's own shipment carrier — never assume DHL. Legacy orders with
@@ -412,22 +417,23 @@ function OrderRow({
               <div>
                 <p className="text-[10px] uppercase tracking-[0.1em] text-[#9B9B9B] mb-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>Artikel</p>
                 <div className="space-y-2">
-                  {(order.items ?? []).map(item => (
-                    <div key={item.id} className="flex items-center gap-2.5 text-[12px]">
-                      <OrderItemThumb src={item.imageUrl} alt={item.productName ?? item.name ?? ''} width={30} />
-                      {/* productName/variantSize/variantColor are what OrderItemResponseDto actually
-                          sends; name/size/color exist only in pre-connect mock data (see
-                          ApiOrderItem). Reading the legacy names left this row blank against the
-                          real API — which in a packing view means no garment and no size. */}
-                      <span className="text-[#2D2D2D] flex-1 min-w-0" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                        {item.productName ?? item.name}
-                        {(item.variantSize ?? item.size) ? <span className="text-[#9B9B9B]"> — {item.variantSize ?? item.size}</span> : null}
-                        {(item.variantColor ?? item.color) ? <span className="text-[#9B9B9B]"> / {item.variantColor ?? item.color}</span> : null}
-                        <span className="text-[#9B9B9B]"> × {item.quantity}</span>
-                      </span>
-                      <span className="font-medium text-[#0A0A0A] tabular-nums shrink-0">{fmtEur((item.priceAtPurchase ?? item.price ?? 0) * item.quantity)}</span>
-                    </div>
-                  ))}
+                  {(order.items ?? []).map(item => {
+                    const active = isItemActive(item)
+                    const d = describeOrderItem(item)
+                    return (
+                      <div key={item.id} className="flex items-center gap-2.5 text-[12px]">
+                        <OrderItemThumb src={item.imageUrl} alt={d.label} width={30} />
+                        <span className={`flex-1 min-w-0 ${active ? 'text-[#2D2D2D]' : 'text-[#9B9B9B] line-through'}`} style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                          {d.label}
+                          {d.size ? <span className="text-[#9B9B9B]"> — {d.size}</span> : null}
+                          {d.color ? <span className="text-[#9B9B9B]"> / {d.color}</span> : null}
+                          <span className="text-[#9B9B9B]"> × {item.quantity}</span>
+                        </span>
+                        <span className="shrink-0"><ItemCancellationBadge item={item} variant="do-not-ship" /></span>
+                        <span className="font-medium text-[#0A0A0A] tabular-nums shrink-0">{fmtEur(d.lineTotal ?? 0)}</span>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
 
@@ -560,7 +566,7 @@ export default function Fulfillment() {
   }
 
   function handleShipped(updated: ApiOrder) {
-    setOrders(prev => prev.map(o => o.id === updated.id ? updated : o))
+    setOrders(prev => prev.map(o => o.id === updated.id ? mergeOrderUpdate(o, updated) : o))
     setShipOrder(null)
     showToast('Versand erfolgreich bestätigt!')
   }
@@ -574,6 +580,7 @@ export default function Fulfillment() {
     const matchStatus = filter === 'ALL' || brandOrderStatus(o, myBrandId) === filter
     const q = search.toLowerCase()
     const matchSearch = !q
+      || String(o.orderNumber ?? '').toLowerCase().includes(q)
       || String(o.id).toLowerCase().includes(q)
       || (o.items ?? []).some(i => (i.productName ?? i.name ?? '').toLowerCase().includes(q))
       || (o.shippingAddress?.city?.toLowerCase().includes(q) ?? false)

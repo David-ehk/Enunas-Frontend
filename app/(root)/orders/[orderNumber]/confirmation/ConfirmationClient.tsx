@@ -9,6 +9,13 @@ import CartFooter from '@/app/(root)/cart/components/CartFooter'
 import { orderApi, listingApi, FetchError } from '@/lib/api'
 import { useCart } from '@/app/context/CartContext'
 import type { ApiOrder, ApiListing } from '@/types/api'
+import { paymentOutcome, takePendingCheckout } from '@/lib/paymentOutcome'
+import OrderItemThumb from '@/components/ui/OrderItemThumb'
+
+// Mollie's webhook usually lands before the customer is redirected back, but not always. Re-check
+// a PENDING order for ~30 s before settling on "not confirmed yet".
+const PAYMENT_POLL_INTERVAL_MS = 3000
+const PAYMENT_POLL_ATTEMPTS = 10
 
 const UPSELL_CONFIG = {
   brandName: 'Vivienne Westwood',
@@ -158,7 +165,8 @@ function OrderDetails({ order }: { order: ApiOrder }) {
           </p>
           {order.items.map(item => (
             <div key={item.id} className="flex justify-between items-start gap-4">
-              <div className="min-w-0">
+              <OrderItemThumb src={item.imageUrl} alt={item.productName ?? ''} width={56} />
+              <div className="flex-1 min-w-0">
                 <p className="font-league-spartan text-sm text-enunas-black leading-snug">
                   {item.productName ?? 'Artikel'}
                 </p>
@@ -263,10 +271,12 @@ interface Props {
 
 export default function ConfirmationClient({ orderNumber, isUpsell }: Props) {
   const router = useRouter()
-  const { addToCart } = useCart()
+  const { addToCart, clearCart } = useCart()
 
   const [mainOrder, setMainOrder] = useState<ApiOrder | null>(null)
   const [mainOrderLoading, setMainOrderLoading] = useState(true)
+  const [pollExhausted, setPollExhausted] = useState(false)
+  const [recheckSignal, setRecheckSignal] = useState(0)
   const [listing, setListing] = useState<ApiListing | null>(null)
   const [selectedSize, setSelectedSize] = useState<string>(UPSELL_CONFIG.sizes[2])
   const [showUpsell, setShowUpsell] = useState(isUpsell)
@@ -285,12 +295,45 @@ export default function ConfirmationClient({ orderNumber, isUpsell }: Props) {
   }, [isUpsell])
 
   useEffect(() => {
-    orderApi
-      .getById(orderNumber)
-      .then(setMainOrder)
-      .catch(() => {})
-      .finally(() => setMainOrderLoading(false))
-  }, [orderNumber])
+    let cancelled = false
+    let timer: ReturnType<typeof setTimeout> | undefined
+    let attempt = 0
+    const check = async () => {
+      let order: ApiOrder | null = null
+      try {
+        order = await orderApi.getByOrderNumber(orderNumber)
+      } catch {
+        // Treated as "could not load" below — never as a confirmed order.
+      }
+      if (cancelled) return
+      setMainOrder(order)
+      setMainOrderLoading(false)
+      if (paymentOutcome(order?.status, order?.paidAt) !== 'processing') return
+      attempt += 1
+      if (attempt < PAYMENT_POLL_ATTEMPTS) timer = setTimeout(check, PAYMENT_POLL_INTERVAL_MS)
+      else setPollExhausted(true)
+    }
+    check()
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [orderNumber, recheckSignal])
+
+  const outcome = mainOrderLoading ? null : paymentOutcome(mainOrder?.status, mainOrder?.paidAt)
+
+  // Clears the cart only for the checkout that was actually handed to Mollie, and only once it is
+  // settled: paid → empty the cart; cancelled (unpaid) → forget the hand-off but keep the items.
+  // Refunded (paid then cancelled) also clears because the customer won't reorder the same items.
+  useEffect(() => {
+    if (outcome !== 'confirmed' && outcome !== 'failed' && outcome !== 'refunded') return
+    if (takePendingCheckout(mainOrder?.orderNumber ?? orderNumber) && outcome === 'confirmed') clearCart()
+    if (outcome === 'refunded') {
+      // Refunded order: clear the cart since the customer won't reorder these items.
+      clearCart()
+      takePendingCheckout(mainOrder?.orderNumber ?? orderNumber) // Forget the hand-off.
+    }
+  }, [outcome, mainOrder?.orderNumber, orderNumber, clearCart])
 
   useEffect(() => {
     if (!showUpsell && !isUpsell) return
@@ -325,6 +368,82 @@ export default function ConfirmationClient({ orderNumber, isUpsell }: Props) {
     // which are gated off in page.tsx.
     // localStorage.setItem(UPSELL_CODE_STORAGE_KEY, DISCOUNT_CODE)
     router.push('/checkout')
+  }
+
+  // ── Payment not confirmed — Mollie redirects here after failed/cancelled payments too, so
+  // nothing below (every case says “Bestellung bestätigt”) may render until the order is paid. ──
+  if (outcome !== 'confirmed') {
+    const stillChecking = outcome === null || (outcome === 'processing' && !pollExhausted)
+    const heading =
+      stillChecking ? 'Zahlung wird geprüft…'
+      : outcome === 'failed' ? 'Zahlung nicht abgeschlossen.'
+      : outcome === 'refunded' ? 'Bestellung storniert'
+      : outcome === 'processing' ? 'Zahlung noch nicht bestätigt.'
+      : 'Status nicht verfügbar.'
+    const body =
+      stillChecking ? 'Einen Moment bitte — wir warten auf die Bestätigung deiner Zahlung.'
+      : outcome === 'failed' ? 'Diese Bestellung wurde storniert, weil die Zahlung nicht zustande kam. Es wurde nichts abgebucht, und deine Artikel liegen weiterhin im Warenkorb.'
+      : outcome === 'refunded' ? 'Deine Bestellung wurde storniert. Die Zahlung ist eingegangen, die Bestellung konnte aber nicht erfüllt werden. Der vollständige Betrag wird auf deine ursprüngliche Zahlungsmethode erstattet (5–10 Werktage).'
+      : outcome === 'processing' ? 'Falls du die Zahlung abgebrochen hast, wird die Bestellung innerhalb von 30 Minuten automatisch storniert — es wird nichts abgebucht und du musst nichts weiter tun. Deine Artikel liegen weiterhin im Warenkorb.'
+      : 'Wir konnten den Status deiner Bestellung gerade nicht laden. Unter „Meine Bestellungen” siehst du, ob die Zahlung eingegangen ist.'
+
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-white pb-24 px-4 sm:px-8 lg:px-16" style={{ paddingTop: '60px' }}>
+          <div className="max-w-[580px] mx-auto">
+            <div className="text-center pt-20 pb-12" role="status" aria-live="polite">
+              {stillChecking && (
+                <div className="w-8 h-8 mx-auto mb-8 border-2 border-enunas-gray-light border-t-enunas-purple rounded-full animate-spin motion-reduce:animate-none" />
+              )}
+              <p className="font-league-spartan text-[10px] tracking-[0.32em] uppercase text-enunas-gray-medium mb-5">
+                {mainOrder?.orderNumber ? `Bestellung ${mainOrder.orderNumber}` : 'Deine Bestellung'}
+              </p>
+              <h1
+                className="font-cormorant text-4xl lg:text-5xl font-light text-enunas-black"
+                style={{ letterSpacing: '0.02em', lineHeight: 1.05 }}
+              >
+                {heading}
+              </h1>
+              <p className="font-league-spartan text-sm text-enunas-gray-medium mt-5 leading-relaxed">
+                {body}
+              </p>
+            </div>
+
+            {!stillChecking && (
+              <div className="flex flex-col items-center gap-5 pt-4 pb-4">
+                {outcome === 'unknown' ? (
+                  <PrimaryLink href="/account">Meine Bestellungen</PrimaryLink>
+                ) : (
+                  <PrimaryLink href="/cart">Zum Warenkorb</PrimaryLink>
+                )}
+                {outcome === 'processing' || outcome === 'unknown' ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPollExhausted(false)
+                      setMainOrderLoading(true)
+                      setRecheckSignal((s) => s + 1)
+                    }}
+                    className="font-league-spartan text-xs text-enunas-gray-medium tracking-[0.12em] uppercase hover:text-enunas-black transition-colors duration-200"
+                  >
+                    Status erneut prüfen
+                  </button>
+                ) : (
+                  <Link
+                    href="/account"
+                    className="font-league-spartan text-xs text-enunas-gray-medium tracking-[0.12em] uppercase hover:text-enunas-black transition-colors duration-200"
+                  >
+                    Meine Bestellungen ansehen
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        <CartFooter />
+      </>
+    )
   }
 
   // ── CASE 3: ?upsell=true — full product detail + compact thank-you below ────

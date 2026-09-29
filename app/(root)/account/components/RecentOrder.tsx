@@ -9,6 +9,7 @@ const STATUS_META: Record<string, { label: string; toneClass: string }> = {
   PENDING:          { label: 'Ausstehend',         toneClass: 'text-enunas-warning' },
   PAID:             { label: 'Bezahlt',             toneClass: 'text-enunas-success' },
   SHIPPED:          { label: 'Versandt',            toneClass: 'text-enunas-success' },
+  PARTIALLY_SHIPPED: { label: 'Teilweise versandt', toneClass: 'text-enunas-success' },
   DELIVERED:        { label: 'Zugestellt',          toneClass: 'text-enunas-success' },
   SHIPPING_PROBLEM: { label: 'Versandproblem',      toneClass: 'text-enunas-warning' },
   AWAITING_ADMIN:   { label: 'In Prüfung',          toneClass: 'text-enunas-warning' },

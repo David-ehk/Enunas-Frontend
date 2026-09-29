@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   toCents, isRevenueOrder, ownSkus, ownItems, itemGross, participatesIn,
   grossProductAmount, refundedAmount, shippingAmount, summarise, partnerSettlementAmount,
+  brandCanShip,
 } from './brandRevenue'
 import type { ApiOrder, AdminApiProduct, AdminPayout } from '@/types/api'
 
@@ -178,5 +179,65 @@ describe('partnerSettlementAmount — backend-owned, never derived', () => {
       payout({ id: 'p1', amount: 50, status: 'PAID' }),
       payout({ id: 'p2', amount: 25, status: 'CANCELLED' }),
     ])).toBeNull()
+  })
+})
+
+describe('brandCanShip — the "Versenden" gate', () => {
+  const awaiting = { brandId: 5, brandName: 'A', status: 'AWAITING_SHIPMENT' } as const
+  const shipped  = { brandId: 6, brandName: 'B', status: 'SHIPPED' } as const
+  const withShipments = (status: string, shipments: unknown[]) =>
+    order({ status, returns: [], shipments } as unknown as Partial<ApiOrder>)
+
+  it('lets a brand ship its parcel on a paid order', () => {
+    expect(brandCanShip(withShipments('PAID', [awaiting]), 5)).toBe(true)
+  })
+
+  it('still lets the second brand ship after another brand already shipped', () => {
+    expect(brandCanShip(withShipments('PARTIALLY_SHIPPED', [awaiting, shipped]), 5)).toBe(true)
+  })
+
+  it('does not offer shipping once this brand has shipped', () => {
+    expect(brandCanShip(withShipments('PARTIALLY_SHIPPED', [awaiting, shipped]), 6)).toBe(false)
+  })
+
+  // ENS-2026-3I731Z on 14 Sep 2026: CANCELLED, but the brand's shipment row still read
+  // AWAITING_SHIPMENT, so the dashboard offered "Versenden" on a cancelled order.
+  it('never offers shipping on a cancelled order, even with a stale AWAITING_SHIPMENT row', () => {
+    expect(brandCanShip(withShipments('CANCELLED', [awaiting]), 5)).toBe(false)
+  })
+
+  it('never offers shipping on refunded or unpaid orders', () => {
+    expect(brandCanShip(withShipments('REFUNDED', [awaiting]), 5)).toBe(false)
+    expect(brandCanShip(withShipments('PENDING', [awaiting]), 5)).toBe(false)
+  })
+
+  it('does not offer shipping while the brand has a reported shipping problem', () => {
+    expect(brandCanShip(withShipments('PAID', [{ ...awaiting, status: 'PROBLEM' }]), 5)).toBe(false)
+  })
+
+  it('falls back to the order status for legacy orders without per-brand shipments', () => {
+    expect(brandCanShip(withShipments('PAID', []), 5)).toBe(true)
+    expect(brandCanShip(withShipments('CANCELLED', []), 5)).toBe(false)
+  })
+
+  it("never offers shipping once every one of this brand's items has been cancelled", () => {
+    const o = order({
+      status: 'PAID', returns: [], shipments: [awaiting],
+      items: [
+        { id: '5', quantity: 1, productName: 'E2E Alpha Hoodie', variantSku: 'QXGXMUSV', priceAtPurchase: 89.95, lineTotal: 89.95, cancellationState: 'CANCELLED' },
+      ],
+    } as unknown as Partial<ApiOrder>)
+    expect(brandCanShip(o, 5)).toBe(false)
+  })
+
+  it("still offers shipping when only some of the brand's items were cancelled", () => {
+    const o = order({
+      status: 'PAID', returns: [], shipments: [awaiting],
+      items: [
+        { id: '5', quantity: 1, variantSku: 'QXGXMUSV', priceAtPurchase: 89.95, lineTotal: 89.95, cancellationState: 'CANCELLED' },
+        { id: '6', quantity: 1, variantSku: 'GVNKCH8T', priceAtPurchase: 29.95, lineTotal: 29.95 },
+      ],
+    } as unknown as Partial<ApiOrder>)
+    expect(brandCanShip(o, 5)).toBe(true)
   })
 })

@@ -3,6 +3,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { useState, useEffect, type ReactNode } from 'react'
+import { X } from 'lucide-react'
+import { isItemActive, canReconcileItem } from '@/lib/orderItemCancellation'
+import type { ApiOrderItem } from '@/types/api'
 
 export const STATUS_MAP: Record<string, { label: string; cls: string }> = {
   APPROVED:          { label: 'Genehmigt',        cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
@@ -18,11 +21,16 @@ export const STATUS_MAP: Record<string, { label: string; cls: string }> = {
   PAID:              { label: 'Bezahlt',           cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
   PROCESSING:        { label: 'In Bearbeitung',    cls: 'bg-sky-50 text-sky-700 border-sky-200' },
   SHIPPED:           { label: 'Versandt',          cls: 'bg-violet-50 text-violet-700 border-violet-200' },
+  PARTIALLY_SHIPPED: { label: 'Teilweise versandt', cls: 'bg-violet-50 text-violet-700 border-violet-200' },
   DELIVERED:         { label: 'Geliefert',         cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
   CANCELLED:         { label: 'Storniert',         cls: 'bg-rose-50 text-rose-700 border-rose-200' },
   REFUNDED:          { label: 'Erstattet',         cls: 'bg-gray-100 text-gray-500 border-gray-200' },
+  SHIPPING_PROBLEM:  { label: 'Versandproblem',    cls: 'bg-orange-50 text-orange-700 border-orange-200' },
+  AWAITING_ADMIN:    { label: 'Auf Admin wartend', cls: 'bg-orange-50 text-orange-700 border-orange-200' },
+  MANUAL_REVIEW:     { label: 'Manuelle Überpr.',  cls: 'bg-orange-50 text-orange-700 border-orange-200' },
   RETURN_REQUESTED:  { label: 'Rückgabe bean.',    cls: 'bg-orange-50 text-orange-700 border-orange-200' },
   RETURN_APPROVED:   { label: 'Rückgabe gen.',     cls: 'bg-sky-50 text-sky-700 border-sky-200' },
+  RETURN_RECEIVED:   { label: 'Rückgabe erh.',     cls: 'bg-sky-50 text-sky-700 border-sky-200' },
   FAILED:            { label: 'Fehlgeschlagen',    cls: 'bg-rose-50 text-rose-700 border-rose-200' },
   LOW:               { label: 'Niedrig',           cls: 'bg-orange-50 text-orange-700 border-orange-200' },
   MEDIUM:            { label: 'Mittel',            cls: 'bg-amber-50 text-amber-700 border-amber-200' },
@@ -43,11 +51,16 @@ const STATUS_DOT: Record<string, { color: string; label: string }> = {
   PAID:              { color: '#1A5A3C', label: 'Bezahlt' },
   PROCESSING:        { color: '#7A5C1E', label: 'In Bearbeitung' },
   SHIPPED:           { color: '#370E4D', label: 'Versandt' },
+  PARTIALLY_SHIPPED: { color: '#370E4D', label: 'Teilweise versandt' },
   DELIVERED:         { color: '#1A5A3C', label: 'Geliefert' },
   CANCELLED:         { color: '#8B1E3F', label: 'Storniert' },
   REFUNDED:          { color: '#9B9B9B', label: 'Erstattet' },
+  SHIPPING_PROBLEM:  { color: '#C05C1E', label: 'Versandproblem' },
+  AWAITING_ADMIN:    { color: '#C05C1E', label: 'Auf Admin wartend' },
+  MANUAL_REVIEW:     { color: '#C05C1E', label: 'Manuelle Überpr.' },
   RETURN_REQUESTED:  { color: '#C05C1E', label: 'Rückgabe bean.' },
   RETURN_APPROVED:   { color: '#0284C7', label: 'Rückgabe gen.' },
+  RETURN_RECEIVED:   { color: '#0284C7', label: 'Rückgabe erh.' },
   FAILED:            { color: '#8B1E3F', label: 'Fehlgeschlagen' },
   LOW:               { color: '#C05C1E', label: 'Niedrig' },
   MEDIUM:            { color: '#7A5C1E', label: 'Mittel' },
@@ -67,6 +80,115 @@ export function StatusBadge({ status }: { status: string }) {
       </span>
     </span>
   )
+}
+
+// Shared shell for the dashboard's small centred action dialogs (whole-order cancel, per-item
+// cancel, ship confirmation, reconcile, …). Owns the backdrop, header, optional warning banner,
+// error line and submit/cancel footer; callers supply only their form body and the submit action.
+export function ActionDialog({
+  eyebrow, orderLabel, warning, error, submitLabel, busyLabel, submitting, submitColor, onSubmit, onClose, children,
+}: {
+  eyebrow: string
+  orderLabel: string
+  warning?: ReactNode
+  error?: string | null
+  submitLabel: string
+  busyLabel: string
+  submitting: boolean
+  submitColor: string
+  onSubmit: () => void
+  onClose: () => void
+  children: ReactNode
+}) {
+  const BTN_PRIMARY = 'flex items-center gap-2 h-9 px-5 rounded-none text-[12px] font-medium text-white transition-all duration-200 disabled:opacity-40'
+  const BTN_GHOST = 'flex items-center gap-2 h-9 px-4 rounded-none text-[12px] text-[#6B6B6B] border border-[#E8E8E8] hover:bg-[#F5F5F0] transition-all duration-200'
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="relative bg-white rounded-none shadow-[0_24px_48px_rgba(0,0,0,0.18)] w-full max-w-md mx-4 overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-[#F0F0EB]" style={{ background: '#FAFAF8' }}>
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.22em] font-medium text-[#9B9B9B] mb-1"
+              style={{ fontFamily: 'var(--font-league-spartan)' }}>
+              {eyebrow}
+            </p>
+            <p className="text-[#0A0A0A] leading-none"
+              style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 20, fontWeight: 300 }}>
+              {orderLabel}
+            </p>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-none text-[#9B9B9B] hover:text-[#0A0A0A] hover:bg-[#F0F0EB] transition-all duration-200">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="px-6 py-5 space-y-4">
+          {warning && (
+            <div className="p-3 bg-[#7A5C1E]/8 border border-[#7A5C1E]/20 rounded-none text-[11px]"
+              style={{ fontFamily: 'var(--font-league-spartan)', color: '#5C4415' }}>
+              {warning}
+            </div>
+          )}
+
+          {children}
+
+          {error && <p className="text-[11px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>{error}</p>}
+
+          <div className="flex items-center gap-3 pt-1">
+            <button
+              onClick={onSubmit}
+              disabled={submitting}
+              className={BTN_PRIMARY}
+              style={{ background: submitColor, fontFamily: 'var(--font-league-spartan)', flex: 1, justifyContent: 'center' }}
+            >
+              {submitting ? busyLabel : submitLabel}
+            </button>
+            <button onClick={onClose} className={BTN_GHOST} style={{ fontFamily: 'var(--font-league-spartan)' }}>
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const CANCELLATION_BADGE = 'text-[9.5px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded border transition-all duration-150'
+
+// Owns every rendering of an order item's per-item cancellation state, so admin (Orders.tsx) and
+// vendor (Fulfillment.tsx) always agree on what "cancelled" or "cancellation in flight" looks
+// like — sibling to StatusBadge, not folded into it, because these states apply to one line item
+// rather than a whole order/return/brand, and PENDING can render as a clickable action.
+export function ItemCancellationBadge({
+  item, variant = 'status', onReconcile,
+}: {
+  item: Pick<ApiOrderItem, 'cancellationState' | 'cancelledAt'>
+  /** 'status' names what happened (Storniert / Klären… / Storno läuft…); 'do-not-ship' just
+   *  flags the item as excluded from this brand's fulfilment, regardless of which non-active
+   *  state it's in. */
+  variant?: 'status' | 'do-not-ship'
+  onReconcile?: () => void
+}) {
+  if (isItemActive(item)) return null
+
+  if (variant === 'do-not-ship') {
+    return <span className={cn(CANCELLATION_BADGE, 'bg-rose-50 text-rose-600 border-rose-200')}>Nicht versenden</span>
+  }
+
+  if (item.cancellationState === 'CANCELLED') {
+    return <span className={cn(CANCELLATION_BADGE, 'bg-rose-50 text-rose-600 border-rose-200')}>Storniert</span>
+  }
+
+  // PENDING
+  if (onReconcile && canReconcileItem(item)) {
+    return (
+      <button onClick={onReconcile} className={cn(CANCELLATION_BADGE, 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100')}>
+        Klären…
+      </button>
+    )
+  }
+  return <span className={cn(CANCELLATION_BADGE, 'bg-amber-50 text-amber-700 border-amber-200')}>Storno läuft…</span>
 }
 
 export function PageHeader({

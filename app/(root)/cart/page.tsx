@@ -56,7 +56,7 @@ export default function CartPage() {
               </div>
             </section>
 
-            <CartSummary subtotal={totalPrice} />
+            <CartSummary subtotal={totalPrice} items={cartItems} />
           </div>
         </div>
       </div>

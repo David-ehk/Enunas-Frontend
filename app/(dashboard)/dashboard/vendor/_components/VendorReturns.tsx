@@ -3,10 +3,12 @@
 import { useVendorReturns } from '@/hooks/use-vendor-returns'
 import { RETURN_LIFECYCLE, returnStageIndex } from '@/lib/api/modules/returnsApi'
 import type { ReturnWithOrder, ReturnStatus } from '@/types/api'
+import OrderItemThumb from '@/components/ui/OrderItemThumb'
 import {
   VPageHeader, VKPIGrid, VKPI, VCard,
   VStatus, fmtEur, fmt, Loader, EmptyState, Phase2Tile,
 } from './vshared'
+import { describeOrderItem } from '@/lib/orderItemDisplay'
 
 const REASON_LABELS: Record<string, string> = {
   WRONG_SIZE:        'Falsche Größe',
@@ -44,9 +46,8 @@ function statusMeta(s: ReturnStatus) {
 }
 
 function itemLabel(it: ReturnWithOrder['items'][number]): string {
-  const name = it.productName ?? it.name ?? 'Artikel'
-  const variant = [it.variantSize ?? it.size, it.variantColor ?? it.color].filter(Boolean).join(' · ')
-  return variant ? `${name} — ${variant}` : name
+  const d = describeOrderItem(it)
+  return d.variant ? `${d.label} — ${d.variant}` : d.label
 }
 
 /** Per-return lifecycle. Each return advances independently of every other one. */
@@ -124,10 +125,11 @@ function ReturnCard({ r }: { r: ReturnWithOrder }) {
           {r.items.length === 0 ? (
             <p className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#C9C9C9' }}>—</p>
           ) : (
-            <ul className="space-y-1">
+            <ul className="space-y-2">
               {r.items.map((it) => (
-                <li key={it.id} className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
-                  {it.quantity ? `${it.quantity}× ` : ''}{itemLabel(it)}
+                <li key={it.id} className="flex items-center gap-2.5 text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
+                  <OrderItemThumb src={it.imageUrl} alt={itemLabel(it)} width={30} />
+                  <span>{it.quantity ? `${it.quantity}× ` : ''}{itemLabel(it)}</span>
                 </li>
               ))}
             </ul>

@@ -10,9 +10,10 @@ import CartFooter from '@/app/(root)/cart/components/CartFooter'
 import CheckoutAuthModal from './components/CheckoutAuthModal'
 import SavedAddressSelector from './components/SavedAddressSelector'
 import { orderApi, FetchError, type CreateOrderDto, type OrderPreviewResponseDto } from '@/lib/api'
-import { calcShipping, calcFinalTotal } from '@/lib/pricing'
+import { estimateShipping, calcFinalTotal } from '@/lib/pricing'
 import { UPSELL_CODE_STORAGE_KEY } from '@/lib/featureFlags'
 import { toShippingAddressDto, type AddressSelection } from '@/lib/address'
+import { rememberPendingCheckout } from '@/lib/paymentOutcome'
 
 const SHIPPING_METHOD_LABEL: Record<OrderPreviewResponseDto['shippingBreakdown'][number]['calculationMethod'], string> = {
   GLOBAL_DEFAULT: 'Standard',
@@ -20,13 +21,15 @@ const SHIPPING_METHOD_LABEL: Record<OrderPreviewResponseDto['shippingBreakdown']
   BRAND_FREE_SHIPPING: 'Kostenlos',
 }
 
+const ADDRESS_REQUIRED_ERROR = 'Bitte wähle oder gib eine Lieferadresse ein.'
+
 export default function CheckoutPage() {
-  const { cartItems, itemCount, totalPrice, clearCart } = useCart()
+  const { cartItems, itemCount, totalPrice } = useCart()
   const { isAuthenticated, isLoading: authLoading, user } = useAuth()
 
   // Client-side estimate — shown instantly, before a shipping address exists to price against.
   // Superseded by the live `preview` below the moment the backend can actually answer.
-  const shippingCost = calcShipping(totalPrice)
+  const shippingCost = estimateShipping(cartItems)
 
   const [email, setEmail] = useState(user?.email ?? '')
   const [addressSelection, setAddressSelection] = useState<AddressSelection | null>(null)
@@ -206,7 +209,7 @@ export default function CheckoutPage() {
       return
     }
     if (!addressSelection) {
-      setError('Bitte wähle oder gib eine Lieferadresse ein.')
+      setError(ADDRESS_REQUIRED_ERROR)
       addressSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       setOpenAddressFormSignal((s) => s + 1)
       return
@@ -242,7 +245,9 @@ export default function CheckoutPage() {
       }
 
       // (The upsell code is cleared on mount now, not only here — see the FUTURE note above.)
-      clearCart()
+      // The cart is NOT cleared here: Mollie returns the customer after a failed or cancelled
+      // payment too. The confirmation page clears it once this exact order is confirmed paid.
+      rememberPendingCheckout(order.orderNumber ?? String(order.id))
       window.location.href = order.checkoutUrl
     } catch (err) {
       const notReleased =
@@ -392,7 +397,11 @@ export default function CheckoutPage() {
                   Lieferadresse
                 </h2>
                 <SavedAddressSelector
-                  onChange={setAddressSelection}
+                  onChange={(selection) => {
+                    setAddressSelection(selection)
+                    // The "no address" error is answered the moment one is chosen — leave any other error.
+                    if (selection) setError((prev) => (prev === ADDRESS_REQUIRED_ERROR ? null : prev))
+                  }}
                   isAuthenticated={isAuthenticated}
                   openFormSignal={openAddressFormSignal}
                 />

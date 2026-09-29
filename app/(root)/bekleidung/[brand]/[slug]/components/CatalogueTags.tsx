@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { SEGMENT_LABELS } from '@/lib/product'
+import { sortSegments } from '@/lib/segmentOrder'
 
 interface CatalogueTagsProps {
   categories: string[] | null;
@@ -33,7 +34,8 @@ function getSlug(tag: string): string {
 const FALLBACK = ['Streetwear', 'Culture', 'Star'];
 
 export default function CatalogueTags({ categories }: CatalogueTagsProps) {
-  const list = (categories && categories.length) ? categories : FALLBACK;
+  // Streetwear-first, then the rest in the fixed segment order — never the backend's own order.
+  const list = sortSegments((categories && categories.length) ? categories : FALLBACK);
 
   return (
     <div className="flex gap-3.5 justify-center my-6 min-h-[28px]">

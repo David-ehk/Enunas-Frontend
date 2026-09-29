@@ -7,6 +7,7 @@ import Image from "next/image"
 import { useAuth } from "@/app/context/AuthContext"
 import { useWishlist, type WishlistItem } from "@/app/context/WishlistContext"
 import { SEGMENT_LABELS } from "@/lib/product"
+import { sortSegments } from "@/lib/segmentOrder"
 import ComingSoonCountdown from "@/components/ComingSoonCountdown"
 import { formatReleaseDateShort } from "@/lib/preview"
 
@@ -88,8 +89,9 @@ const PopularProductCard = ({
   preview = false,
   releaseDate = null
 }: PopularProductCardProps) => {
-  // Use catalogue if categories is empty
-  const displayCategories = categories.length > 0 ? categories : catalogue;
+  // Use catalogue if categories is empty. Always shown Streetwear-first, then the rest in the
+  // fixed segment order — never whatever order the backend returned them in.
+  const displayCategories = sortSegments(categories.length > 0 ? categories : catalogue);
   const [isHovered, setIsHovered] = useState(false);
   // Touch devices fire mouseenter on tap but never mouseleave, which would leave
   // the card flipped to sizes with the price hidden. Only arm the swap where

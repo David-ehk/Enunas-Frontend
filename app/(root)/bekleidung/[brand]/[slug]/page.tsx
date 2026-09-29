@@ -166,7 +166,7 @@ async function ProductPage({ params }: ProductPageProps) {
 
   const brandItems: RecItem[] = allRes.content
     .filter((p: ApiProduct) => generateSlug(p.brandName) === brand && p.id !== resolved.id)
-    .slice(0, 4)
+    .slice(0, 12)
     .map(toRecItem)
 
   const catalogueTags = resolved.catalogue ?? []
@@ -176,7 +176,7 @@ async function ProductPage({ params }: ProductPageProps) {
       const tags = p.catalogue ?? []
       return tags.some((t: string) => catalogueTags.includes(t))
     })
-    .slice(0, 4)
+    .slice(0, 12)
     .map(toRecItem)
 
   return (
@@ -195,7 +195,7 @@ async function ProductPage({ params }: ProductPageProps) {
       />
       <CompleteTheLook items={relatedItems} heroImage={product.images[0]} />
       <MoreFromBrand brand={product.brandName} items={brandItems} />
-      <SimilarProducts items={similarItems} />
+      <SimilarProducts items={similarItems} allHref={catalogueTags[0] ? `/bekleidung/${catalogueTags[0].toLowerCase()}` : '/bekleidung'} />
       <CuratedRecommendations excludeId={resolved.id} />
     </div>
   )

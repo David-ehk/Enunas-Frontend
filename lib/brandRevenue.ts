@@ -31,6 +31,7 @@
 // productId) on OrderItemResponseDto. Tracked with the /brand/orders scoping work.
 
 import type { ApiOrder, ApiOrderItem, ApiOrderShipment, AdminApiProduct, AdminPayout } from '@/types/api'
+import { allItemsCancelled } from './orderItemCancellation'
 
 /** Round once, at the end, to whole cents — never to whole euros. */
 export function toCents(value: number): number {
@@ -139,6 +140,18 @@ export function brandOrderStatus(order: ApiOrder, brandId: string | number | nul
       : 'SHIPPED'
   }
   return global   // PROBLEM etc.
+}
+
+/**
+ * Whether this brand may still dispatch its parcel for the order ("Versenden"). The brand's own
+ * shipment row alone is not enough: the backend leaves it at AWAITING_SHIPMENT when the order is
+ * cancelled or refunded, so the order-level state has to agree too.
+ */
+export function brandCanShip(order: ApiOrder, brandId: string | number | null): boolean {
+  if (brandOrderStatus(order, brandId) !== 'PAID') return false
+  if (allItemsCancelled(order.items)) return false
+  const mine = ownShipment(order, brandId)
+  return mine ? mine.status === 'AWAITING_SHIPMENT' : true
 }
 
 export interface BrandRevenue {

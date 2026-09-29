@@ -100,7 +100,7 @@ function CatalogueDescription() {
         philosophy="Wenn du lieber auffällst als dazugehörst und das nicht trotz, sondern wegen deines Stils, dann ist das deine Kategorie."
         href="/bekleidung/experimental"
         imageFirst={false}
-        imageSrc="https://cdn.rickowens.eu/products/205600/large/RL02E1719_CTW_09_01.jpg?1757411991"
+        imageSrc="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbnWELfxw3qGZHCA2Las4gv7ei5YNoUDkOrzP0"
       />
 
       {/* Athleisure */}

@@ -1,15 +1,17 @@
 import Link from 'next/link';
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard';
 import { RecItem } from './ProductCard';
+import Rail from './Rail';
 
 interface RecRowProps {
   title: string;
   titleAccent?: string;
   items: RecItem[];
   allHref?: string;
+  allLabel?: string;
 }
 
-export default function RecRow({ title, titleAccent, items, allHref = '#' }: RecRowProps) {
+export default function RecRow({ title, titleAccent, items, allHref = '#', allLabel = 'Alle ansehen →' }: RecRowProps) {
   if (!items || items.length === 0) return null;
 
   return (
@@ -23,24 +25,28 @@ export default function RecRow({ title, titleAccent, items, allHref = '#' }: Rec
           href={allHref}
           className="shrink-0 font-league-spartan text-[10px] sm:text-[11px] tracking-[0.18em] sm:tracking-[0.22em] uppercase whitespace-nowrap text-enunas-black border-b border-enunas-black pb-0.5 hover:text-enunas-purple hover:border-enunas-purple transition-colors"
         >
-          Alle ansehen →
+          {allLabel}
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2">
-        {items.slice(0, 4).map((item) => (
-          <PopularProductCard
-            key={item.name}
-            imgURL={item.image ?? ''}
-            brandName={item.brand}
-            productName={item.name}
-            price={item.price}
-            href={item.href}
-            colours={item.colors.map(hex => ({ hex, name: '' }))}
-            createdAt={new Date(0)}
-          />
+      <Rail label={title}>
+        {items.map((item) => (
+          <div key={item.href + item.name} className="snap-start shrink-0 basis-[58%] sm:basis-[34%] lg:basis-[23.5%]">
+            <PopularProductCard
+              imgURL={item.image ?? ''}
+              brandName={item.brand}
+              productName={item.name}
+              price={item.price}
+              originalPrice={item.originalPrice}
+              href={item.href}
+              colours={item.colors.map(hex => ({ hex, name: '' }))}
+              createdAt={new Date(0)}
+              preview={item.preview}
+              releaseDate={item.releaseDate}
+            />
+          </div>
         ))}
-      </div>
+      </Rail>
     </section>
   );
 }

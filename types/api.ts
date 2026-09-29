@@ -7,10 +7,16 @@ export type ProductStatus = 'PENDING' | 'ACTIVE' | 'APPROVED' | 'REJECTED' | 'HI
 
 // Exact backend OrderStatus enum values — PROCESSING does not exist in the backend.
 export type OrderStatus =
-  | 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED'
+  | 'PENDING' | 'PAID' | 'SHIPPED' | 'PARTIALLY_SHIPPED' | 'DELIVERED'
   | 'SHIPPING_PROBLEM' | 'AWAITING_ADMIN' | 'MANUAL_REVIEW'
   | 'RETURN_REQUESTED' | 'RETURN_APPROVED' | 'RETURN_RECEIVED'
   | 'REFUNDED' | 'CANCELLED';
+
+// Exact backend CancelReason enum values for POST /admin/orders/{id}/cancel.
+export type CancelReason = 'FRAUD_SUSPICION' | 'OUT_OF_STOCK' | 'CUSTOMER_REQUEST' | 'TECHNICAL_ERROR' | 'OTHER';
+
+// Per-item cancellation state for the admin per-item cancel feature.
+export type CancellationState = 'ACTIVE' | 'PENDING' | 'CANCELLED';
 
 // Exact backend ReturnReason enum values.
 export type ReturnReason =
@@ -251,6 +257,16 @@ export interface ApiOrderItem {
   // Null/absent on rows predating the snapshot column and on lines whose product had no image
   // at purchase; there is no backfill. Render the placeholder, never a substitute image.
   imageUrl?: string | null;
+  // Per-item cancellation state (admin per-item cancel). Absent/undefined on orders predating
+  // this feature and on brand-scoped views for the two fields marked below — treat as ACTIVE.
+  cancellationState?: CancellationState;
+  // Set from the moment the item is claimed for cancellation (state PENDING or CANCELLED).
+  cancelledAt?: string | null;
+  cancellationReason?: CancelReason | null;
+  // Mollie refund id once CANCELLED. Never present on brand-scoped order views.
+  refundTransactionId?: string | null;
+  // Needed to reconcile a stuck PENDING claim. Never present on brand-scoped order views.
+  cancellationClaimKey?: string | null;
   // Legacy fields — not returned by the backend; present only in pre-connect mock data.
   productId?: string;
   name?: string;
@@ -350,6 +366,12 @@ export interface ApiOrder {
   returnShipToAddress?: string;
   // Legacy field — not returned by backend. Admin/vendor views using this see undefined.
   totalAmount?: number;
+  // Payment timestamp — null = never charged. Changed from status=CANCELLED meaning.
+  paidAt?: string | null;
+  // Reason for cancellation (admin cancel via POST /admin/orders/{id}/cancel).
+  cancellationReason?: CancelReason | null;
+  // Mollie refund transaction ID when admin cancels a PAID order.
+  refundTransactionId?: string | null;
 }
 
 export interface ApiWardrobeItem {
@@ -404,6 +426,9 @@ export interface BrandOrder {
   createdAt: string;
   totalAmount: number;
   status: 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | string;
+  // Reason for cancellation (admin cancel via POST /admin/orders/{id}/cancel).
+  // Brand-scoped order never includes refundTransactionId.
+  cancellationReason?: CancelReason | null;
 }
 
 // Mirrors backend BrandPartnerResponseDto (email comes as userEmail/contactEmail).

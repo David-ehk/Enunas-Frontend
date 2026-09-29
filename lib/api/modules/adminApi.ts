@@ -1,5 +1,5 @@
 import { fetcher, getBaseUrl } from '../fetcher';
-import type { AdminBrand, AdminCustomer, AdminPayout, ApiOrder, PayoutDashboard, AdminApiProduct } from '@/types/api';
+import type { AdminBrand, AdminCustomer, AdminPayout, ApiOrder, PayoutDashboard, AdminApiProduct, CancelReason } from '@/types/api';
 
 interface Page<T> { content: T[] }
 function unpage<T>(res: Page<T> | T[]): T[] {
@@ -120,7 +120,7 @@ export const adminApi = {
     // Backend CancelOrderDto: reason is the CancelReason enum (@NotNull), free text goes into note
     async cancel(
       orderId: string,
-      reason: 'FRAUD_SUSPICION' | 'OUT_OF_STOCK' | 'CUSTOMER_REQUEST' | 'TECHNICAL_ERROR' | 'OTHER',
+      reason: CancelReason,
       note?: string,
     ): Promise<ApiOrder> {
       return fetcher<ApiOrder>(`/admin/orders/${orderId}/cancel`, {
@@ -131,6 +131,36 @@ export const adminApi = {
     // Order-scoped return actions have been removed. They are deprecated backend
     // compatibility shims and cannot express "approve Brand A but not Brand B" on
     // a multi-brand order. Use adminReturnsApi (scoped by returnNumber) instead.
+
+    async getById(orderId: string): Promise<ApiOrder> {
+      return fetcher<ApiOrder>(`/admin/orders/${orderId}`);
+    },
+    // Backend CancelItemsDto: { orderItemIds, reason, note? }. Items must belong to one brand
+    // and one order — the backend enforces this and answers 400 if they don't.
+    async cancelItems(
+      orderId: string,
+      orderItemIds: (string | number)[],
+      reason: CancelReason,
+      note?: string,
+    ): Promise<ApiOrder> {
+      return fetcher<ApiOrder>(`/admin/orders/${orderId}/cancel-items`, {
+        method: 'POST',
+        body: JSON.stringify({ orderItemIds, reason, ...(note ? { note } : {}) }),
+      });
+    },
+    // Only for a claim 5+ minutes old whose refund outcome is unknown (Mollie timeout/5xx).
+    // RECORD requires refundId (verified in Mollie by the admin first); RELEASE does not.
+    async reconcileCancelItems(
+      orderId: string,
+      claimKey: string,
+      action: 'RECORD' | 'RELEASE',
+      refundId?: string,
+    ): Promise<ApiOrder> {
+      return fetcher<ApiOrder>(`/admin/orders/${orderId}/cancel-items/reconcile`, {
+        method: 'POST',
+        body: JSON.stringify({ claimKey, action, ...(refundId ? { refundId } : {}) }),
+      });
+    },
   },
 
   payouts: {

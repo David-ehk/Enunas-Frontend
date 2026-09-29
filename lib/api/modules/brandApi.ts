@@ -1,4 +1,5 @@
 import { fetcher } from '../fetcher'
+import { isRevenueOrder } from '@/lib/brandRevenue'
 import type { ProductStatus, ApiBrandPartner, AdminApiProduct, AdminApiVariant, ApiOrder, ApiListing, ApiProductImage, AdminPayout } from '@/types/api'
 
 export interface CreateProductVariantDto {
@@ -182,7 +183,11 @@ export const brandApi = {
 
   orders: {
     async getAll(): Promise<ApiOrder[]> {
-      return unpage(await fetcher<Page<ApiOrder> | ApiOrder[]>('/brand/orders?page=0&size=100'))
+      // A brand only ever sees orders that were actually paid. /brand/orders still returns PENDING
+      // checkouts and the CANCELLED ones the expiry job leaves behind when payment never came —
+      // nothing for a brand to act on. Filtered here so every vendor view (Übersicht, Bestellungen,
+      // Analytics) agrees, until the backend filters it itself.
+      return unpage(await fetcher<Page<ApiOrder> | ApiOrder[]>('/brand/orders?page=0&size=100')).filter(isRevenueOrder)
     },
     // Mirrors backend ShipmentConfirmationDto: { carrier, trackingNumber, note? }
     async ship(
