@@ -3,11 +3,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { resolveTransitionTarget } from '@/lib/pageTransition'
+import { shouldRevealInitial } from '@/lib/initialReveal'
 
 type Phase = 'idle' | 'cover' | 'reveal'
 
 const DURATION_MS = 800
 const FALLBACK_MS = 4000
+const INITIAL_MIN_MS = 700
+const INITIAL_MAX_MS = 4000
 
 /**
  * Route-change curtain: on an internal link click the panel drops in from the top and covers the
@@ -17,8 +20,11 @@ const FALLBACK_MS = 4000
 export default function PageTransition() {
   const router = useRouter()
   const pathname = usePathname()
-  const [phase, setPhase] = useState<Phase>('idle')
-  const busy = useRef(false)
+  // Starts covered: the first paint of every full page load is the curtain, so the videos get
+  // time to load behind it (see the initial-load effect below).
+  const [phase, setPhase] = useState<Phase>('cover')
+  const busy = useRef(true)
+  const initial = useRef(true)
   const timers = useRef<number[]>([])
 
   const later = (fn: () => void, ms: number) => {
@@ -70,8 +76,40 @@ export default function PageTransition() {
     }, DURATION_MS)
   }
 
+  // First load: hold the curtain until the videos in the first viewport can play.
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      initial.current = false
+      busy.current = false
+      setPhase('idle')
+      return
+    }
+    const start = performance.now()
+    const iv = window.setInterval(() => {
+      const videos = Array.from(document.querySelectorAll('video')).filter(
+        v => v.getBoundingClientRect().top < window.innerHeight,
+      )
+      const videosReady = videos.every(v => v.readyState >= 3 || v.error !== null)
+      if (
+        shouldRevealInitial({
+          elapsedMs: performance.now() - start,
+          videosReady,
+          minMs: INITIAL_MIN_MS,
+          maxMs: INITIAL_MAX_MS,
+        })
+      ) {
+        window.clearInterval(iv)
+        initial.current = false
+        reveal()
+      }
+    }, 100)
+    return () => window.clearInterval(iv)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // The route committed: slide the curtain away.
   useEffect(() => {
+    if (initial.current) return
     if (busy.current) reveal()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])

@@ -105,7 +105,7 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
               padding: '16px 32px',
               background: '#370E4D',
               fontFamily: 'var(--font-Cormorant-Garamond)',
-              fontSize: '18px',
+              fontSize: 'clamp(15px, 4.1vw, 18px)',
               fontWeight: 400,
               letterSpacing: '0.06em',
               color: 'white',
@@ -140,7 +140,7 @@ function AuthGate({ onSuccess }: { onSuccess: () => void }) {
               padding: '16px 32px',
               background: '#370E4D',
               fontFamily: 'var(--font-Cormorant-Garamond)',
-              fontSize: '18px',
+              fontSize: 'clamp(15px, 4.1vw, 18px)',
               fontWeight: 400,
               letterSpacing: '0.06em',
               color: 'white',
@@ -202,10 +202,10 @@ export default function AccountPage() {
               <p className="font-league-spartan text-[11px] tracking-[0.35em] uppercase text-enunas-gray-medium mb-3">
                 Mein Konto
               </p>
-              <h1 className="font-cormorant text-4xl lg:text-5xl font-light text-enunas-black leading-tight mb-2">
+              <h1 className="font-cormorant text-[30px] sm:text-4xl lg:text-5xl font-light text-enunas-black leading-tight mb-2">
                 Willkommen.
               </h1>
-              <p className="font-cormorant italic text-lg lg:text-xl text-enunas-gray-dark">
+              <p className="font-cormorant italic text-base sm:text-lg lg:text-xl text-enunas-gray-dark">
                 Melde dich an oder erstelle ein Konto.
               </p>
             </div>

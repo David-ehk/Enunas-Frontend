@@ -283,6 +283,27 @@ const css = `
 }
 @media (max-width: 480px) {
   .enu-summary::before, .enu-summary::after { display: none; }
+
+  /* Small screens: prices sit at the product-card size (14px League Spartan light) so a costly
+     piece reads as a matter of course, and the remaining type steps down with them. */
+  .enu-cart-head { padding: 20px 20px 0; }
+  .enu-cart-body { padding: 4px 20px 20px; }
+  .enu-summary { padding: 18px 20px 22px; }
+  .enu-cart-tab { font-size: 19px; }
+  .enu-item { grid-template-columns: 76px 1fr; gap: 14px; padding: 20px 0; }
+  .enu-item-media { width: 76px; height: 100px; }
+  .enu-item-name { font-size: 16px; }
+  .enu-item-price {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-size: 14px; font-weight: 300;
+  }
+  .enu-empty .enu-e-title { font-size: 22px; }
+  .enu-sum-total .enu-lbl { font-size: 18px; }
+  .enu-sum-total .enu-val {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-size: 16px; font-weight: 400;
+  }
+  .enu-checkout { font-size: 16px; padding: 14px 24px; }
 }
 `
 
