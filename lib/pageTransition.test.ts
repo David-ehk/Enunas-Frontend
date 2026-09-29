@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { resolveTransitionTarget } from './pageTransition'
+import { resolveTransitionTarget, isCurtainFreePath } from './pageTransition'
 
 const base = {
   currentUrl: 'https://enunas.com/neu?sort=asc',
@@ -49,5 +49,25 @@ describe('resolveTransitionTarget', () => {
     expect(resolveTransitionTarget({ ...base, href: 'https://enunas.com/bekleidung/nike/air-max?c=red' })).toBeNull()
     expect(resolveTransitionTarget({ ...base, href: 'https://enunas.com/bekleidung/nike' })).toBe('/bekleidung/nike')
     expect(resolveTransitionTarget({ ...base, href: 'https://enunas.com/bekleidung' })).toBe('/bekleidung')
+  })
+})
+
+describe('curtain-free pages', () => {
+  it('flags the checkout and everything below it', () => {
+    expect(isCurtainFreePath('/checkout')).toBe(true)
+    expect(isCurtainFreePath('/checkout/')).toBe(true)
+    expect(isCurtainFreePath('/checkout/bestaetigung')).toBe(true)
+  })
+
+  it('flags product pages but not the catalogue or other pages', () => {
+    expect(isCurtainFreePath('/bekleidung/nike/air-max')).toBe(true)
+    expect(isCurtainFreePath('/bekleidung/nike')).toBe(false)
+    expect(isCurtainFreePath('/bekleidung')).toBe(false)
+    expect(isCurtainFreePath('/marken')).toBe(false)
+    expect(isCurtainFreePath('/checkoutx')).toBe(false)
+  })
+
+  it('does not run the curtain for a link to the checkout', () => {
+    expect(resolveTransitionTarget({ ...base, href: 'https://enunas.com/checkout' })).toBeNull()
   })
 })

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 import type { RecItem } from './ProductCard'
-import GlassArrowButton from './GlassArrowButton'
+import GlassArrowButton from '@/components/GlassArrowButton'
 
 interface CompleteTheLookProps {
   items: RecItem[]
@@ -93,7 +93,7 @@ export default function CompleteTheLook({ items, heroImage }: CompleteTheLookPro
 
           <div className="relative">
           {overflowing && (
-            <GlassArrowButton direction="prev" onClick={() => slide(-1)} className="hidden md:flex lg:hidden absolute top-[26%] left-2 z-10" />
+            <GlassArrowButton direction="prev" onClick={() => slide(-1)} className="flex lg:hidden absolute top-[26%] left-2 z-10" />
           )}
           <ul
             ref={sliderRef}
@@ -125,7 +125,7 @@ export default function CompleteTheLook({ items, heroImage }: CompleteTheLookPro
             ))}
           </ul>
           {overflowing && (
-            <GlassArrowButton direction="next" onClick={() => slide(1)} className="hidden md:flex lg:hidden absolute top-[26%] right-2 z-10" />
+            <GlassArrowButton direction="next" onClick={() => slide(1)} className="flex lg:hidden absolute top-[26%] right-2 z-10" />
           )}
           </div>
         </div>

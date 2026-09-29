@@ -14,9 +14,9 @@ interface GlassCursorProps {
 }
 
 /**
- * Custom cursor for image galleries: a see-through liquid-glass disc with thin purple line rings
- * that turn slowly, following the pointer with a slight lag. Only on devices with a real hover
- * pointer at tablet width and up; everywhere else the native cursor is left untouched.
+ * Custom cursor for image galleries: a see-through liquid-glass disc with a plus or minus,
+ * following the pointer with a slight lag. Only on devices with a real hover pointer at tablet
+ * width and up; everywhere else the native cursor is left untouched.
  */
 export default function GlassCursor({ targetRef, mode }: GlassCursorProps) {
   const posRef = useRef<HTMLDivElement>(null)
@@ -101,7 +101,7 @@ export default function GlassCursor({ targetRef, mode }: GlassCursorProps) {
         }}
       >
         {/* Liquid-glass disc: mostly see-through, with a blurred backdrop, a bright rim and a
-            faint purple depth at the lower edge. */}
+            soft neutral depth at the lower edge. */}
         <div
           className="absolute rounded-full"
           style={{
@@ -112,38 +112,13 @@ export default function GlassCursor({ targetRef, mode }: GlassCursorProps) {
             WebkitBackdropFilter: 'blur(7px) saturate(1.7)',
             border: '1px solid rgba(255,255,255,0.75)',
             boxShadow:
-              'inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -10px 18px rgba(55,14,77,0.12), 0 8px 24px rgba(10,10,10,0.1)',
+              'inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -10px 18px rgba(10,10,10,0.08), 0 8px 24px rgba(10,10,10,0.1)',
           }}
         />
 
-        {/* Purple lines: two thin dashed rings that turn against each other. */}
-        <svg className="absolute inset-0" width={SIZE} height={SIZE} viewBox="0 0 96 96" fill="none">
-          <circle
-            className="glass-cursor-ring-a"
-            cx="48"
-            cy="48"
-            r="45.5"
-            stroke="#370E4D"
-            strokeWidth="0.9"
-            strokeLinecap="round"
-            strokeDasharray="88 26 34 26 52 26"
-          />
-          <circle
-            className="glass-cursor-ring-b"
-            cx="48"
-            cy="48"
-            r="41.5"
-            stroke="#370E4D"
-            strokeOpacity="0.55"
-            strokeWidth="0.7"
-            strokeLinecap="round"
-            strokeDasharray="22 30 64 30"
-          />
-        </svg>
-
         {/* Plus / minus */}
         <svg className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d={mode === 'plus' ? 'M1 7h12M7 1v12' : 'M1 7h12'} stroke="#370E4D" strokeWidth="1.1" strokeLinecap="round" />
+          <path d={mode === 'plus' ? 'M1 7h12M7 1v12' : 'M1 7h12'} stroke="#0A0A0A" strokeWidth="1.1" strokeLinecap="round" />
         </svg>
       </div>
     </div>,

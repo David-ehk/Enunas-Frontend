@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { resolveTransitionTarget } from '@/lib/pageTransition'
+import { resolveTransitionTarget, isCurtainFreePath } from '@/lib/pageTransition'
 import { shouldRevealInitial } from '@/lib/initialReveal'
 
 type Phase = 'idle' | 'cover' | 'reveal'
@@ -22,14 +22,25 @@ export default function PageTransition() {
   const pathname = usePathname()
   // Starts covered: the first paint of every full page load is the curtain, so the videos get
   // time to load behind it (see the initial-load effect below).
-  const [phase, setPhase] = useState<Phase>('cover')
-  const busy = useRef(true)
-  const initial = useRef(true)
+  // Curtain-free pages (checkout, product pages) never start covered.
+  const startsClear = isCurtainFreePath(pathname)
+  const [phase, setPhase] = useState<Phase>(startsClear ? 'idle' : 'cover')
+  const busy = useRef(!startsClear)
+  const initial = useRef(!startsClear)
   const timers = useRef<number[]>([])
 
-  const later = (fn: () => void, ms: number) => {
+  const later = useCallback((fn: () => void, ms: number) => {
     timers.current.push(window.setTimeout(fn, ms))
-  }
+  }, [])
+
+  const reveal = useCallback(() => {
+    if (!busy.current) return
+    setPhase('reveal')
+    later(() => {
+      setPhase('idle')
+      busy.current = false
+    }, DURATION_MS)
+  }, [later])
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -65,24 +76,15 @@ export default function PageTransition() {
       document.removeEventListener('click', onClick, true)
       timers.current.forEach(clearTimeout)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router])
-
-  const reveal = () => {
-    if (!busy.current) return
-    setPhase('reveal')
-    later(() => {
-      setPhase('idle')
-      busy.current = false
-    }, DURATION_MS)
-  }
+  }, [router, later, reveal])
 
   // First load: hold the curtain until the videos in the first viewport can play.
   useEffect(() => {
+    if (!initial.current) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       initial.current = false
       busy.current = false
-      setPhase('idle')
+      later(() => setPhase('idle'), 0)
       return
     }
     const start = performance.now()
@@ -105,15 +107,13 @@ export default function PageTransition() {
       }
     }, 100)
     return () => window.clearInterval(iv)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [later, reveal])
 
   // The route committed: slide the curtain away.
   useEffect(() => {
     if (initial.current) return
     if (busy.current) reveal()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname])
+  }, [pathname, reveal])
 
   const y = phase === 'cover' ? '0%' : phase === 'reveal' ? '100%' : '-100%'
 

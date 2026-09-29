@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import GlassArrowButton from '@/components/GlassArrowButton'
 
 // The mobile rail renders this many back-to-back copies of the category
 // list and silently re-centres onto the middle copy once the user stops
@@ -10,16 +11,6 @@ import Link from 'next/link'
 const RAIL_COPIES = 3
 const HOME_COPY = 1
 
-const ArrowLeft = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M19 12H5M11 6l-6 6 6 6" />
-  </svg>
-)
-const ArrowRight = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 12h14M13 6l6 6-6 6" />
-  </svg>
-)
 const ArrowRightSm = () => (
   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M5 12h14M13 6l6 6-6 6" />
@@ -232,17 +223,12 @@ export default function KategorieAuswahl() {
         <div style={{ position: 'relative', padding: '14px 0 0' }}>
 
           {/* Left arrow — always active, the rail loops endlessly */}
-          <button
+          <GlassArrowButton
+            direction="prev"
+            label="Vorherige Kategorie"
             onClick={() => step(-1)}
-            aria-label="Vorherige Kategorie"
-            style={{
-              position: 'absolute', left: '-5px', top: '50%', transform: 'translateY(-50%)', zIndex: 2,
-              background: 'none', border: 0, padding: '15px', cursor: 'pointer',
-              color: '#0A0A0A', transition: 'color 200ms ease',
-            }}
-          >
-            <ArrowLeft />
-          </button>
+            className="absolute left-1 top-1/2 z-[2] -translate-y-1/2"
+          />
 
           <div
             ref={railRef}
@@ -313,17 +299,12 @@ export default function KategorieAuswahl() {
           </div>
 
           {/* Right arrow — always active, the rail loops endlessly */}
-          <button
+          <GlassArrowButton
+            direction="next"
+            label="Nächste Kategorie"
             onClick={() => step(1)}
-            aria-label="Nächste Kategorie"
-            style={{
-              position: 'absolute', right: '-5px', top: '50%', transform: 'translateY(-50%)', zIndex: 2,
-              background: 'none', border: 0, padding: '15px', cursor: 'pointer',
-              color: '#0A0A0A', transition: 'color 200ms ease',
-            }}
-          >
-            <ArrowRight />
-          </button>
+            className="absolute right-1 top-1/2 z-[2] -translate-y-1/2"
+          />
         </div>
 
         {/* Progress pills — glassmorphism/neumorphism look */}

@@ -88,43 +88,94 @@ function ZoomIcon({ minus }: { minus?: boolean }) {
   )
 }
 
-// Full-width viewer: every image takes the whole viewport width and the column scrolls
-// vertically, opened at the image that was clicked. Click an image, press Escape or use the
+// Full-width viewer, modelled on self-portrait's PDP zoom: every image takes the whole viewport
+// width and the column scrolls vertically, opened so the exact spot that was clicked stays where
+// the pointer is. A thumbnail strip stays on the left. Click an image, press Escape or use the
 // corner icon to go back. Pinch zoom stays available on touch.
-function ZoomViewer({ images, productName, startIndex, onClose }: {
+interface ZoomStart { index: number; fx: number; fy: number }
+
+function ZoomViewer({ images, productName, start, onClose }: {
   images: string[]
   productName: string
-  startIndex: number
-  onClose: () => void
+  start: ZoomStart
+  /** Called with the image that was in view when the viewer closed. */
+  onClose: (lastIndex: number) => void
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
+  const [ready, setReady] = useState(false)
+  const [current, setCurrent] = useState(start.index)
+  const currentRef = useRef(start.index)
+
+  const close = useCallback(() => onClose(currentRef.current), [onClose])
+
+  const indexInView = useCallback(() => {
+    const sc = scrollerRef.current
+    if (!sc) return 0
+    const mid = sc.scrollTop + sc.clientHeight / 2
+    let found = 0
+    ;(Array.from(sc.children) as HTMLElement[]).forEach((el, i) => {
+      if (el.offsetTop <= mid) found = i
+    })
+    return found
+  }, [])
 
   useEffect(() => {
     const previousFocus = document.activeElement as HTMLElement | null
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    const target = scrollerRef.current?.children[startIndex] as HTMLElement | undefined
-    if (scrollerRef.current && target) scrollerRef.current.scrollTop = target.offsetTop
     closeRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+
+    // Wait for every image to have its real height (they are already cached from the gallery),
+    // then put the clicked spot at the middle of the screen before showing anything.
+    const sc = scrollerRef.current
+    const imgs = sc ? (Array.from(sc.querySelectorAll('img')) as HTMLImageElement[]) : []
+    let cancelled = false
+    Promise.all(imgs.map(i => i.decode().catch(() => {}))).then(() => {
+      if (cancelled || !sc) return
+      const target = sc.children[start.index] as HTMLElement | undefined
+      if (target) {
+        const y = target.offsetTop + start.fy * target.offsetHeight - sc.clientHeight / 2
+        sc.scrollTop = Math.max(0, y)
+      }
+      setReady(true)
+    })
+
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close() }
     window.addEventListener('keydown', onKey)
     return () => {
+      cancelled = true
       window.removeEventListener('keydown', onKey)
       document.body.style.overflow = previousOverflow
       previousFocus?.focus?.()
     }
-  }, [startIndex, onClose])
+  }, [start, close])
+
+  const onScroll = () => {
+    const i = indexInView()
+    currentRef.current = i
+    setCurrent(i)
+  }
+
+  const goTo = (i: number) => {
+    const sc = scrollerRef.current
+    const target = sc?.children[i] as HTMLElement | undefined
+    if (!sc || !target) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    sc.scrollTo({ top: target.offsetTop, behavior: reduce ? 'auto' : 'smooth' })
+  }
 
   return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-label={`${productName} – Bildzoom`}
-      className="fixed inset-0 z-[9000] bg-white animate-fade-in"
+      className="fixed inset-0 z-[9000] bg-white ease-out-expo"
+      style={{ opacity: ready ? 1 : 0, transition: 'opacity 300ms' }}
     >
       <div
         ref={scrollerRef}
+        onScroll={onScroll}
         className="h-full w-full overflow-y-auto"
         style={{ touchAction: 'pan-x pan-y pinch-zoom', scrollbarWidth: 'none' }}
       >
@@ -134,16 +185,37 @@ function ZoomViewer({ images, productName, startIndex, onClose }: {
             key={index}
             src={image}
             alt={`${productName} - Ansicht ${index + 1}`}
-            onClick={onClose}
+            onClick={close}
             className="block w-full h-auto cursor-zoom-out"
           />
         ))}
       </div>
+
+      {images.length > 1 && (
+        <div className="fixed left-4 top-1/2 z-10 hidden -translate-y-1/2 flex-col gap-2 md:flex">
+          {images.map((image, index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => goTo(index)}
+              aria-label={`Zu Bild ${index + 1}`}
+              aria-current={current === index}
+              className={`h-[60px] w-[44px] overflow-hidden border transition-opacity duration-300 ease-out-expo ${
+                current === index ? 'border-enunas-black opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
+              }`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={image} alt="" className="h-full w-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+
       <GlassCursor targetRef={scrollerRef} mode="minus" />
       <button
         ref={closeRef}
         type="button"
-        onClick={onClose}
+        onClick={close}
         aria-label="Zoom schließen"
         className="fixed bottom-4 left-4 z-10 p-2 text-white mix-blend-difference focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
       >
@@ -156,8 +228,12 @@ function ZoomViewer({ images, productName, startIndex, onClose }: {
 
 function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, onShare, shareCopied }: ImageGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0)
-  const [zoomIndex, setZoomIndex] = useState<number | null>(null)
-  const closeZoom = useCallback(() => setZoomIndex(null), [])
+  const [zoomStart, setZoomStart] = useState<ZoomStart | null>(null)
+  const closeZoom = useCallback((lastIndex: number) => {
+    setZoomStart(null)
+    // Put the gallery back on the image the viewer ended on.
+    imageRefs.current[lastIndex]?.scrollIntoView({ behavior: 'auto', block: 'center' })
+  }, [])
   const containerRef = useRef<HTMLDivElement>(null)
   const imageRefs = useRef<(HTMLDivElement | null)[]>([])
 
@@ -278,7 +354,14 @@ function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, on
             <img
               src={image}
               alt={`${productName} - Ansicht ${index + 1}`}
-              onClick={() => setZoomIndex(index)}
+              onClick={(e) => {
+                const r = e.currentTarget.getBoundingClientRect()
+                setZoomStart({
+                  index,
+                  fx: (e.clientX - r.left) / r.width,
+                  fy: (e.clientY - r.top) / r.height,
+                })
+              }}
               className="w-full h-full object-cover cursor-zoom-in"
             />
           </div>
@@ -287,7 +370,7 @@ function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, on
 
       <button
         type="button"
-        onClick={() => setZoomIndex(activeIndex)}
+        onClick={() => setZoomStart({ index: activeIndex, fx: 0.5, fy: 0.5 })}
         aria-label="Bild vergrößern"
         className="absolute top-3 left-3 z-20 p-2 text-white mix-blend-difference focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
       >
@@ -296,8 +379,8 @@ function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, on
 
       <GlassCursor targetRef={containerRef} mode="plus" />
 
-      {zoomIndex !== null && (
-        <ZoomViewer images={images} productName={productName} startIndex={zoomIndex} onClose={closeZoom} />
+      {zoomStart !== null && (
+        <ZoomViewer images={images} productName={productName} start={zoomStart} onClose={closeZoom} />
       )}
 
       {/* CSS zum Verstecken der Scrollbar */}

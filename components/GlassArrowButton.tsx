@@ -3,16 +3,18 @@
 interface GlassArrowButtonProps {
   direction: 'prev' | 'next';
   onClick: () => void;
+  /** Screen-reader label; defaults to Zurück / Weiter. */
+  label?: string;
   /** Positioning (and visibility breakpoint) is up to the row that hosts the button. */
   className?: string;
 }
 
 /** Round "liquid glass" arrow: blurred, translucent, with a bright rim and inner highlight. */
-export default function GlassArrowButton({ direction, onClick, className = '' }: GlassArrowButtonProps) {
+export default function GlassArrowButton({ direction, onClick, label, className = '' }: GlassArrowButtonProps) {
   return (
     <button
       type="button"
-      aria-label={direction === 'prev' ? 'Zurück' : 'Weiter'}
+      aria-label={label ?? (direction === 'prev' ? 'Zurück' : 'Weiter')}
       onClick={onClick}
       className={`
         flex h-11 w-11 items-center justify-center rounded-full text-enunas-black

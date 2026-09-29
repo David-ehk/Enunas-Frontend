@@ -270,12 +270,13 @@ export default function CheckoutPage() {
     'w-full border border-enunas-gray-light px-4 py-3 font-league-spartan text-sm text-enunas-black bg-white focus:outline-none focus:border-enunas-purple transition-colors duration-200'
 
   // Not passed to the submit button's `disabled` attribute — a natively disabled button never
-  // fires a click, so it couldn't scroll to the reason. Instead it only greys the button out
-  // visually; the real gate (and the scroll-to-reason) lives in handleSubmit above.
-  const checkoutBlocked = !isAuthenticated || !addressSelection
+  // fires a click, so it couldn't scroll to the reason. The real gate (and the scroll-to-reason,
+  // e.g. to the login) lives in handleSubmit above. The button always looks clickable, even while
+  // the visitor still has to log in or pick an address, so nobody is put off pressing it; it only
+  // dims while an order is actually being submitted.
   const submitButtonClass =
     'group relative w-full overflow-hidden bg-enunas-purple text-white py-5 transition-colors duration-300 ease-out-expo' +
-    (loading || checkoutBlocked ? ' opacity-60 cursor-not-allowed' : ' hover:bg-enunas-purple-dark')
+    (loading ? ' opacity-60 cursor-not-allowed' : ' cursor-pointer hover:bg-enunas-purple-dark')
 
   if (cartItems.length === 0) {
     return (

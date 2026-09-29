@@ -10,6 +10,11 @@ export interface TransitionClick {
   altKey: boolean
 }
 
+/** Pages that open without the curtain: the checkout flow and product pages (/bekleidung/[brand]/[slug]). */
+export function isCurtainFreePath(pathname: string): boolean {
+  return /^\/checkout(\/|$)/.test(pathname) || /^\/bekleidung\/[^/]+\/[^/]+\/?$/.test(pathname)
+}
+
 /**
  * Decides whether a link click should play the page-transition curtain. Returns the
  * path + search + hash to navigate to, or null when the browser should handle the click itself
@@ -30,8 +35,7 @@ export function resolveTransitionTarget(click: TransitionClick): string | null {
 
   if (to.origin !== from.origin) return null
   if (to.pathname === from.pathname) return null
-  // Product pages (/bekleidung/[brand]/[slug]) open without the curtain.
-  if (/^\/bekleidung\/[^/]+\/[^/]+\/?$/.test(to.pathname)) return null
+  if (isCurtainFreePath(to.pathname)) return null
 
   return `${to.pathname}${to.search}${to.hash}`
 }

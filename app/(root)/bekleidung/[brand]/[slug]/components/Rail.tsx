@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, type ReactNode } from 'react';
-import GlassArrowButton from './GlassArrowButton';
+import GlassArrowButton from '@/components/GlassArrowButton';
 
 /** Horizontal, snap-scrolling strip: drag/swipe/trackpad natively, arrow buttons on hover devices. */
 export default function Rail({ children, label }: { children: ReactNode; label: string }) {
@@ -14,7 +14,7 @@ export default function Rail({ children, label }: { children: ReactNode; label: 
     el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: reduce ? 'auto' : 'smooth' });
   }
 
-  const pos = 'hidden md:flex lg:hidden absolute top-[38%] z-10';
+  const pos = 'flex lg:hidden absolute top-[38%] z-10';
 
   return (
     <div className="relative" role="region" aria-label={label}>

@@ -38,6 +38,8 @@ export default function FounderQuote() {
     <section
       ref={ref as React.RefObject<HTMLElement>}
       className="relative w-full aspect-video min-h-[440px] sm:min-h-0 overflow-hidden bg-white"
+      // Own stacking context, so the text's blend mode only ever sees the video behind it.
+      style={{ isolation: 'isolate' }}
     >
       <video
         ref={videoRef}
@@ -46,12 +48,17 @@ export default function FounderQuote() {
         muted
         loop
         playsInline
-        preload="metadata"
+        preload="auto"
         aria-hidden
         className="absolute inset-0 h-full w-full object-cover"
+        // Own compositing layer: Safari only blends text over video reliably when both are layers.
+        style={{ transform: 'translateZ(0)' }}
       />
 
-      <div className="absolute inset-0 flex items-center px-6 lg:px-16 text-white mix-blend-difference">
+      <div
+        className="absolute inset-0 flex items-center px-6 lg:px-16 text-white mix-blend-difference"
+        style={{ transform: 'translateZ(0)' }}
+      >
         <div className="max-w-[1800px] mx-auto w-full">
           <blockquote className="m-0">
             {LINES.map((line, i) => (

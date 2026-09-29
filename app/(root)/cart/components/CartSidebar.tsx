@@ -247,7 +247,6 @@ const css = `
   cursor: pointer; text-decoration: none;
   transition: background 300ms var(--ease-q);
 }
-.enu-checkout .enu-lock { display: flex; opacity: 0.85; }
 .enu-checkout:hover { background: #250838; }
 .enu-checkout-line {
   position: absolute; left: 50%; transform: translateX(-50%);
@@ -303,7 +302,6 @@ const css = `
     font-family: 'League Spartan', system-ui, sans-serif;
     font-size: 16px; font-weight: 400;
   }
-  .enu-checkout { font-size: 16px; padding: 14px 24px; }
 }
 `
 
@@ -565,8 +563,7 @@ export default function CartSidebar() {
 
             <Link href="/checkout" onClick={closeCart} className="enu-checkout">
               <span className="enu-checkout-line top" />
-              <span className="enu-lock"><LockIcon /></span>
-              Sicher zur Kasse
+              <span style={{ position: 'relative', zIndex: 10 }}>Sicher zur Kasse</span>
               <span className="enu-checkout-line bot" />
             </Link>
 
