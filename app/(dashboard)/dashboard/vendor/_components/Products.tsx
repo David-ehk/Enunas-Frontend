@@ -4,7 +4,7 @@ import { useState, useEffect, Fragment } from 'react'
 import { brandApi } from '@/lib/api/modules/brandApi'
 import { FetchError } from '@/lib/api'
 import { errorRemedies, type ErrorRemedy } from '@/lib/api/errorCopy'
-import type { AdminApiProduct } from '@/types/api'
+import type { AdminApiProduct, AdminApiVariant } from '@/types/api'
 import {
   StatusBadge, SectionCard, EmptyState, Loader,
   TH, TD, TableRow, FilterBar, SearchInput, fmt, fmtEur,
@@ -12,6 +12,7 @@ import {
 import { VPageHeader } from './vshared'
 import { ChevronDown, ChevronUp, Edit2, Package, Plus, Trash2, X } from 'lucide-react'
 import { isProductLive } from '@/lib/product'
+import { isSoldOut, variantsToSellOut } from '@/lib/soldOut'
 import { STATUS_FILTERS, BTN_PRIMARY } from './products/constants'
 import CreateWizard from './products/CreateWizard'
 import EditPanel from './products/EditPanel'
@@ -50,6 +51,11 @@ export default function Products() {
   // productId → Brutto-Preise der Listings (ProductResponseDto trägt keinen Preis;
   // Preise leben auf Listings — niemals € 0,00 anzeigen)
   const [priceMap, setPriceMap] = useState<Record<string, number[]>>({})
+  // productId → its variants with stock — drives the "Ausverkauft" badge and quick action.
+  const [variantMap, setVariantMap] = useState<Record<string, AdminApiVariant[]>>({})
+  const [confirmSoldOut, setConfirmSoldOut] = useState<string | null>(null)
+  const [sellingOut, setSellingOut] = useState<string | null>(null)
+  const [soldOutError, setSoldOutError] = useState<string | null>(null)
 
   useEffect(() => {
     brandApi.products.getMy()
@@ -68,6 +74,36 @@ export default function Products() {
     )).then(entries => { if (alive) setPriceMap(Object.fromEntries(entries)) })
     return () => { alive = false }
   }, [products])
+
+  useEffect(() => {
+    if (products.length === 0) return
+    let alive = true
+    Promise.all(products.map(p =>
+      brandApi.variants.list(p.id)
+        .then(vs => [p.id, vs] as const)
+        .catch(() => [p.id, [] as AdminApiVariant[]] as const)
+    )).then(entries => { if (alive) setVariantMap(Object.fromEntries(entries)) })
+    return () => { alive = false }
+  }, [products])
+
+  // Marks every variant of a product as sold out (stock 0). Restocking happens per variant in
+  // the "Varianten" view, where the stock steppers and "Wieder verfügbar" live.
+  async function sellOutProduct(id: string) {
+    setSellingOut(id)
+    setSoldOutError(null)
+    try {
+      const variants = variantMap[id] ?? await brandApi.variants.list(id)
+      for (const v of variantsToSellOut(variants)) {
+        await brandApi.variants.update(id, v.id, { stockQuantity: 0 })
+      }
+      setVariantMap(prev => ({ ...prev, [id]: variants.map(v => ({ ...v, stockQuantity: 0 })) }))
+      setConfirmSoldOut(null)
+    } catch {
+      setSoldOutError('Produkt konnte nicht als ausverkauft markiert werden.')
+    } finally {
+      setSellingOut(null)
+    }
+  }
 
   function PriceCell({ productId }: { productId: string }) {
     const prices = priceMap[productId]
@@ -215,6 +251,7 @@ export default function Products() {
         eyebrow="Brand Portal"
         title="Produkt"
         italicTitle="verwaltung."
+        joined
         sub="Eigene Produkte erstellen, bearbeiten und Listings verwalten."
         actions={
           <button
@@ -273,7 +310,16 @@ export default function Products() {
                     </TD>
                     <TD className="text-[#6B6B6B] capitalize">{p.category?.toLowerCase()}</TD>
                     <TD><PriceCell productId={p.id} /></TD>
-                    <TD><StatusBadge status={p.status} /></TD>
+                    <TD>
+                      <div className="flex flex-col items-start gap-1">
+                        <StatusBadge status={p.status} />
+                        {isSoldOut(variantMap[p.id] ?? []) && (
+                          <span className="text-[10px] uppercase tracking-[0.1em] font-medium text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                            Ausverkauft
+                          </span>
+                        )}
+                      </div>
+                    </TD>
                     <TD className="text-[#9B9B9B]">{fmt(p.createdAt)}</TD>
                     <TD>
                       <div className="flex items-center gap-1">
@@ -291,12 +337,45 @@ export default function Products() {
                         >
                           Varianten
                         </button>
+                        {(variantMap[p.id]?.length ?? 0) > 0 && !isSoldOut(variantMap[p.id]) && (
+                          confirmSoldOut === p.id ? (
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => sellOutProduct(p.id)}
+                                disabled={sellingOut === p.id}
+                                className="h-7 px-2.5 rounded-none border border-[#8B1E3F]/40 bg-rose-50 text-[11px] text-[#8B1E3F] transition-all duration-150"
+                                style={{ fontFamily: 'var(--font-league-spartan)' }}
+                              >
+                                {sellingOut === p.id ? '…' : 'Ausverkauft setzen'}
+                              </button>
+                              <button
+                                onClick={() => { setConfirmSoldOut(null); setSoldOutError(null) }}
+                                className="h-7 w-7 rounded-none border border-[#E8E8E8] flex items-center justify-center text-[#9B9B9B] hover:text-[#6B6B6B]"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => { setConfirmSoldOut(p.id); setSoldOutError(null) }}
+                              className="h-7 px-2.5 rounded-none border border-[#E8E8E8] text-[11px] text-[#6B6B6B] hover:border-[#8B1E3F]/40 hover:text-[#8B1E3F] transition-all duration-150"
+                              style={{ fontFamily: 'var(--font-league-spartan)' }}
+                            >
+                              Ausverkauft
+                            </button>
+                          )
+                        )}
                         <button
                           onClick={() => setExpandedId(expandedId === p.id ? null : p.id)}
                           className="h-7 w-7 rounded-none border border-[#E8E8E8] flex items-center justify-center text-[#9B9B9B] hover:border-[#E8E8E8] hover:text-[#6B6B6B] transition-all duration-150"
                         >
                           {expandedId === p.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         </button>
+                        {soldOutError && confirmSoldOut === p.id && (
+                          <p className="max-w-[240px] text-[11px] leading-snug text-rose-700" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                            {soldOutError}
+                          </p>
+                        )}
                         {confirmDelete === p.id ? (
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-1">

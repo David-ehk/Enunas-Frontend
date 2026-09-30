@@ -182,6 +182,7 @@ export default function Discounts() {
         eyebrow="Brand Portal"
         title="Rabatt"
         italicTitle="codes"
+        joined
         sub={`Eigene Marken-Codes erstellen und verwalten (max. ${BRAND_MAX_PERCENT}%).`}
         actions={<CreateButton onClick={openCreate} size="md" />}
       />

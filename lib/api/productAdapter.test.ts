@@ -101,3 +101,70 @@ describe('apiProductToColourwayCards', () => {
     expect(cards[1].imgURL).toBe('shared.jpg')
   })
 })
+
+describe('sold-out product cards', () => {
+  const stocked = (overrides: Partial<ApiProduct> = {}) =>
+    product({
+      colours: [
+        { hex: '#000000', name: 'BLACK' },
+        { hex: '#FFFFFF', name: 'WHITE' },
+      ],
+      imageObjects: [],
+      variants: [
+        { id: 1, sku: 'B-M', color: 'BLACK', colorId: 10, size: 'M', stockQuantity: 0 },
+        { id: 2, sku: 'B-L', color: 'BLACK', colorId: 10, size: 'L', stockQuantity: 0 },
+        { id: 3, sku: 'W-M', color: 'WHITE', colorId: 11, size: 'M', stockQuantity: 4 },
+        { id: 4, sku: 'W-L', color: 'WHITE', colorId: 11, size: 'L', stockQuantity: 0 },
+      ],
+      ...overrides,
+    })
+
+  it('flags a product as sold out only when every variant has no stock', () => {
+    const all0 = stocked({ variants: stocked().variants!.map(v => ({ ...v, stockQuantity: 0 })) })
+    expect(apiProductToCardShape(all0).soldOut).toBe(true)
+    expect(apiProductToCardShape(stocked()).soldOut).toBe(false)
+  })
+
+  it('never flags a product without variant data as sold out', () => {
+    expect(apiProductToCardShape(product()).soldOut).toBe(false)
+  })
+
+  it('lists only sizes that are still in stock', () => {
+    expect(apiProductToCardShape(stocked()).sizes).toEqual(['M'])
+  })
+
+  it('flags each colour card on its own', () => {
+    const [black, white] = apiProductToColourwayCards(stocked())
+    expect(black.soldOut).toBe(true)
+    expect(black.sizes).toEqual([])
+    expect(white.soldOut).toBe(false)
+    expect(white.sizes).toEqual(['M'])
+  })
+})
+
+describe('colour cards still show the other colours', () => {
+  const p = () =>
+    product({
+      colours: [
+        { hex: '#D8C8A8', name: 'BEIGE' },
+        { hex: '#2E7D4F', name: 'GREEN' },
+        { hex: '#0A0A0A', name: 'BLACK' },
+      ],
+      variants: [],
+    })
+
+  it("lists the card's own colour first, then the others in their original order", () => {
+    const cards = apiProductToColourwayCards(p())
+    expect(cards[1].allColours?.map(c => c.name)).toEqual(['GREEN', 'BEIGE', 'BLACK'])
+    expect(cards[2].allColours?.map(c => c.name)).toEqual(['BLACK', 'BEIGE', 'GREEN'])
+  })
+
+  it('keeps `colours` to the own colour so the colour filter only matches that card', () => {
+    const cards = apiProductToColourwayCards(p())
+    expect(cards[1].colours.map(c => c.name)).toEqual(['GREEN'])
+  })
+
+  it('leaves allColours unset on an ordinary one-colour card', () => {
+    expect(apiProductToCardShape(product()).allColours).toBeUndefined()
+  })
+})

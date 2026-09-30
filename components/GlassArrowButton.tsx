@@ -9,7 +9,7 @@ interface GlassArrowButtonProps {
   className?: string;
 }
 
-/** Round "liquid glass" arrow: blurred, translucent, with a bright rim and inner highlight. */
+/** Round "liquid glass" arrow: clear, blurred and colour-boosted, with a bright rim and inner highlight. */
 export default function GlassArrowButton({ direction, onClick, label, className = '' }: GlassArrowButtonProps) {
   return (
     <button
@@ -24,15 +24,17 @@ export default function GlassArrowButton({ direction, onClick, label, className 
         ${className}
       `}
       style={{
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.22) 100%)',
-        backdropFilter: 'blur(14px) saturate(1.6)',
-        WebkitBackdropFilter: 'blur(14px) saturate(1.6)',
-        border: '1px solid rgba(255,255,255,0.65)',
+        // Mostly clear glass: only a hint of white, with the backdrop blurred and pushed in
+        // saturation, so the disc picks up the colour of whatever image sits behind it.
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.04) 100%)',
+        backdropFilter: 'blur(10px) saturate(2.2) brightness(1.04)',
+        WebkitBackdropFilter: 'blur(10px) saturate(2.2) brightness(1.04)',
+        border: '1px solid rgba(255,255,255,0.55)',
         boxShadow:
-          'inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(255,255,255,0.25), 0 6px 20px rgba(10,10,10,0.14)',
+          'inset 0 1px 0 rgba(255,255,255,0.75), inset 0 -1px 0 rgba(255,255,255,0.18), 0 4px 16px rgba(10,10,10,0.1)',
       }}
     >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ filter: 'drop-shadow(0 0 2px rgba(255,255,255,0.9))' }}>
         <path d={direction === 'prev' ? 'm14.5 6-6 6 6 6' : 'm9.5 6 6 6-6 6'} />
       </svg>
     </button>

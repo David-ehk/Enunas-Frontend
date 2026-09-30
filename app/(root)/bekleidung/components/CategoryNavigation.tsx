@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
@@ -22,6 +23,21 @@ export default function CategoryNavigation({ basePath = '/bekleidung' }: { baseP
   const searchParams = useSearchParams()
   const activeCat   = searchParams.get('cat') || ''
   const gender      = searchParams.get('gender') || ''
+  const barRef      = useRef<HTMLDivElement>(null)
+
+  // The bar scrolls sideways and starts at the left, so on a phone a selected tab further along
+  // (Accessoires, Schuhe, …) would sit off-screen. The selection lives in the URL (?cat=), so
+  // just bring the selected tab to the middle of the bar — only the bar scrolls, not the page.
+  useEffect(() => {
+    const bar = barRef.current
+    const active = bar?.querySelector<HTMLElement>('[aria-current="page"]')
+    if (!bar || !active) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    bar.scrollTo({
+      left: Math.max(0, active.offsetLeft - (bar.clientWidth - active.offsetWidth) / 2),
+      behavior: reduce ? 'auto' : 'smooth',
+    })
+  }, [activeCat])
 
   function buildHref(cat: string) {
     const p = new URLSearchParams()
@@ -32,7 +48,8 @@ export default function CategoryNavigation({ basePath = '/bekleidung' }: { baseP
   }
 
   return (
-    <div style={{
+    <div ref={barRef} style={{
+      position: 'relative',
       display: 'flex',
       alignItems: 'center',
       maxWidth: 1800,
@@ -47,6 +64,7 @@ export default function CategoryNavigation({ basePath = '/bekleidung' }: { baseP
           <Link
             key={cat.slug}
             href={buildHref(cat.cat)}
+            aria-current={isActive ? 'page' : undefined}
             style={{
               position: 'relative',
               flexShrink: 0,

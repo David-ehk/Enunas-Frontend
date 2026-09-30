@@ -147,7 +147,9 @@ export default function LegalPage({ kicker, title, lede, meta, sections, contact
         </aside>
 
         {/* Sections */}
-        <main className="lg:pl-[80px]">
+        {/* A div, not <main>: the footer layout already provides the page's <main>, and the global
+            `main { padding: 0 }` rule in globals.css would wipe out this left padding. */}
+        <div className="lg:pl-[80px]">
           {sections.map((s) => (
             <section
               key={s.id}
@@ -205,7 +207,7 @@ export default function LegalPage({ kicker, title, lede, meta, sections, contact
               </div>
             </section>
           ))}
-        </main>
+        </div>
       </div>
 
       {/* ── CONTACT CTA ── */}

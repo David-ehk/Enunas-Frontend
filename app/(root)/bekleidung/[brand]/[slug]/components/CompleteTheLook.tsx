@@ -1,9 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 import type { RecItem } from './ProductCard'
-import GlassArrowButton from '@/components/GlassArrowButton'
 
 interface CompleteTheLookProps {
   items: RecItem[]
@@ -17,14 +16,12 @@ interface CompleteTheLookProps {
 export default function CompleteTheLook({ items, heroImage }: CompleteTheLookProps) {
   const sliderRef = useRef<HTMLUListElement>(null)
   const thumbRef = useRef<HTMLDivElement>(null)
-  const [overflowing, setOverflowing] = useState(false)
 
   const syncThumb = useCallback(() => {
     const slider = sliderRef.current
     const thumb = thumbRef.current
     if (!slider || !thumb) return
     const { scrollLeft, scrollWidth, clientWidth } = slider
-    setOverflowing(scrollWidth > clientWidth + 1)
     const ratio = scrollWidth > 0 ? Math.min(1, clientWidth / scrollWidth) : 1
     const track = thumb.parentElement?.clientWidth ?? 0
     thumb.style.width = `${ratio * 100}%`
@@ -43,13 +40,6 @@ export default function CompleteTheLook({ items, heroImage }: CompleteTheLookPro
       ro.disconnect()
     }
   }, [syncThumb, items.length])
-
-  function slide(dir: 1 | -1) {
-    const el = sliderRef.current
-    if (!el) return
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: reduce ? 'auto' : 'smooth' })
-  }
 
   if (!items || items.length === 0) return null
 
@@ -92,9 +82,6 @@ export default function CompleteTheLook({ items, heroImage }: CompleteTheLookPro
           </div>
 
           <div className="relative">
-          {overflowing && (
-            <GlassArrowButton direction="prev" onClick={() => slide(-1)} className="flex lg:hidden absolute top-[26%] left-2 z-10" />
-          )}
           <ul
             ref={sliderRef}
             role="list"
@@ -124,9 +111,6 @@ export default function CompleteTheLook({ items, heroImage }: CompleteTheLookPro
               </li>
             ))}
           </ul>
-          {overflowing && (
-            <GlassArrowButton direction="next" onClick={() => slide(1)} className="flex lg:hidden absolute top-[26%] right-2 z-10" />
-          )}
           </div>
         </div>
       </div>

@@ -271,7 +271,7 @@ export default function FeedPageContent({ basePath, HeroComponent, brandFilter, 
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
             columnGap: isMobile ? 12 : 16, rowGap: isMobile ? 36 : 52,
           }}>
-            {visibleProducts.map(p => <PopularProductCard key={p.id} {...p} />)}
+            {visibleProducts.map(p => <PopularProductCard key={p.id} {...p} colours={p.allColours ?? p.colours} />)}
           </div>
         )}
       </section>

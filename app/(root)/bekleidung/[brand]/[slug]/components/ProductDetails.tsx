@@ -189,7 +189,11 @@ export default function ProductDetails({
     () => product.variants.find(v => v.color === selectedColor?.name),
     [product.variants, selectedColor]
   )
-  const isOutOfStock = !!(selectedVariant && selectedVariant.stockQuantity === 0)
+  // Sold out for the chosen colour: every one of its sizes is at zero. The product stays on the
+  // page with all those sizes crossed out; only buying it is switched off.
+  const colourVariants = product.variants.filter(v => v.color === selectedColor?.name)
+  const colourSoldOut = colourVariants.length > 0 && colourVariants.every(v => v.stockQuantity === 0)
+  const isOutOfStock = colourSoldOut || !!(selectedVariant && selectedVariant.stockQuantity === 0)
 
   // Find the listing that matches the currently selected color + size.
   // Each listing maps to exactly one variant (variantColor + variantSize).
@@ -555,7 +559,9 @@ export default function ProductDetails({
                 letterSpacing: '0.04em',
                 border: 'none',
                 color: 'white',
-                opacity: ctaMuted ? 0.55 : 1,
+                // Sold out / unavailable dims like Coming Soon does — the inline value would
+                // otherwise win over the class-based disabled opacity.
+                opacity: ctaMuted || ctaDisabled ? 0.55 : 1,
                 cursor: ctaDisabled ? 'not-allowed' : 'pointer',
                 transition: 'background-color 300ms, opacity 300ms',
               }}

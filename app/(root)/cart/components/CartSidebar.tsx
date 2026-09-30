@@ -16,7 +16,7 @@ const css = `
   height: 100dvh; width: min(468px, 100vw);
   display: flex; flex-direction: column;
   background: #F5F5F0; color: #0A0A0A;
-  font-family: 'League Spartan', system-ui, sans-serif;
+  font-family: var(--font-league-spartan), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transform: translateX(101%);
@@ -50,13 +50,13 @@ const css = `
 .enu-cart-tabs { display: flex; gap: 26px; }
 .enu-cart-tab {
   position: relative; background: none; border: 0; padding: 0 0 16px; cursor: pointer;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-Cormorant-Garamond), Georgia, serif;
   font-weight: 400; font-size: 23px; letter-spacing: 0.01em;
   color: var(--faint);
   transition: color 280ms var(--ease-q);
 }
 .enu-cart-tab .enu-tab-n {
-  font-family: 'League Spartan', system-ui, sans-serif;
+  font-family: var(--font-league-spartan), system-ui, sans-serif;
   font-size: 10px; letter-spacing: 0.1em; vertical-align: super;
   margin-left: 5px; color: var(--faint); font-variant-numeric: tabular-nums;
 }
@@ -121,7 +121,7 @@ const css = `
   color: var(--muted); margin-bottom: 7px;
 }
 .enu-item-name {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-Cormorant-Garamond), Georgia, serif;
   font-weight: 400; font-size: 19px; line-height: 1.1; color: #0A0A0A;
   text-decoration: none; transition: opacity 240ms cubic-bezier(0.25,1,0.5,1);
 }
@@ -163,7 +163,7 @@ const css = `
   border-left: 1px solid var(--hair-c); border-right: 1px solid var(--hair-c);
 }
 .enu-item-price {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-Cormorant-Garamond), Georgia, serif;
   font-size: 19px; font-weight: 400; color: #0A0A0A;
   font-variant-numeric: tabular-nums;
 }
@@ -175,7 +175,7 @@ const css = `
 }
 .enu-empty .enu-e-mark { color: var(--faint); }
 .enu-empty .enu-e-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-Cormorant-Garamond), Georgia, serif;
   font-size: 27px; font-weight: 300; color: #0A0A0A;
 }
 .enu-empty .enu-e-sub {
@@ -184,7 +184,7 @@ const css = `
 }
 .enu-empty .enu-e-cta {
   margin-top: 6px; background: none; border: 0; cursor: pointer; color: var(--acc);
-  font-family: 'League Spartan', system-ui, sans-serif;
+  font-family: var(--font-league-spartan), system-ui, sans-serif;
   font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
   display: inline-flex; align-items: center; gap: 9px;
 }
@@ -220,14 +220,14 @@ const css = `
   padding-top: 15px; border-top: 1px solid var(--hair-c);
 }
 .enu-sum-total .enu-lbl {
-  font-family: 'Cormorant Garamond', Georgia, serif; font-size: 22px; font-weight: 400;
+  font-family: var(--font-Cormorant-Garamond), Georgia, serif; font-size: 22px; font-weight: 400;
 }
 .enu-sum-total .enu-lbl .enu-n {
-  font-family: 'League Spartan', system-ui, sans-serif;
+  font-family: var(--font-league-spartan), system-ui, sans-serif;
   font-size: 11px; letter-spacing: 0.12em; color: var(--muted); margin-left: 8px;
 }
 .enu-sum-total .enu-val {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-Cormorant-Garamond), Georgia, serif;
   font-size: 27px; font-weight: 400; font-variant-numeric: tabular-nums; color: #0A0A0A;
 }
 .enu-sum-vat {
@@ -237,11 +237,12 @@ const css = `
 
 /* Checkout CTA — identical treatment to the site "Abonnieren" / "Weiter einkaufen"
    buttons (Subscribe.tsx, checkout/page.tsx): purple fill, Cormorant 18px/0.06em,
-   two white hairlines that contract to 70% on hover. */
+   two white hairlines that contract to 70% on hover. Fonts go through the next/font variables
+   (not the literal family names), which only resolve where the font is installed locally. */
 .enu-checkout {
   width: 100%; margin-top: 18px; position: relative; overflow: hidden;
   background: var(--acc); color: #fff; border: 0; padding: 16px 32px;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-Cormorant-Garamond), Georgia, serif;
   font-size: 18px; font-weight: 400; letter-spacing: 0.06em;
   display: flex; align-items: center; justify-content: center; gap: 12px;
   cursor: pointer; text-decoration: none;
@@ -260,7 +261,7 @@ const css = `
 .enu-continue {
   display: block; width: 100%; margin-top: 14px; text-align: center;
   background: none; border: 0; cursor: pointer; color: var(--muted);
-  font-family: 'League Spartan', system-ui, sans-serif;
+  font-family: var(--font-league-spartan), system-ui, sans-serif;
   font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
   padding: 4px; transition: color 240ms var(--ease-q);
 }
@@ -273,7 +274,7 @@ const css = `
   margin-top: 16px; color: var(--faint);
 }
 .enu-trust span {
-  font-family: 'League Spartan', system-ui, sans-serif;
+  font-family: var(--font-league-spartan), system-ui, sans-serif;
   font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase;
 }
 
@@ -293,13 +294,13 @@ const css = `
   .enu-item-media { width: 76px; height: 100px; }
   .enu-item-name { font-size: 16px; }
   .enu-item-price {
-    font-family: 'League Spartan', system-ui, sans-serif;
+    font-family: var(--font-league-spartan), system-ui, sans-serif;
     font-size: 14px; font-weight: 300;
   }
   .enu-empty .enu-e-title { font-size: 22px; }
   .enu-sum-total .enu-lbl { font-size: 18px; }
   .enu-sum-total .enu-val {
-    font-family: 'League Spartan', system-ui, sans-serif;
+    font-family: var(--font-league-spartan), system-ui, sans-serif;
     font-size: 16px; font-weight: 400;
   }
 }

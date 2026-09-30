@@ -85,8 +85,11 @@ export function EmptyState({ message }: { message: string }) {
 }
 
 // ─── VPageHeader ──────────────────────────────────────────────────────────────
-export function VPageHeader({ eyebrow, title, italicTitle, sub, actions }: {
-  eyebrow: string; title: string; italicTitle?: string; sub?: string
+export function VPageHeader({ eyebrow, title, italicTitle, joined, sub, actions }: {
+  eyebrow: string; title: string; italicTitle?: string
+  /** One compound word (Produkt|verwaltung): no space between the parts and no italic — it reads as one plain word. */
+  joined?: boolean
+  sub?: string
   actions?: React.ReactNode
 }) {
   return (
@@ -97,7 +100,7 @@ export function VPageHeader({ eyebrow, title, italicTitle, sub, actions }: {
             {eyebrow}
           </p>
           <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontWeight: 300, fontSize: 36, lineHeight: 1.05, color: '#0A0A0A', margin: 0 }}>
-            {title}{italicTitle && <> <em style={{ fontStyle: 'italic' }}>{italicTitle}</em></>}
+            {title}{italicTitle && <>{!joined && ' '}<em style={{ fontStyle: joined ? 'normal' : 'italic' }}>{italicTitle}</em></>}
           </h1>
           {sub && (
             <p style={{ fontFamily: 'var(--font-league-spartan)', fontSize: 12, color: '#6B6B6B', marginTop: 8, lineHeight: 1.6, maxWidth: 620 }}>

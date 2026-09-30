@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { brandApi } from '@/lib/api/modules/brandApi'
 import type { AdminApiProduct, AdminApiVariant } from '@/types/api'
 import { SectionCard, EmptyState, Loader } from '../../../admin/_components/shared'
 import { ChevronLeft, Trash2, Plus } from 'lucide-react'
 import { COLORS, COLOR_LABELS, COLOR_SWATCHES, SIZES, BTN_PRIMARY } from './constants'
+import { isSoldOut, variantsToSellOut, restockQuantity } from '@/lib/soldOut'
 
 // Existing-product variant management — add/remove/adjust stock for a product that already
 // exists. Distinct from VariantCard (CreateWizard.tsx), which edits variants before the product
@@ -26,6 +27,9 @@ export default function VariantsPanel({
   const [adding, setAdding]         = useState(false)
   const [saving, setSaving]         = useState<string | null>(null)
   const [err, setErr]               = useState<string | null>(null)
+  // Stock each variant had before it was marked sold out, so "Wieder verfügbar" can put it back.
+  const stockBeforeSoldOut = useRef<Record<string, number>>({})
+  const [sellingOutAll, setSellingOutAll] = useState(false)
 
   useEffect(() => {
     brandApi.variants.list(product.id)
@@ -58,6 +62,27 @@ export default function VariantsPanel({
     finally { setSaving(null) }
   }
 
+  async function sellOut(v: AdminApiVariant) {
+    stockBeforeSoldOut.current[v.id] = v.stockQuantity ?? 0
+    await updateStock(v.id, 0)
+  }
+
+  async function restock(v: AdminApiVariant) {
+    await updateStock(v.id, restockQuantity(stockBeforeSoldOut.current[v.id]))
+  }
+
+  async function sellOutAll() {
+    setSellingOutAll(true)
+    try {
+      for (const v of variantsToSellOut(variants)) {
+        stockBeforeSoldOut.current[v.id] = v.stockQuantity ?? 0
+        const updated = await brandApi.variants.update(product.id, v.id, { stockQuantity: 0 })
+        setVariants(prev => prev.map(x => x.id === v.id ? updated : x))
+      }
+    } catch { setErr('Nicht alle Varianten konnten auf ausverkauft gesetzt werden.') }
+    finally { setSellingOutAll(false) }
+  }
+
   async function removeVariant(variantId: string) {
     try {
       await brandApi.variants.delete(product.id, variantId)
@@ -66,6 +91,7 @@ export default function VariantsPanel({
   }
 
   const totalStock = variants.reduce((s, v) => s + (v.stockQuantity ?? 0), 0)
+  const soldOut = isSoldOut(variants)
 
   return (
     <div className="space-y-5">
@@ -82,7 +108,22 @@ export default function VariantsPanel({
             <p className="text-[13px] font-semibold text-[#0A0A0A]" style={{ fontFamily: 'var(--font-league-spartan)' }}>{product.name}</p>
             <p className="text-[11px] text-[#6B6B6B]">{variants.length} Varianten · {totalStock} Stk. gesamt</p>
           </div>
+          {soldOut && (
+            <span className="ml-1 px-2 py-0.5 border border-[#8B1E3F]/30 text-[10px] uppercase tracking-[0.1em] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+              Ausverkauft
+            </span>
+          )}
         </div>
+        {variants.length > 0 && !soldOut && (
+          <button
+            onClick={sellOutAll}
+            disabled={sellingOutAll}
+            className="ml-auto h-8 px-3 rounded-none border border-[#8B1E3F]/40 text-[11px] uppercase tracking-[0.1em] text-[#8B1E3F] hover:bg-rose-50 transition-all duration-150 disabled:opacity-50"
+            style={{ fontFamily: 'var(--font-league-spartan)' }}
+          >
+            {sellingOutAll ? '…' : 'Gesamtes Produkt als ausverkauft markieren'}
+          </button>
+        )}
       </div>
 
       <SectionCard title="Varianten">
@@ -127,6 +168,23 @@ export default function VariantsPanel({
                     <p className="font-mono text-[11px] text-[#6B6B6B]">{v.sku ?? '—'}</p>
                   </div>
                 </div>
+                {(v.stockQuantity ?? 0) > 0 ? (
+                  <button
+                    onClick={() => sellOut(v)}
+                    className="h-7 px-2.5 rounded-none border border-[#E8E8E8] text-[11px] text-[#6B6B6B] hover:border-[#8B1E3F]/40 hover:text-[#8B1E3F] transition-all duration-150 shrink-0"
+                    style={{ fontFamily: 'var(--font-league-spartan)' }}
+                  >
+                    Ausverkauft
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => restock(v)}
+                    className="h-7 px-2.5 rounded-none border border-[#8B1E3F]/30 text-[11px] text-[#8B1E3F] hover:border-[#370E4D]/40 hover:text-[#370E4D] transition-all duration-150 shrink-0"
+                    style={{ fontFamily: 'var(--font-league-spartan)' }}
+                  >
+                    Wieder verfügbar
+                  </button>
+                )}
                 <button
                   onClick={() => removeVariant(v.id)}
                   className="w-7 h-7 rounded-none flex items-center justify-center text-[#C0C0BC] hover:text-[#8B1E3F] hover:bg-rose-50 transition-all duration-150 shrink-0"

@@ -36,6 +36,36 @@ These are the five failure modes most likely to bite a real shopper. No unit tes
 4. **Image re-tagging and deleting in the dashboard.** The product-list thumbnail and the PDP must change after reassigning an image's colour or deleting the primary image, without a manual refresh. Pinned in Task 4 Steps 6–8 and Task 7 Step 3.
 5. **Per-colour listing cards (`?color=`).** A card for RED must open the PDP with RED selected and RED images, including colour names with umlauts or spaces (`Weiß`). Pinned in Task 7 Step 2.
 
+## Grill Concerns (Round 1: open until the user answers)
+
+**Decided (user, 2026-09-30):** tests run against production at `https://www.enunas.com` (`enunas.com` 308-redirects there), **not** localhost. The tasks below still describe localhost. They get rewritten once the open questions are answered.
+
+**Facts checked while grilling (these change the plan regardless of the answers):**
+- **F1:** `/mock-checkout` does nothing in production; the page redirects to `/`. Payment on production goes through real Mollie.
+- **F2: Correction.** `/neu`, `/trendy` and `/drop` **do** load real products (through `bekleidung/components/FeedPageContent` and `lib/curation`). Task 7 Step 1 wrongly lists them as known gaps; they are real checks.
+- **F3:** The wizard's release date matters. A future `releaseDate` makes the product "Coming Soon" (`preview: true`): visible but not buyable, with the price hidden. `/trendy` and the homepage exclude these products, and `/neu` shows them for 7 days (see `docs/superpowers/plans/2026-09-08-coming-soon-preview-state.md`). Release date must be today or earlier for the buy path. The countdown targets UTC midnight, so a date entered just after local midnight can still read as "future".
+- **F4:** `NEXT_PUBLIC_DISABLE_MOCK` doesn't matter in production: the mock fallback only runs when `NODE_ENV === 'development'`.
+- **F5:** The local `main` has uncommitted changes (`ImageGallery.tsx`, `CompleteTheLook.tsx`, `globals.css`, `GlassCursor.tsx`) that are not on production.
+
+**Open questions** (➡️ = recommended answer):
+
+| # | Concern | Options | ➡️ Recommendation |
+|---|---------|---------|-------------------|
+| Q1 | **Paying for the multi-brand order.** Production uses live Mollie, so it costs real money. | (a) Pay for real with very low test prices, then refund through admin cancel/return. (b) Stop on the Mollie page, leaving order/fulfilment/return/payout untested. (c) Point the backend at a Mollie test key temporarily. | (a). It's the only option that tests the real production path, including real refunds. |
+| Q2 | **Real shoppers can see the test products** once approved (homepage, `/neu`, search…). | (a) Approve, test and hide in one session, off-peak. (b) Keep them "Coming Soon", which leaves the buy path untested. (c) Leave them visible for a few days. | (a), plus visible names such as `E2E-0930 TEST – nicht kaufen`. |
+| Q3 | **Task 1's code change** only reaches production after a deploy; no deploys mid-test. | (a) Take Task 1 out as a separate follow-up, and run the Playwright spec against `https://www.enunas.com` without the local `webServer`. (b) Deploy Task 1 first, then test. | (a). Test exactly what is live, with no app code changes in this plan. |
+| Q4 | **Which version is tested.** Findings must refer to the deployed commit (see F5). | Confirm via `vercel` CLI, or the user confirms in the Vercel dashboard. | Check that the production deploy matches `12d7298` (or record the real commit) before Task 3, and put it in the report header. |
+| Q5 | **Side effects on production.** "Problem melden", ship, return and refund send real emails. Discount codes and brand bio edits are briefly public. | (a) Allow all of it on the two test brands and the test customer, and undo it in the same session. (b) Skip anything that emails or is public. | (a). Otherwise "every button" can't be tested. |
+| Q6 | **Admin access** for approval, delivery, returns and hiding. The seeded `admin@enunas.com / admin123` also works on production (a known security hole). | (a) The user gives the `enunas.munich@gmail.com` password. (b) The user logs in as admin themselves in the Chrome window at each admin step. (c) Use the seeded admin. | (b). The password never enters the transcript. Separately, `admin123` should be disabled on production. |
+| Q7 | **How far "production ready" goes.** Functional only, or also quality audits? | (a) Functional only. (b) Also `lighthouse_audit` on the homepage, `/bekleidung`, the P1 PDP and checkout, plus an image-optimisation check (AVIF/WebP, `sizes`). | (b), as a new Task 11b. Any score below 90 is a finding. |
+| Q8 | **What happens when a bug is found.** Fixes need a deploy. | (a) Log only, fix later. (b) Stop at a serious bug, fix, deploy, continue. | (a), except stop and ask the user if the buy path or the brand's order view is completely blocked. |
+
+**Round 2 (waits on Round 1):**
+- The exact test prices, and whether the refund goes through a whole-order cancel or a per-item return (depends on Q1).
+- The product naming convention (depends on Q2).
+- The Playwright `baseURL` / `webServer` config change for a production run (depends on Q3).
+- The order of admin hand-offs in the task sequence (depends on Q6).
+
 ---
 
 ## Execution Protocol (applies to every chrome-devtools task)

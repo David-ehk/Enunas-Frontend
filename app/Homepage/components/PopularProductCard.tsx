@@ -62,6 +62,8 @@ interface PopularProductCardProps {
   /** Renders the "Coming Soon" state: purple chip, "Kommt am …" instead of a price,
    *  countdown on hover. */
   preview?: boolean;
+  /** Every size is out of stock: the card stays listed but is tagged "Ausverkauft". */
+  soldOut?: boolean;
   /** ISO "YYYY-MM-DD"; required visual data when `preview` is true. */
   releaseDate?: string | null;
 }
@@ -84,6 +86,7 @@ const PopularProductCard = ({
   colours,
   createdAt,
   sizes = [],
+  soldOut = false,
   categories = [],
   catalogue = [],
   preview = false,
@@ -163,6 +166,19 @@ const PopularProductCard = ({
               }}
             >
               Coming Soon
+            </span>
+          )}
+
+          {soldOut && !preview && (
+            <span
+              className="absolute top-3 left-3 z-10 text-white mix-blend-difference uppercase"
+              style={{
+                fontFamily: 'var(--font-league-spartan)',
+                fontSize: 9,
+                letterSpacing: '0.12em',
+              }}
+            >
+              Ausverkauft
             </span>
           )}
 
