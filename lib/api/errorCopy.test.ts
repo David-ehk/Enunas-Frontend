@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { germanErrorMessage, errorRemedies } from './errorCopy'
+import { germanErrorMessage, errorRemedies, couponErrorMessage } from './errorCopy'
 
 describe('germanErrorMessage', () => {
   it('translates infra statuses instead of echoing the English backend string', () => {
@@ -53,5 +53,20 @@ describe('germanErrorMessage', () => {
 
   it('falls back to generic German when the body carried no message', () => {
     expect(germanErrorMessage(418, undefined)).toBe('Ein Fehler ist aufgetreten.')
+  })
+})
+
+// Checkout, 30 Sep 2026 E2E run: an unknown Gutscheincode showed the backend's raw English
+// message. The customer-facing text must be German; server errors keep the generic server copy.
+describe('couponErrorMessage', () => {
+  it('explains a rejected code in German for 4xx responses', () => {
+    for (const status of [400, 404, 409, 422]) {
+      expect(couponErrorMessage(status)).toBe('Dieser Gutscheincode ist ungültig oder abgelaufen.')
+    }
+  })
+
+  it('does not blame the code for a server error or a network failure', () => {
+    expect(couponErrorMessage(500)).toBe('Gutscheincode konnte nicht geprüft werden.')
+    expect(couponErrorMessage(undefined)).toBe('Gutscheincode konnte nicht geprüft werden.')
   })
 })

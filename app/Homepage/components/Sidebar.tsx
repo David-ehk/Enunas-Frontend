@@ -754,6 +754,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         aria-label="Hauptnavigation"
         role="dialog"
         aria-modal="true"
+        inert={!isOpen}
       >
         {/* ── Column 1 · ink rail ── */}
         <div className="mn-rail">

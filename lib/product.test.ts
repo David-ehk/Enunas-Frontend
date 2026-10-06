@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { generateSlug } from './product'
+import { generateSlug, colourHref, withColourFirst } from './product'
 
 describe('generateSlug', () => {
   it('lowercases and hyphenates spaces', () => {
@@ -28,5 +28,33 @@ describe('generateSlug', () => {
 
   it('handles empty string', () => {
     expect(generateSlug('')).toBe('')
+  })
+})
+
+// One builder for "open the PDP on this colour" links (colourway cards, homepage cover cards,
+// saved favourites) — the PDP reads it back via ?color=.
+describe('colourHref', () => {
+  it('appends the colour, URL-encoded', () => {
+    expect(colourHref('/bekleidung/brand/hoodie', 'Weiß')).toBe('/bekleidung/brand/hoodie?color=Wei%C3%9F')
+  })
+
+  it('returns the plain link when there is no colour', () => {
+    expect(colourHref('/bekleidung/brand/hoodie', null)).toBe('/bekleidung/brand/hoodie')
+    expect(colourHref('/bekleidung/brand/hoodie', undefined)).toBe('/bekleidung/brand/hoodie')
+  })
+})
+
+// A card or favourite for one colour leads with that colour's swatch (30 Sep 2026: a WHITE
+// favourite on /saved-lists still showed RED first).
+describe('withColourFirst', () => {
+  const colours = [{ name: 'RED' }, { name: 'WHITE' }, { name: 'BLACK' }]
+
+  it('moves the named colour to the front and keeps the rest in order', () => {
+    expect(withColourFirst(colours, 'BLACK').map(c => c.name)).toEqual(['BLACK', 'RED', 'WHITE'])
+  })
+
+  it('returns the list unchanged for an unknown or missing colour', () => {
+    expect(withColourFirst(colours, 'GREEN')).toEqual(colours)
+    expect(withColourFirst(colours, null)).toEqual(colours)
   })
 })

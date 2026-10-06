@@ -300,6 +300,7 @@ function SearchSidebar({
         role="dialog"
         aria-modal="true"
         aria-label="Suche"
+        inert={!isOpen}
         className={[
           'fixed inset-y-0 right-0 z-[9999]',
           'w-full max-w-[480px] bg-enunas-off-white',

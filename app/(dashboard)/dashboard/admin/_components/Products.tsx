@@ -7,6 +7,7 @@ import { PageHeader, SectionCard, StatusBadge, EmptyState, Loader, FilterBar, Se
 import { Eye, EyeOff, Archive, ArchiveRestore, CheckCircle, XCircle, Flag, Pencil, RotateCcw, X, Download } from 'lucide-react'
 import ImageDropzone from '@/components/ui/ImageDropzone'
 import { isProductLive } from '@/lib/product'
+import { matchesProductSearch } from '@/lib/adminProductSearch'
 
 type Filter = 'all' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'DEACTIVATED' | 'ARCHIVED'
 type Queue  = 'all' | 'moderation'
@@ -38,8 +39,8 @@ const CATALOGUE_COLORS: Record<string, { activeBg: string; activeText: string; i
 
 const GENDER_OPTIONS = [
   { value: '', label: '— Kein —' },
-  { value: 'MALE', label: 'Herren' },
-  { value: 'FEMALE', label: 'Damen' },
+  { value: 'MEN', label: 'Herren' },
+  { value: 'WOMEN', label: 'Damen' },
   { value: 'UNISEX', label: 'Unisex' },
 ]
 
@@ -248,10 +249,8 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
   }, [orders])
 
   const visible = useMemo(() => {
-    const q = search.toLowerCase()
     const result = products.filter(p => {
-      const matchSearch = !q || p.name.toLowerCase().includes(q) || p.brandName.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)
-      if (!matchSearch) return false
+      if (!matchesProductSearch(p, search)) return false
       const isArch = archivedIds.has(p.id)
       // "Archiviert" is the only view that shows archived products; every other tab hides them.
       if (queue === 'moderation') return !isArch && p.status === 'PENDING'
@@ -495,7 +494,7 @@ export default function Products({ orders = [] }: { orders?: ApiOrder[] }) {
                     </TD>
                     <TD className="text-[#6B6B6B]">{p.brandName}</TD>
                     <TD className="font-mono text-[11px] text-[#9B9B9B]">{p.sku}</TD>
-                    <TD className="font-medium text-[#0A0A0A]">{fmtEur(p.price)}</TD>
+                    <TD className="font-medium text-[#0A0A0A]">{p.price != null ? fmtEur(p.price) : '—'}</TD>
                     <TD className="text-[#6B6B6B] capitalize">{p.category}</TD>
                     <TD><StatusBadge status={p.status} /></TD>
                     <TD>

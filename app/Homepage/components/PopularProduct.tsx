@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useScrollAnimation } from '@/hooks/use-scroll-animation'
 import { cn } from '@/lib/utils'
 import PopularProductCard from "./PopularProductCard"
-import { productApi, apiProductToCardShape } from '@/lib/api'
+import { productApi, apiProductToCoverCard } from '@/lib/api'
 import type { ProductCardShape } from '@/lib/api'
 import { partitionPreview } from '@/lib/preview'
 
@@ -15,7 +15,7 @@ const PopularProduct = () => {
 
   useEffect(() => {
     productApi.list({ size: 8 })
-      .then(res => setProducts(partitionPreview(res.content.map(apiProductToCardShape), 'hide')))
+      .then(res => setProducts(partitionPreview(res.content.map(apiProductToCoverCard), 'hide').slice(0, 4)))
       .catch(() => setProducts([]))
       .finally(() => setLoading(false))
   }, [])
@@ -64,6 +64,7 @@ const PopularProduct = () => {
                   brandName={product.brandName}
                   productName={product.productName}
                   price={product.price}
+                  originalPrice={product.originalPrice}
                   href={product.href}
                   colours={product.colours}
                   catalogue={product.catalogue}

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useScrollAnimation } from '@/hooks/use-scroll-animation'
 import { cn } from '@/lib/utils'
 import PopularProductCard from './PopularProductCard'
-import { productApi, apiProductToCardShape } from '@/lib/api'
+import { productApi, apiProductToCoverCard } from '@/lib/api'
 import type { ProductCardShape } from '@/lib/api'
 import { partitionPreview } from '@/lib/preview'
 
@@ -14,13 +14,9 @@ export default function NewProducts() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    productApi.list({ size: 8 })
-      .then(res => {
-        const sorted = [...res.content].sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        )
-        setProducts(partitionPreview(sorted.map(apiProductToCardShape), 'hide'))
-      })
+    // Newest first from the API; a few extra so hidden preview products still leave 4 to show.
+    productApi.list({ size: 12, sort: 'createdAt,desc' })
+      .then(res => setProducts(partitionPreview(res.content.map(apiProductToCoverCard), 'hide').slice(0, 4)))
       .catch(() => setProducts([]))
       .finally(() => setLoading(false))
   }, [])
@@ -65,6 +61,7 @@ export default function NewProducts() {
                   brandName={product.brandName}
                   productName={product.productName}
                   price={product.price}
+                  originalPrice={product.originalPrice}
                   href={product.href}
                   colours={product.colours}
                   catalogue={product.catalogue}

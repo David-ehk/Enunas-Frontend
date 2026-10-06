@@ -8,6 +8,7 @@ import { StatusBadge, SectionCard, fmt } from '../../admin/_components/shared'
 import { VPageHeader } from './vshared'
 import ImageDropzone from '@/components/ui/ImageDropzone'
 import { Check, Info } from 'lucide-react'
+import { vatIdError, postalCodeError, normalizeSocialHandle, normalizeVatId } from '@/lib/brandSettingsValidation'
 
 const COUNTRIES = [
   { code: 'DE', name: 'Deutschland' },
@@ -131,8 +132,8 @@ export default function SettingsTab({
       const updated = await brandApi.updateMe({
         description: description.trim(),
         websiteUrl: websiteUrl.trim(),
-        instagramHandle: instagramHandle.trim(),
-        tiktokHandle: tiktokHandle.trim(),
+        instagramHandle: normalizeSocialHandle(instagramHandle),
+        tiktokHandle: normalizeSocialHandle(tiktokHandle),
         contactEmail: contactEmail.trim(),
       })
       onUpdate(updated)
@@ -151,6 +152,8 @@ export default function SettingsTab({
 
   async function saveAddress() {
     if (!legalName.trim() || !street.trim() || !postalCode.trim() || !city.trim()) return
+    const invalid = postalCodeError(postalCode, country) ?? vatIdError(vatId)
+    if (invalid) { setAddrError(invalid); return }
     setAddrSaving(true)
     setAddrError(null)
     try {
@@ -160,7 +163,7 @@ export default function SettingsTab({
         addressPostalCode: postalCode.trim(),
         addressCity: city.trim(),
         addressCountry: country,
-        ...(vatId.trim() ? { vatId: vatId.trim() } : { vatId: undefined }),
+        ...(vatId.trim() ? { vatId: normalizeVatId(vatId) } : { vatId: undefined }),
         ...(taxNumber.trim() ? { taxNumber: taxNumber.trim() } : { taxNumber: undefined }),
       })
       onUpdate(updated)
@@ -178,6 +181,8 @@ export default function SettingsTab({
   }
 
   async function saveReturnAddress() {
+    const invalid = retPostalCode.trim() ? postalCodeError(retPostalCode, retCountry) : null
+    if (invalid) { setRetError(invalid); return }
     setRetSaving(true)
     setRetError(null)
     try {
@@ -540,6 +545,7 @@ export default function SettingsTab({
                   setCountry(brand?.addressCountry ?? 'DE')
                   setVatId(brand?.vatId ?? '')
                   setTaxNumber(brand?.taxNumber ?? '')
+                  setAddrError(null)
                 }}
                 className="h-9 px-4 rounded-none text-[12px] text-[#6B6B6B] border border-[#E8E8E8] hover:bg-[#F5F5F0] transition-all duration-200"
                 style={{ fontFamily: 'var(--font-league-spartan)' }}
@@ -666,6 +672,7 @@ export default function SettingsTab({
                   setRetCity(brand?.returnCity ?? '')
                   setRetCountry(brand?.returnCountry ?? 'DE')
                   setRetInstructions(brand?.returnInstructions ?? '')
+                  setRetError(null)
                 }}
                 className="h-9 px-4 rounded-none text-[12px] text-[#6B6B6B] border border-[#E8E8E8] hover:bg-[#F5F5F0] transition-all duration-200"
                 style={{ fontFamily: 'var(--font-league-spartan)' }}

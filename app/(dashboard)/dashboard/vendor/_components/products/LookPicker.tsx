@@ -24,10 +24,17 @@ function coverImageUrl(p: AdminApiProduct): string | null {
 
 // Toggling an already-selected id always removes it; adding past the cap is a no-op rather
 // than silently evicting an earlier pick.
-export function toggleLookSelection(prev: string[], id: string): string[] {
-  if (prev.includes(id)) return prev.filter(x => x !== id)
+// Ids are compared as strings: saved picks arrive as strings while GET /products/my returns
+// numeric ids at runtime, and a strict mismatch showed saved picks unselected and duplicated them.
+export function isLookSelected(selected: string[], id: string | number): boolean {
+  return selected.includes(String(id))
+}
+
+export function toggleLookSelection(prev: string[], id: string | number): string[] {
+  const key = String(id)
+  if (prev.includes(key)) return prev.filter(x => x !== key)
   if (prev.length >= MAX_LOOK_PRODUCTS) return prev
-  return [...prev, id]
+  return [...prev, key]
 }
 
 // Shared by the edit panel and the create wizard's Look step, so a look is curated the same way
@@ -111,7 +118,7 @@ export function LookPicker({
             </p>
             <div className="grid grid-cols-4 gap-3">
               {visible.map(c => {
-                const isSelected = selected.includes(c.id)
+                const isSelected = isLookSelected(selected, c.id)
                 const atMax = !isSelected && selected.length >= MAX_LOOK_PRODUCTS
                 return (
                   <button

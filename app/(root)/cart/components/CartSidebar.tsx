@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useCart } from '@/app/context/CartContext'
+import { useWishlist } from '@/app/context/WishlistContext'
 import Image from 'next/image'
 import Link from 'next/link'
 import { estimateShipping } from '@/lib/pricing'
@@ -434,6 +435,7 @@ export default function CartSidebar() {
   } = useCart()
 
   const [activeTab, setActiveTab] = useState<'cart' | 'wish'>('cart')
+  const { items: wishlistItems } = useWishlist()
   const [removingId, setRemovingId] = useState<string | null>(null)
 
   // Estimate only — the backend prices shipping per brand and confirms it at checkout.
@@ -477,6 +479,8 @@ export default function CartSidebar() {
       <aside
         className={`enu-cart${isCartOpen ? ' is-open' : ''}`}
         aria-label="Warenkorb"
+        // Closed drawers stay in the DOM off-screen; inert keeps their controls out of the Tab order.
+        inert={!isCartOpen}
       >
         {/* ── Header ── */}
         <div className="enu-cart-head">
@@ -496,7 +500,7 @@ export default function CartSidebar() {
                 aria-selected={activeTab === 'wish'}
                 onClick={() => setActiveTab('wish')}
               >
-                Wunschliste<span className="enu-tab-n">0</span>
+                Wunschliste<span className="enu-tab-n">{wishlistItems.length}</span>
               </button>
             </div>
             <button className="enu-cart-close" onClick={closeCart} aria-label="Schließen">
@@ -531,6 +535,16 @@ export default function CartSidebar() {
                 </button>
               </div>
             )
+          ) : wishlistItems.length > 0 ? (
+            <div className="enu-empty">
+              <div className="enu-e-mark"><HeartIcon /></div>
+              <div className="enu-e-title">
+                {wishlistItems.length === 1 ? '1 Lieblingsstück gemerkt' : `${wishlistItems.length} Lieblingsstücke gemerkt`}
+              </div>
+              <Link href="/saved-lists" className="enu-e-cta" onClick={closeCart}>
+                Wunschliste ansehen <span className="enu-e-ar"><ArrowIcon /></span>
+              </Link>
+            </div>
           ) : (
             <div className="enu-empty">
               <div className="enu-e-mark"><HeartIcon /></div>

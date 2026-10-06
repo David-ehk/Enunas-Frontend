@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { brandApi } from '@/lib/api/modules/brandApi'
 import type { ApiOrder, ApiOrderItem, ApiBrandPartner } from '@/types/api'
-import { ownShipment, brandOrderStatus, brandCanShip } from '@/lib/brandRevenue'
+import { ownShipment, brandOrderStatus, brandCanShip, isReturnStatus, fulfilmentTab } from '@/lib/brandRevenue'
 import { isItemActive } from '@/lib/orderItemCancellation'
 import { describeOrderItem } from '@/lib/orderItemDisplay'
 import { mergeOrderUpdate } from '@/lib/mergeOrderUpdate'
@@ -17,6 +17,7 @@ import {
   Truck, AlertTriangle, X, Check,
   ChevronDown, ChevronUp, ExternalLink, RefreshCw,
 } from 'lucide-react'
+import { shippingAddressLines } from '@/lib/orderAddress'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 // 'Other' is a real option here (a brand can ship with a carrier we don't deep-link), which the
@@ -29,7 +30,7 @@ const STATUS_TABS = [
   { id: 'PAID',             label: 'Versandbereit' },
   { id: 'SHIPPED',          label: 'Versandt' },
   { id: 'DELIVERED',        label: 'Geliefert' },
-  { id: 'RETURN_REQUESTED', label: 'Rückgabe' },
+  { id: 'RETURN',           label: 'Rückgabe' },
 ]
 
 function trackingUrl(carrier: Carrier, trackingNumber: string): string {
@@ -133,9 +134,8 @@ function ShipModal({
             <div className="mt-3 pt-3 border-t border-[#E0E0DB]">
               <p className="text-[10px] uppercase tracking-[0.1em] text-[#9B9B9B] mb-1" style={{ fontFamily: 'var(--font-league-spartan)' }}>Lieferadresse</p>
               <p className="text-[12px] text-[#2D2D2D]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                {order.shippingAddress.firstName} {order.shippingAddress.lastName}<br />
-                {order.shippingAddress.street}<br />
-                {order.shippingAddress.postalCode} {order.shippingAddress.city}, {order.shippingAddress.country}
+                {shippingAddressLines(order.shippingAddress).map((line, i) => <span key={i}>{line}<br /></span>)}
+                {order.shippingAddress.country}
               </p>
             </div>
           )}
@@ -439,9 +439,9 @@ function OrderRow({
                 <p className="text-[10px] uppercase tracking-[0.1em] text-[#9B9B9B] mb-2" style={{ fontFamily: 'var(--font-league-spartan)' }}>Lieferadresse</p>
                 {order.shippingAddress ? (
                   <div className="text-[12px] text-[#2D2D2D] space-y-0.5" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                    <p className="font-medium">{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
-                    <p>{order.shippingAddress.street}</p>
-                    <p>{order.shippingAddress.postalCode} {order.shippingAddress.city}</p>
+                    {shippingAddressLines(order.shippingAddress).map((line, i) => (
+                      <p key={i} className={i === 0 ? 'font-medium' : undefined}>{line}</p>
+                    ))}
                     <p className="text-[#9B9B9B]">{order.shippingAddress.country}</p>
                   </div>
                 ) : (
@@ -482,10 +482,7 @@ function StatsRow({ orders, brandId }: { orders: ApiOrder[]; brandId: string | n
   const paid      = orders.filter(o => brandOrderStatus(o, brandId) === 'PAID').length
   const shipped   = orders.filter(o => brandOrderStatus(o, brandId) === 'SHIPPED').length
   const delivered = orders.filter(o => brandOrderStatus(o, brandId) === 'DELIVERED').length
-  const returned  = orders.filter(o => {
-    const s = brandOrderStatus(o, brandId)
-    return s === 'RETURN_REQUESTED' || s === 'RETURN_APPROVED'
-  }).length
+  const returned  = orders.filter(o => isReturnStatus(brandOrderStatus(o, brandId))).length
 
   const cells = [
     { label: 'Versandbereit', value: paid,      accent: true,          warn: false },
@@ -574,7 +571,7 @@ export default function Fulfillment() {
   }
 
   const filtered = orders.filter(o => {
-    const matchStatus = filter === 'ALL' || brandOrderStatus(o, myBrandId) === filter
+    const matchStatus = filter === 'ALL' || fulfilmentTab(brandOrderStatus(o, myBrandId)) === filter
     const q = search.toLowerCase()
     const matchSearch = !q
       || String(o.orderNumber ?? '').toLowerCase().includes(q)

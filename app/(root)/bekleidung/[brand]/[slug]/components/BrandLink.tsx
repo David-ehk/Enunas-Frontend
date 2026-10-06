@@ -17,7 +17,7 @@ export default function BrandLink({ brand }: BrandLinkProps) {
         py-2 pb-2.5
         transition-colors duration-200 ease-out-expo
         hover:text-enunas-purple-light hover:border-enunas-purple-light
-        focus:outline-none focus-visible:text-enunas-purple-light
+        focus-visible:text-enunas-purple-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-enunas-purple
       "
     >
       {brand}

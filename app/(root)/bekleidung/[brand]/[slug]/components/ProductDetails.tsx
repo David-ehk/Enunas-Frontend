@@ -25,6 +25,7 @@ import { useWishlist, type WishlistItem } from '@/app/context/WishlistContext'
 import { productApi } from '@/lib/api'
 import { listingPriceView } from '@/lib/pricing'
 import { colourwayCoverImage } from '@/lib/colourwayImage'
+import { colourHref, withColourFirst } from '@/lib/product'
 import type { ApiListing } from '@/types/api'
 
 interface ProductDetailsProps {
@@ -299,8 +300,9 @@ export default function ProductDetails({
       productName: product.name,
       price: livePreview ? null : formattedPrice,
       originalPrice: formattedOriginalPrice,
-      href: `/bekleidung/${brandSlug}/${productSlug}`,
-      colours: colorsForSelector,
+      // Keep the colour whose photo is saved, so the favourite reopens the PDP on it.
+      href: colourHref(`/bekleidung/${brandSlug}/${productSlug}`, selectedColor?.name),
+      colours: withColourFirst(colorsForSelector, selectedColor?.name),
       createdAt: product.createdAt,
       sizes: [...new Set(product.variants.filter(v => v.stockQuantity > 0).map(v => v.size))],
       catalogue: product.catalogueCategory ?? undefined,

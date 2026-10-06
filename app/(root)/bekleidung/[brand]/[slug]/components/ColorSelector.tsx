@@ -84,7 +84,7 @@ export default function ColorSelector({
                 onClick={handleCopySku}
                 title={copied ? 'Kopiert' : 'Produktnummer kopieren'}
                 aria-label={`Produktnummer ${sku} kopieren`}
-                className="group inline-flex items-center gap-1.5 font-mono text-[11px] tracking-[0.08em] text-enunas-gray-medium hover:text-enunas-black transition-colors duration-200 focus:outline-none"
+                className="group inline-flex items-center gap-1.5 font-mono text-[11px] tracking-[0.08em] text-enunas-gray-medium hover:text-enunas-black transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-enunas-purple"
               >
                 <span className="select-all truncate">{sku}</span>
                 {copied ? (
@@ -112,7 +112,7 @@ export default function ColorSelector({
                 onMouseLeave={() => setHoveredColor(null)}
                 aria-label={`Farbe ${color.name} auswählen`}
                 aria-pressed={isSelected}
-                className="flex flex-col items-center flex-shrink-0 focus:outline-none"
+                className="flex flex-col items-center flex-shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-enunas-purple"
               >
                 <div
                   className="transition-all duration-150"
@@ -213,6 +213,7 @@ function ColorSidebar({ colors, selectedColor, onColorSelect, open, onClose }: S
         role="dialog"
         aria-modal
         aria-label="Farbe wählen"
+        inert={!open}
         className="fixed top-0 right-0 h-full bg-white z-[70] flex flex-col"
         style={{
           width: '340px',

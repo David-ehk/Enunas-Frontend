@@ -19,6 +19,8 @@ export interface ProductSearchParams {
   search?: string;
   minPrice?: number;
   maxPrice?: number;
+  /** Spring Pageable sort, e.g. 'createdAt,desc' (verified on GET /products, 4 Oct 2026). */
+  sort?: string;
 }
 
 export interface PagedProducts {

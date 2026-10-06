@@ -14,6 +14,8 @@ import { estimateShipping, calcFinalTotal } from '@/lib/pricing'
 import { UPSELL_CODE_STORAGE_KEY } from '@/lib/featureFlags'
 import { toShippingAddressDto, type AddressSelection } from '@/lib/address'
 import { rememberPendingCheckout } from '@/lib/paymentOutcome'
+import { couponErrorMessage } from '@/lib/api/errorCopy'
+import { formatEuro } from '@/lib/format'
 
 const SHIPPING_METHOD_LABEL: Record<OrderPreviewResponseDto['shippingBreakdown'][number]['calculationMethod'], string> = {
   GLOBAL_DEFAULT: 'Standard',
@@ -120,7 +122,7 @@ export default function CheckoutPage() {
         if (promoCode.trim()) {
           setCouponMessage(
             res.discountAmount
-              ? { type: 'success', text: `✓ Rabatt angewendet (−€${res.discountAmount.toFixed(2)})` }
+              ? { type: 'success', text: `✓ Rabatt angewendet (−${formatEuro(res.discountAmount)})` }
               : { type: 'info', text: 'Für diesen Code gilt kein Rabatt.' }
           )
         }
@@ -130,7 +132,7 @@ export default function CheckoutPage() {
         if (promoCode.trim()) {
           setCouponMessage({
             type: 'info',
-            text: err instanceof FetchError ? err.message : 'Gutscheincode konnte nicht geprüft werden.',
+            text: couponErrorMessage(err instanceof FetchError ? err.status : undefined),
           })
         }
       } finally {
@@ -567,7 +569,7 @@ export default function CheckoutPage() {
                     </span>
                     <span className="flex items-center gap-2 flex-shrink-0">
                       <span className="font-league-spartan text-sm text-enunas-black font-medium">
-                        €{displayTotal.toFixed(2)}
+                        {formatEuro(displayTotal)}
                       </span>
                       <svg
                         width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -628,7 +630,7 @@ export default function CheckoutPage() {
                             </p>
                           </div>
                           <p className="font-league-spartan text-xs text-enunas-black flex-shrink-0">
-                            €{(item.price * item.quantity).toFixed(2)}
+                            {formatEuro(item.price * item.quantity)}
                           </p>
                         </div>
                       ))}
@@ -641,7 +643,7 @@ export default function CheckoutPage() {
                     <div className="border-t border-enunas-gray-light pt-4 space-y-2">
                       <div className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium">
                         <span>Zwischensumme</span>
-                        <span>€{displaySubtotal.toFixed(2)}</span>
+                        <span>{formatEuro(displaySubtotal)}</span>
                       </div>
 
                       {preview?.shippingBreakdown && preview.shippingBreakdown.length > 0 ? (
@@ -651,25 +653,25 @@ export default function CheckoutPage() {
                               Versand — {line.brandName}
                               <span className="text-enunas-gray-medium/70"> · {SHIPPING_METHOD_LABEL[line.calculationMethod]}</span>
                             </span>
-                            <span>{line.amount === 0 ? 'Kostenlos' : `€${line.amount.toFixed(2)}`}</span>
+                            <span>{line.amount === 0 ? 'Kostenlos' : formatEuro(line.amount)}</span>
                           </div>
                         ))
                       ) : (
                         <div className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium">
                           <span>Versand{previewLoading ? ' …' : ''}</span>
-                          <span>{displayShippingTotal === 0 ? 'Kostenlos' : `€${displayShippingTotal.toFixed(2)}`}</span>
+                          <span>{displayShippingTotal === 0 ? 'Kostenlos' : formatEuro(displayShippingTotal)}</span>
                         </div>
                       )}
 
                       {displayDiscount > 0 && (
                         <div className="flex justify-between font-league-spartan text-xs text-enunas-success">
                           <span>{preview?.discountCode ? `Rabatt (${preview.discountCode})` : 'Rabatt'}</span>
-                          <span>−€{displayDiscount.toFixed(2)}</span>
+                          <span>−{formatEuro(displayDiscount)}</span>
                         </div>
                       )}
                       <div className="flex justify-between font-league-spartan text-sm text-enunas-black pt-3 border-t border-enunas-gray-light">
                         <span className="font-medium">Gesamt</span>
-                        <span className="font-medium">€{displayTotal.toFixed(2)}</span>
+                        <span className="font-medium">{formatEuro(displayTotal)}</span>
                       </div>
                       <p className="font-league-spartan text-[10px] text-enunas-gray-medium">
                         inkl. MwSt.
@@ -685,7 +687,12 @@ export default function CheckoutPage() {
                         name="coupon"
                         placeholder="Gutscheincode"
                         value={couponInput}
-                        onChange={e => setCouponInput(e.target.value)}
+                        onChange={e => {
+                          setCouponInput(e.target.value)
+                          // An emptied field removes the code from the order too — otherwise a
+                          // rejected code keeps being sent and blocks payment.
+                          if (!e.target.value.trim()) { setPromoCode(''); setCouponMessage(null) }
+                        }}
                         className="flex-1 min-w-0 border border-enunas-gray-light px-3 py-2.5 font-league-spartan text-xs text-enunas-black bg-white focus:outline-none focus:border-enunas-purple transition-colors duration-200"
                       />
                       <button

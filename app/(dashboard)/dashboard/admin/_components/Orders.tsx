@@ -13,6 +13,7 @@ import { describeOrderItem } from '@/lib/orderItemDisplay'
 import { mergeOrderUpdate } from '@/lib/mergeOrderUpdate'
 import { cancelOrderErrorMessage } from '@/lib/api/errorCopy'
 import { cancelOrderItems, reconcileCancelledItem } from '@/lib/orderItemCancellationActions'
+import { shippingAddressLines } from '@/lib/orderAddress'
 
 type Filter = 'all' | 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'RETURN_REQUESTED' | 'REFUNDED' | 'SHIPPING_PROBLEM' | 'AWAITING_ADMIN' | 'MANUAL_REVIEW'
 
@@ -481,9 +482,9 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
                             <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-2">Lieferadresse</p>
                             {order.shippingAddress ? (
                               <div className="text-[12px] text-[#0A0A0A] space-y-0.5">
-                                <p>{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
-                                <p className="text-[#6B6B6B]">{order.shippingAddress.street}</p>
-                                <p className="text-[#6B6B6B]">{order.shippingAddress.postalCode} {order.shippingAddress.city}</p>
+                                {shippingAddressLines(order.shippingAddress).map((line, i) => (
+                                  <p key={i} className={i === 0 ? undefined : 'text-[#6B6B6B]'}>{line}</p>
+                                ))}
                                 <p className="text-[#6B6B6B]">{order.shippingAddress.country}</p>
                               </div>
                             ) : <p className="text-[11px] text-[#9B9B9B]">—</p>}

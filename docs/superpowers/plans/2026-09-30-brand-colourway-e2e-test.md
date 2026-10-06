@@ -60,13 +60,58 @@ These are the five failure modes most likely to bite a real shopper. No unit tes
 | Q7 | **How far "production ready" goes.** Functional only, or also quality audits? | (a) Functional only. (b) Also `lighthouse_audit` on the homepage, `/bekleidung`, the P1 PDP and checkout, plus an image-optimisation check (AVIF/WebP, `sizes`). | (b), as a new Task 11b. Any score below 90 is a finding. |
 | Q8 | **What happens when a bug is found.** Fixes need a deploy. | (a) Log only, fix later. (b) Stop at a serious bug, fix, deploy, continue. | (a), except stop and ask the user if the buy path or the brand's order view is completely blocked. |
 
-**Round 2 (waits on Round 1):**
-- The exact test prices, and whether the refund goes through a whole-order cancel or a per-item return (depends on Q1).
-- The product naming convention (depends on Q2).
-- The Playwright `baseURL` / `webServer` config change for a production run (depends on Q3).
-- The order of admin hand-offs in the task sequence (depends on Q6).
+**Round 1 answers (user, 2026-09-30):**
+- **Q1:** Production uses a **Mollie test API key**, so no real money moves. Normal prices are fine, and the Mollie test page is used to mark payments paid, failed or cancelled.
+- **Q2:** There are no real users yet, so the test products may stay visible. The `E2E-0930` prefix is enough.
+- **Q3:** Everything is deployed; production matches the current code.
+- **Q4:** The user commits all pending changes before the run. Task 2 records the deployed commit hash in the report header.
+- **Q5:** Every side effect is allowed on production. Emails go to the user's own aliases.
+- **Q6:** **The user logs in as admin themselves.** Claude must never know, ask for, type or use the live admin password, and must never use the seeded `admin123` account either. Every admin step is a hand-off: Claude pauses, the user logs in, and Claude takes no snapshot or screenshot while credentials are being typed.
+- **Q7:** Lighthouse and image-optimisation audits are **out of scope** (a separate run later).
+- **Q8:** **Log only.** Bugs are fixed later in separate tasks.
+
+## Grill Concerns (Round 2: open until the user answers)
+
+| # | Concern | Options | ➡️ Recommendation |
+|---|---------|---------|-------------------|
+| R2-Q1 | **Task 1** (the gallery refactor + unit test) changes `ProductDetails.tsx`, which is code that isn't deployed. | (a) Move it to a separate follow-up, so this run makes no app code changes. (b) Do it first, the user deploys it, then the run starts. | (a). This run tests what is live. The only files it adds are test files (fixtures, the Playwright spec, the Playwright config). |
+| R2-Q2 | **Playwright against production.** `playwright.config.ts` hardcodes `localhost:3000` and always starts `npm run dev`. | (a) Make `baseURL` come from `E2E_BASE_URL` and skip `webServer` when it is set, keeping localhost as the default. (b) A separate `playwright.prod.config.ts`. | (a). A 3-line change, and the existing smoke tests can also run against production. |
+| R2-Q3 | **Which refund path to test.** With test mode, both are free. | (a) Only return → refund on the multi-brand order. (b) Also a second small order that the admin cancels while PAID (`POST /admin/orders/{id}/cancel`, reason `OTHER`), which tests the Mollie cancel-refund. (c) Also test a failed or cancelled payment on the Mollie test page. | (b) + (c). A failed payment must leave no order visible to either brand, and the cancel-refund is a separate backend path. |
+| R2-Q4 | **Checking emails** (order confirmation, shipping, return, refund, "Problem melden"). | (a) The user checks their inbox and reports back. (b) Claude reads them through the Gmail connector (needs a one-time sign-in by the user). (c) Don't check emails. | (b) if the user is fine connecting Gmail; otherwise (a). Emails are part of "production ready" and often show the wrong product image or colour. |
+| R2-Q5 | **Admin hand-off timing.** Admin is needed 4 times (approve, deliver, return steps, hide/cleanup). | (a) Pause at each point in order. (b) Group them: approve once, then later do deliver + returns + cancel together. | (b). Two hand-offs instead of four. The plan's order already allows grouping. |
+
+**Round 2 answers (user, 2026-09-30):**
+- **R2-Q1:** The user asked which code this means. Answer: the swatch→images filter inline in `ProductDetails.tsx:173-184`, which Task 1 would move into `lib/colourwayImage.ts` for a unit test. Recommended: **drop Task 1** from this run. *Waiting for the user to confirm.*
+- **R2-Q2:** **No Playwright.** The gallery check runs through the chrome-devtools MCP instead: `evaluate_script` collects the PDP's image `src`s per colour, with a red check before the upload and a green check after it. `playwright.config.ts` stays untouched.
+- **R2-Q3:** **All three paths:** (a) return → refund on the multi-brand order, (b) an admin cancel of a second PAID order, and (c) a failed or cancelled payment on the Mollie test page.
+- **R2-Q4:** **The user checks the emails** and reports back. At each email-producing step, the plan lists which emails to expect (recipient, subject topic, product/colour/image shown).
+- **R2-Q5:** **Grouped admin hand-offs.** Hand-off 1 is approval. Hand-off 2 covers delivery, return approve/receive/refund, the cancel order, and cleanup (hiding products).
 
 ---
+
+## Production Run Rules (2026-09-30; these OVERRIDE the task text below)
+
+- **Target:** `https://www.enunas.com` only. No local dev server, no Playwright.
+- **Task 1 is dropped** (user: "not that important"). The Task 4 Playwright spec is replaced by a chrome MCP check: `evaluate_script` returns `[...document.querySelectorAll('main img')].map(i => decodeURIComponent(i.currentSrc || i.src))` for each colour on the PDP, before the upload (red) and after it (green). Record both results in the ledger.
+- **Click the UI. Never shortcut a step with a direct API call.** `evaluate_script` is only for *reading* state. The single exception is Task 11 Step 2, the cross-brand authorization check, which by definition is a raw request.
+- **One isolated tab per role.** Use `new_page({ url, isolatedContext })` with contexts `admin`, `brandA`, `brandB` and `customer`.
+  - The `admin` context (page 2 at the start) is **already logged in by the user and must never be logged out, closed, or navigated outside `/dashboard/admin*`**. Admin actions are button clicks in that tab.
+  - Never click "Abmelden" in the admin tab.
+- **Never type, ask for or read an admin password.** Never use `admin123`.
+- **Payments:** production uses a Mollie **test** key. On the Mollie test page, choose the status (Paid, Failed or Canceled) and click the continue button.
+- **Emails:** don't check them. At each step that sends one, add a line to the report's "Emails to verify" section with the recipient, trigger, and expected product, colour and image.
+- **Bugs (revised by the user mid-run, 2026-09-30):** test phases on production **log** each bug with a screenshot, the failing request (`get_network_request`) and repro steps. After all test phases, a **fix phase** handles every frontend bug:
+  1. Reproduce it on `localhost:3000`, which also uses the production API.
+  2. Write a failing Vitest test (pure function) or Playwright spec first, per CLAUDE.md.
+  3. Fix it.
+  4. Confirm the test passes.
+  5. Re-verify in the browser on localhost.
+  6. Run `pnpm run build`.
+
+  Backend-only bugs can't be fixed from this repo and are reported as such. Fixes stay **uncommitted**, so the user can review and deploy them.
+- **Shared state file:** `e2e/reports/2026-09-30-state.md` holds the product ids, slugs, colour ids, order numbers and return numbers. Each phase reads it first and appends to it.
+- **Ledger:** `e2e/reports/2026-09-30-brand-colourways-ledger.md`. Screenshots go in `e2e/reports/2026-09-30/`.
+- **Lighthouse and image audits are out of scope.**
 
 ## Execution Protocol (applies to every chrome-devtools task)
 

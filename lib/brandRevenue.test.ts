@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   toCents, isRevenueOrder, ownSkus, ownItems, itemGross, participatesIn,
   grossProductAmount, refundedAmount, shippingAmount, summarise, partnerSettlementAmount,
-  brandCanShip,
+  brandCanShip, brandOrderStatus, isReturnStatus, fulfilmentTab,
 } from './brandRevenue'
 import type { ApiOrder, AdminApiProduct, AdminPayout } from '@/types/api'
 
@@ -239,5 +239,56 @@ describe('brandCanShip — the "Versenden" gate', () => {
       ],
     } as unknown as Partial<ApiOrder>)
     expect(brandCanShip(o, 5)).toBe(true)
+  })
+})
+
+// ENS-2026-1TWSCJ, 30 Sep 2026: both brands shipped, admin marked DELIVERED, then a return was
+// received. Both brand dashboards still said "Versandt", because RETURN_RECEIVED was not among
+// the statuses past SHIPPED that a shipped brand surfaces.
+describe('brandOrderStatus — after this brand shipped', () => {
+  const shipped = { brandId: 5, brandName: 'A', status: 'SHIPPED' } as const
+  const at = (status: string) =>
+    order({ status, returns: [], shipments: [shipped] } as unknown as Partial<ApiOrder>)
+
+  it('shows every status past SHIPPED instead of falling back to SHIPPED', () => {
+    for (const s of ['DELIVERED', 'RETURN_REQUESTED', 'RETURN_APPROVED', 'RETURN_RECEIVED']) {
+      expect(brandOrderStatus(at(s), 5)).toBe(s)
+    }
+  })
+
+  it('stays SHIPPED while the order as a whole is only partially shipped', () => {
+    expect(brandOrderStatus(at('PARTIALLY_SHIPPED'), 5)).toBe('SHIPPED')
+  })
+})
+
+// Same order: the "Rückgabe" tab matched only RETURN_REQUESTED, so it went empty as soon as the
+// return was approved or received.
+describe('isReturnStatus', () => {
+  it('covers every open return stage', () => {
+    for (const s of ['RETURN_REQUESTED', 'RETURN_APPROVED', 'RETURN_RECEIVED']) {
+      expect(isReturnStatus(s)).toBe(true)
+    }
+  })
+
+  it('excludes non-return statuses', () => {
+    for (const s of ['PAID', 'SHIPPED', 'DELIVERED', 'REFUNDED']) {
+      expect(isReturnStatus(s)).toBe(false)
+    }
+  })
+})
+
+// Bestellungen tabs: one bucket per brand status, with every return stage under "Rückgabe" —
+// replaces a special-case branch in the list filter.
+describe('fulfilmentTab', () => {
+  it('puts every return stage in the RETURN tab', () => {
+    for (const s of ['RETURN_REQUESTED', 'RETURN_APPROVED', 'RETURN_RECEIVED']) {
+      expect(fulfilmentTab(s)).toBe('RETURN')
+    }
+  })
+
+  it('maps other statuses to their own tab', () => {
+    expect(fulfilmentTab('PAID')).toBe('PAID')
+    expect(fulfilmentTab('SHIPPED')).toBe('SHIPPED')
+    expect(fulfilmentTab('DELIVERED')).toBe('DELIVERED')
   })
 })

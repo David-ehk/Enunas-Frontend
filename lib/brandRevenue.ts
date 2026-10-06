@@ -135,7 +135,7 @@ export function brandOrderStatus(order: ApiOrder, brandId: string | number | nul
   if (mine.status === 'AWAITING_SHIPMENT') return 'PAID'   // this brand still owes a shipment
   if (mine.status === 'SHIPPED') {
     // this brand is done dispatching — surface the furthest global progress past SHIPPED
-    return (global === 'DELIVERED' || global === 'RETURN_REQUESTED' || global === 'RETURN_APPROVED')
+    return (global === 'DELIVERED' || isReturnStatus(global))
       ? global
       : 'SHIPPED'
   }
@@ -201,4 +201,14 @@ export function partnerSettlementAmount(payouts: AdminPayout[]): number | null {
   const outstanding = payouts.filter(p => p.status === 'PENDING' || p.status === 'APPROVED')
   if (outstanding.length === 0) return null
   return toCents(outstanding.reduce((sum, p) => sum + (p.amount ?? 0), 0))
+}
+
+/** An open return in any stage — drives the "Rückgabe" tab and the "Rückgaben" KPI. */
+export function isReturnStatus(status: string): boolean {
+  return status === 'RETURN_REQUESTED' || status === 'RETURN_APPROVED' || status === 'RETURN_RECEIVED'
+}
+
+/** The Bestellungen tab a brand status belongs to; every return stage shares the "Rückgabe" tab. */
+export function fulfilmentTab(status: string): string {
+  return isReturnStatus(status) ? 'RETURN' : status
 }

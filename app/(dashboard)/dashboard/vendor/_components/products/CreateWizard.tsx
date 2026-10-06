@@ -7,11 +7,12 @@ import type { AdminApiProduct, PriceInputMode } from '@/types/api'
 import { SectionCard, fmtEur } from '../../../admin/_components/shared'
 import { Plus, Check, ChevronLeft, Package, ImagePlus, X } from 'lucide-react'
 import {
-  CATALOGUE_OPTS, GENDERS, PRODUCT_TYPES, SIZES, COLORS, COLOR_LABELS, COLOR_SWATCHES,
+  CATALOGUE_OPTS, GENDERS, PRODUCT_TYPES, productTypeLabel, SIZES, COLORS, COLOR_LABELS, COLOR_SWATCHES,
   INPUT, LABEL, BTN_PRIMARY, BTN_GHOST, LISTING_REGIONS, round2, PRICE_MODE_CONFIG,
   EMPTY_WIZARD, type WizardData, type VariantRow, type WizardStep,
 } from './constants'
 import { LookPicker, toggleLookSelection } from './LookPicker'
+import { returnPeriodError, duplicateVariants } from '@/lib/productWizardValidation'
 
 function StepIndicator({ step }: { step: WizardStep }) {
   const steps = [
@@ -195,11 +196,18 @@ export default function CreateWizard({ onBack, onCreated }: { onBack: () => void
     if (!data.originCountry.trim()) { setErr('Herkunftsland ist erforderlich.'); return false }
     if (!data.careInstructions.trim()) { setErr('Pflegehinweise sind erforderlich.'); return false }
     if (data.catalogueCategory.length === 0) { setErr('Mindestens eine Katalogart wählen.'); return false }
+    const periodErr = returnPeriodError(data.returnPeriodDays)
+    if (periodErr) { setErr(periodErr); return false }
     return true
   }
 
   function validateStep2() {
     if (variants.length === 0) { setErr('Mindestens eine Variante hinzufügen.'); return false }
+    const dupes = duplicateVariants(variants)
+    if (dupes.length > 0) {
+      setErr(`Doppelte Variante: ${dupes.map(d => `${COLOR_LABELS[d.color] ?? d.color} / ${d.size}`).join(', ')}. Bitte eine davon entfernen.`)
+      return false
+    }
     return true
   }
 
@@ -351,7 +359,7 @@ export default function CreateWizard({ onBack, onCreated }: { onBack: () => void
               <div>
                 <label className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Produkttyp</label>
                 <select className={INPUT} value={data.productType} onChange={e => setField('productType', e.target.value)} style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                  {PRODUCT_TYPES.map(t => <option key={t} value={t}>{t.replace('_', ' ')}</option>)}
+                  {PRODUCT_TYPES.map(t => <option key={t} value={t}>{productTypeLabel(t)}</option>)}
                 </select>
               </div>
               <div>
@@ -735,8 +743,8 @@ export default function CreateWizard({ onBack, onCreated }: { onBack: () => void
               {[
                 { label: 'Name',          value: data.name },
                 { label: 'Kategorie',     value: data.category },
-                { label: 'Geschlecht',    value: data.gender },
-                { label: 'Produkttyp',    value: data.productType },
+                { label: 'Geschlecht',    value: GENDERS.find(g => g.id === data.gender)?.label ?? data.gender },
+                { label: 'Produkttyp',    value: productTypeLabel(data.productType) },
                 { label: 'Material',      value: data.material },
                 { label: 'Herkunftsland', value: data.originCountry },
                 { label: 'Pflegehinweise', value: data.careInstructions },

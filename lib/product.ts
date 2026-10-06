@@ -105,3 +105,13 @@ export function generateSlug(text: string): string {
     .trim();
 }
  
+/** A PDP link that opens on the given colour (read back by the PDP's `?color=`). */
+export function colourHref(href: string, colourName: string | null | undefined): string {
+  return colourName ? `${href}?color=${encodeURIComponent(colourName)}` : href
+}
+
+/** The colours with `name` first (a card or favourite for one colour leads with its swatch). */
+export function withColourFirst<T extends { name: string }>(colours: T[], name: string | null | undefined): T[] {
+  const first = colours.find(c => c.name === name)
+  return first ? [first, ...colours.filter(c => c !== first)] : colours
+}

@@ -323,6 +323,8 @@ export interface ApiOrder {
     lastName?: string;
     street?: string;
     street2?: string;
+    houseNumber?: string;
+    addressLine2?: string;
     city?: string;
     postalCode?: string;
     country?: string;

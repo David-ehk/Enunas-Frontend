@@ -12,14 +12,17 @@ export const CATALOGUE_OPTS = [
 ]
 
 export const GENDERS = [
-  { id: 'MALE',   label: 'Herren' },
-  { id: 'FEMALE', label: 'Damen' },
+  { id: 'MEN',    label: 'Herren' },
+  { id: 'WOMEN',  label: 'Damen' },
   { id: 'UNISEX', label: 'Unisex' },
 ]
 
 // Full backend ProductType enum (23 values) — the dropdown submits the value verbatim, so any
 // value not in the backend enum hard-fails product creation. Order/grouping mirrors the backend
 // source: tops, bottoms, dress, outerwear, footwear, accessories, other.
+/** Display label for a ProductType enum value, e.g. ZIP_HOODIE → ZIP HOODIE. */
+export const productTypeLabel = (t: string) => t.replaceAll('_', ' ')
+
 export const PRODUCT_TYPES = [
   'T_SHIRT', 'LONGSLEEVE', 'SHIRT', 'HOODIE', 'ZIP_HOODIE', 'SWEATER',
   'JEANS', 'CARGO_PANTS', 'JOGGER', 'SHORTS', 'PANTS', 'SKIRT',

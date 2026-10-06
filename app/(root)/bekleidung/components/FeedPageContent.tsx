@@ -9,6 +9,7 @@ import { useIsMobile } from '@/hooks/use-mobile'
 import { generateSlug } from '@/lib/product'
 import FilterSidebar, { FilterState, CATEGORIES, catMatchesProduct, parsePriceNum, genderMatchesProduct } from './FilterSidebar'
 import { partitionPreview } from '@/lib/preview'
+import { byNewest } from '@/lib/newestProducts'
 import SortDropdown from './SortDropdown'
 import BlurFilterBar from './BlurFilterBar'
 import CategoryNavigation from './CategoryNavigation'
@@ -114,6 +115,7 @@ export default function FeedPageContent({ basePath, HeroComponent, brandFilter, 
     if (filters.sortieren === 'preis-auf')      r = [...r].sort((a, b) => parsePriceNum(a.price) - parsePriceNum(b.price))
     else if (filters.sortieren === 'preis-ab')  r = [...r].sort((a, b) => parsePriceNum(b.price) - parsePriceNum(a.price))
     else if (filters.sortieren === 'name')      r = [...r].sort((a, b) => a.productName.localeCompare(b.productName))
+    else if (filters.sortieren === 'neu')       r = [...r].sort(byNewest)
     return partitionPreview(r, previewMode)
   }, [brandScopedProducts, activeCat, gender, filters, previewMode])
 

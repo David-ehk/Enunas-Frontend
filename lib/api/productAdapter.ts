@@ -1,5 +1,5 @@
 import type { ApiProduct } from '@/types/api';
-import { generateSlug } from '@/lib/product';
+import { generateSlug, colourHref, withColourFirst } from '@/lib/product';
 import { colourwayCoverImage } from '@/lib/colourwayImage';
 
 export interface ProductCardShape {
@@ -44,6 +44,11 @@ export function apiProductToColourwayCards(p: ApiProduct): ProductCardShape[] {
   const base = apiProductToCardShape(p);
   if (p.colours.length <= 1) return [base];
 
+  // A colour with no photo of its own gets a shared one; the product's first image may belong to
+  // another colour.
+  const shared = (p.imageObjects ?? []).filter(i => i.productColorId == null);
+  const sharedCover = (shared.find(i => i.primary) ?? shared[0])?.url ?? base.imgURL;
+
   return p.colours.map(c => {
     const variants = (p.variants ?? []).filter(v => v.color === c.name);
     const colorId = variants.find(v => v.colorId != null)?.colorId ?? null;
@@ -51,16 +56,35 @@ export function apiProductToColourwayCards(p: ApiProduct): ProductCardShape[] {
     return {
       ...base,
       id: `${p.id}:${c.name}`,
-      imgURL: colourwayCoverImage(p.imageObjects, colorId, base.imgURL),
+      imgURL: colourwayCoverImage(p.imageObjects, colorId, sharedCover),
       colours: [{ hex: c.hex, name: c.name, colorFamily: c.colorFamily }],
-      allColours: [c, ...p.colours.filter(o => o.name !== c.name)].map(o => ({
+      allColours: withColourFirst(p.colours, c.name).map(o => ({
         hex: o.hex, name: o.name, colorFamily: o.colorFamily,
       })),
       sizes: variants.length > 0 ? sizes : base.sizes,
       soldOut: variants.length > 0 && variants.every(v => v.stockQuantity === 0),
-      href: `${base.href}?color=${encodeURIComponent(c.name)}`,
+      href: colourHref(base.href, c.name),
     };
   });
+}
+
+/**
+ * One card per product (homepage sections): like apiProductToCardShape, but when the cover photo
+ * belongs to one colourway, that colour's swatch comes first and the link opens the PDP on it —
+ * so photo, swatch and landing colour agree. Shared or untagged covers leave the card unchanged.
+ */
+export function apiProductToCoverCard(p: ApiProduct): ProductCardShape {
+  const base = apiProductToCardShape(p);
+  const coverColorId = p.imageObjects?.find(i => i.url === base.imgURL)?.productColorId ?? null;
+  if (coverColorId == null) return base;
+  const colourName = p.variants?.find(v => v.colorId === coverColorId)?.color;
+  const cover = base.colours.find(c => c.name === colourName);
+  if (!cover) return base;
+  return {
+    ...base,
+    colours: withColourFirst(base.colours, cover.name),
+    href: colourHref(base.href, cover.name),
+  };
 }
 
 // Sizes with stock left, uppercased; undefined when there is no variant data to go by.

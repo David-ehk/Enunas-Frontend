@@ -11,6 +11,9 @@ import { useCart } from '@/app/context/CartContext'
 import type { ApiOrder, ApiListing } from '@/types/api'
 import { paymentOutcome, takePendingCheckout } from '@/lib/paymentOutcome'
 import OrderItemThumb from '@/components/ui/OrderItemThumb'
+import { shippingAddressLines } from '@/lib/orderAddress'
+import { itemGross } from '@/lib/brandRevenue'
+import { formatEuro } from '@/lib/format'
 
 // Mollie's webhook usually lands before the customer is redirected back, but not always. Re-check
 // a PENDING order for ~30 s before settling on "not confirmed yet".
@@ -134,7 +137,6 @@ function formatDate(iso: string) {
 }
 
 function OrderDetails({ order }: { order: ApiOrder }) {
-  const fmt = (n: number) => `€${n.toFixed(2).replace('.', ',')}`
   return (
     <div className="border-t border-enunas-gray-light mt-4">
       <div className="flex justify-between items-start py-6 border-b border-enunas-gray-light">
@@ -175,13 +177,15 @@ function OrderDetails({ order }: { order: ApiOrder }) {
                     {[item.variantSize, item.variantColor].filter(Boolean).join(' · ')}
                   </p>
                 )}
+                {item.quantity > 1 && (
+                  <p className="font-league-spartan text-[11px] text-enunas-gray-medium">
+                    ×{item.quantity}
+                  </p>
+                )}
               </div>
+              {/* Line total, so the lines add up to the subtotal. */}
               <p className="font-league-spartan text-sm text-enunas-black flex-shrink-0">
-                {item.discountPriceAtPurchase != null
-                  ? fmt(item.discountPriceAtPurchase)
-                  : item.priceAtPurchase != null
-                    ? fmt(item.priceAtPurchase)
-                    : ''}
+                {formatEuro(itemGross(item))}
               </p>
             </div>
           ))}
@@ -193,7 +197,7 @@ function OrderDetails({ order }: { order: ApiOrder }) {
           {order.subtotal != null && (
             <div className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium mb-2">
               <span>Zwischensumme</span>
-              <span>{fmt(order.subtotal)}</span>
+              <span>{formatEuro(order.subtotal)}</span>
             </div>
           )}
 
@@ -204,26 +208,26 @@ function OrderDetails({ order }: { order: ApiOrder }) {
             order.shippingSnapshots.map(line => (
               <div key={line.brandId} className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium mb-2">
                 <span>Versand — {line.brandName}</span>
-                <span>{line.amount === 0 ? 'Kostenlos' : fmt(line.amount)}</span>
+                <span>{line.amount === 0 ? 'Kostenlos' : formatEuro(line.amount)}</span>
               </div>
             ))
           ) : order.shippingTotal != null ? (
             <div className="flex justify-between font-league-spartan text-xs text-enunas-gray-medium mb-2">
               <span>Versand</span>
-              <span>{order.shippingTotal === 0 ? 'Kostenlos' : fmt(order.shippingTotal)}</span>
+              <span>{order.shippingTotal === 0 ? 'Kostenlos' : formatEuro(order.shippingTotal)}</span>
             </div>
           ) : null}
 
           {order.discountAmount != null && order.discountAmount > 0 && (
             <div className="flex justify-between font-league-spartan text-xs text-enunas-success mb-2">
               <span>{order.discountCode ? `Rabatt (${order.discountCode})` : 'Rabatt'}</span>
-              <span>−{fmt(order.discountAmount)}</span>
+              <span>−{formatEuro(order.discountAmount)}</span>
             </div>
           )}
 
           <div className="flex justify-between pt-2 border-t border-enunas-gray-light">
             <p className="font-league-spartan text-sm text-enunas-black font-medium">Gesamt</p>
-            <p className="font-league-spartan text-sm text-enunas-black font-medium">{fmt(order.total)}</p>
+            <p className="font-league-spartan text-sm text-enunas-black font-medium">{formatEuro(order.total)}</p>
           </div>
           <p className="font-league-spartan text-[10px] text-enunas-gray-medium mt-1">inkl. MwSt.</p>
         </div>
@@ -235,11 +239,7 @@ function OrderDetails({ order }: { order: ApiOrder }) {
             Lieferadresse
           </p>
           <div className="font-league-spartan text-sm text-enunas-black space-y-0.5 leading-relaxed">
-            {order.shippingAddress.fullName && <p>{order.shippingAddress.fullName}</p>}
-            {order.shippingAddress.street && <p>{order.shippingAddress.street}</p>}
-            {(order.shippingAddress.postalCode || order.shippingAddress.city) && (
-              <p>{[order.shippingAddress.postalCode, order.shippingAddress.city].filter(Boolean).join(' ')}</p>
-            )}
+            {shippingAddressLines(order.shippingAddress).map((line, i) => <p key={i}>{line}</p>)}
           </div>
         </div>
       )}
@@ -349,7 +349,6 @@ export default function ConfirmationClient({ orderNumber, isUpsell }: Props) {
 
   const originalPrice = listing?.price ?? UPSELL_CONFIG.fallbackOriginalPrice
   const discountedPreviewPrice = Math.round(originalPrice * 0.9 * 100) / 100
-  const fmt = (n: number) => `€${n.toFixed(2).replace('.', ',')}`
 
   function handleUpsellCheckout() {
     addToCart({
@@ -483,10 +482,10 @@ export default function ConfirmationClient({ orderNumber, isUpsell }: Props) {
                   </div>
                   <div className="flex items-baseline gap-3 flex-wrap">
                     <span className="font-league-spartan text-2xl font-semibold text-enunas-black">
-                      {fmt(discountedPreviewPrice)}
+                      {formatEuro(discountedPreviewPrice)}
                     </span>
                     <span className="font-league-spartan text-sm text-enunas-gray-medium line-through">
-                      {fmt(originalPrice)}
+                      {formatEuro(originalPrice)}
                     </span>
                     <span
                       className="font-league-spartan text-[10px] uppercase tracking-[0.08em] text-enunas-purple px-2 py-1 flex-shrink-0"
@@ -532,7 +531,7 @@ export default function ConfirmationClient({ orderNumber, isUpsell }: Props) {
                       />
                       <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
                       <span className="relative z-10 font-cormorant text-[20px] tracking-[0.06em]">
-                        Jetzt kaufen — {fmt(discountedPreviewPrice)}
+                        Jetzt kaufen — {formatEuro(discountedPreviewPrice)}
                       </span>
                       <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
                     </button>
@@ -648,10 +647,10 @@ export default function ConfirmationClient({ orderNumber, isUpsell }: Props) {
                   </p>
                   <div className="flex items-baseline gap-2">
                     <span className="font-league-spartan text-sm text-enunas-purple font-medium">
-                      {fmt(discountedPreviewPrice)}
+                      {formatEuro(discountedPreviewPrice)}
                     </span>
                     <span className="font-league-spartan text-xs text-enunas-gray-medium line-through">
-                      {fmt(originalPrice)}
+                      {formatEuro(originalPrice)}
                     </span>
                   </div>
                 </div>

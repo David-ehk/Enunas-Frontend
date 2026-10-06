@@ -129,3 +129,11 @@ export function reconcileCancelErrorMessage(status: number, serverMessage: strin
     default: return serverMessage || 'Aktion fehlgeschlagen.';
   }
 }
+
+/** Checkout coupon field: a 4xx means the code itself was rejected; anything else is not the code's fault. */
+export function couponErrorMessage(status: number | undefined): string {
+  if (status !== undefined && status >= 400 && status < 500) {
+    return 'Dieser Gutscheincode ist ungültig oder abgelaufen.'
+  }
+  return 'Gutscheincode konnte nicht geprüft werden.'
+}

@@ -12,6 +12,8 @@ import { generateSlug } from '@/lib/product'
 import { UPSELL_ENABLED } from '@/lib/featureFlags'
 import type { ApiOrder } from '@/types/api'
 import type { ProductCardShape } from '@/lib/api'
+import { shippingAddressLines } from '@/lib/orderAddress'
+import { formatEuro } from '@/lib/format'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -106,7 +108,7 @@ function UpsellCard({ product, discountPct }: { product: ProductCardShape; disco
       </p>
       <div className="flex items-baseline gap-2">
         <span className="font-league-spartan text-sm text-enunas-purple font-medium">
-          €{discountedPrice.toFixed(2).replace('.', ',')}
+          {formatEuro(discountedPrice)}
         </span>
         <span className="font-league-spartan text-xs text-enunas-gray-medium line-through">
           {product.price}
@@ -197,7 +199,7 @@ function OrderDetails({ order }: { order: ApiOrder }) {
               </div>
               {item.lineTotal != null && (
                 <p className="font-league-spartan text-sm text-enunas-black flex-shrink-0">
-                  €{item.lineTotal.toFixed(2).replace('.', ',')}
+                  {formatEuro(item.lineTotal)}
                 </p>
               )}
             </div>
@@ -211,7 +213,7 @@ function OrderDetails({ order }: { order: ApiOrder }) {
           <div className="flex justify-between">
             <p className="font-league-spartan text-sm text-enunas-black font-medium">Gesamt</p>
             <p className="font-league-spartan text-sm text-enunas-black font-medium">
-              €{total.toFixed(2).replace('.', ',')}
+              {formatEuro(total)}
             </p>
           </div>
           <p className="font-league-spartan text-[10px] text-enunas-gray-medium mt-1">inkl. MwSt.</p>
@@ -225,11 +227,7 @@ function OrderDetails({ order }: { order: ApiOrder }) {
             Lieferadresse
           </p>
           <div className="font-league-spartan text-sm text-enunas-black space-y-0.5 leading-relaxed">
-            {order.shippingAddress.fullName && <p>{order.shippingAddress.fullName}</p>}
-            {order.shippingAddress.street && <p>{order.shippingAddress.street}</p>}
-            {(order.shippingAddress.postalCode || order.shippingAddress.city) && (
-              <p>{[order.shippingAddress.postalCode, order.shippingAddress.city].filter(Boolean).join(' ')}</p>
-            )}
+            {shippingAddressLines(order.shippingAddress).map((line, i) => <p key={i}>{line}</p>)}
             {order.shippingAddress.country && (
               <p>{order.shippingAddress.country}</p>
             )}
