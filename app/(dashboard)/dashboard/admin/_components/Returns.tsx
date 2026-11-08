@@ -1,16 +1,17 @@
 'use client'
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
-import { adminReturnsApi, returnActionErrorMessage } from '@/lib/api/modules/adminReturnsApi'
-import { RETURN_LIFECYCLE, RETURN_STAGE_LABELS, nextAction, type ReturnAction } from '@/lib/api/modules/returnsApi'
+import { adminReturnsApi, returnActionErrorMessage, reconcileRefundErrorMessage } from '@/lib/api/modules/adminReturnsApi'
+import { RETURN_LIFECYCLE, RETURN_STAGE_LABELS, adminReturnAction, effectiveRefundState, toReturnsWithOrder, type ReturnAction } from '@/lib/api/modules/returnsApi'
+import RefundReleaseDialog from './RefundReleaseDialog'
 import ReturnTimeline from '@/components/ui/ReturnTimeline'
 import { FetchError } from '@/lib/api'
-import type { AdminCustomer, ReturnStatus, ReturnWithOrder } from '@/types/api'
+import type { AdminCustomer, ApiOrder, ReturnStatus, ReturnWithOrder } from '@/types/api'
 import {
   PageHeader, KPIGrid, KPICell, SectionCard, EmptyState, Loader,
   fmt, fmtEur, dailyCounts, weekDeltaStr,
 } from './shared'
-import { RotateCcw, CheckCircle, PackageCheck, Euro } from 'lucide-react'
+import { RotateCcw, CheckCircle, PackageCheck, Euro, RefreshCw } from 'lucide-react'
 import OrderItemThumb from '@/components/ui/OrderItemThumb'
 import { describeOrderItem } from '@/lib/orderItemDisplay'
 
@@ -31,9 +32,20 @@ const LABEL_STATUS_LABELS: Record<string, string> = {
 
 const ACTION_META: Record<Exclude<ReturnAction, null>, { label: string; icon: typeof CheckCircle }> = {
   approve: { label: 'Retoure genehmigen', icon: CheckCircle },
-  receive: { label: 'Wareneingang buchen', icon: PackageCheck },
-  refund:  { label: 'Erstattung auslösen', icon: Euro },
+  receive: { label: 'Ware erhalten (statt Marke)', icon: PackageCheck },
+  release: { label: 'Erstattung freigeben', icon: Euro },
+  refresh: { label: 'Status bei Mollie prüfen', icon: RefreshCw },
+  resend:  { label: 'Erneut senden', icon: Euro },
 }
+
+// Money side of a return, shown next to the physical status.
+const REFUND_STATE_META: Record<string, { label: string; color: string }> = {
+  PENDING:  { label: 'Erstattung läuft — wartet auf Mollie', color: '#7A5C1E' },
+  FAILED:   { label: 'Erstattung fehlgeschlagen', color: '#8B1E3F' },
+  REFUNDED: { label: 'Erstattung bestätigt', color: '#1A5A3C' },
+}
+
+type RowAction = Exclude<ReturnAction, null> | 'override'
 
 function StatusPill({ status }: { status: ReturnStatus }) {
   const tone: Record<ReturnStatus, { bg: string; fg: string }> = {
@@ -56,12 +68,13 @@ function ReturnRow({
 }: {
   r: ReturnWithOrder
   customerLabel: string
-  onAction: (r: ReturnWithOrder, action: Exclude<ReturnAction, null>, amount?: number) => void
+  onAction: (r: ReturnWithOrder, action: RowAction) => void
   busy: boolean
   error: string | null
 }) {
-  const action = nextAction(r.status)
-  const [amount, setAmount] = useState('')
+  const action = adminReturnAction(r)
+  const refundState = effectiveRefundState(r)
+  const refundMeta = refundState ? REFUND_STATE_META[refundState] : null
 
   return (
     <div className="bg-white border border-[#E8E8E8]">
@@ -92,19 +105,19 @@ function ReturnRow({
         <div>
           <p className="text-[9.5px] uppercase tracking-[0.18em] font-medium mb-2"
             style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>Artikel</p>
-          {r.items.length === 0 ? (
+          {r.lines.length === 0 ? (
             <p className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#C9C9C9' }}>
               {r.orderItemIds?.length ? `${r.orderItemIds.length} Position(en) — Details nicht in der Bestellung gefunden` : '—'}
             </p>
           ) : (
             <ul className="space-y-2">
-              {r.items.map(it => {
+              {r.lines.map(it => {
                 const d = describeOrderItem(it)
                 return (
                   <li key={it.id} className="flex items-center gap-2.5 text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
                     <OrderItemThumb src={it.imageUrl} alt={d.label} width={30} />
                     <span>
-                      {it.quantity ? `${it.quantity}× ` : ''}{d.label}
+                      {it.quantityReturned} von {it.quantity} · {d.label}
                       {d.variant ? ` — ${d.variant}` : ''}
                     </span>
                   </li>
@@ -155,9 +168,21 @@ function ReturnRow({
             {r.shipToAddress || 'Keine Adresse übermittelt.'}
           </p>
 
-          {r.refundAmount != null && (
-            <p className="text-[12px] mt-3" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
-              Erstattet: <strong>{fmtEur(r.refundAmount)}</strong>
+          {refundMeta && (
+            <p className="text-[12px] mt-3" style={{ fontFamily: 'var(--font-league-spartan)', color: refundMeta.color }}>
+              {refundMeta.label}
+              {r.refundAmount != null && <> · <strong>{fmtEur(r.refundAmount)}</strong></>}
+              {r.refundShippingAmount ? ` (inkl. ${fmtEur(r.refundShippingAmount)} Versand)` : ''}
+            </p>
+          )}
+          {r.receivedBy && (
+            <p className="text-[11px] mt-1" style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
+              Wareneingang bestätigt von {r.receivedBy === 'BRAND' ? 'der Marke' : 'Enunas'}{r.receivedAt ? ` · ${fmt(r.receivedAt)}` : ''}
+            </p>
+          )}
+          {r.refundOverrideReason && (
+            <p className="text-[11px] mt-1" style={{ fontFamily: 'var(--font-league-spartan)', color: '#7A5C1E' }}>
+              Ohne Wareneingang erstattet: {r.refundOverrideReason}
             </p>
           )}
 
@@ -167,24 +192,9 @@ function ReturnRow({
                 Abgeschlossen — keine weitere Aktion.
               </p>
             ) : (
-              <div className="space-y-2">
-                {action === 'refund' && (
-                  <div>
-                    <p className="text-[9.5px] uppercase tracking-[0.18em] font-medium mb-1"
-                      style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
-                      Betrag (optional)
-                    </p>
-                    <input
-                      type="number" step="0.01" min="0" value={amount}
-                      onChange={e => setAmount(e.target.value)}
-                      placeholder="Leer = voller offener Betrag dieser Marke"
-                      className="w-full text-[12px] border border-[#E8E8E8] px-2.5 py-2 focus:outline-none focus:border-[#370E4D]/50"
-                      style={{ fontFamily: 'var(--font-league-spartan)' }}
-                    />
-                  </div>
-                )}
+              <div className="flex items-center gap-3 flex-wrap">
                 <button
-                  onClick={() => onAction(r, action, action === 'refund' && amount.trim() ? Number(amount) : undefined)}
+                  onClick={() => onAction(r, action)}
                   disabled={busy}
                   className="inline-flex items-center gap-1.5 h-8 px-3 text-[11px] font-medium border transition-all duration-200 disabled:opacity-40"
                   style={{ fontFamily: 'var(--font-league-spartan)', borderColor: '#370E4D', color: '#370E4D' }}
@@ -192,6 +202,16 @@ function ReturnRow({
                   {React.createElement(ACTION_META[action].icon, { className: 'w-3.5 h-3.5' })}
                   {busy ? 'Wird ausgeführt…' : ACTION_META[action].label}
                 </button>
+                {action === 'receive' && (
+                  <button
+                    onClick={() => onAction(r, 'override')}
+                    disabled={busy}
+                    className="text-[11px] underline underline-offset-4 transition-colors duration-200 disabled:opacity-40"
+                    style={{ fontFamily: 'var(--font-league-spartan)', color: '#6B6B6B' }}
+                  >
+                    Ohne Wareneingang erstatten…
+                  </button>
+                )}
               </div>
             )}
             {error && (
@@ -212,6 +232,7 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
   const [busy, setBusy] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [filter, setFilter] = useState<ReturnStatus | 'ALL'>('ALL')
+  const [dialog, setDialog] = useState<{ returnNumber: string; mode: 'release' | 'resend' | 'override' } | null>(null)
 
   const getCustomerLabel = useCallback((buyerEmail?: string) => {
     if (!buyerEmail) return '—'
@@ -236,31 +257,33 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
    * order, so we re-derive only the returns belonging to that order — every
    * other brand's return is left exactly as it was.
    */
-  async function runAction(r: ReturnWithOrder, action: Exclude<ReturnAction, null>, amount?: number) {
+  // Replaces only the returns of the updated order, re-resolved from it (quantities can change);
+  // every other order's returns stay exactly as they were.
+  function applyUpdatedOrder(updated: ApiOrder) {
+    const fresh = toReturnsWithOrder(updated)
+    if (!fresh.length) { load(); return }
+    setReturns(prev => prev.map(x => {
+      const next = x.orderId === updated.id ? fresh.find(f => f.returnNumber === x.returnNumber) : undefined
+      return next ? { ...next, buyerEmail: next.buyerEmail ?? x.buyerEmail, orderNumber: next.orderNumber ?? x.orderNumber } : x
+    }))
+  }
+
+  async function runAction(r: ReturnWithOrder, action: RowAction) {
+    if (action === 'release' || action === 'resend' || action === 'override') {
+      setDialog({ returnNumber: r.returnNumber, mode: action })
+      return
+    }
     setBusy(r.returnNumber)
     setErrors(e => ({ ...e, [r.returnNumber]: '' }))
     try {
       const updated =
         action === 'approve' ? await adminReturnsApi.approveReturn(r.returnNumber)
         : action === 'receive' ? await adminReturnsApi.receiveReturn(r.returnNumber)
-        : await adminReturnsApi.refundReturn(r.returnNumber, amount)
-
-      const fresh = (updated.returns ?? []).reduce<Record<string, ReturnWithOrder['status']>>((acc, x) => {
-        acc[x.returnNumber] = x.status
-        return acc
-      }, {})
-      setReturns(prev => prev.map(x => {
-        const next = updated.returns?.find(u => u.returnNumber === x.returnNumber)
-        // Only returns present on the updated order are touched; and within that
-        // order only the fields the backend actually returned.
-        return next && x.orderId === updated.id
-          ? { ...x, ...next, items: x.items, orderId: x.orderId, orderNumber: x.orderNumber, currency: x.currency }
-          : x
-      }))
-      if (!Object.keys(fresh).length) load()
+        : await adminReturnsApi.reconcileRefund(r.returnNumber, 'REFRESH')
+      applyUpdatedOrder(updated)
     } catch (err) {
       const msg = err instanceof FetchError
-        ? returnActionErrorMessage(err.status, err.message)
+        ? (action === 'refresh' ? reconcileRefundErrorMessage : returnActionErrorMessage)(err.status, err.message)
         : 'Aktion fehlgeschlagen.'
       setErrors(e => ({ ...e, [r.returnNumber]: msg }))
     } finally {
@@ -336,6 +359,15 @@ export default function Returns({ customers = [] }: { customers?: AdminCustomer[
             />
           ))}
         </div>
+      )}
+
+      {dialog && (
+        <RefundReleaseDialog
+          returnNumber={dialog.returnNumber}
+          mode={dialog.mode}
+          onClose={() => setDialog(null)}
+          onDone={updated => { applyUpdatedOrder(updated); setDialog(null) }}
+        />
       )}
 
       <p className="text-[10.5px] flex items-center gap-1.5"

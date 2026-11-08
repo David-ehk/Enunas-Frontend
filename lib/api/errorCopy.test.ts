@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { germanErrorMessage, errorRemedies, couponErrorMessage } from './errorCopy'
+import { germanErrorMessage, errorRemedies, couponErrorMessage, returnRequestErrorMessage } from './errorCopy'
 
 describe('germanErrorMessage', () => {
   it('translates infra statuses instead of echoing the English backend string', () => {
@@ -68,5 +68,22 @@ describe('couponErrorMessage', () => {
   it('does not blame the code for a server error or a network failure', () => {
     expect(couponErrorMessage(500)).toBe('Gutscheincode konnte nicht geprüft werden.')
     expect(couponErrorMessage(undefined)).toBe('Gutscheincode konnte nicht geprüft werden.')
+  })
+})
+
+// POST /orders/{id}/return with partial quantities (contract of 7 Oct 2026). The backend message is
+// English; the customer sees German copy keyed on the status.
+describe('returnRequestErrorMessage', () => {
+  it('explains a quantity above what is left (400)', () => {
+    expect(returnRequestErrorMessage(400)).toBe('Diese Menge kann nicht mehr zurückgegeben werden. Bitte lade die Seite neu.')
+  })
+
+  it('explains why a return is not possible right now (409)', () => {
+    expect(returnRequestErrorMessage(409)).toContain('Rückgabefrist')
+    expect(returnRequestErrorMessage(409)).toContain('noch bearbeitet')
+  })
+
+  it('falls back to a generic message', () => {
+    expect(returnRequestErrorMessage(500)).toBe('Retoure konnte nicht beantragt werden. Bitte versuche es später erneut.')
   })
 })

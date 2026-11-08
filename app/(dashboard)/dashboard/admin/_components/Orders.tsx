@@ -14,6 +14,7 @@ import { mergeOrderUpdate } from '@/lib/mergeOrderUpdate'
 import { cancelOrderErrorMessage } from '@/lib/api/errorCopy'
 import { cancelOrderItems, reconcileCancelledItem } from '@/lib/orderItemCancellationActions'
 import { shippingAddressLines } from '@/lib/orderAddress'
+import OrderRefundPreview from './OrderRefundPreview'
 
 type Filter = 'all' | 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'RETURN_REQUESTED' | 'REFUNDED' | 'SHIPPING_PROBLEM' | 'AWAITING_ADMIN' | 'MANUAL_REVIEW'
 
@@ -477,6 +478,14 @@ export default function Orders({ customers = [] }: { customers?: AdminCustomer[]
                   {expanded === order.id && (
                     <tr className="border-b border-[#F0F0EB]" style={{ background: '#F8F8F5' }}>
                       <td colSpan={8} className="px-6 py-5">
+                        {(order.returns ?? []).some(r => r.status !== 'REFUNDED') && (
+                          <div className="mb-5 max-w-xl">
+                            <OrderRefundPreview
+                              orderId={order.id}
+                              onOrderUpdated={updated => setOrders(prev => prev.map(o => o.id === updated.id ? mergeOrderUpdate(o, updated) : o))}
+                            />
+                          </div>
+                        )}
                         <div className="grid grid-cols-3 gap-6 mb-5">
                           <div>
                             <p className="text-[10px] uppercase tracking-[0.12em] text-[#9B9B9B] font-medium mb-2">Lieferadresse</p>

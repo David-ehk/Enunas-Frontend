@@ -1,6 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import { useVendorReturns } from '@/hooks/use-vendor-returns'
+import { returnsApi, brandCanConfirmReceipt } from '@/lib/api/modules/returnsApi'
+import { returnActionErrorMessage } from '@/lib/api/modules/adminReturnsApi'
+import { FetchError } from '@/lib/api'
 import type { ReturnWithOrder, ReturnStatus } from '@/types/api'
 import OrderItemThumb from '@/components/ui/OrderItemThumb'
 import ReturnTimeline from '@/components/ui/ReturnTimeline'
@@ -32,7 +36,7 @@ const STATUS_META: Record<ReturnStatus, { label: string; tone: 'warn' | 'purple'
 // stops the page reading as a to-do list the brand is failing to action.
 const NEXT_STEP: Record<ReturnStatus, string | null> = {
   REQUESTED: 'Enunas prüft die Anfrage — für dich ist aktuell nichts zu tun.',
-  APPROVED:  'Die Rücksendung geht an die gespeicherte Lieferadresse. Paket entgegennehmen und Zustand prüfen.',
+  APPROVED:  'Die Rücksendung geht an die gespeicherte Lieferadresse. Paket entgegennehmen, Zustand prüfen und dann „Ware erhalten" bestätigen.',
   RECEIVED:  'Wareneingang erfasst — Enunas veranlasst die Rückerstattung.',
   REFUNDED:  null,
 }
@@ -41,12 +45,17 @@ function statusMeta(s: ReturnStatus) {
   return STATUS_META[s] ?? { label: String(s), tone: 'muted' as const }
 }
 
-function itemLabel(it: ReturnWithOrder['items'][number]): string {
+function itemLabel(it: ReturnWithOrder['lines'][number]): string {
   const d = describeOrderItem(it)
   return d.variant ? `${d.label} — ${d.variant}` : d.label
 }
 
-function ReturnCard({ r }: { r: ReturnWithOrder }) {
+function ReturnCard({ r, onConfirmReceipt, busy, error }: {
+  r: ReturnWithOrder
+  onConfirmReceipt: (r: ReturnWithOrder) => void
+  busy: boolean
+  error: string | null
+}) {
   const { label, tone } = statusMeta(r.status)
   const hasLabel = Boolean(r.labelUrl || r.labelCarrier || r.labelTrackingNumber)
   const nextStep = NEXT_STEP[r.status] ?? null
@@ -89,17 +98,37 @@ function ReturnCard({ r }: { r: ReturnWithOrder }) {
             style={{ fontFamily: 'var(--font-league-spartan)', color: '#9B9B9B' }}>
             Artikel
           </p>
-          {r.items.length === 0 ? (
+          {r.lines.length === 0 ? (
             <p className="text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#C9C9C9' }}>—</p>
           ) : (
             <ul className="space-y-2">
-              {r.items.map((it) => (
+              {r.lines.map((it) => (
                 <li key={it.id} className="flex items-center gap-2.5 text-[12px]" style={{ fontFamily: 'var(--font-league-spartan)', color: '#2D2D2D' }}>
                   <OrderItemThumb src={it.imageUrl} alt={itemLabel(it)} width={30} />
-                  <span>{it.quantity ? `${it.quantity}× ` : ''}{itemLabel(it)}</span>
+                  <span>
+                    {it.quantityReturned}× {itemLabel(it)}
+                    {it.quantityReturned < it.quantity && (
+                      <span style={{ color: '#9B9B9B' }}>{` (${it.quantityReturned} von ${it.quantity})`}</span>
+                    )}
+                  </span>
                 </li>
               ))}
             </ul>
+          )}
+          {brandCanConfirmReceipt(r) && (
+            <div className="mt-4">
+              <button
+                onClick={() => onConfirmReceipt(r)}
+                disabled={busy}
+                className="h-9 px-4 text-[11px] font-medium uppercase tracking-[0.12em] text-white transition-colors duration-200 disabled:opacity-50"
+                style={{ fontFamily: 'var(--font-league-spartan)', background: '#370E4D' }}
+              >
+                {busy ? 'Wird gespeichert…' : 'Ware erhalten'}
+              </button>
+              {error && (
+                <p className="text-[11px] mt-2" style={{ fontFamily: 'var(--font-league-spartan)', color: '#8B1E3F' }}>{error}</p>
+              )}
+            </div>
           )}
           {r.reason && (
             <div className="mt-3">
@@ -169,7 +198,27 @@ function ReturnCard({ r }: { r: ReturnWithOrder }) {
 }
 
 export default function VendorReturns() {
-  const { returns, loading, error } = useVendorReturns()
+  const { returns, loading, error, reload } = useVendorReturns()
+  const [busy, setBusy] = useState<string | null>(null)
+  const [actionErrors, setActionErrors] = useState<Record<string, string>>({})
+
+  async function confirmReceipt(r: ReturnWithOrder) {
+    setBusy(r.returnNumber)
+    setActionErrors(e => ({ ...e, [r.returnNumber]: '' }))
+    try {
+      await returnsApi.confirmReceived(r.returnNumber)
+      reload()
+    } catch (err) {
+      setActionErrors(e => ({
+        ...e,
+        [r.returnNumber]: err instanceof FetchError
+          ? returnActionErrorMessage(err.status, err.message)
+          : 'Wareneingang konnte nicht gespeichert werden.',
+      }))
+    } finally {
+      setBusy(null)
+    }
+  }
 
   if (loading) return <Loader />
 
@@ -205,7 +254,15 @@ export default function VendorReturns() {
         </VCard>
       ) : (
         <div className="space-y-3">
-          {returns.map(r => <ReturnCard key={r.returnNumber} r={r} />)}
+          {returns.map(r => (
+            <ReturnCard
+              key={r.returnNumber}
+              r={r}
+              onConfirmReceipt={confirmReceipt}
+              busy={busy === r.returnNumber}
+              error={actionErrors[r.returnNumber] || null}
+            />
+          ))}
         </div>
       )}
     </div>

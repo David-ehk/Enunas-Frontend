@@ -11,6 +11,8 @@ import { describeShipment } from '@/lib/orderShipments'
 import { isItemActive } from '@/lib/orderItemCancellation'
 import { describeOrderItem } from '@/lib/orderItemDisplay'
 import { mergeOrderUpdate } from '@/lib/mergeOrderUpdate'
+import { returnableLines, buildReturnRequest, toReturnsWithOrder, customerRefundText, effectiveRefundState, RETURN_STAGE_LABELS } from '@/lib/api/modules/returnsApi'
+import { returnRequestErrorMessage } from '@/lib/api/errorCopy'
 import OrderItemThumb from '@/components/ui/OrderItemThumb'
 import AccountButton from './AccountButton'
 
@@ -69,6 +71,8 @@ function OrderRow({
   const [returnReason, setReturnReason] = useState<ReturnReason>('WRONG_SIZE')
   const [returnDesc, setReturnDesc] = useState('')
   const [returnItemIds, setReturnItemIds] = useState<string[]>([])
+  // Units to return per selected line; absent = every remaining unit.
+  const [returnQty, setReturnQty] = useState<Record<string, number>>({})
   const [returnLoading, setReturnLoading] = useState(false)
   const [returnError, setReturnError] = useState<string | null>(null)
 
@@ -84,25 +88,28 @@ function OrderRow({
     }
     setReturnLoading(true)
     try {
-      // The API accepts one orderItemId per request; send one per selected item so
-      // the customer returns only what they picked, not the whole order. The backend
-      // groups them into one return per brand.
+      // One request per selected line (with its quantity) so the customer returns only what
+      // they picked. The backend adds units to the brand's open REQUESTED return.
       let updated: ApiOrder | null = null
       for (const itemId of returnItemIds) {
-        updated = await orderApi.requestReturn(order.id, {
-          orderItemId: Number(itemId),
+        const remaining = returnableItems.find(i => i.id === itemId)?.remaining ?? 1
+        updated = await orderApi.requestReturn(order.id, buildReturnRequest({
+          orderItemId: itemId,
+          quantity: returnQty[itemId] ?? remaining,
+          remaining,
           reason: returnReason,
-          description: returnDesc.trim() || undefined,
-        })
+          description: returnDesc,
+        }))
+        onUpdated(updated)
       }
-      if (updated) onUpdated(updated)
       setReturnOpen(false)
       setReturnDesc('')
       setReturnItemIds([])
+      setReturnQty({})
     } catch (err) {
       setReturnError(
         err instanceof FetchError
-          ? err.message
+          ? returnRequestErrorMessage(err.status)
           : 'Retoure konnte nicht vollständig beantragt werden.'
       )
     } finally {
@@ -110,13 +117,12 @@ function OrderRow({
     }
   }
 
-  // An admin-cancelled (refunded) item must never be offered for a return — that would
-  // double-refund it. Items with no cancellationState predate the feature and count as active.
-  const returnableItems = order.items.filter(isItemActive)
-  const canReturn = order.status === 'DELIVERED' && returnableItems.length > 0
-  const hasReturn = [
-    'RETURN_REQUESTED', 'RETURN_APPROVED', 'RETURN_RECEIVED', 'REFUNDED',
-  ].includes(String(order.status))
+  // Lines with units left to return (cancelled lines and units already on a return excluded).
+  // Also available after a first partial return, so the remaining units can follow later.
+  const returnableItems = returnableLines(order)
+  const canReturn = returnableItems.length > 0
+  const orderReturns = toReturnsWithOrder(order)
+  const hasReturn = orderReturns.length > 0
 
   return (
     <article className="border border-enunas-gray-light">
@@ -329,10 +335,25 @@ function OrderRow({
                             {d.variant && (
                               <span className="text-enunas-gray-medium">{' · '}{d.variant}</span>
                             )}
-                            {item.quantity > 1 && (
+                            {item.remaining < item.quantity && (
+                              <span className="text-enunas-gray-medium">{` · noch ${item.remaining} von ${item.quantity}`}</span>
+                            )}
+                            {item.remaining === item.quantity && item.quantity > 1 && (
                               <span className="text-enunas-gray-medium">{` · ×${item.quantity}`}</span>
                             )}
                           </span>
+                          {returnItemIds.includes(item.id) && item.remaining > 1 && (
+                            <select
+                              aria-label={`Menge für ${d.label}`}
+                              value={returnQty[item.id] ?? item.remaining}
+                              onChange={(e) => setReturnQty((prev) => ({ ...prev, [item.id]: Number(e.target.value) }))}
+                              className="ml-auto border border-enunas-gray-light px-2 py-1 font-league-spartan text-xs text-enunas-black bg-white focus:outline-none focus:border-enunas-purple transition-colors duration-200"
+                            >
+                              {Array.from({ length: item.remaining }, (_, i) => i + 1).map((n) => (
+                                <option key={n} value={n}>{n} Stk.</option>
+                              ))}
+                            </select>
+                          )}
                         </label>
                       )
                     })}
@@ -378,7 +399,7 @@ function OrderRow({
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setReturnOpen(false); setReturnError(null); setReturnItemIds([]) }}
+                  onClick={() => { setReturnOpen(false); setReturnError(null); setReturnItemIds([]); setReturnQty({}) }}
                   className="font-league-spartan text-[11px] tracking-[0.15em] uppercase px-5 py-2.5 border border-enunas-gray-light text-enunas-gray-medium hover:text-enunas-black hover:border-enunas-black transition-colors duration-200"
                 >
                   Abbrechen
@@ -387,26 +408,51 @@ function OrderRow({
             </form>
           )}
 
-          {/* Return details — shown once a return exists */}
+          {/* Returns — one per brand, each with its own units, address and refund status */}
           {hasReturn && (
-            <div className="mt-4 border-t border-enunas-gray-light pt-4 space-y-4">
-              <p
-                className={cn(
-                  'font-league-spartan text-xs leading-relaxed',
-                  order.status === 'REFUNDED' ? 'text-enunas-success' : 'text-enunas-gray-dark'
-                )}
-              >
-                {order.status === 'RETURN_REQUESTED' &&
-                  'Dein Retourenantrag ist eingegangen und wird geprüft. Du kannst die Ware bereits an die unten stehende Adresse zurücksenden.'}
-                {order.status === 'RETURN_APPROVED' &&
-                  'Deine Retoure ist genehmigt. Bitte sende die Ware innerhalb von 14 Tagen an die unten stehende Adresse zurück.'}
-                {order.status === 'RETURN_RECEIVED' &&
-                  'Deine Rücksendung ist eingegangen und wird geprüft — die Erstattung erfolgt innerhalb von 5–10 Werktagen über deine ursprüngliche Zahlungsmethode.'}
-                {order.status === 'REFUNDED' &&
-                  'Erstattet — der Betrag wurde über deine ursprüngliche Zahlungsmethode zurückgezahlt.'}
-              </p>
+            <div className="mt-4 border-t border-enunas-gray-light pt-4 space-y-5">
+              {orderReturns.map((r) => {
+                const refundText = customerRefundText(r)
+                return (
+                  <div key={r.returnNumber} className="space-y-2">
+                    <div className="flex items-baseline justify-between gap-4 flex-wrap">
+                      <p className="font-league-spartan text-[11px] text-enunas-gray-medium">
+                        Retoure <span className="font-medium text-enunas-black font-mono">{r.returnNumber}</span>
+                        {r.brandName && <>{' · '}{r.brandName}</>}
+                      </p>
+                      <p className="font-league-spartan text-[11px] tracking-[0.15em] uppercase text-enunas-gray-dark">
+                        {RETURN_STAGE_LABELS[r.status] ?? r.status}
+                      </p>
+                    </div>
+                    <ul className="font-league-spartan text-xs text-enunas-black space-y-0.5">
+                      {r.lines.map((l) => {
+                        const d = describeOrderItem(l)
+                        return (
+                          <li key={l.id}>
+                            {l.quantityReturned}× {d.label}
+                            {d.variant && <span className="text-enunas-gray-medium">{' · '}{d.variant}</span>}
+                          </li>
+                        )
+                      })}
+                    </ul>
+                    <p className={cn('font-league-spartan text-xs leading-relaxed', effectiveRefundState(r) === 'REFUNDED' ? 'text-enunas-success' : 'text-enunas-gray-dark')}>
+                      {refundText ?? (
+                        r.status === 'REQUESTED' ? 'Dein Antrag ist eingegangen und wird geprüft. Du kannst die Ware bereits an die unten stehende Adresse zurücksenden.'
+                        : r.status === 'APPROVED' ? 'Genehmigt — bitte sende die Ware innerhalb von 14 Tagen an die unten stehende Adresse zurück.'
+                        : r.status === 'RECEIVED' ? 'Deine Rücksendung ist eingegangen. Die Erstattung wird vorbereitet.'
+                        : null
+                      )}
+                    </p>
+                    {(r.status === 'REQUESTED' || r.status === 'APPROVED') && r.shipToAddress && (
+                      <pre className="font-league-spartan text-sm text-enunas-black whitespace-pre-line leading-relaxed">
+                        {r.shipToAddress}
+                      </pre>
+                    )}
+                  </div>
+                )
+              })}
 
-              {['RETURN_REQUESTED', 'RETURN_APPROVED'].includes(String(order.status)) && (
+              {orderReturns.some((r) => r.status === 'REQUESTED' || r.status === 'APPROVED') && (
                 <div>
                   <p className="font-league-spartan text-[10px] tracking-[0.2em] uppercase text-enunas-gray-medium mb-2">
                     So sendest du zurück
@@ -421,24 +467,6 @@ function OrderRow({
                     Ein vorfrankiertes Retourenlabel bieten wir derzeit nicht an.
                   </p>
                 </div>
-              )}
-
-              {order.returnShipToAddress && (
-                <div>
-                  <p className="font-league-spartan text-[10px] tracking-[0.2em] uppercase text-enunas-gray-medium mb-2">
-                    Rücksendeadresse
-                  </p>
-                  <pre className="font-league-spartan text-sm text-enunas-black whitespace-pre-line leading-relaxed">
-                    {order.returnShipToAddress}
-                  </pre>
-                </div>
-              )}
-
-              {order.returnNumber && (
-                <p className="font-league-spartan text-[11px] text-enunas-gray-medium">
-                  Retourennummer:{' '}
-                  <span className="font-medium text-enunas-black font-mono">{order.returnNumber}</span>
-                </p>
               )}
             </div>
           )}

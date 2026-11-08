@@ -1,6 +1,7 @@
 "use client"
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { useScrollAnimation } from '@/hooks/use-scroll-animation'
+import { useRobustAutoplay } from '@/hooks/use-robust-autoplay'
 import { cn } from '@/lib/utils'
 
 const LINES = [
@@ -13,20 +14,7 @@ const PILL_VIDEO = 'https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbpR5K1iOCwcgFKdqleIRy
 export default function FounderQuote() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 })
   const videoRef = useRef<HTMLVideoElement>(null)
-
-  // Reduced motion: keep the first frame instead of a looping video.
-  useEffect(() => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const sync = () => {
-      const v = videoRef.current
-      if (!v) return
-      if (reduced.matches) v.pause()
-      else void v.play().catch(() => {})
-    }
-    sync()
-    reduced.addEventListener('change', sync)
-    return () => reduced.removeEventListener('change', sync)
-  }, [])
+  useRobustAutoplay(videoRef)
 
   const revealClass = cn(
     'transition-all duration-1200 ease-out-expo',

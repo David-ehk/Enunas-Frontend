@@ -34,6 +34,8 @@ export interface CreateOrderDto {
 // Mirrors backend ReturnRequestDto
 export interface ReturnRequestDto {
   orderItemId?: number;
+  // Only together with orderItemId; omitted = every remaining unit of that line.
+  quantity?: number;
   reason: ReturnReason;
   description?: string;
 }

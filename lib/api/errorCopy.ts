@@ -137,3 +137,13 @@ export function couponErrorMessage(status: number | undefined): string {
   }
   return 'Gutscheincode konnte nicht geprüft werden.'
 }
+
+/** Customer return request (POST /orders/{id}/return). */
+export function returnRequestErrorMessage(status: number): string {
+  switch (status) {
+    case 400: return 'Diese Menge kann nicht mehr zurückgegeben werden. Bitte lade die Seite neu.'
+    case 403: return 'Diese Bestellung gehört nicht zu deinem Konto.'
+    case 409: return 'Für diesen Artikel ist gerade keine Retoure möglich — er ist bereits vollständig zurückgegeben, die Rückgabefrist ist abgelaufen oder die Retoure dieser Marke wird noch bearbeitet.'
+    default:  return 'Retoure konnte nicht beantragt werden. Bitte versuche es später erneut.'
+  }
+}

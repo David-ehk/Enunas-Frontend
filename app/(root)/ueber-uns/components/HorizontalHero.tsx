@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
+import { useRobustAutoplay } from '@/hooks/use-robust-autoplay'
 
 const serif = { fontFamily: 'var(--font-Cormorant-Garamond)' }
 
@@ -45,19 +46,7 @@ export default function HorizontalHero({
     }
   }, [])
 
-  // Reduced motion: show the still poster instead of a looping video.
-  useEffect(() => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const sync = () => {
-      const v = videoRef.current
-      if (!v) return
-      if (reduced.matches) v.pause()
-      else void v.play().catch(() => {})
-    }
-    sync()
-    reduced.addEventListener('change', sync)
-    return () => reduced.removeEventListener('change', sync)
-  }, [])
+  useRobustAutoplay(videoRef)
 
   // Measured after the wide layout is applied (enabled toggles the track to w-max).
   useEffect(() => {

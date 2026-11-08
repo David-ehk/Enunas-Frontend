@@ -8,7 +8,7 @@ import type { AdminBrand, AdminCustomer, AdminApiProduct, ApiOrder } from '@/typ
 import {
   LayoutDashboard, Users, Store, Package,
   ShoppingBag, RotateCcw, BarChart2,
-  ShieldAlert, MessageSquare, LogOut, AlertCircle, Sparkles, Tag, Receipt,
+  ShieldAlert, MessageSquare, LogOut, AlertCircle, Sparkles, Tag, Receipt, Euro,
 } from 'lucide-react'
 
 import Overview    from './_components/Overview'
@@ -17,6 +17,7 @@ import Brands      from './_components/Brands'
 import Products    from './_components/Products'
 import Orders      from './_components/Orders'
 import Returns      from './_components/Returns'
+import Refunds      from './_components/Refunds'
 import Analytics    from './_components/Analytics'
 import Storefront   from './_components/Storefront'
 import Discounts    from './_components/Discounts'
@@ -24,7 +25,7 @@ import Settlements  from './_components/Settlements'
 
 type Tab =
   | 'overview' | 'customers' | 'brands' | 'products'
-  | 'orders'   | 'returns'   | 'discounts' | 'settlements'
+  | 'orders'   | 'returns'   | 'refunds'   | 'discounts' | 'settlements'
   | 'analytics'| 'content'   | 'support'   | 'storefront'
 
 interface NavItem { id: Tab; label: string; icon: React.ElementType; phase2?: boolean }
@@ -50,6 +51,7 @@ const NAV_SECTIONS: { group: string; items: NavItem[] }[] = [
     group: 'Finanzen',
     items: [
       { id: 'returns',      label: 'Rückgaben',      icon: RotateCcw },
+      { id: 'refunds',      label: 'Erstattungen',   icon: Euro },
       { id: 'discounts',    label: 'Rabattcodes',    icon: Tag },
       { id: 'settlements',  label: 'Abrechnung',     icon: Receipt },
     ],
@@ -71,6 +73,7 @@ const TITLES: Record<Tab, string> = {
   products:    'Produkte',
   orders:      'Bestellungen',
   returns:     'Rückgaben',
+  refunds:     'Erstattungen',
   discounts:   'Rabattcodes',
   settlements: 'Abrechnung',
   analytics:   'Analytics',
@@ -86,6 +89,7 @@ const SUBTITLES: Record<Tab, string> = {
   products:    'Produktkatalog & Freigaben',
   orders:      'Bestellungsverwaltung',
   returns:     'Rückgaben & Erstattungen',
+  refunds:     'Freigabe, Status und Abgleich der Erstattungen',
   discounts:   'Plattform- & Marken-Rabattcodes',
   settlements: 'Monatliche Provisionsabrechnung & Auszahlungen je Brand',
   analytics:   'Phase 2',
@@ -337,6 +341,7 @@ export default function AdminPage() {
           {activeTab === 'products'  && <Products orders={orders} />}
           {activeTab === 'orders'    && <Orders customers={customers} />}
           {activeTab === 'returns'   && <Returns customers={customers} />}
+          {activeTab === 'refunds'   && <Refunds />}
           {activeTab === 'discounts'   && <Discounts />}
           {activeTab === 'settlements' && <Settlements />}
           {activeTab === 'analytics'   && <Analytics />}

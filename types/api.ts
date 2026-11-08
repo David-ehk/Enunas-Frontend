@@ -35,6 +35,16 @@ export type ReturnStatus = 'REQUESTED' | 'APPROVED' | 'RECEIVED' | 'REFUNDED';
 // Only PENDING and UPLOADED_BY_BRAND are currently reachable.
 export type ReturnLabelStatus = 'PENDING' | 'UPLOADED_BY_BRAND' | 'GENERATED' | 'FAILED';
 
+// The money side of a return, separate from its physical `status`. null = not released yet.
+// A released refund only becomes REFUNDED once Mollie confirms it (webhook).
+export type ReturnRefundState = 'PENDING' | 'REFUNDED' | 'FAILED';
+
+// One order line on a return — a return can carry only some units of a line.
+export interface ReturnItemRef {
+  orderItemId: string | number;
+  quantityReturned: number;
+}
+
 // Mirrors backend ReturnSummaryDto exactly.
 export interface ReturnSummary {
   id: string;
@@ -48,12 +58,22 @@ export interface ReturnSummary {
   // that was current then, even after the brand edits its warehouse.
   shipToAddress: string;
   // Item IDs referencing OrderResponseDto.items — NOT embedded line items.
-  // Resolve against the parent order; see resolveReturnItems().
+  // Kept by the backend for compatibility; for quantities use `items`.
   orderItemIds: string[];
-  refundAmount?: number;
+  // Units per order line on this return. Absent on backends before partial returns
+  // (then every listed line counts as fully returned). Resolve via toReturnsWithOrder().
+  items?: ReturnItemRef[];
+  // Total (items + shipping) once the refund is released.
+  refundAmount?: number | null;
+  refundItemsAmount?: number | null;
+  refundShippingAmount?: number | null;
+  refundState?: ReturnRefundState | null;
+  receivedBy?: 'BRAND' | 'ADMIN' | null;
+  // Admin views only — null for customer and brand views.
+  refundOverrideReason?: string | null;
   requestedAt?: string;
   approvedAt?: string;
-  receivedAt?: string;
+  receivedAt?: string | null;
   refundedAt?: string;
   labelStatus?: ReturnLabelStatus;
   labelCarrier?: string;
@@ -68,9 +88,70 @@ export interface ReturnWithOrder extends ReturnSummary {
   orderNumber?: string;
   buyerEmail?: string;
   currency: string;
-  // Resolved from orderItemIds against the parent order's items.
-  items: ApiOrderItem[];
+  // This return's order lines, resolved against the parent order, each with the units on
+  // this return. (Not named `items`: that is the backend's own ReturnItemRef[] field.)
+  lines: ReturnLine[];
 }
+
+export type ReturnLine = ApiOrderItem & { quantityReturned: number };
+
+// GET /admin/returns/{returnNumber}/refund-preview — read-only, exactly what release sends.
+export interface RefundPreviewLine {
+  orderItemId: number;
+  productName: string;
+  color?: string | null;
+  size?: string | null;
+  unitsReturned: number;
+  unitsOrdered: number;
+  amount: number;
+}
+
+export interface RefundPreview {
+  returnNumber: string;
+  returnStatus: ReturnStatus;
+  refundState: ReturnRefundState | null;
+  brandId: number;
+  brandName: string;
+  lines: RefundPreviewLine[];
+  itemsAmount: number;
+  shippingAmount: number;
+  total: number;
+  // false = not released yet (what WILL be sent); true = released (what WAS sent).
+  stored: boolean;
+}
+
+// GET /admin/orders/{orderId}/refund-preview — one entry per brand return not yet REFUNDED.
+export interface OrderRefundPreview {
+  orderId: number;
+  orderNumber: string;
+  returns: RefundPreview[];
+  total: number;
+}
+
+// GET /admin/refunds?state=… rows (RefundOverviewRowDto).
+export type RefundDashboardState = 'DUE' | 'IN_PROGRESS' | 'PENDING' | 'FAILED' | 'REFUNDED';
+
+export interface RefundOverviewRow {
+  returnNumber: string;
+  orderNumber: string;
+  brandId: number;
+  brandName: string;
+  state: RefundDashboardState;
+  // null on legacy orders without per-item prices → manual refund needed.
+  itemsAmount: number | null;
+  shippingAmount: number | null;
+  total: number | null;
+  releasedBy?: string | null;
+  overrideReason?: string | null;
+  claimKey?: string | null;
+  refundTransactionId?: string | null;
+  receivedAt?: string | null;
+  receivedBy?: 'BRAND' | 'ADMIN' | null;
+  claimedAt?: string | null;
+  refundedAt?: string | null;
+}
+
+export type ReconcileRefundAction = 'RECORD' | 'RELEASE' | 'REFRESH';
 
 // Spring Page<T> wrapper shape.
 export interface ApiPage<T> {

@@ -3,7 +3,7 @@
 // re-deriving "is this item still returnable / shippable / cancellable" independently.
 import type { ApiOrderItem } from '@/types/api';
 
-const RECONCILE_ELIGIBLE_AFTER_MS = 5 * 60 * 1000;
+export const RECONCILE_ELIGIBLE_AFTER_MS = 5 * 60 * 1000;
 
 /** Absence of cancellationState means the item predates this feature — treat it as ACTIVE. */
 export function isItemActive(item: Pick<ApiOrderItem, 'cancellationState'>): boolean {
