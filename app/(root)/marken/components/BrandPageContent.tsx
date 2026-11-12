@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation'
 import { useState, useEffect, useMemo } from 'react'
 import FeedPageContent from '../../bekleidung/components/FeedPageContent'
 import HeroBrand from './HeroBrand'
-import { productApi } from '@/lib/api'
+import { productApi, publicBrandApi } from '@/lib/api'
 import { generateSlug } from '@/lib/product'
 
 export default function BrandPageContent() {
@@ -12,6 +12,21 @@ export default function BrandPageContent() {
   const brandSlug = params.brand
 
   const [brandName, setBrandName] = useState('')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!brandSlug) return
+    let cancelled = false
+    publicBrandApi.getBySlug(brandSlug)
+      .then(brand => {
+        if (cancelled) return
+        setLogoUrl(brand?.logoUrl || null)
+        setHeroImageUrl(brand?.heroImageUrl || null)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [brandSlug])
 
   useEffect(() => {
     if (!brandSlug) return
@@ -27,9 +42,9 @@ export default function BrandPageContent() {
 
   const Hero = useMemo(() => {
     return function HeroForBrand({ count, loading }: { count: number; loading: boolean }) {
-      return <HeroBrand brandName={displayName} count={count} loading={loading} />
+      return <HeroBrand brandName={displayName} logoUrl={logoUrl} heroImageUrl={heroImageUrl} count={count} loading={loading} />
     }
-  }, [displayName])
+  }, [displayName, logoUrl, heroImageUrl])
 
   return (
     <FeedPageContent

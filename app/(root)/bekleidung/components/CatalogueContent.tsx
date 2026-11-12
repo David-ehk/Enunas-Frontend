@@ -33,9 +33,14 @@ export default function CatalogueContent({ initialProducts, config }: Props) {
   const [navH, setNavH] = useState(60)
   useEffect(() => {
     const header = document.querySelector('header')
-    // Measure the real header height from the DOM once on mount.
+    if (!header) return
+    // The header changes height while scrolling, so keep tracking the real height from the DOM.
+    const measure = () => setNavH(header.getBoundingClientRect().height)
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (header) setNavH(header.getBoundingClientRect().height)
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(header, { box: 'border-box' })
+    return () => ro.disconnect()
   }, [])
 
   const [activeCat, setActiveCat] = useState(() => {

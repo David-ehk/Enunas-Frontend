@@ -16,6 +16,8 @@ export type {
 } from './modules/orderApi';
 export { wardrobeApi } from './modules/wardrobeApi';
 export { brandApi } from './modules/brandApi';
+export { publicBrandApi } from './modules/publicBrandApi';
+export type { PublicBrand } from './modules/publicBrandApi';
 export { adminApi } from './modules/adminApi';
 export { discountsApi } from './modules/discountsApi';
 export { settlementApi } from './modules/settlementApi';

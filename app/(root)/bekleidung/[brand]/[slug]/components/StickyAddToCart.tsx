@@ -44,8 +44,14 @@ export default function StickyAddToCart({
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-enunas-gray-light transition-transform duration-500 ease-out-expo"
-      style={{ transform: visible ? 'translateY(0)' : 'translateY(100%)' }}
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-enunas-gray-light"
+      style={{
+        transform: visible ? 'translateY(0)' : 'translateY(calc(100% + env(safe-area-inset-bottom)))',
+        visibility: visible ? 'visible' : 'hidden',
+        pointerEvents: visible ? 'auto' : 'none',
+        // Hide only after the slide-out finishes, so the exit animation still plays.
+        transition: `transform 500ms var(--ease-out-expo), visibility 0s ${visible ? '0s' : '500ms'}`,
+      }}
       aria-hidden={!visible}
     >
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 py-3 sm:py-4 flex items-center gap-3 sm:gap-6">

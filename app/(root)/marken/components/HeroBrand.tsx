@@ -1,18 +1,33 @@
+import Image from 'next/image'
+
 interface HeroBrandProps {
   brandName: string
+  logoUrl?: string | null
+  heroImageUrl?: string | null
   count?: number
   loading?: boolean
 }
 
-// No per-brand photography exists yet, so the hero leans on the same
-// monogram treatment used as the fallback on brand cards (FeaturedBrandCard)
-// — an oversized, near-invisible initial letter — instead of a generic
-// gradient block or a mismatched stock photo.
-const HeroBrand = ({ brandName, count, loading = false }: HeroBrandProps) => {
+// The brand's own hero image (uploaded in the vendor dashboard) fills the hero.
+// Brands without one fall back to the monogram treatment used on brand cards
+// (FeaturedBrandCard) — an oversized, near-invisible initial letter.
+const HeroBrand = ({ brandName, logoUrl, heroImageUrl, count, loading = false }: HeroBrandProps) => {
   return (
     <section style={{ position: 'relative', width: '100%', height: '88vh', overflow: 'hidden', minHeight: 520, background: 'linear-gradient(160deg, #0a0a0a 0%, #250838 130%)' }}>
 
-      {/* Oversized monogram — decorative, echoes the brand-card fallback */}
+      {heroImageUrl ? (
+        <div className="animate-fade-in" style={{ position: 'absolute', inset: 0 }}>
+          <Image
+            src={heroImageUrl}
+            alt=""
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover"
+          />
+        </div>
+      ) : (
+      /* Oversized monogram — decorative, echoes the brand-card fallback */
       <div style={{
         position: 'absolute', inset: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -29,6 +44,7 @@ const HeroBrand = ({ brandName, count, loading = false }: HeroBrandProps) => {
           {brandName.charAt(0).toUpperCase()}
         </span>
       </div>
+      )}
 
       {/* Gradient — deep at bottom for text legibility */}
       <div style={{
@@ -45,6 +61,30 @@ const HeroBrand = ({ brandName, count, loading = false }: HeroBrandProps) => {
         right: 0,
         padding: '0 clamp(20px, 4vw, 48px) 52px',
       }}>
+
+        {/* Brand logo — square, object-cover, same framing as the vendor dashboard upload */}
+        {logoUrl && (
+          <div
+            className="animate-fade-in"
+            style={{
+              position: 'relative',
+              width: 'clamp(64px, 7vw, 96px)',
+              aspectRatio: '1 / 1',
+              overflow: 'hidden',
+              background: '#F5F5F0',
+              margin: '0 0 28px',
+            }}
+          >
+            <Image
+              src={logoUrl}
+              alt={`${brandName} Logo`}
+              fill
+              sizes="96px"
+              priority
+              className="object-cover"
+            />
+          </div>
+        )}
 
         {/* Eyebrow */}
         <p style={{
