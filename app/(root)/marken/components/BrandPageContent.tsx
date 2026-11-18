@@ -21,6 +21,7 @@ export default function BrandPageContent() {
     publicBrandApi.getBySlug(brandSlug)
       .then(brand => {
         if (cancelled) return
+        if (brand?.brandName) setBrandName(brand.brandName)
         setLogoUrl(brand?.logoUrl || null)
         setHeroImageUrl(brand?.heroImageUrl || null)
       })

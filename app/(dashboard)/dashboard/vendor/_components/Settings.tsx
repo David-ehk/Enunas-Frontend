@@ -327,6 +327,17 @@ export default function SettingsTab({
             </p>
           )}
 
+          {/* Guidance for the public hero (HeroBrand): full-width, object-cover, centre-cropped on
+              phones, with name + description over a dark gradient at the bottom-left. */}
+          <div className="space-y-1.5 text-[11px] leading-[1.6] text-[#6B6B6B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+            <p className={labelCls}>So sieht dein Hero-Bild gut aus</p>
+            <p><span className="text-[#2D2D2D]">Format:</span> Querformat 16:9, ideal 2400 × 1350 px (mindestens 1600 × 900 px).</p>
+            <p><span className="text-[#2D2D2D]">Motiv mittig:</span> Auf dem Handy ist nur der mittlere Bereich (etwa ein Drittel der Breite) zu sehen.</p>
+            <p><span className="text-[#2D2D2D]">Unteres Drittel frei:</span> Dort stehen Markenname und Beschreibung auf einem dunklen Verlauf.</p>
+            <p><span className="text-[#2D2D2D]">Kein Text im Bild:</span> Schrift im Bild wird auf kleinen Displays abgeschnitten.</p>
+            <p><span className="text-[#2D2D2D]">Logo:</span> Quadratisch, ideal 400 × 400 px, mit eigener Hintergrundfläche, damit es sich vom Hero abhebt.</p>
+          </div>
+
           <div>
             <p className={labelCls} style={{ fontFamily: 'var(--font-league-spartan)' }}>Website</p>
             <input
