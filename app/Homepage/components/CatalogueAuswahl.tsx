@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import GlassArrowButton from '@/components/GlassArrowButton'
 
 // The mobile rail renders this many back-to-back copies of the category
@@ -180,15 +181,13 @@ export default function KategorieAuswahl() {
         {/* Hero Image — crossfade stack */}
         <Link href={current.link} style={{ position: 'relative', width: '100%', height: '300px', display: 'block', overflow: 'hidden', background: '#F8F7F5' }}>
           {kategorie.map((kat, i) => (
-            <img
+            <Image
               key={kat.id}
               src={kat.image}
               alt={kat.name}
+              fill
+              sizes="100vw"
               style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
                 objectFit: 'cover',
                 objectPosition: 'center 18%',
                 opacity: i === idx ? 1 : 0,
@@ -272,11 +271,13 @@ export default function KategorieAuswahl() {
                     transition: 'flex-basis 360ms cubic-bezier(0.16,1,0.3,1), height 360ms cubic-bezier(0.16,1,0.3,1)',
                   }}
                 >
-                  <img
+                  <Image
                     src={cat.image}
                     alt={cat.name}
+                    fill
+                    sizes="118px"
                     style={{
-                      width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 18%',
+                      objectFit: 'cover', objectPosition: 'center 18%',
                       filter: isCenter ? 'brightness(1)' : 'brightness(0.7)',
                       transition: 'filter 300ms ease',
                     }}
@@ -418,10 +419,12 @@ export default function KategorieAuswahl() {
 
             {/* Right — image */}
             <div className="relative h-[700px] overflow-hidden">
-              <img
-                src={currentKategorie?.image}
-                alt={currentKategorie?.name}
-                className={`w-full h-full object-cover transition-all duration-700 ease-out ${isImageLoading ? 'opacity-0 scale-105' : 'opacity-100 scale-100'}`}
+              <Image
+                src={currentKategorie?.image ?? kategorie[0].image}
+                alt={currentKategorie?.name ?? kategorie[0].name}
+                fill
+                sizes="50vw"
+                className={`object-cover transition-all duration-700 ease-out ${isImageLoading ? 'opacity-0 scale-105' : 'opacity-100 scale-100'}`}
                 onLoad={() => setIsImageLoading(false)}
               />
               <div

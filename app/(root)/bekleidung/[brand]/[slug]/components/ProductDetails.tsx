@@ -24,6 +24,7 @@ import { useAuth } from '@/app/context/AuthContext'
 import { useWishlist, type WishlistItem } from '@/app/context/WishlistContext'
 import { productApi } from '@/lib/api'
 import { listingPriceView } from '@/lib/pricing'
+import { effectiveReturnPeriodDays } from '@/lib/returnPolicy'
 import { colourwayCoverImage } from '@/lib/colourwayImage'
 import { colourHref, withColourFirst } from '@/lib/product'
 import type { ApiListing } from '@/types/api'
@@ -635,7 +636,7 @@ export default function ProductDetails({
                 onToggle={() => toggleAccordion('shipping')}
               >
                 <p style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: '16px', lineHeight: 1.7, color: '#2D2D2D' }}>
-                  Versand aus {product.originCountry || 'DE'}. {product.returnPeriodDays ?? 14} Tage Rückgaberecht ab Erhalt der Ware.
+                  Versand aus {product.originCountry || 'DE'}. {effectiveReturnPeriodDays(product.returnPeriodDays)} Tage Rückgaberecht ab Erhalt der Ware.
                 </p>
               </PdpAccordion>
 

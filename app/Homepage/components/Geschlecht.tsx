@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import React from 'react'
 
 const geschlecht = [
@@ -32,10 +33,12 @@ const geschlecht = [
             </div>
 
               <div className="absolute inset-0 cursor-pointer">
-                <img
-                  className="w-full h-full object-cover"
+                <Image
+                  className="object-cover"
                   src={ges.image}
                   alt={ges.title}
+                  fill
+                  sizes="50vw"
                 />
               </div>
 

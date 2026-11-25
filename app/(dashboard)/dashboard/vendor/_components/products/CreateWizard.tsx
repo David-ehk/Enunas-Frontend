@@ -12,7 +12,7 @@ import {
   EMPTY_WIZARD, type WizardData, type VariantRow, type WizardStep,
 } from './constants'
 import { LookPicker, toggleLookSelection } from './LookPicker'
-import { returnPeriodError, duplicateVariants } from '@/lib/productWizardValidation'
+import { returnPeriodError, duplicateVariants, MIN_RETURN_PERIOD_DAYS, MAX_RETURN_PERIOD_DAYS } from '@/lib/productWizardValidation'
 
 function StepIndicator({ step }: { step: WizardStep }) {
   const steps = [
@@ -364,7 +364,8 @@ export default function CreateWizard({ onBack, onCreated }: { onBack: () => void
               </div>
               <div>
                 <label className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Rückgabefrist (Tage)</label>
-                <input type="number" min={0} max={30} className={INPUT} value={data.returnPeriodDays}
+                <input type="number" min={MIN_RETURN_PERIOD_DAYS} max={MAX_RETURN_PERIOD_DAYS} className={INPUT} value={data.returnPeriodDays}
+                  readOnly={MIN_RETURN_PERIOD_DAYS === MAX_RETURN_PERIOD_DAYS}
                   onChange={e => setField('returnPeriodDays', Number(e.target.value))}
                   style={{ fontFamily: 'var(--font-league-spartan)' }}
                 />

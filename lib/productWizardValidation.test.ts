@@ -1,17 +1,18 @@
 import { describe, it, expect } from 'vitest'
 import { returnPeriodError, duplicateVariants } from './productWizardValidation'
 
-// The wizard's return-period field is capped at 30 days (the input's max), but typing 31 was
-// accepted and submitted — found in the 30 Sep 2026 production E2E run.
+// Platform policy (25 Nov 2026): the return window is fixed at 14 days. The range check stays so
+// the window can be widened again later (out-of-range input was once accepted — 30 Sep 2026 E2E).
 describe('returnPeriodError', () => {
-  it('accepts 0, 14 and 30 days', () => {
-    expect(returnPeriodError(0)).toBeNull()
+  it('accepts 14 days', () => {
     expect(returnPeriodError(14)).toBeNull()
-    expect(returnPeriodError(30)).toBeNull()
   })
 
-  it('rejects more than 30 days', () => {
-    expect(returnPeriodError(31)).not.toBeNull()
+  it('rejects any other window', () => {
+    expect(returnPeriodError(0)).not.toBeNull()
+    expect(returnPeriodError(13)).not.toBeNull()
+    expect(returnPeriodError(15)).not.toBeNull()
+    expect(returnPeriodError(30)).not.toBeNull()
   })
 
   it('rejects negative and non-whole values', () => {

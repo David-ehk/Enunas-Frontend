@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import React from 'react'
 
 const categories = [
@@ -36,10 +37,12 @@ const CategorySection = () => {
 
               {/* BILD - Scrollt durch */}
               <div className="absolute inset-0 group cursor-pointer">
-               <img
+               <Image
                   src={cat.image}
                   alt={cat.title}
-                 className="h-full w-full object-cover"
+                  fill
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                 className="object-cover"
                  />
               </div>
 

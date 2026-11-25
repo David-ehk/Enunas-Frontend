@@ -1,9 +1,13 @@
-export const MAX_RETURN_PERIOD_DAYS = 30
+import { MIN_RETURN_PERIOD_DAYS, MAX_RETURN_PERIOD_DAYS } from './returnPolicy'
 
-/** Error message for an out-of-range return period, or null when it is a whole 0–30 days. */
+export { MIN_RETURN_PERIOD_DAYS, MAX_RETURN_PERIOD_DAYS }
+
+/** Error message for an out-of-range return period, or null when it is a whole day count in policy range. */
 export function returnPeriodError(days: number): string | null {
-  if (!Number.isInteger(days) || days < 0 || days > MAX_RETURN_PERIOD_DAYS) {
-    return `Rückgabefrist muss zwischen 0 und ${MAX_RETURN_PERIOD_DAYS} Tagen liegen.`
+  if (!Number.isInteger(days) || days < MIN_RETURN_PERIOD_DAYS || days > MAX_RETURN_PERIOD_DAYS) {
+    return MIN_RETURN_PERIOD_DAYS === MAX_RETURN_PERIOD_DAYS
+      ? `Rückgabefrist beträgt ${MAX_RETURN_PERIOD_DAYS} Tage.`
+      : `Rückgabefrist muss zwischen ${MIN_RETURN_PERIOD_DAYS} und ${MAX_RETURN_PERIOD_DAYS} Tagen liegen.`
   }
   return null
 }

@@ -8,6 +8,23 @@ const Subscribe = () => {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'error' | 'success'>('idle')
   const videoRef = useRef<HTMLVideoElement>(null)
+  // The video is ~12 MB and sits at the very bottom of the homepage. With autoPlay, Chrome
+  // downloads it immediately, starving the images above it of bandwidth — so attach the
+  // src only once the section approaches the viewport.
+  const [videoNear, setVideoNear] = useState(false)
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setVideoNear(true)
+        observer.disconnect()
+      }
+    }, { rootMargin: '300px 0px' })
+    observer.observe(video)
+    return () => observer.disconnect()
+  }, [])
 
   // Same autoplay robustness as the Hero video: relying on the JSX autoPlay/muted
   // attributes alone can lose the race with hydration, and some mobile browsers
@@ -16,7 +33,7 @@ const Subscribe = () => {
   // the first tap/scroll/click anywhere on the page is used as a last-resort kick.
   useEffect(() => {
     const video = videoRef.current
-    if (!video) return
+    if (!video || !videoNear) return
     video.muted = true
     video.defaultMuted = true
     const playPromise = video.play()
@@ -32,7 +49,7 @@ const Subscribe = () => {
     return () => {
       events.forEach(event => document.removeEventListener(event, tryPlay))
     }
-  }, [])
+  }, [videoNear])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -113,12 +130,12 @@ const Subscribe = () => {
         <div className="relative h-[400px] md:h-[450px] lg:h-[400px] overflow-hidden flex items-center justify-center pt-5">
           <video
             ref={videoRef}
-            src="https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbAKylyM1QupCLYd3cO7264E8yxM5iFaTvjNgG"
+            src={videoNear ? "https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbAKylyM1QupCLYd3cO7264E8yxM5iFaTvjNgG" : undefined}
             autoPlay
             loop
             muted
             playsInline
-            preload="auto"
+            preload={videoNear ? 'auto' : 'none'}
             className="w-full h-full object-contain"
           />
         </div>

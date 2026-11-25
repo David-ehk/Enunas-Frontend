@@ -246,7 +246,7 @@ export default function AngebotPage() {
                   </span>
                 </div>
                 <p className="font-league-spartan text-[10px] text-enunas-gray-medium tracking-[0.1em] uppercase">
-                  inkl. MwSt. · Kostenloser Versand · Nur für dich
+                  inkl. MwSt. · zzgl. Versand · Nur für dich
                 </p>
               </div>
 
@@ -363,7 +363,6 @@ export default function AngebotPage() {
               {/* Trust signals */}
               <div className="mt-8 pt-6 border-t border-enunas-gray-light space-y-2.5">
                 {[
-                  'Kostenloser Versand',
                   '14 Tage Rückgaberecht',
                   'SSL-verschlüsselte Zahlung',
                 ].map(item => (
