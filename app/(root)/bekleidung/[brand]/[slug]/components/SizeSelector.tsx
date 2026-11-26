@@ -2,15 +2,18 @@
 
 import { useMemo } from 'react'
 import { Variant, findVariant, sortedSizes } from '../types/product'
+import { isSizeUnavailable } from '@/lib/sizeAvailability'
 
 interface SizeSelectorProps {
   variants: Variant[]
   selectedColor: string | null
   selectedSize: string | null
   onSizeSelect: (size: string) => void
+  /** Not released yet: every size is crossed out. */
+  comingSoon?: boolean
 }
 
-export default function SizeSelector({ variants, selectedColor, selectedSize, onSizeSelect }: SizeSelectorProps) {
+export default function SizeSelector({ variants, selectedColor, selectedSize, onSizeSelect, comingSoon = false }: SizeSelectorProps) {
   const sizes = useMemo(() => sortedSizes(variants), [variants])
 
   if (sizes.length === 0) return null
@@ -20,7 +23,7 @@ export default function SizeSelector({ variants, selectedColor, selectedSize, on
       <div className="flex flex-wrap justify-center gap-2">
         {sizes.map((s) => {
           const v = findVariant(variants, selectedColor, s)
-          const isDisabled = !v || v.stockQuantity === 0
+          const isDisabled = isSizeUnavailable(v, comingSoon)
           const isSelected = !isDisabled && s === selectedSize
 
           return (

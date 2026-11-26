@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { STANDARD_SORTS, type ProductSort } from '@/lib/productSorts'
+import SortCataloguePanel, { type CatalogueChoice } from './SortCataloguePanel'
 
 interface SortDropdownProps {
   /** Defaults to STANDARD_SORTS. */
@@ -10,6 +11,8 @@ interface SortDropdownProps {
   onChange: (id: string) => void
   align?: 'left' | 'right'
   dropUp?: boolean
+  /** Phones have no Catalogue button: passing this puts the catalogue lines into this menu. */
+  catalogue?: CatalogueChoice
 }
 
 export default function SortDropdown({
@@ -18,6 +21,7 @@ export default function SortDropdown({
   onChange,
   align = 'right',
   dropUp = false,
+  catalogue,
 }: SortDropdownProps) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -29,8 +33,13 @@ export default function SortDropdown({
         setOpen(false)
       }
     }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
     document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', handler)
+      document.removeEventListener('keydown', onKey)
+    }
   }, [open])
 
   return (
@@ -39,6 +48,7 @@ export default function SortDropdown({
       {/* ── Trigger ── */}
       <button
         onClick={() => setOpen(p => !p)}
+        aria-expanded={open}
         style={{
           background: 'none',
           border: 'none',
@@ -76,12 +86,24 @@ export default function SortDropdown({
         </svg>
       </button>
 
-      {/* ── Dropdown panel ──
+      {catalogue ? (
+        <SortCataloguePanel
+          open={open}
+          onClose={() => setOpen(false)}
+          sorts={sorts}
+          value={value}
+          onSort={onChange}
+          catalogue={catalogue}
+          align={align}
+          dropUp={dropUp}
+        />
+      ) : (
+      /* ── Dropdown panel ──
           No outer border or shadow — the container is transparent.
           Each item carries its own background so items are readable,
           and the first item has a borderTop that visually anchors the
           list to the filter bar's bottom border line ("die Linie darunter").
-      ── */}
+      ── */
       <div
         aria-hidden={!open}
         style={{
@@ -149,6 +171,7 @@ export default function SortDropdown({
           )
         })}
       </div>
+      )}
     </div>
   )
 }

@@ -17,6 +17,11 @@ import { STATUS_FILTERS, BTN_PRIMARY } from './products/constants'
 import CreateWizard from './products/CreateWizard'
 import EditPanel from './products/EditPanel'
 import VariantsPanel from './products/VariantsPanel'
+import ShopSwitch from './products/ShopSwitch'
+import RestockPanel from './products/RestockPanel'
+import { shopState } from '@/lib/shopVisibility'
+import { previewReleaseMs } from '@/lib/preview'
+import type { ApiListing } from '@/types/api'
 
 // Product management, split across app/(dashboard)/dashboard/vendor/_components/products/ —
 // this file is now just the list view plus the small state machine that switches between it,
@@ -56,6 +61,9 @@ export default function Products() {
   const [confirmSoldOut, setConfirmSoldOut] = useState<string | null>(null)
   const [sellingOut, setSellingOut] = useState<string | null>(null)
   const [soldOutError, setSoldOutError] = useState<string | null>(null)
+  // productId → its listings — drives the "Im Shop" switch. Absent until (or unless) loaded.
+  const [listingMap, setListingMap] = useState<Record<string, ApiListing[]>>({})
+  const [restockId, setRestockId] = useState<string | null>(null)
 
   useEffect(() => {
     brandApi.products.getMy()
@@ -69,7 +77,10 @@ export default function Products() {
     let alive = true
     Promise.all(products.map(p =>
       brandApi.listings.list(p.id)
-        .then(ls => [p.id, ls.map(l => l.priceGross ?? l.price).filter((v): v is number => v != null && v > 0)] as const)
+        .then(ls => {
+          if (alive) setListingMap(prev => ({ ...prev, [p.id]: ls }))
+          return [p.id, ls.map(l => l.priceGross ?? l.price).filter((v): v is number => v != null && v > 0)] as const
+        })
         .catch(() => [p.id, [] as number[]] as const)
     )).then(entries => { if (alive) setPriceMap(Object.fromEntries(entries)) })
     return () => { alive = false }
@@ -240,7 +251,8 @@ export default function Products() {
     return (
       <VariantsPanel
         product={selected}
-        onBack={() => { setView('list'); setSelected(null) }}
+        // A new array re-reads stock and listings, which this view may have changed.
+        onBack={() => { setView('list'); setSelected(null); setProducts(prev => [...prev]) }}
       />
     )
   }
@@ -318,6 +330,22 @@ export default function Products() {
                             Ausverkauft
                           </span>
                         )}
+                        {/* Only a released, approved product can be taken in and out of the shop. */}
+                        {isProductLive(p.status) && listingMap[p.id] && (
+                          p.preview || (p.releaseDate && Date.now() < previewReleaseMs(p.releaseDate)) ? (
+                            shopState(listingMap[p.id]) !== 'no-listing' && (
+                              <span className="text-[10px] text-[#6B6B6B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+                                Coming Soon — im Shop sichtbar
+                              </span>
+                            )
+                          ) : (
+                            <ShopSwitch
+                              productId={p.id}
+                              listings={listingMap[p.id]}
+                              onListingsChange={ls => setListingMap(prev => ({ ...prev, [p.id]: ls }))}
+                            />
+                          )
+                        )}
                       </div>
                     </TD>
                     <TD className="text-[#9B9B9B]">{fmt(p.createdAt)}</TD>
@@ -364,6 +392,16 @@ export default function Products() {
                               Ausverkauft
                             </button>
                           )
+                        )}
+                        {isSoldOut(variantMap[p.id] ?? []) && (
+                          <button
+                            onClick={() => setRestockId(restockId === p.id ? null : p.id)}
+                            aria-expanded={restockId === p.id}
+                            className="h-7 px-2.5 rounded-none bg-[#370E4D] text-[11px] text-white hover:bg-[#250838] transition-colors duration-200"
+                            style={{ fontFamily: 'var(--font-league-spartan)' }}
+                          >
+                            Wieder auffüllen
+                          </button>
                         )}
                         <button
                           onClick={() => setExpandedId(expandedId === p.id ? null : p.id)}
@@ -434,6 +472,18 @@ export default function Products() {
                       </div>
                     </TD>
                   </TableRow>
+                  {restockId === p.id && variantMap[p.id] && (
+                    <tr className="bg-[#FAFAF8]">
+                      <td colSpan={6} className="px-6 py-4 border-b border-[#F5F5F0]">
+                        <RestockPanel
+                          productId={p.id}
+                          variants={variantMap[p.id]}
+                          onVariantsChange={vs => setVariantMap(prev => ({ ...prev, [p.id]: vs }))}
+                          onClose={() => setRestockId(null)}
+                        />
+                      </td>
+                    </tr>
+                  )}
                   {/* Expanded row */}
                   {expandedId === p.id && (
                     <tr className="bg-[#FAFAF8]">

@@ -113,7 +113,7 @@ export default function CatalogueDropdown({
           aria-hidden
           className="catalogue-menu-highlight"
           style={{
-            opacity: highlight >= 0 ? 1 : 0,
+            opacity: open && highlight >= 0 ? 1 : 0,
             transform: `translateY(calc(${Math.max(highlight, 0)} * var(--catalogue-row)))`,
             // The highlight's edge bar takes the line's own colour.
             color: CATALOGUE_OPTIONS[Math.max(highlight, 0)].color,

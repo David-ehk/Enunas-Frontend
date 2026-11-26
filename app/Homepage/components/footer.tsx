@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { footerLinks } from "../../constants";
+import { PAYMENT_METHODS } from "@/app/(root)/cart/components/CartFooter";
 
 /* ─────────────────────────────────────────────────────────────────
    CSS from design_handoff_footer/footer/footer.css — embedded here
@@ -17,8 +19,6 @@ const css = `
   --hair-str: rgba(255,255,255,0.42);
   --foot-bg:  #370E4D;
   --acc:      color-mix(in oklab, #370E4D 42%, #ffffff);
-  --tile-bg:  #FFFFFF;
-  --tile-bd:  transparent;
   --ease:     cubic-bezier(0.16, 1, 0.3, 1);
   --ease-q:   cubic-bezier(0.25, 1, 0.5, 1);
   position: relative;
@@ -81,11 +81,7 @@ const css = `
 .col-link:hover::after { transform: scaleX(1); }
 
 .pay-tiles { display: grid; grid-template-columns: repeat(2, 56px); gap: 8px; }
-.pay-tile {
-  width: 56px; height: 38px; display: grid; place-items: center;
-  background: var(--tile-bg); border: 1px solid var(--tile-bd);
-  transition: transform 320ms var(--ease);
-}
+.pay-tile { display: block; width: 56px; height: auto; transition: transform 320ms var(--ease); }
 .pay-tile:hover { transform: translateY(-3px); }
 .pay-note {
   margin-top: 16px; font-size: 10px; letter-spacing: 0.22em;
@@ -192,61 +188,6 @@ const css = `
 }
 `;
 
-/* ── Payment marks — 56×38 tiles ─────────────────────────────── */
-const PayVisa = () => (
-  <svg width="42" height="26" viewBox="0 0 48 32">
-    <text x="24" y="22" textAnchor="middle" fontFamily="'League Spartan',sans-serif"
-      fontSize="14" fontWeight="800" fontStyle="italic" letterSpacing="1" fill="#1A1F71">VISA</text>
-  </svg>
-);
-const PayMC = () => (
-  <svg width="40" height="26" viewBox="0 0 48 32">
-    <circle cx="20" cy="16" r="8.5" fill="#EB001B" />
-    <circle cx="28" cy="16" r="8.5" fill="#F79E1B" />
-    <path d="M24 9.3a8.5 8.5 0 0 1 0 13.4 8.5 8.5 0 0 1 0-13.4Z" fill="#FF5F00" />
-  </svg>
-);
-const PayAmex = () => (
-  <svg width="44" height="26" viewBox="0 0 48 32">
-    <rect x="5" y="7" width="38" height="18" rx="2" fill="#006FCF" />
-    <text x="24" y="16.5" textAnchor="middle" fontFamily="'League Spartan',sans-serif"
-      fontSize="6" fontWeight="800" letterSpacing="0.3" fill="#FFFFFF">AMERICAN</text>
-    <text x="24" y="22.5" textAnchor="middle" fontFamily="'League Spartan',sans-serif"
-      fontSize="6" fontWeight="800" letterSpacing="0.3" fill="#FFFFFF">EXPRESS</text>
-  </svg>
-);
-const PayPP = () => (
-  <svg width="44" height="26" viewBox="0 0 48 32">
-    <text x="24" y="21" textAnchor="middle" fontFamily="'League Spartan',sans-serif"
-      fontSize="11" fontWeight="800" fontStyle="italic">
-      <tspan fill="#003087">Pay</tspan><tspan fill="#0070BA">Pal</tspan>
-    </text>
-  </svg>
-);
-const PayKlarna = () => (
-  <svg width="44" height="26" viewBox="0 0 48 32">
-    <rect x="6" y="9" width="36" height="14" rx="3" fill="#FFB3C7" />
-    <text x="24" y="20" textAnchor="middle" fontFamily="'League Spartan',sans-serif"
-      fontSize="9.5" fontWeight="800" letterSpacing="-0.2" fill="#0A0A0A">Klarna.</text>
-  </svg>
-);
-const PayApple = () => (
-  <svg width="46" height="26" viewBox="0 0 48 32">
-    <path d="M13.6 12.1c-.4.5-1 .8-1.6.8-.1-.6.1-1.2.5-1.6.4-.5 1-.8 1.6-.9.1.6-.1 1.2-.5 1.7Zm.5.8c-.9-.1-1.6.5-2 .5-.4 0-1-.5-1.7-.5-.9 0-1.7.5-2.1 1.3-.9 1.6-.2 3.9.7 5.2.4.6.9 1.3 1.6 1.3.6 0 .9-.4 1.7-.4.8 0 1 .4 1.7.4.7 0 1.1-.6 1.6-1.2.5-.7.7-1.4.7-1.4s-1.3-.5-1.4-2c0-1.2 1-1.8 1-1.8-.5-.8-1.4-.9-1.8-.9Z" fill="#0A0A0A" />
-    <text x="27" y="21" textAnchor="middle" fontFamily="'League Spartan',sans-serif"
-      fontSize="11" fontWeight="600" letterSpacing="-0.2" fill="#0A0A0A">Pay</text>
-  </svg>
-);
-
-const PAY_LIST = [
-  { key: "visa",     El: PayVisa },
-  { key: "mc",       El: PayMC },
-  { key: "amex",     El: PayAmex },
-  { key: "pp",       El: PayPP },
-  { key: "klarna",   El: PayKlarna },
-  { key: "applepay", El: PayApple },
-];
-
 /* ── Social glyphs ───────────────────────────────────────────── */
 const SOCIAL_LIST = [
   {
@@ -339,8 +280,16 @@ const Footer = () => {
                 <span className="col-title">Zahlungsarten</span>
               </div>
               <div className="pay-tiles">
-                {PAY_LIST.map(({ key, El }) => (
-                  <div key={key} className="pay-tile" title={key}><El /></div>
+                {PAYMENT_METHODS.map(({ file, label }) => (
+                  <Image
+                    key={file}
+                    src={`/assets/icons/payment/${file}.svg`}
+                    alt={label}
+                    title={label}
+                    width={56}
+                    height={37}
+                    className="pay-tile"
+                  />
                 ))}
               </div>
               <div className="pay-note">

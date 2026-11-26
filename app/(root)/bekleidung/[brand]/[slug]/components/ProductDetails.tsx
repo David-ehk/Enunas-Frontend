@@ -26,8 +26,27 @@ import { productApi } from '@/lib/api'
 import { listingPriceView } from '@/lib/pricing'
 import { effectiveReturnPeriodDays } from '@/lib/returnPolicy'
 import { colourwayCoverImage, colourwayGallery } from '@/lib/colourwayImage'
+import { collectionAbovePrice } from '@/lib/collectionLine'
 import { colourHref, withColourFirst } from '@/lib/product'
 import type { ApiListing } from '@/types/api'
+
+const NOTES = {
+  preview: {
+    title: 'Gefällt dir, was du siehst?',
+    text: 'Uns auch. Aber sachte — der Drop ist noch nicht live. Warte, bis der Countdown durch ist, dann kannst du zuschlagen. Versprochen.',
+    button: 'Na gut, ich warte',
+  },
+  price: {
+    title: 'Der Preis wird bald angezeigt.',
+    text: 'Noch halten wir ihn geheim. Sobald der Drop live ist, siehst du ihn hier.',
+    button: 'Na gut, ich warte',
+  },
+  soldOut: {
+    title: 'Ich weiß, dir gefällt, was du siehst …',
+    text: 'Aber du warst leider zu langsam. Vielleicht kommt es doch noch zurück.',
+    button: 'Na gut, ich hoffe weiter',
+  },
+}
 
 interface ProductDetailsProps {
   product: Product
@@ -72,9 +91,9 @@ export default function ProductDetails({
   )
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [showSizeModal, setShowSizeModal] = useState(false)
-  // Preview products aren't buyable yet — the CTA stays clickable and opens a cheeky "not so
-  // fast" note instead of doing nothing.
-  const [showPreviewModal, setShowPreviewModal] = useState(false)
+  // What can't be bought — not released yet, or sold out — stays clickable and opens a note
+  // (preview CTA, blurred price, sold-out CTA) instead of doing nothing.
+  const [note, setNote] = useState<keyof typeof NOTES | null>(null)
   const [openAccordion, setOpenAccordion] = useState<string | null>('details')
   const [justSaved, setJustSaved] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
@@ -232,6 +251,7 @@ export default function ProductDetails({
       ? Math.round((1 - priceView.current / priceView.original) * 100)
       : 0
   const hasDiscount = formattedOriginalPrice != null
+  const collectionLine = collectionAbovePrice(product.collectionName, product.inspirationStory)
 
   // Reset size when color changes if selected size no longer available for new color
   const handleColorSelect = (color: Color) => {
@@ -271,7 +291,8 @@ export default function ProductDetails({
   }
 
   const handleCta = () => {
-    if (livePreview) { setShowPreviewModal(true); return }
+    if (livePreview) { setNote('preview'); return }
+    if (showsSoldOut) { setNote('soldOut'); return }
     if (!effectiveAvailable || isOutOfStock || variantUnavailable) return
     if (!selectedSize) { setShowSizeModal(true); return }
     handleAddToCart(selectedSize)
@@ -327,8 +348,11 @@ export default function ProductDetails({
 
   // A preview CTA is never "disabled" — it stays clickable and opens the countdown note — but it
   // is visually muted so it never reads as a live "add to cart" button.
-  const ctaDisabled = !livePreview && (!effectiveAvailable || isOutOfStock || variantUnavailable)
-  const ctaMuted = livePreview
+  // The "Ausverkauft" CTA works the same way. An unavailable product says so instead (see
+  // ctaLabel) and stays disabled.
+  const showsSoldOut = !livePreview && effectiveAvailable && isOutOfStock
+  const ctaDisabled = !livePreview && !showsSoldOut && (!effectiveAvailable || isOutOfStock || variantUnavailable)
+  const ctaMuted = livePreview || showsSoldOut
   const ctaLabel = livePreview
     ? 'Coming Soon'
     : !effectiveAvailable
@@ -396,13 +420,13 @@ export default function ProductDetails({
               {product.name}
             </h1>
 
-            {/* 3. Collection line */}
-            {product.collectionName && (
+            {/* 3. Collection line — gives way to an inspiration story */}
+            {collectionLine && (
               <p
                 className="text-enunas-gray-medium mb-5"
                 style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: '15px', fontStyle: 'italic' }}
               >
-                {product.collectionName}
+                {collectionLine}
               </p>
             )}
 
@@ -422,7 +446,13 @@ export default function ProductDetails({
                 }}
               >
                 {/* Blurred placeholder — the real price is withheld by the backend until release. */}
-                <div className="flex items-baseline gap-3">
+                <button
+                  type="button"
+                  onClick={() => setNote('price')}
+                  aria-haspopup="dialog"
+                  aria-label="Wann wird der Preis angezeigt?"
+                  className="flex items-baseline gap-3 cursor-pointer transition-opacity duration-300 ease-out-expo hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-enunas-purple"
+                >
                   <span
                     aria-hidden="true"
                     className="text-enunas-black"
@@ -442,7 +472,7 @@ export default function ProductDetails({
                   >
                     inkl. MwSt.
                   </span>
-                </div>
+                </button>
                 <span className="sr-only">Der Preis wird zum Release bekannt gegeben.</span>
 
                 {product.releaseDate && (
@@ -464,15 +494,15 @@ export default function ProductDetails({
             ) : hasDiscount ? (
               <div role="group" aria-label="Reduzierter Preis" className="flex flex-col items-center gap-2 mb-10 font-league-spartan">
                 <div className="flex flex-wrap items-center justify-center gap-x-3.5 gap-y-2">
-                  <span className="text-[30px] font-light leading-none text-[#B3261E]">{formattedPrice}</span>
+                  <span className="text-[22px] font-light leading-none text-[#B3261E]">{formattedPrice}</span>
                   <s
-                    className="text-[18px] font-light leading-none text-[#8A8780]"
+                    className="text-[16px] font-light leading-none text-[#8A8780]"
                     style={{ textDecorationThickness: '1px' }}
                   >
                     {formattedOriginalPrice}
                   </s>
                   {discountPct > 0 && (
-                    <span className="rounded-[2px] bg-[#FBEDEC] px-[7px] py-1 text-[11px] font-semibold tracking-[0.06em] text-[#B3261E]">
+                    <span className="rounded-[2px] bg-[#FBEDEC] px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.06em] text-[#B3261E]">
                       −{discountPct} %
                     </span>
                   )}
@@ -514,6 +544,7 @@ export default function ProductDetails({
               selectedColor={selectedColor?.name ?? null}
               selectedSize={selectedSize}
               onSizeSelect={setSelectedSize}
+              comingSoon={livePreview}
             />
 
             {/* 8. Catalogue tags */}
@@ -543,7 +574,7 @@ export default function ProductDetails({
                 letterSpacing: '0.04em',
                 border: 'none',
                 color: 'white',
-                // Sold out / unavailable dims like Coming Soon does — the inline value would
+                // Unavailable dims like Sold out and Coming Soon do — the inline value would
                 // otherwise win over the class-based disabled opacity.
                 opacity: ctaMuted || ctaDisabled ? 0.55 : 1,
                 cursor: ctaDisabled ? 'not-allowed' : 'pointer',
@@ -711,18 +742,21 @@ export default function ProductDetails({
         </div>
       )}
 
-      {/* ── "Not so fast" preview modal ───────────────────── */}
-      {showPreviewModal && (
+      {/* ── "Not so fast" note — see NOTES ─────────────────── */}
+      {note && (
         <div
           className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center animate-fade-in"
-          onClick={() => setShowPreviewModal(false)}
+          onClick={() => setNote(null)}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="preview-note-title"
             className="bg-white w-full sm:max-w-md relative px-8 py-10 text-center"
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              onClick={() => setShowPreviewModal(false)}
+              onClick={() => setNote(null)}
               className="absolute top-4 right-4 p-1 text-enunas-gray-medium hover:text-enunas-black transition-colors duration-200"
               aria-label="Schließen"
             >
@@ -732,21 +766,21 @@ export default function ProductDetails({
             <p className="text-3xl mb-4" aria-hidden="true">👀</p>
 
             <h3
+              id="preview-note-title"
               className="text-enunas-black mb-3"
               style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: '24px', fontWeight: 400 }}
             >
-              Gefällt dir, was du siehst?
+              {NOTES[note].title}
             </h3>
 
             <p
               className="text-enunas-gray-dark mb-6"
               style={{ fontFamily: 'var(--font-Cormorant-Garamond)', fontSize: '17px', lineHeight: 1.7 }}
             >
-              Uns auch. Aber sachte — der Drop ist noch nicht live. Warte, bis der
-              Countdown durch ist, dann kannst du zuschlagen. Versprochen.
+              {NOTES[note].text}
             </p>
 
-            {product.releaseDate && (
+            {note !== 'soldOut' && product.releaseDate && (
               <div className="flex flex-col items-center gap-3 mb-8">
                 <span
                   className="text-enunas-gray-medium"
@@ -759,7 +793,7 @@ export default function ProductDetails({
             )}
 
             <button
-              onClick={() => setShowPreviewModal(false)}
+              onClick={() => setNote(null)}
               className="group relative w-full overflow-hidden py-[18px] bg-enunas-purple text-white hover:bg-enunas-purple-dark transition-colors duration-300"
               style={{
                 fontFamily: 'var(--font-Cormorant-Garamond)',
@@ -769,7 +803,7 @@ export default function ProductDetails({
               }}
             >
               <span className="absolute left-1/2 -translate-x-1/2 top-[16%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[70%]" />
-              <span className="relative z-10">Na gut, ich warte</span>
+              <span className="relative z-10">{NOTES[note].button}</span>
               <span className="absolute left-1/2 -translate-x-1/2 bottom-[16%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[70%]" />
             </button>
           </div>

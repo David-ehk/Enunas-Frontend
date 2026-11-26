@@ -265,7 +265,7 @@ function BekleidungContent() {
         </div>
 
         {/* Right — filter controls */}
-        <div style={{ display: 'flex', gap: isMobile ? 16 : 24, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: isMobile ? 16 : 24, alignItems: 'center', marginLeft: isMobile ? 'auto' : 0 }}>
           {!isMobile && (
             <CatalogueDropdown
               value={filters.catalogue}
@@ -301,6 +301,9 @@ function BekleidungContent() {
             value={activeSort.id}
             onChange={(id) => setFilters(prev => ({ ...prev, sortieren: id }))}
             align="right"
+            catalogue={isMobile
+              ? { value: filters.catalogue, onChange: (id) => setFilters(prev => ({ ...prev, catalogue: id })) }
+              : undefined}
           />
         </div>
       </div>
@@ -389,6 +392,7 @@ function BekleidungContent() {
         onSort={(id) => setFilters(prev => ({ ...prev, sortieren: id }))}
         catalogueValue={filters.catalogue}
         onCatalogue={(id) => setFilters(prev => ({ ...prev, catalogue: id }))}
+        catalogueInSort
       />
     </div>
   )

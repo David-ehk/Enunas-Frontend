@@ -12,8 +12,6 @@ import {
   EMPTY_WIZARD, type WizardData, type VariantRow, type WizardStep,
 } from './constants'
 import { LookPicker, toggleLookSelection } from './LookPicker'
-import HighlightField from './HighlightField'
-import { highlightFields, type ProductHighlight } from '@/lib/productHighlight'
 import { returnPeriodError, duplicateVariants, MIN_RETURN_PERIOD_DAYS, MAX_RETURN_PERIOD_DAYS } from '@/lib/productWizardValidation'
 
 function StepIndicator({ step }: { step: WizardStep }) {
@@ -132,7 +130,6 @@ export default function CreateWizard({ onBack, onCreated }: { onBack: () => void
   const [step, setStep]         = useState<WizardStep>(1)
   const [data, setData]         = useState<WizardData>(EMPTY_WIZARD)
   const [variants, setVariants] = useState<VariantRow[]>([])
-  const [highlight, setHighlight] = useState<ProductHighlight>('none')
   const [submitting, setSubmitting] = useState(false)
   const [err, setErr]           = useState<string | null>(null)
 
@@ -230,7 +227,6 @@ export default function CreateWizard({ onBack, onCreated }: { onBack: () => void
     try {
       const dto: CreateProductDto = {
         ...data,
-        ...highlightFields(highlight, data.collectionName, data.inspirationStory),
         variants: variants.map(v => ({
           color: v.color,
           colorFamily: v.color,
@@ -389,6 +385,10 @@ export default function CreateWizard({ onBack, onCreated }: { onBack: () => void
                 <label className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Pflegehinweise *</label>
                 <input className={INPUT} value={data.careInstructions} onChange={e => setField('careInstructions', e.target.value)} placeholder="30°C Maschinenwäsche" style={{ fontFamily: 'var(--font-league-spartan)' }} />
               </div>
+              <div>
+                <label className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Kollektion</label>
+                <input className={INPUT} value={data.collectionName} onChange={e => setField('collectionName', e.target.value)} placeholder="Sommer 2026" style={{ fontFamily: 'var(--font-league-spartan)' }} />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -430,14 +430,10 @@ export default function CreateWizard({ onBack, onCreated }: { onBack: () => void
               </div>
             </div>
 
-            <HighlightField
-              highlight={highlight}
-              onHighlightChange={setHighlight}
-              collectionName={data.collectionName}
-              onCollectionNameChange={v => setField('collectionName', v)}
-              inspirationStory={data.inspirationStory}
-              onInspirationStoryChange={v => setField('inspirationStory', v)}
-            />
+            <div>
+              <label className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Inspirationsgeschichte</label>
+              <textarea rows={2} className={INPUT} value={data.inspirationStory} onChange={e => setField('inspirationStory', e.target.value)} placeholder="Was inspirierte dieses Produkt?" style={{ fontFamily: 'var(--font-league-spartan)', resize: 'vertical' }} />
+            </div>
 
             {err && <p className="text-[11px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>{err}</p>}
 
@@ -753,10 +749,7 @@ export default function CreateWizard({ onBack, onCreated }: { onBack: () => void
                 { label: 'Material',      value: data.material },
                 { label: 'Herkunftsland', value: data.originCountry },
                 { label: 'Pflegehinweise', value: data.careInstructions },
-                { label: 'Highlight',     value:
-                  highlight === 'collection' && data.collectionName.trim() ? `Kollektion: ${data.collectionName}`
-                  : highlight === 'inspiration' && data.inspirationStory.trim() ? `Inspiration: ${data.inspirationStory}`
-                  : '—' },
+                { label: 'Kollektion',    value: data.collectionName || '—' },
                 { label: 'Rückgabefrist', value: `${data.returnPeriodDays} Tage` },
                 { label: 'Varianten',     value: `${variants.length} Stk. · ${totalStock} Stk. Bestand gesamt` },
                 { label: `Preis (${LISTING_REGIONS.find(r => r.id === region)?.label ?? region})`,

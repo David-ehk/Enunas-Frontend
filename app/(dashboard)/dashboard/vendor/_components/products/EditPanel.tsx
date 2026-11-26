@@ -9,8 +9,6 @@ import { INPUT, LABEL, BTN_PRIMARY, BTN_GHOST } from './constants'
 import ImagesSection from './ImagesSection'
 import ListingsSection from './ListingsSection'
 import CompleteTheLookSection from './CompleteTheLookSection'
-import HighlightField from './HighlightField'
-import { highlightOf, highlightFields } from '@/lib/productHighlight'
 
 export default function EditPanel({
   product,
@@ -31,9 +29,6 @@ export default function EditPanel({
     collectionName:   product.collectionName ?? '',
     inspirationStory: product.inspirationStory ?? '',
   })
-  const [highlight, setHighlight] = useState(() => highlightOf(product.collectionName, product.inspirationStory))
-  // Saved before the either-or rule: saving will drop one, so the brand has to be told.
-  const hasBoth = Boolean(product.collectionName?.trim() && product.inspirationStory?.trim())
   const [saving, setSaving] = useState(false)
   const [saved, setSaved]   = useState(false)
   const [err, setErr]       = useState<string | null>(null)
@@ -51,7 +46,8 @@ export default function EditPanel({
         description: form.description,
         material: form.material,
         careInstructions: form.careInstructions,
-        ...highlightFields(highlight, form.collectionName, form.inspirationStory),
+        collectionName: form.collectionName,
+        inspirationStory: form.inspirationStory,
       })
       onSaved(updated)
       setSaved(true)
@@ -92,27 +88,24 @@ export default function EditPanel({
             <label className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Beschreibung</label>
             <textarea rows={3} className={INPUT} value={form.description} onChange={e => set('description', e.target.value)} style={{ fontFamily: 'var(--font-league-spartan)', resize: 'vertical' }} />
           </div>
-          <div>
-            <label className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Material</label>
-            <input className={INPUT} value={form.material} onChange={e => set('material', e.target.value)} placeholder="100% Baumwolle" style={{ fontFamily: 'var(--font-league-spartan)' }} />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Material</label>
+              <input className={INPUT} value={form.material} onChange={e => set('material', e.target.value)} placeholder="100% Baumwolle" style={{ fontFamily: 'var(--font-league-spartan)' }} />
+            </div>
+            <div>
+              <label className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Kollektion</label>
+              <input className={INPUT} value={form.collectionName} onChange={e => set('collectionName', e.target.value)} placeholder="Sommer 2026" style={{ fontFamily: 'var(--font-league-spartan)' }} />
+            </div>
           </div>
           <div>
             <label className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Pflegehinweise</label>
             <input className={INPUT} value={form.careInstructions} onChange={e => set('careInstructions', e.target.value)} placeholder="30°C Maschinenwäsche" style={{ fontFamily: 'var(--font-league-spartan)' }} />
           </div>
-          <HighlightField
-            highlight={highlight}
-            onHighlightChange={setHighlight}
-            collectionName={form.collectionName}
-            onCollectionNameChange={v => set('collectionName', v)}
-            inspirationStory={form.inspirationStory}
-            onInspirationStoryChange={v => set('inspirationStory', v)}
-          />
-          {hasBoth && (
-            <p className="text-[11px] text-[#7A5C1E]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-              Für dieses Produkt sind Kollektion und Inspiration gespeichert. Beim Speichern bleibt nur deine Auswahl erhalten.
-            </p>
-          )}
+          <div>
+            <label className={LABEL} style={{ fontFamily: 'var(--font-league-spartan)' }}>Inspirationsgeschichte</label>
+            <textarea rows={3} className={INPUT} value={form.inspirationStory} onChange={e => set('inspirationStory', e.target.value)} style={{ fontFamily: 'var(--font-league-spartan)', resize: 'vertical' }} />
+          </div>
 
           {err && <p className="text-[11px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>{err}</p>}
 

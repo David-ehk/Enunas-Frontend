@@ -6,6 +6,10 @@ import { useWishlist } from '@/app/context/WishlistContext'
 import Image from 'next/image'
 import Link from 'next/link'
 import { estimateShipping } from '@/lib/pricing'
+import { pickSuggestions } from '@/lib/cartSuggestions'
+import { generateSlug } from '@/lib/product'
+import { useCartShelf } from './useCartShelf'
+import CartProductRow from './CartProductRow'
 
 /* ─────────────────────────────────────────────────────────────────
    CSS from design_handoff_cart/cart/cart.css — embedded so it loads
@@ -169,6 +173,66 @@ const css = `
   font-variant-numeric: tabular-nums;
 }
 
+/* Suggestion + favourite rows */
+.enu-picks { display: flex; flex-direction: column; gap: 10px; padding-top: 18px; }
+.enu-picks-title {
+  font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase;
+  color: var(--muted); margin: 8px 0 4px; font-weight: 400;
+}
+.enu-pick {
+  display: grid; grid-template-columns: 72px 1fr; gap: 14px;
+  padding: 12px; border: 1px solid var(--hair-c);
+}
+.enu-pick-media {
+  position: relative; display: block; width: 72px; height: 96px;
+  align-self: start; overflow: hidden; background: var(--panel);
+}
+.enu-pick-media img { transition: transform 800ms var(--ease); }
+.enu-pick:hover .enu-pick-media img { transform: scale(1.05); }
+.enu-pick-main { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+.enu-pick-top { display: flex; justify-content: space-between; gap: 12px; width: 100%; }
+.enu-pick-name {
+  font-family: var(--font-Cormorant-Garamond), Georgia, serif;
+  font-size: 17px; line-height: 1.15; color: #0A0A0A; text-decoration: none;
+  transition: opacity 240ms var(--ease-q);
+}
+.enu-pick-name:hover { opacity: 0.6; }
+.enu-pick-price { flex: none; font-size: 13px; font-weight: 300; font-variant-numeric: tabular-nums; }
+.enu-pick-status, .enu-pick-add {
+  margin-top: 10px; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+}
+.enu-pick-status { color: var(--muted); }
+.enu-pick-add {
+  background: none; border: 0; padding: 4px 0; cursor: pointer; color: var(--acc);
+  font-family: var(--font-league-spartan), system-ui, sans-serif;
+  transition: opacity 240ms var(--ease-q);
+}
+.enu-pick-add:hover { opacity: 0.65; }
+.enu-pick-add:disabled { cursor: wait; opacity: 0.45; }
+.enu-pick-choice { animation: enuItemIn 420ms var(--ease) forwards; opacity: 0; transform: translateY(6px); }
+.enu-pick-options { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.enu-pick-option {
+  min-width: 36px; height: 32px; padding: 0 10px; cursor: pointer;
+  background: none; border: 1px solid var(--hair-c); color: #0A0A0A;
+  font-family: var(--font-league-spartan), system-ui, sans-serif; font-size: 11px;
+  transition: opacity 220ms var(--ease-q);
+}
+.enu-pick-option:hover:not(:disabled), .enu-pick-option[aria-pressed="true"] {
+  background: var(--acc); border-color: var(--acc); color: #fff;
+}
+.enu-pick-option:disabled { color: var(--faint); text-decoration: line-through; cursor: not-allowed; }
+.enu-pick-note { font-size: 11px; color: var(--muted); }
+.enu-pick-note:not(:empty) { margin-top: 8px; }
+.enu-pick-note a { color: var(--acc); text-decoration: underline; }
+.enu-pick a:focus-visible, .enu-pick button:focus-visible {
+  outline: 1px solid var(--acc); outline-offset: 2px;
+}
+.enu-wish-all { display: flex; justify-content: center; padding-top: 12px; }
+.enu-wish-all a {
+  color: var(--acc); text-decoration: none; display: inline-flex; align-items: center; gap: 9px;
+  font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+}
+
 /* Empty state */
 .enu-empty {
   height: 100%; display: flex; flex-direction: column; align-items: center;
@@ -281,6 +345,9 @@ const css = `
 
 @media (prefers-reduced-motion: reduce) {
   .enu-item { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .enu-pick-choice { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .enu-pick-media img { transition: none !important; }
+  .enu-pick:hover .enu-pick-media img { transform: none !important; }
 }
 @media (max-width: 480px) {
   .enu-summary::before, .enu-summary::after { display: none; }
@@ -442,6 +509,10 @@ export default function CartSidebar() {
   const shipping  = estimateShipping(cartItems)
   const total     = totalPrice + shipping
 
+  const shelf = useCartShelf(isCartOpen && (cartItems.length > 0 || wishlistItems.length > 0))
+  const suggestions = shelf ? pickSuggestions(cartItems, shelf.products, shelf.curation) : []
+  const productById = new Map(shelf?.products.map(p => [String(p.id), p]))
+
   function handleRemove(id: string) {
     setRemovingId(id)
     setTimeout(() => { removeFromCart(id); setRemovingId(null) }, 420)
@@ -515,16 +586,38 @@ export default function CartSidebar() {
         <div className="enu-cart-body">
           {activeTab === 'cart' ? (
             cartItems.length > 0 ? (
-              cartItems.map((item) => (
-                <CartItemRow
-                  key={item.id}
-                  item={item}
-                  removing={removingId === item.id}
-                  onDec={() => updateQuantity(item.id, item.quantity - 1)}
-                  onInc={() => updateQuantity(item.id, item.quantity + 1)}
-                  onRemove={() => handleRemove(item.id)}
-                />
-              ))
+              <>
+                {/* Own wrapper: the cart lines' staggered entrance counts siblings. */}
+                <div>
+                  {cartItems.map((item) => (
+                    <CartItemRow
+                      key={item.id}
+                      item={item}
+                      removing={removingId === item.id}
+                      onDec={() => updateQuantity(item.id, item.quantity - 1)}
+                      onInc={() => updateQuantity(item.id, item.quantity + 1)}
+                      onRemove={() => handleRemove(item.id)}
+                    />
+                  ))}
+                </div>
+                {suggestions.length > 0 && (
+                  <section className="enu-picks" aria-label="Das könnte dir gefallen">
+                    <h3 className="enu-picks-title">Das könnte dir gefallen</h3>
+                    {suggestions.map((p) => (
+                      <CartProductRow
+                        key={p.id}
+                        image={p.images[0] ?? ''}
+                        brand={p.brandName}
+                        name={p.name}
+                        price={fmt(p.price)}
+                        href={`/bekleidung/${generateSlug(p.brandName)}/${p.slug}`}
+                        product={p}
+                        onNavigate={closeCart}
+                      />
+                    ))}
+                  </section>
+                )}
+              </>
             ) : (
               <div className="enu-empty">
                 <div className="enu-e-mark"><BagIcon /></div>
@@ -536,14 +629,27 @@ export default function CartSidebar() {
               </div>
             )
           ) : wishlistItems.length > 0 ? (
-            <div className="enu-empty">
-              <div className="enu-e-mark"><HeartIcon /></div>
-              <div className="enu-e-title">
-                {wishlistItems.length === 1 ? '1 Lieblingsstück gemerkt' : `${wishlistItems.length} Lieblingsstücke gemerkt`}
+            <div className="enu-picks">
+              {wishlistItems.map((saved) => {
+                const product = productById.get(String(saved.id))
+                return (
+                  <CartProductRow
+                    key={saved.id}
+                    image={saved.imgURL}
+                    brand={saved.brandName}
+                    name={saved.productName}
+                    price={product?.preview ? null : product?.available ? fmt(product.price) : saved.price}
+                    href={saved.href}
+                    product={product}
+                    onNavigate={closeCart}
+                  />
+                )
+              })}
+              <div className="enu-wish-all">
+                <Link href="/saved-lists" onClick={closeCart}>
+                  Wunschliste ansehen <ArrowIcon />
+                </Link>
               </div>
-              <Link href="/saved-lists" className="enu-e-cta" onClick={closeCart}>
-                Wunschliste ansehen <span className="enu-e-ar"><ArrowIcon /></span>
-              </Link>
             </div>
           ) : (
             <div className="enu-empty">

@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 // Source and licence: public/assets/icons/payment/ATTRIBUTION.txt
-const PAYMENT_METHODS = [
+export const PAYMENT_METHODS = [
   { file: 'visa', label: 'Visa' },
   { file: 'mastercard', label: 'Mastercard' },
   { file: 'american-express', label: 'American Express' },

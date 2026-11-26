@@ -24,6 +24,8 @@ interface BlurFilterBarProps {
   sorts?: ProductSort[]
   catalogueValue: string
   onCatalogue: (id: string) => void
+  /** On phones, offers the catalogue lines inside Sortieren (the bar has no Catalogue button). */
+  catalogueInSort?: boolean
 }
 
 // ── Desktop sub-components ────────────────────────────────────────────────────
@@ -159,6 +161,7 @@ export default function BlurFilterBar({
   sorts,
   catalogueValue,
   onCatalogue,
+  catalogueInSort = false,
 }: BlurFilterBarProps) {
   const [visible, setVisible] = useState(false)
   const isMobile = useIsMobile()
@@ -288,6 +291,7 @@ export default function BlurFilterBar({
               onChange={onSort}
               align="right"
               dropUp
+              catalogue={catalogueInSort ? { value: catalogueValue, onChange: onCatalogue } : undefined}
             />
           </div>
 
