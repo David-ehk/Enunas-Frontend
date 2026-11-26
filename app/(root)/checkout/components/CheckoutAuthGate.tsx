@@ -10,13 +10,7 @@ import GoogleLoginButton from '@/components/auth/GoogleLoginButton'
 // one isn't exported, and duplicating a ~130-line form is preferable to an unsolicited edit of
 // an unrelated page. No dedicated /login route exists anywhere in this app; this is how the app
 // gates a page behind auth everywhere else.
-interface CheckoutAuthGateProps {
-  // Fires once refreshUser() resolves after a successful login/register — lets a wrapper (the
-  // checkout auth modal) close itself the moment the visitor is actually signed in.
-  onSuccess?: () => void
-}
-
-export default function CheckoutAuthGate({ onSuccess }: CheckoutAuthGateProps = {}) {
+export default function CheckoutAuthGate() {
   const [tab, setTab] = useState<'login' | 'register'>('login')
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState<string | null>(null)
@@ -33,7 +27,6 @@ export default function CheckoutAuthGate({ onSuccess }: CheckoutAuthGateProps = 
     try {
       await authApi.login({ email: form.email, password: form.password })
       await refreshUser()
-      onSuccess?.()
     } catch (err) {
       setError(err instanceof FetchError ? err.message : 'E-Mail oder Passwort falsch.')
     } finally {
@@ -50,7 +43,6 @@ export default function CheckoutAuthGate({ onSuccess }: CheckoutAuthGateProps = 
       await authApi.signup({ email: form.email, password: form.password })
       await authApi.login({ email: form.email, password: form.password })
       await refreshUser()
-      onSuccess?.()
     } catch (err) {
       setError(err instanceof FetchError ? err.message : 'Registrierung fehlgeschlagen. Bitte versuche es erneut.')
     } finally {

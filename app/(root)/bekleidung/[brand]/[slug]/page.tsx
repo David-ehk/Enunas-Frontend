@@ -8,6 +8,7 @@ import { productApi, resolveProductWithMeta } from '@/lib/api'
 import { DEFAULT_RETURN_PERIOD_DAYS } from '@/lib/api/productResponseAdapter'
 // productApi used below for category/brand recommendations
 import { generateSlug } from '@/lib/product'
+import { highlightOf, highlightFields } from '@/lib/productHighlight'
 import type { ApiProduct, ApiCompleteTheLookItem } from '@/types/api'
 import type { Product as PdpProduct, Variant, Gender } from './types/product'
 import type { RecItem } from './components/ProductCard'
@@ -59,13 +60,20 @@ function toNewProduct(p: ApiProduct): PdpProduct {
     }
   }
 
+  // Collection or story, never both — also for products saved with both.
+  const highlight = highlightFields(
+    highlightOf(p.collectionName, p.inspirationStory),
+    p.collectionName ?? '',
+    p.inspirationStory ?? '',
+  )
+
   return {
     brandId: 0,
     brandName: p.brandName,
     careInstructions: p.details?.care ?? null,
     catalogueCategory: (p.catalogue && p.catalogue.length > 0) ? p.catalogue : null,
     category: p.category,
-    collectionName: p.collectionName ?? null,
+    collectionName: highlight.collectionName || null,
     createdAt: p.createdAt,
     creatorEmail: '',
     creatorId: 0,
@@ -77,7 +85,7 @@ function toNewProduct(p: ApiProduct): PdpProduct {
     id: parseInt(p.id) || 0,
     images: p.images ?? [],
     imageObjects: p.imageObjects,
-    inspirationStory: p.inspirationStory ?? null,
+    inspirationStory: highlight.inspirationStory || null,
     material: p.details?.material ?? '',
     name: p.name,
     originCountry: p.details?.origin ?? '',

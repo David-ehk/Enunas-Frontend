@@ -461,30 +461,32 @@ export default function ProductDetails({
                   </>
                 )}
               </div>
+            ) : hasDiscount ? (
+              <div role="group" aria-label="Reduzierter Preis" className="flex flex-col items-center gap-2 mb-10 font-league-spartan">
+                <div className="flex flex-wrap items-center justify-center gap-x-3.5 gap-y-2">
+                  <span className="text-[30px] font-light leading-none text-[#B3261E]">{formattedPrice}</span>
+                  <s
+                    className="text-[18px] font-light leading-none text-[#8A8780]"
+                    style={{ textDecorationThickness: '1px' }}
+                  >
+                    {formattedOriginalPrice}
+                  </s>
+                  {discountPct > 0 && (
+                    <span className="rounded-[2px] bg-[#FBEDEC] px-[7px] py-1 text-[11px] font-semibold tracking-[0.06em] text-[#B3261E]">
+                      −{discountPct} %
+                    </span>
+                  )}
+                </div>
+                <span className="text-[12px] text-enunas-gray-medium">inkl. MwSt.</span>
+              </div>
             ) : (
-            <div className="flex flex-col items-center gap-2 mb-10">
-              <div className="flex items-baseline gap-3">
+              <div className="flex items-baseline justify-center gap-3 mb-10">
                 <span
-                  className={hasDiscount ? 'text-enunas-error' : 'text-enunas-black'}
+                  className="text-enunas-black"
                   style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '22px', fontWeight: 300 }}
                 >
                   {formattedPrice}
                 </span>
-                {formattedOriginalPrice && (
-                  <span
-                    className="text-enunas-gray-dark"
-                    style={{
-                      fontFamily: 'var(--font-league-spartan)',
-                      fontSize: '17px',
-                      fontWeight: 400,
-                      textDecorationLine: 'line-through',
-                      textDecorationColor: '#8B1E3F',
-                      textDecorationThickness: '1.5px',
-                    }}
-                  >
-                    {formattedOriginalPrice}
-                  </span>
-                )}
                 <span
                   className="text-enunas-gray-medium"
                   style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '12px', letterSpacing: '0.02em' }}
@@ -492,17 +494,6 @@ export default function ProductDetails({
                   inkl. MwSt.
                 </span>
               </div>
-              {/* textIndent offsets the trailing letter-spacing after the last glyph, which
-                  would otherwise push the label off-centre inside the box. */}
-              {hasDiscount && discountPct > 0 && (
-                <span
-                  className="inline-flex items-center justify-center bg-enunas-error text-white px-3 py-1.5 leading-none uppercase"
-                  style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '10px', letterSpacing: '0.2em', textIndent: '0.2em' }}
-                >
-                  Reduziert −{discountPct} %
-                </span>
-              )}
-            </div>
             )}
 
             {/* 6. Color + SKU */}

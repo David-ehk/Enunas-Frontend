@@ -1,8 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useAuth } from '@/app/context/AuthContext'
 import CheckoutAuthGate from './CheckoutAuthGate'
+
+// How long the success message stays before the popup closes itself.
+const CONFIRMATION_MS = 1800
 
 interface CheckoutAuthModalProps {
   open: boolean
@@ -18,6 +22,18 @@ export default function CheckoutAuthModal({ open, onClose }: CheckoutAuthModalPr
   // Portal mount gate — must start false on the server and flip after hydration.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMounted(true) }, [])
+  const { isAuthenticated, user } = useAuth()
+
+  // Driven by the auth state, not by a callback from a form, so every way of signing in ends the
+  // same: confirmation, then close. The ref keeps the page's re-renders (it passes a new onClose
+  // each time) from restarting the timer.
+  const onCloseRef = useRef(onClose)
+  useEffect(() => { onCloseRef.current = onClose })
+  useEffect(() => {
+    if (!open || !isAuthenticated) return
+    const timer = setTimeout(() => onCloseRef.current(), CONFIRMATION_MS)
+    return () => clearTimeout(timer)
+  }, [open, isAuthenticated])
 
   useEffect(() => {
     if (!open) return
@@ -86,7 +102,24 @@ export default function CheckoutAuthModal({ open, onClose }: CheckoutAuthModalPr
             </svg>
           </button>
           <div className="max-h-[90vh] overflow-y-auto bg-white">
-            <CheckoutAuthGate onSuccess={onClose} />
+            {isAuthenticated ? (
+              <div role="status" className="animate-fade-in-up px-6 sm:px-8 py-16 text-center">
+                <p className="font-league-spartan text-[11px] tracking-[0.35em] uppercase text-enunas-success mb-3">
+                  Anmeldung erfolgreich
+                </p>
+                <p className="font-cormorant text-3xl text-enunas-black font-light">
+                  Du bist angemeldet.
+                </p>
+                {user?.email && (
+                  <p className="font-league-spartan text-xs text-enunas-gray-medium mt-3 break-all">{user.email}</p>
+                )}
+                <p className="font-league-spartan text-xs text-enunas-gray-medium mt-1">
+                  Du kannst jetzt deine Bestellung abschließen.
+                </p>
+              </div>
+            ) : (
+              <CheckoutAuthGate />
+            )}
           </div>
         </div>
       </div>
