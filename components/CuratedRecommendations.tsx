@@ -1,25 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getCuration, resolveCuratedOrNewest, type Segment } from '@/lib/curation'
 import { useScrollAnimation } from '@/hooks/use-scroll-animation'
 import { cn } from '@/lib/utils'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
 import Rail from '@/app/(root)/bekleidung/[brand]/[slug]/components/Rail'
-import { apiProductToCardShape } from '@/lib/api'
-import { partitionPreview, type PreviewMode } from '@/lib/preview'
+import { apiProductToCardShape, storefrontApi } from '@/lib/api'
+import { useAuth } from '@/app/context/AuthContext'
 import type { ApiProduct } from '@/types/api'
-
-const SEGMENT_PRIORITY: Segment[] = ['star', 'streetwear', 'cultural', 'athleisure', 'experimental']
-
-function resolveIds(excludeId?: string): string[] {
-  const curation = getCuration()
-  for (const seg of SEGMENT_PRIORITY) {
-    const ids = curation.recommendations[seg] ?? []
-    if (ids.length > 0) return ids.filter(id => id !== excludeId)
-  }
-  return []
-}
 
 interface Props {
   excludeId?: string
@@ -27,21 +15,28 @@ interface Props {
   dark?: boolean
   /** 'feed' matches the "Neue Arrivals" section styling (homepage). */
   variant?: 'default' | 'feed'
-  /** How preview products are placed. Homepage passes 'hide'; catalogue/PDP default to 'show'. */
-  previewMode?: PreviewMode
 }
 
-export default function CuratedRecommendations({ excludeId, title = 'Das könnte dir auch gefallen', dark = false, variant = 'default', previewMode = 'show' }: Props) {
+export default function CuratedRecommendations({ excludeId, title = 'Das könnte dir auch gefallen', dark = false, variant = 'default' }: Props) {
   const [products, setProducts] = useState<ApiProduct[]>([])
   const [expanded, setExpanded] = useState(false)
   const [loading, setLoading] = useState(true)
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 })
+  // Re-fetch when the signed-in user changes (login/logout) — the list is personal.
+  // Waits for the auth bootstrap so the first load doesn't fetch twice.
+  const { user, isLoading: authLoading } = useAuth()
+  const userId = user?.id ?? null
 
   useEffect(() => {
-    resolveCuratedOrNewest(resolveIds(excludeId), 8)
-      .then(res => setProducts(partitionPreview(res.filter(p => p.id !== excludeId), previewMode)))
-      .finally(() => setLoading(false))
-  }, [excludeId, previewMode])
+    if (authLoading) return
+    let cancelled = false
+    // The backend filters, orders and limits the list — render it exactly as returned.
+    storefrontApi.getRecommendations({ size: 8, excludeProductId: excludeId })
+      .then(res => { if (!cancelled) setProducts(res.products) })
+      .catch(() => { if (!cancelled) setProducts([]) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [excludeId, userId, authLoading])
 
   const visible = expanded ? products : products.slice(0, 4)
   const hiddenCount = products.length - 4

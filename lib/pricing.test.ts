@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { estimateShipping, calcUpsellDiscount, calcFinalTotal, listingPriceView, resolvePromoPricing, STANDARD_SHIPPING } from './pricing'
+import { estimateShipping, listingPriceView, STANDARD_SHIPPING } from './pricing'
 
 describe('estimateShipping', () => {
   it('matches the backend GLOBAL_DEFAULT rate (5.00 per brand in order snapshots, 14 Sep 2026)', () => {
@@ -23,56 +23,6 @@ describe('estimateShipping', () => {
 
   it('charges nothing for an empty cart', () => {
     expect(estimateShipping([])).toBe(0)
-  })
-})
-
-describe('calcUpsellDiscount', () => {
-  it('applies 10% for UPSELL10, rounded to cents', () => {
-    expect(calcUpsellDiscount(49.95, 'UPSELL10')).toBe(5)      // 4.995 -> 5.00
-    expect(calcUpsellDiscount(33.33, 'UPSELL10')).toBe(3.33)
-  })
-
-  it('is case- and whitespace-insensitive', () => {
-    expect(calcUpsellDiscount(100, '  upsell10 ')).toBe(10)
-  })
-
-  it('gives no discount for any other or empty code', () => {
-    expect(calcUpsellDiscount(100, 'SAVE20')).toBe(0)
-    expect(calcUpsellDiscount(100, '')).toBe(0)
-  })
-})
-
-describe('calcFinalTotal', () => {
-  it('is subtotal + shipping − discount', () => {
-    expect(calcFinalTotal(49.95, 4.99, 0)).toBeCloseTo(54.94, 2)
-    expect(calcFinalTotal(100, 0, 10)).toBe(90)
-  })
-})
-
-describe('resolvePromoPricing', () => {
-  it('takes the pct off the list price when the product is not on sale', () => {
-    const r = resolvePromoPricing(149.95, null, 10)
-    expect(r.promoPrice).toBe(134.95)
-    expect(r.listPrice).toBe(149.95)
-    expect(r.alreadyReduced).toBe(false)
-  })
-
-  it('does not stack on an existing markdown, and strikes the real list price', () => {
-    // 119.95 is already reduced from 149.95. Quoting 119.95 * 0.9 = 107.96 would advertise —
-    // and, via UPSELL10 against the cart subtotal, actually charge — a compounded discount.
-    const r = resolvePromoPricing(119.95, 149.95, 10)
-    expect(r.promoPrice).toBe(119.95)
-    expect(r.listPrice).toBe(149.95)
-    expect(r.alreadyReduced).toBe(true)
-  })
-
-  it('treats undefined originalPrice as not on sale', () => {
-    expect(resolvePromoPricing(100, undefined, 10).promoPrice).toBe(90)
-  })
-
-  it('rounds to cents', () => {
-    expect(resolvePromoPricing(33.33, null, 10).promoPrice).toBe(30)
-    expect(resolvePromoPricing(49.95, null, 10).promoPrice).toBe(44.96)
   })
 })
 

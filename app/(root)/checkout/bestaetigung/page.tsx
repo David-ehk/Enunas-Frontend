@@ -3,23 +3,14 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import CheckoutNavbar from '@/app/(root)/cart/components/CheckoutNavbar'
 import CartFooter from '@/app/(root)/cart/components/CartFooter'
 import { orderApi } from '@/lib/api/modules/orderApi'
-import { productApi, apiProductToCardShape } from '@/lib/api'
-import { generateSlug } from '@/lib/product'
-import { UPSELL_ENABLED } from '@/lib/featureFlags'
 import type { ApiOrder } from '@/types/api'
-import type { ProductCardShape } from '@/lib/api'
 import { shippingAddressLines } from '@/lib/orderAddress'
 import { formatEuro } from '@/lib/format'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function parsePriceNum(price: string): number {
-  return parseFloat(price.replace(/[^\d.,]/g, '').replace(',', '.')) || 0
-}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('de-DE', {
@@ -59,62 +50,6 @@ function LargeCheckmark() {
         </svg>
       </div>
     </>
-  )
-}
-
-function SmallCheckmark() {
-  return (
-    <div className="w-6 h-6 rounded-full border border-enunas-purple flex items-center justify-center flex-shrink-0">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-        <path d="M2 6L5 9L10 3" stroke="#370E4D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </div>
-  )
-}
-
-// ── Upsell product card ───────────────────────────────────────────────────────
-
-function UpsellCard({ product, discountPct }: { product: ProductCardShape; discountPct: number }) {
-  const originalPrice = parsePriceNum(product.price)
-  const discountedPrice = originalPrice * (1 - discountPct / 100)
-
-  return (
-    <Link href={product.href} className="group block">
-      <div className="relative overflow-hidden aspect-[3/4] bg-enunas-off-white mb-3">
-        {product.imgURL ? (
-          <Image
-            src={product.imgURL}
-            alt={product.productName}
-            fill
-            sizes="(min-width: 768px) 25vw, 50vw"
-            className="object-cover transition-transform duration-800 ease-out-expo group-hover:scale-105"
-          />
-        ) : (
-          <div className="w-full h-full bg-enunas-off-white" />
-        )}
-        <div
-          className="absolute top-3 left-3 bg-enunas-purple text-white font-league-spartan px-2 py-1"
-          style={{ fontSize: '10px', letterSpacing: '0.08em' }}
-        >
-          −{discountPct}%
-        </div>
-      </div>
-
-      <p className="font-league-spartan text-[10px] text-enunas-gray-medium uppercase tracking-[0.1em] mb-1">
-        {product.brandName}
-      </p>
-      <p className="font-cormorant text-base text-enunas-black leading-snug mb-2 group-hover:text-enunas-purple transition-colors duration-200">
-        {product.productName}
-      </p>
-      <div className="flex items-baseline gap-2">
-        <span className="font-league-spartan text-sm text-enunas-purple font-medium">
-          {formatEuro(discountedPrice)}
-        </span>
-        <span className="font-league-spartan text-xs text-enunas-gray-medium line-through">
-          {product.price}
-        </span>
-      </div>
-    </Link>
   )
 }
 
@@ -238,94 +173,14 @@ function OrderDetails({ order }: { order: ApiOrder }) {
   )
 }
 
-// ── 10-minute countdown (shared with /angebot via sessionStorage) ─────────────
-
-const ANGEBOT_STORAGE_KEY = 'enunas-angebot-start'
-
-function useCountdown(totalSeconds: number) {
-  const [remaining, setRemaining] = useState<number>(() => {
-    if (typeof window === 'undefined') return totalSeconds
-    const stored = sessionStorage.getItem(ANGEBOT_STORAGE_KEY)
-    if (stored) {
-      const elapsed = Math.floor((Date.now() - parseInt(stored, 10)) / 1000)
-      return Math.max(0, totalSeconds - elapsed)
-    }
-    sessionStorage.setItem(ANGEBOT_STORAGE_KEY, String(Date.now()))
-    return totalSeconds
-  })
-
-  useEffect(() => {
-    if (remaining <= 0) return
-    const id = setInterval(() => {
-      const stored = sessionStorage.getItem(ANGEBOT_STORAGE_KEY)
-      if (!stored) return
-      const elapsed = Math.floor((Date.now() - parseInt(stored, 10)) / 1000)
-      setRemaining(Math.max(0, totalSeconds - elapsed))
-    }, 1000)
-    return () => clearInterval(id)
-  }, [totalSeconds, remaining])
-
-  const m = String(Math.floor(remaining / 60)).padStart(2, '0')
-  const s = String(remaining % 60).padStart(2, '0')
-  return { display: `${m}:${s}`, expired: remaining <= 0 }
-}
-
-function CountdownBanner({ discountPct }: { discountPct: number }) {
-  const { display, expired } = useCountdown(10 * 60)
-  return (
-    <div className="text-center mb-14">
-      <p className="font-league-spartan text-[10px] tracking-[0.32em] uppercase text-enunas-gray-medium mb-4">
-        Exklusiv für dich
-      </p>
-
-      {expired ? (
-        <h2
-          className="font-cormorant text-2xl sm:text-4xl lg:text-5xl font-light text-enunas-gray-medium mb-4"
-          style={{ letterSpacing: '0.02em', lineHeight: 1.1 }}
-        >
-          Das Angebot ist abgelaufen.
-        </h2>
-      ) : (
-        <>
-          <h2
-            className="font-cormorant font-light text-enunas-black mb-3"
-            style={{
-              fontSize: 'clamp(22px, 6vw, 52px)',
-              letterSpacing: '0.02em',
-              lineHeight: 1.1,
-            }}
-          >
-            Nur noch{' '}
-            <span
-              className="font-cormorant tabular-nums"
-              style={{ color: '#8B1E3F', fontVariantNumeric: 'tabular-nums' }}
-            >
-              {display}
-            </span>
-            {' '}— {discountPct}% Rabatt
-          </h2>
-          <p className="font-league-spartan text-xs sm:text-sm text-enunas-gray-medium max-w-xs sm:max-w-sm mx-auto leading-relaxed px-4 sm:px-0">
-            Diese Auswahl wird nicht jedem gemacht — sei schnell, das Angebot läuft ab.
-          </p>
-        </>
-      )}
-    </div>
-  )
-}
-
 // ── Page content (inside Suspense) ────────────────────────────────────────────
 
 function BestaetiguungContent() {
   const searchParams  = useSearchParams()
   const orderId       = searchParams.get('orderId')
-  // Gated like the order-confirmation route: with the upsell off, `?upsell=true` is ignored and
-  // this always renders the standard confirmation.
-  const isUpsell      = UPSELL_ENABLED && searchParams.get('upsell') === 'true'
-  const discountPct   = 10
 
   const [order, setOrder]         = useState<ApiOrder | null>(null)
   const [orderLoading, setLoading] = useState(true)
-  const [products, setProducts]   = useState<ProductCardShape[]>([])
 
   useEffect(() => {
     // One-shot: fetch the confirmed order, or drop the loading state if there's no id.
@@ -336,111 +191,6 @@ function BestaetiguungContent() {
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [orderId])
-
-  useEffect(() => {
-    // Waits for the order fetch attempt to finish (success or failure) so this only runs once,
-    // with whatever purchased-items data is actually available — starting it in parallel would
-    // mean firing this fetch a second time the moment `order` resolves.
-    if (!isUpsell || orderLoading) return
-    // A "special discount" on the exact thing just bought at full price is a confusing,
-    // self-defeating upsell — exclude items from the order just placed. Order items from the
-    // real backend don't carry a productId (see ApiOrderItem), only productName, so this
-    // matches on name; fetching a larger pool than the 4 shown backfills whatever the filter
-    // removes instead of risking an empty/short grid.
-    productApi.list({ size: 20 })
-      .then(r => {
-        const purchasedNames = new Set(
-          (order?.items ?? [])
-            .map(i => (i.productName ?? i.name ?? '').trim().toLowerCase())
-            .filter(Boolean)
-        )
-        const filtered = r.content.filter(p => !purchasedNames.has(p.name.trim().toLowerCase()))
-        setProducts(filtered.slice(0, 4).map(p => ({
-          ...apiProductToCardShape(p),
-          href: `/angebot/${generateSlug(p.brandName)}/${p.slug}`,
-        })))
-      })
-      .catch(() => {})
-  }, [isUpsell, orderLoading, order])
-
-  // ── VARIANT 2: Upsell ────────────────────────────────────────────────────────
-  if (isUpsell) {
-    return (
-      <>
-        <CheckoutNavbar />
-        <div className="min-h-screen bg-white pb-24 px-4 sm:px-8 lg:px-16" style={{ paddingTop: '42px' }}>
-          <div className="max-w-[1440px] mx-auto">
-
-            {/* Compact confirmation header */}
-            <div className="text-center pt-8 pb-6 border-b border-enunas-gray-light">
-              <div className="flex items-center justify-center gap-3 mb-5">
-                <SmallCheckmark />
-                <p className="font-league-spartan text-[11px] tracking-[0.28em] uppercase text-enunas-gray-medium">
-                  Bestellung bestätigt
-                </p>
-              </div>
-              <h1
-                className="font-cormorant text-2xl sm:text-3xl lg:text-4xl font-light text-enunas-black"
-                style={{ letterSpacing: '0.02em' }}
-              >
-                Vielen Dank für deine Bestellung.
-              </h1>
-              {order?.orderNumber && (
-                <p className="font-league-spartan text-xs text-enunas-gray-medium mt-3 tracking-[0.12em]">
-                  Bestellnummer:{' '}
-                  <span className="text-enunas-black font-medium">{order.orderNumber}</span>
-                </p>
-              )}
-              <p className="font-league-spartan text-xs text-enunas-gray-medium mt-2">
-                Du erhältst in Kürze eine Bestätigung per E-Mail.
-              </p>
-              <p className="font-cormorant italic text-base text-enunas-gray-medium mt-4 max-w-md mx-auto leading-relaxed">
-                Als besonderen Dank für deine Bestellung haben wir dich für ein exklusives Angebot ausgewählt —
-                eine Gelegenheit, die nicht jeder erhält.
-              </p>
-            </div>
-
-            {/* Upsell section */}
-            <div className="py-8 lg:py-16">
-              <CountdownBanner discountPct={discountPct} />
-
-              {/* Product grid */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8 max-w-[1280px] mx-auto">
-                {products.length > 0
-                  ? products.map(p => (
-                      <UpsellCard key={p.id} product={p} discountPct={discountPct} />
-                    ))
-                  : Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="flex flex-col gap-3">
-                        <div className="aspect-[3/4] bg-enunas-off-white animate-pulse" />
-                        <div className="h-2.5 w-1/2 bg-enunas-off-white animate-pulse" />
-                        <div className="h-4 w-3/4 bg-enunas-off-white animate-pulse" />
-                        <div className="h-3 w-1/3 bg-enunas-off-white animate-pulse" />
-                      </div>
-                    ))
-                }
-              </div>
-
-              {/* Divider + CTA */}
-              <div className="max-w-[1280px] mx-auto">
-                <div className="h-px bg-enunas-gray-light mt-16 mb-12" />
-                <div className="flex flex-col items-center gap-5">
-                  <PrimaryLink href="/bekleidung">Weiter einkaufen</PrimaryLink>
-                  <Link
-                    href="/account"
-                    className="font-league-spartan text-xs text-enunas-gray-medium tracking-[0.12em] uppercase hover:text-enunas-black transition-colors duration-200"
-                  >
-                    Meine Bestellungen ansehen
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <CartFooter />
-      </>
-    )
-  }
 
   // ── VARIANT 1: Standard confirmation ─────────────────────────────────────────
   return (

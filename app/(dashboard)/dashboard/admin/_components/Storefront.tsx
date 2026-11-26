@@ -1,17 +1,21 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { getCuration, saveCuration, type CurationData, type Segment } from '@/lib/curation'
+import { removeCuratedId, moveCuratedId, insertCuratedId } from '@/lib/curation'
+import { storefrontApi } from '@/lib/api'
 import { getTopDesigners, saveTopDesigners, MAX_TOP_DESIGNERS } from '@/lib/topDesigners'
-import type { AdminApiProduct } from '@/types/api'
+import type { AdminApiProduct, CurationData, Segment } from '@/types/api'
 import { GripVertical, X, Plus, Check, Save, Trash2, AlertTriangle } from 'lucide-react'
 import { PageHeader, SearchInput, SelectFilter } from './shared'
 import { isProductLive } from '@/lib/product'
+import { adminProductCover } from '@/lib/adminProductCover'
 
 type SectionTab = 'trendy' | 'drops' | 'recommendations'
 type DragState =
   | { type: 'left'; id: string }
-  | { type: 'right'; id: string; from: number }
+  | { type: 'right'; id: string }
+
+type SaveState = 'idle' | 'saving' | 'saved' | { error: string }
 
 const SECTION_TABS: { id: SectionTab; label: string }[] = [
   { id: 'trendy',          label: 'Trendy' },
@@ -50,7 +54,7 @@ function AvailableCard({ product, isDragOver, onAdd, onDragStart }: {
   onAdd: () => void
   onDragStart: (e: React.DragEvent) => void
 }) {
-  const img = product.images?.[0]
+  const img = adminProductCover(product.images)
   return (
     <div
       draggable
@@ -77,10 +81,12 @@ function AvailableCard({ product, isDragOver, onAdd, onDragStart }: {
         </p>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-[10px] text-[#6B6B6B] tabular-nums"
-          style={{ fontFamily: 'var(--font-league-spartan)' }}>
-          €{Math.round(product.price ?? 0)}
-        </span>
+        {product.price != null && (
+          <span className="text-[10px] text-[#6B6B6B] tabular-nums"
+            style={{ fontFamily: 'var(--font-league-spartan)' }}>
+            €{Math.round(product.price)}
+          </span>
+        )}
         <div className="w-5 h-5 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150"
           style={{ background: '#370E4D' }}>
           <Plus className="w-3 h-3 text-white" />
@@ -100,7 +106,7 @@ function SelectedCard({ product, index, isDragOver, isAboveFold, onRemove, onDra
   onDragOver: (e: React.DragEvent) => void
   onDrop: (e: React.DragEvent) => void
 }) {
-  const img = product?.images?.[0]
+  const img = adminProductCover(product?.images)
   return (
     <div
       draggable
@@ -248,8 +254,9 @@ function TopDesignerPicker({ brandNames }: { brandNames: string[] }) {
   )
 }
 
-export default function Storefront({ products }: { products: AdminApiProduct[] }) {
-  const [curation, setCuration] = useState<CurationData>(() => getCuration())
+function CurationEditor({ initial, approved }: { initial: CurationData; approved: AdminApiProduct[] }) {
+  const [curation, setCuration] = useState<CurationData>(initial)
+  const [saveState, setSaveState] = useState<SaveState>('idle')
   const [section, setSection]   = useState<SectionTab>('trendy')
   const [segment, setSegment]   = useState<Segment>('streetwear')
   const [search, setSearch]     = useState('')
@@ -257,8 +264,9 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
   const [catFilter, setCat]     = useState('all')
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [dropZoneActive, setDropZoneActive] = useState(false)
-  const [saved, setSaved] = useState(false)
   const dragRef = useRef<DragState | null>(null)
+  const saving = saveState === 'saving'
+  const saved = saveState === 'saved'
 
   useEffect(() => {
     // Reset the available-products filters whenever the section tab changes.
@@ -266,19 +274,18 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
     setSearch(''); setBrand('all'); setCat('all')
   }, [section])
 
-  const approved = useMemo(() => products.filter(p => isProductLive(p.status)), [products])
-
   const selectedIds = useMemo(() => getIds(curation, section, segment), [curation, section, segment])
 
   const selectedProducts = useMemo(() =>
-    selectedIds.map(id => approved.find(p => p.id === id)).filter((p): p is AdminApiProduct => !!p),
+    // Curation ids are strings, admin product ids come back numeric, so compare as strings.
+    selectedIds.map(id => approved.find(p => String(p.id) === id)).filter((p): p is AdminApiProduct => !!p),
     [selectedIds, approved]
   )
 
   const available = useMemo(() => {
     const sel = new Set(selectedIds)
     return approved.filter(p => {
-      if (sel.has(p.id)) return false
+      if (sel.has(String(p.id))) return false
       if (search) {
         const q = search.toLowerCase()
         if (!p.name.toLowerCase().includes(q) && !p.brandName?.toLowerCase().includes(q)) return false
@@ -294,35 +301,36 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
     return [{ value: 'all', label: 'Alle Marken' }, ...Array.from(set).sort().map(b => ({ value: b, label: b }))]
   }, [approved])
 
-  const brandNames = useMemo(
-    () => brandOptions.filter(b => b.value !== 'all').map(b => b.value),
-    [brandOptions]
-  )
-
   const catOptions = useMemo(() => {
     const set = new Set<string>()
     approved.forEach(p => getCats(p).forEach(c => set.add(c)))
     return [{ value: 'all', label: 'Alle Kategorien' }, ...Array.from(set).sort().map(c => ({ value: c, label: c }))]
   }, [approved])
 
+  // Selected ids can include hidden products the list doesn't render, so every edit goes by
+  // product id, never by the position in the rendered list.
   function add(id: string) {
-    const cur = getIds(curation, section, segment)
-    if (cur.includes(id)) return
-    setCuration(c => setIds(c, section, segment, [...cur, id]))
+    setCuration(c => setIds(c, section, segment, insertCuratedId(getIds(c, section, segment), id)))
   }
 
-  function remove(index: number) {
-    const cur = getIds(curation, section, segment)
-    const next = [...cur]; next.splice(index, 1)
-    setCuration(c => setIds(c, section, segment, next))
+  function remove(id: string) {
+    setCuration(c => setIds(c, section, segment, removeCuratedId(getIds(c, section, segment), id)))
   }
 
   function clearAll() { setCuration(c => setIds(c, section, segment, [])) }
 
-  function save() {
-    saveCuration(curation)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2200)
+  async function save() {
+    setSaveState('saving')
+    try {
+      // PUT replaces ALL lists, so the complete object goes out; the response is the saved state
+      // (duplicates removed, deleted products gone).
+      setCuration(await storefrontApi.admin.saveCuration(curation))
+      setSaveState('saved')
+      setTimeout(() => setSaveState(s => s === 'saved' ? 'idle' : s), 2200)
+    } catch (err) {
+      // Nothing was saved. Keep the admin's edits so they can fix and retry.
+      setSaveState({ error: err instanceof Error ? err.message : 'Speichern fehlgeschlagen.' })
+    }
   }
 
   function handleLeftDragStart(e: React.DragEvent, id: string) {
@@ -330,9 +338,9 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
     dragRef.current = { type: 'left', id }
   }
 
-  function handleRightDragStart(e: React.DragEvent, id: string, from: number) {
+  function handleRightDragStart(e: React.DragEvent, id: string) {
     e.dataTransfer.effectAllowed = 'move'
-    dragRef.current = { type: 'right', id, from }
+    dragRef.current = { type: 'right', id }
   }
 
   function handleItemDragOver(e: React.DragEvent, index: number) {
@@ -340,24 +348,12 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
     setDragOverIndex(index)
   }
 
-  function handleItemDrop(e: React.DragEvent, targetIndex: number) {
+  function handleItemDrop(e: React.DragEvent, targetId: string) {
     e.preventDefault(); e.stopPropagation()
     const drag = dragRef.current
     if (!drag) return
-    const cur = getIds(curation, section, segment)
-
-    if (drag.type === 'left') {
-      if (cur.includes(drag.id)) return
-      const next = [...cur]; next.splice(targetIndex, 0, drag.id)
-      setCuration(c => setIds(c, section, segment, next))
-    } else {
-      const from = drag.from
-      if (from === targetIndex) return
-      const next = [...cur]
-      const [moved] = next.splice(from, 1)
-      next.splice(from < targetIndex ? targetIndex - 1 : targetIndex, 0, moved)
-      setCuration(c => setIds(c, section, segment, next))
-    }
+    const edit = drag.type === 'left' ? insertCuratedId : moveCuratedId
+    setCuration(c => setIds(c, section, segment, edit(getIds(c, section, segment), drag.id, targetId)))
     dragRef.current = null; setDragOverIndex(null)
   }
 
@@ -369,24 +365,16 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
     e.preventDefault(); setDropZoneActive(false)
     const drag = dragRef.current
     if (!drag || drag.type !== 'left') { dragRef.current = null; setDragOverIndex(null); return }
-    const cur = getIds(curation, section, segment)
-    if (!cur.includes(drag.id)) setCuration(c => setIds(c, section, segment, [...cur, drag.id]))
+    setCuration(c => setIds(c, section, segment, insertCuratedId(getIds(c, section, segment), drag.id)))
     dragRef.current = null; setDragOverIndex(null)
   }
 
   const currentSegment = SEGMENTS.find(s => s.id === segment)
 
   return (
-    <div className="space-y-5">
-      <PageHeader
-        eyebrow="Schaufenster"
-        title="Sortiment"
-        italicTitle="kuratieren."
-        noBorder
-      />
-
-      <TopDesignerPicker brandNames={brandNames} />
-
+    // Inert while saving: the server's response replaces the state, so an edit made meanwhile
+    // would be silently lost.
+    <div className="space-y-5" inert={saving}>
       {/* Section tabs */}
       <div className="flex gap-1 p-1 rounded-xl w-fit"
         style={{ background: 'white', border: '1px solid #E8E8E8' }}>
@@ -408,6 +396,13 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
       </div>
 
       {/* Segment selector (recommendations only) */}
+      {section === 'trendy' && (
+        <p className="text-[10px] text-[#9B9B9B] uppercase tracking-[0.1em]"
+          style={{ fontFamily: 'var(--font-league-spartan)' }}>
+          Erscheint ganz oben auf /trendy
+        </p>
+      )}
+
       {section === 'recommendations' && (
         <div className="space-y-3">
           <div className="flex items-center gap-2 flex-wrap">
@@ -479,8 +474,8 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
                     <AvailableCard
                       key={p.id}
                       product={p}
-                      onAdd={() => add(p.id)}
-                      onDragStart={e => handleLeftDragStart(e, p.id)}
+                      onAdd={() => add(String(p.id))}
+                      onDragStart={e => handleLeftDragStart(e, String(p.id))}
                     />
                   ))}
                 </div>
@@ -495,7 +490,12 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
             <p className="text-[10px] uppercase tracking-[0.14em] font-semibold text-[#6B6B6B]"
               style={{ fontFamily: 'var(--font-league-spartan)' }}>
               Kuratierte Auswahl
-              <span className="ml-1.5 text-[#9B9B9B] font-normal">{selectedIds.length}</span>
+              <span className="ml-1.5 text-[#9B9B9B] font-normal">{selectedProducts.length}</span>
+              {selectedIds.length > selectedProducts.length && (
+                <span className="ml-1.5 text-[#9B9B9B] font-normal normal-case tracking-normal">
+                  (+{selectedIds.length - selectedProducts.length} ausgeblendet, bleiben gespeichert)
+                </span>
+              )}
             </p>
             {selectedIds.length > 0 && (
               <button
@@ -518,10 +518,10 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
                 Direkt sichtbar (1–4)
               </span>
             </span>
-            {selectedIds.length > 4 && (
+            {selectedProducts.length > 4 && (
               <span className="text-[9px] text-[#9B9B9B]"
                 style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                +{selectedIds.length - 4} auf Klick
+                +{selectedProducts.length - 4} auf Klick
               </span>
             )}
           </div>
@@ -537,7 +537,7 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
             onDragLeave={() => { setDropZoneActive(false); setDragOverIndex(null) }}
             onDrop={handleContainerDrop}
           >
-            {selectedIds.length === 0
+            {selectedProducts.length === 0
               ? <DropZoneEmpty />
               : (
                 <div className="space-y-1">
@@ -548,10 +548,10 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
                         index={i}
                         isDragOver={dragOverIndex === i}
                         isAboveFold={i < 4}
-                        onRemove={() => remove(i)}
-                        onDragStart={e => handleRightDragStart(e, p.id, i)}
+                        onRemove={() => remove(String(p.id))}
+                        onDragStart={e => handleRightDragStart(e, String(p.id))}
                         onDragOver={e => handleItemDragOver(e, i)}
-                        onDrop={e => handleItemDrop(e, i)}
+                        onDrop={e => handleItemDrop(e, String(p.id))}
                       />
                       {i === 3 && selectedProducts.length > 4 && (
                         <div className="flex items-center gap-2 py-1.5 px-1">
@@ -573,10 +573,17 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
       </div>
 
       {/* Save footer */}
-      <div className="flex items-center justify-end pt-2">
+      <div className="flex items-center justify-end gap-4 pt-2">
+        {typeof saveState === 'object' && (
+          <p role="alert" className="flex items-center gap-1.5 text-[11px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+            Nicht gespeichert: {saveState.error}
+          </p>
+        )}
         <button
           onClick={save}
-          className="flex items-center gap-2 h-9 px-5 rounded-xl text-[11px] font-semibold transition-all duration-200"
+          disabled={saving}
+          className="flex items-center gap-2 h-9 px-5 rounded-xl text-[11px] font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
           style={{
             fontFamily: 'var(--font-league-spartan)',
             letterSpacing: '0.06em',
@@ -586,9 +593,58 @@ export default function Storefront({ products }: { products: AdminApiProduct[] }
         >
           {saved
             ? <><Check className="w-3.5 h-3.5" /> Gespeichert</>
-            : <><Save className="w-3.5 h-3.5" /> Änderungen speichern</>}
+            : <><Save className="w-3.5 h-3.5" /> {saving ? 'Wird gespeichert…' : 'Änderungen speichern'}</>}
         </button>
       </div>
+    </div>
+  )
+}
+
+export default function Storefront({ products }: { products: AdminApiProduct[] }) {
+  // The editor only mounts once the saved lists are here: an editor that never loaded would
+  // PUT empty lists over them, and edits made while loading would be overwritten.
+  const [curation, setCuration] = useState<CurationData | null>(null)
+  const [loadFailed, setLoadFailed] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    // Always the admin GET: the public one omits hidden products, and a PUT built from it
+    // would delete them from the lists.
+    storefrontApi.admin.getCuration()
+      .then(c => { if (!cancelled) setCuration(c) })
+      .catch(() => { if (!cancelled) setLoadFailed(true) })
+    return () => { cancelled = true }
+  }, [])
+
+  const approved = useMemo(() => products.filter(p => isProductLive(p.status)), [products])
+  const brandNames = useMemo(
+    () => [...new Set(approved.map(p => p.brandName).filter(Boolean))].sort(),
+    [approved]
+  )
+
+  return (
+    <div className="space-y-5">
+      <PageHeader
+        eyebrow="Schaufenster"
+        title="Sortiment"
+        italicTitle="kuratieren."
+        noBorder
+      />
+
+      <TopDesignerPicker brandNames={brandNames} />
+
+      {curation ? (
+        <CurationEditor initial={curation} approved={approved} />
+      ) : loadFailed ? (
+        <p role="alert" className="flex items-center gap-1.5 text-[11px] text-[#8B1E3F]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+          Gespeicherte Auswahl konnte nicht geladen werden. Bitte Seite neu laden.
+        </p>
+      ) : (
+        <p className="text-[11px] text-[#6B6B6B]" style={{ fontFamily: 'var(--font-league-spartan)' }}>
+          Auswahl wird geladen…
+        </p>
+      )}
     </div>
   )
 }

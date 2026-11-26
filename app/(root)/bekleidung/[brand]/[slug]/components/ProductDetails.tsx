@@ -25,7 +25,7 @@ import { useWishlist, type WishlistItem } from '@/app/context/WishlistContext'
 import { productApi } from '@/lib/api'
 import { listingPriceView } from '@/lib/pricing'
 import { effectiveReturnPeriodDays } from '@/lib/returnPolicy'
-import { colourwayCoverImage } from '@/lib/colourwayImage'
+import { colourwayCoverImage, colourwayGallery } from '@/lib/colourwayImage'
 import { colourHref, withColourFirst } from '@/lib/product'
 import type { ApiListing } from '@/types/api'
 
@@ -169,21 +169,11 @@ export default function ProductDetails({
     [product.variants, selectedColor],
   )
 
-  // Gallery images for the current swatch: the colourway's own images plus every shared
-  // (untagged) one, primary-first. Falls back to the full flat list when the backend sends no
-  // per-image colour metadata, so the gallery is unchanged for products that haven't tagged any.
-  const galleryImages = useMemo(() => {
-    const objs = product.imageObjects
-    if (!objs || objs.length === 0) return product.images
-    const matches = objs.filter(
-      io => io.productColorId == null || io.productColorId === selectedColorId,
-    )
-    const ordered = [...matches].sort((a, b) => Number(b.primary) - Number(a.primary))
-    const urls = ordered.map(io => io.url)
-    // A colourway with no images of its own and no shared images: show the full set rather than
-    // an empty gallery.
-    return urls.length > 0 ? urls : product.images
-  }, [product.imageObjects, product.images, selectedColorId])
+  // Gallery images for the current swatch — see colourwayGallery.
+  const galleryImages = useMemo(
+    () => colourwayGallery(product.imageObjects, selectedColorId, product.images),
+    [product.imageObjects, product.images, selectedColorId],
+  )
 
   const selectedVariant = findVariant(product.variants, selectedColor?.name ?? null, selectedSize)
   // SKU shown as soon as a color is selected — not size-dependent
@@ -799,7 +789,7 @@ export default function ProductDetails({
 }
 
 // ── PDP Accordion ─────────────────────────────────────
-function PdpAccordion({
+export function PdpAccordion({
   title, open, onToggle, children, isLast = false,
 }: {
   id: string

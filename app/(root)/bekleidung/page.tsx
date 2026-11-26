@@ -10,7 +10,8 @@ import BlurFilterBar from './components/BlurFilterBar'
 import SortDropdown from './components/SortDropdown'
 import CatalogueDropdown from './components/CatalogueDropdown'
 import CategoryNavigation from './components/CategoryNavigation'
-import FilterSidebar, { FilterState, CATEGORIES, catMatchesProduct, parsePriceNum, genderMatchesProduct } from './components/FilterSidebar'
+import FilterSidebar, { FilterState, CATEGORIES, catMatchesProduct, genderMatchesProduct } from './components/FilterSidebar'
+import { BROWSE_SORTS, resolveSort } from '@/lib/productSorts'
 import { partitionPreview } from '@/lib/preview'
 
 // ── Loading Skeletons ─────────────────────────────────────────────────────────
@@ -71,8 +72,10 @@ function BekleidungContent() {
   const [filterOpen, setFilterOpen]     = useState(false)
   const [openSections, setOpenSections] = useState<string[]>(['kategorien'])
   const [filters, setFilters]           = useState<FilterState>({
-    kategorien: [], farben: [], groessen: [], marken: [], sortieren: 'neu', catalogue: '',
+    kategorien: [], farben: [], groessen: [], marken: [], sortieren: '', catalogue: '',
   })
+  // '' means "not chosen yet": the list's first sort applies.
+  const activeSort = resolveSort(BROWSE_SORTS, filters.sortieren)
 
   // Keep activeCat in sync when the URL changes via CategoryNavigation links
   useEffect(() => {
@@ -116,11 +119,8 @@ function BekleidungContent() {
     if (filters.groessen.length > 0)    r = r.filter(p => p.sizes?.some(s => filters.groessen.includes(s)))
     if (filters.marken.length > 0)      r = r.filter(p => filters.marken.includes(p.brandName))
     if (filters.catalogue)              r = r.filter(p => (p.catalogue ?? []).some(c => c.toLowerCase() === filters.catalogue.toLowerCase()))
-    if (filters.sortieren === 'preis-auf')      r = [...r].sort((a, b) => parsePriceNum(a.price) - parsePriceNum(b.price))
-    else if (filters.sortieren === 'preis-ab')  r = [...r].sort((a, b) => parsePriceNum(b.price) - parsePriceNum(a.price))
-    else if (filters.sortieren === 'name')      r = [...r].sort((a, b) => a.productName.localeCompare(b.productName))
-    return partitionPreview(r, 'show')
-  }, [allProducts, activeCat, gender, filters])
+    return partitionPreview(activeSort.apply(r), 'show')
+  }, [allProducts, activeCat, gender, filters, activeSort])
 
   const activeFilterCount = filters.kategorien.length + filters.farben.length + filters.groessen.length + filters.marken.length
 
@@ -130,7 +130,7 @@ function BekleidungContent() {
       return { ...prev, [key]: arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val] }
     })
 
-  const resetFilters = () => setFilters({ kategorien: [], farben: [], groessen: [], marken: [], sortieren: 'neu', catalogue: '' })
+  const resetFilters = () => setFilters({ kategorien: [], farben: [], groessen: [], marken: [], sortieren: '', catalogue: '' })
   const toggleGender = (g: 'damen' | 'herren') =>
     setGender(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g])
   const openAt = (section: string) => {
@@ -297,7 +297,8 @@ function BekleidungContent() {
           <span style={{ width: 1, height: 12, background: '#D8D8D8', flexShrink: 0 }} />
 
           <SortDropdown
-            value={filters.sortieren}
+            sorts={BROWSE_SORTS}
+            value={activeSort.id}
             onChange={(id) => setFilters(prev => ({ ...prev, sortieren: id }))}
             align="right"
           />
@@ -364,7 +365,8 @@ function BekleidungContent() {
       <FilterSidebar
         open={filterOpen}
         onClose={() => setFilterOpen(false)}
-        filters={filters}
+        filters={{ ...filters, sortieren: activeSort.id }}
+        sorts={BROWSE_SORTS}
         setFilters={setFilters}
         openSections={openSections}
         toggleSection={toggleSection}
@@ -382,7 +384,8 @@ function BekleidungContent() {
         activeFilterCount={activeFilterCount}
         onOpenFilter={() => setFilterOpen(true)}
         onOpenAt={openAt}
-        sortValue={filters.sortieren}
+        sorts={BROWSE_SORTS}
+        sortValue={activeSort.id}
         onSort={(id) => setFilters(prev => ({ ...prev, sortieren: id }))}
         catalogueValue={filters.catalogue}
         onCatalogue={(id) => setFilters(prev => ({ ...prev, catalogue: id }))}

@@ -256,3 +256,15 @@ describe('apiProductToCoverCard', () => {
     expect(apiProductToCoverCard(p)).toEqual(apiProductToCardShape(p))
   })
 })
+
+describe('card productId', () => {
+  it('is the product id on a single card', () => {
+    const p = product()
+    expect(apiProductToCardShape(p).productId).toBe(p.id)
+  })
+
+  it('is the product id on every colourway card, whatever the card id is', () => {
+    const p = product({ colours: [{ hex: '#000000', name: 'BLACK' }, { hex: '#FFFFFF', name: 'WHITE' }] })
+    expect(apiProductToColourwayCards(p).map(c => c.productId)).toEqual([p.id, p.id])
+  })
+})

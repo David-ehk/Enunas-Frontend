@@ -20,6 +20,8 @@ export { publicBrandApi } from './modules/publicBrandApi';
 export type { PublicBrand } from './modules/publicBrandApi';
 export { adminApi } from './modules/adminApi';
 export { discountsApi } from './modules/discountsApi';
+export { storefrontApi } from './modules/storefrontApi';
+export type { StorefrontRecommendations } from './modules/storefrontApi';
 export { settlementApi } from './modules/settlementApi';
 export type { SettlementRow, SettlementDashboard } from './modules/settlementApi';
 export { apiProductToProduct, apiProductToCardShape, apiProductToColourwayCards, apiProductToCoverCard } from './productAdapter';

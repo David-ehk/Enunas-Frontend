@@ -1,15 +1,11 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-
-export const SORT_OPTIONS = [
-  { id: 'neu',       label: 'Neuheiten'         },
-  { id: 'preis-auf', label: 'Preis aufsteigend' },
-  { id: 'preis-ab',  label: 'Preis absteigend'  },
-  { id: 'name',      label: 'Name A–Z'          },
-]
+import { STANDARD_SORTS, type ProductSort } from '@/lib/productSorts'
 
 interface SortDropdownProps {
+  /** Defaults to STANDARD_SORTS. */
+  sorts?: ProductSort[]
   value: string
   onChange: (id: string) => void
   align?: 'left' | 'right'
@@ -17,6 +13,7 @@ interface SortDropdownProps {
 }
 
 export default function SortDropdown({
+  sorts = STANDARD_SORTS,
   value,
   onChange,
   align = 'right',
@@ -100,9 +97,9 @@ export default function SortDropdown({
           // No background, no border, no shadow on the container itself
         }}
       >
-        {SORT_OPTIONS.map((opt, i) => {
+        {sorts.map((opt, i) => {
           const isActive = value === opt.id
-          const isLast   = i === SORT_OPTIONS.length - 1
+          const isLast   = i === sorts.length - 1
           const delay    = `${i * 0.05}s`
 
           // Anchor line: top of first item connects to the filter bar border;

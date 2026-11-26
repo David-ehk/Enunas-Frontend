@@ -9,10 +9,13 @@ import CheckoutNavbar from '@/app/(root)/cart/components/CheckoutNavbar'
 import CartFooter from '@/app/(root)/cart/components/CartFooter'
 import CheckoutAuthModal from './components/CheckoutAuthModal'
 import SavedAddressSelector from './components/SavedAddressSelector'
-import { orderApi, FetchError, type CreateOrderDto, type OrderPreviewResponseDto } from '@/lib/api'
-import { estimateShipping, calcFinalTotal } from '@/lib/pricing'
-import { UPSELL_CODE_STORAGE_KEY } from '@/lib/featureFlags'
-import { toShippingAddressDto, type AddressSelection } from '@/lib/address'
+import DiscountField, { type CouponMessage } from './components/DiscountField'
+import { orderApi, FetchError, type OrderPreviewResponseDto } from '@/lib/api'
+import { estimateShipping } from '@/lib/pricing'
+import { buildOrderRequest } from '@/lib/orderRequest'
+import { currentPreview } from '@/lib/upsellOffer'
+import { useAppliedOffer } from '@/hooks/use-applied-offer'
+import type { AddressSelection } from '@/lib/address'
 import { rememberPendingCheckout } from '@/lib/paymentOutcome'
 import { couponErrorMessage } from '@/lib/api/errorCopy'
 import { formatEuro } from '@/lib/format'
@@ -40,41 +43,25 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'applepay' | 'klarna' | 'card'>('paypal')
   const [promoCode, setPromoCode] = useState('')
   const [couponInput, setCouponInput] = useState('')
-  const [couponMessage, setCouponMessage] = useState<{ type: 'success' | 'info'; text: string } | null>(null)
+  const [couponMessage, setCouponMessage] = useState<CouponMessage | null>(null)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [summaryOpen, setSummaryOpen] = useState(false)
-  const [preview, setPreview] = useState<OrderPreviewResponseDto | null>(null)
+  const [latestPreview, setPreview] = useState<OrderPreviewResponseDto | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
   const [focusCouponSignal, setFocusCouponSignal] = useState(0)
   const [openAddressFormSignal, setOpenAddressFormSignal] = useState(0)
+  // The post-purchase offer accepted on /angebot.
+  const {
+    offerId: upsellOfferId,
+    error: offerError,
+    remove: removeOffer,
+    reject: rejectOffer,
+    dismissError: dismissOfferError,
+  } = useAppliedOffer()
+  const preview = currentPreview(latestPreview, upsellOfferId)
   const couponInputRef = useRef<HTMLInputElement>(null)
   const signInNoticeRef = useRef<HTMLDivElement>(null)
   const addressSectionRef = useRef<HTMLElement>(null)
-
-  // FUTURE (upsell): the confirmation-page upsell used to hand a code to the checkout through
-  // localStorage, and this auto-applied it. Removed for launch — the feature is not ready, and the
-  // key was only cleared after a *successful* order, so anyone who opened /angebot and abandoned
-  // kept a silent 10% off every later checkout: it survived logout and even a different account
-  // signing in on the same browser. Nothing reads the key now, so any left over in a visitor's
-  // browser is inert. Restore this together with the promo page, and give the code an expiry.
-  //
-  // useEffect(() => {
-  //   const upsellCode = localStorage.getItem(UPSELL_CODE_STORAGE_KEY)
-  //   if (upsellCode) setPromoCode(upsellCode)
-  // }, [])
-  //
-  // One-off cleanup so a code stranded by the old behaviour cannot come back if the block above
-  // is ever re-enabled. Safe to delete once enough time has passed.
-  useEffect(() => {
-    localStorage.removeItem(UPSELL_CODE_STORAGE_KEY)
-  }, [])
-
-  // Keeps the visible input in sync when a code was auto-applied above, without fighting the
-  // user's own typing — this only fires when promoCode itself changes, not on every render.
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (promoCode) setCouponInput(promoCode)
-  }, [promoCode])
 
   useEffect(() => {
     // Prefill the email field from the signed-in user when it becomes available.
@@ -82,20 +69,10 @@ export default function CheckoutPage() {
     if (user?.email) setEmail(user.email)
   }, [user?.email])
 
-  // FUTURE (upsell): UPSELL10 was the one code recognised client-side, for instant feedback before
-  // the server preview came back. With the feature off nothing should promise a discount the
-  // backend has not confirmed, so the local estimate is always 0 and `preview.discountAmount`
-  // (the real, server-priced answer) is the only thing that can discount an order.
-  // const upsellDiscount = calcUpsellDiscount(totalPrice, promoCode)
-  const upsellDiscount = 0
-  const finalTotal = calcFinalTotal(totalPrice, shippingCost, upsellDiscount)
-
   // POST /orders/preview runs the exact same pricing pipeline as order creation, so once an
   // address is on file this is the authoritative source for shipping/discount/total — it
-  // supersedes the client-side estimates above. UPSELL10 still gets instant local feedback
-  // on apply (below) since that one code is recognized client-side too, but the preview
-  // response is what actually confirms or corrects it, including surfacing a real error for
-  // an invalid/expired/exhausted code instead of silently falling back to an undiscounted total.
+  // supersedes the client-side estimates above, and it is what confirms or rejects a discount
+  // code or the offer.
   useEffect(() => {
     if (!addressSelection || cartItems.length === 0 || cartItems.some((item) => !item.defaultListingId)) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -106,18 +83,15 @@ export default function CheckoutPage() {
     const timer = setTimeout(async () => {
       setPreviewLoading(true)
       try {
-        const body: CreateOrderDto = {
-          items: cartItems.map((item) => ({
-            listingId: Number(item.defaultListingId!),
-            quantity: item.quantity,
-          })),
-          ...(addressSelection.mode === 'saved'
-            ? { savedAddressId: addressSelection.id }
-            : { shippingAddress: toShippingAddressDto(addressSelection.address) }),
-          discountCode: promoCode.trim() || undefined,
-        }
-        const res = await orderApi.preview(body)
+        const res = await orderApi.preview(
+          buildOrderRequest(cartItems, addressSelection, promoCode, upsellOfferId),
+        )
         if (cancelled) return
+        if (upsellOfferId != null && res.upsellError) {
+          // The figures exclude the discount. Dropping the offer re-runs this preview without it.
+          rejectOffer(res.upsellError)
+          setSummaryOpen(true)
+        }
         setPreview(res)
         if (promoCode.trim()) {
           setCouponMessage(
@@ -145,12 +119,14 @@ export default function CheckoutPage() {
     }
     // cartItems is compared by identity via CartContext's own state updates (add/remove/qty
     // change all produce a new array), so it's safe to depend on directly here.
-  }, [cartItems, addressSelection, promoCode])
+  }, [cartItems, addressSelection, promoCode, upsellOfferId, rejectOffer])
 
   const displaySubtotal = preview?.subtotal ?? totalPrice
   const displayShippingTotal = preview?.shippingTotal ?? shippingCost
-  const displayDiscount = preview?.discountAmount ?? upsellDiscount
-  const displayTotal = preview?.total ?? finalTotal
+  const displayDiscount = preview?.discountAmount ?? 0
+  const offerDiscount = preview?.upsellDiscountAmount ?? 0
+  // No discount is estimated client-side: only a preview can discount an order.
+  const displayTotal = preview?.total ?? totalPrice + shippingCost
 
   // "Rabatt hinzufügen" opens the (possibly still-collapsed) order summary accordion and jumps
   // straight to the coupon field — the signal counter (rather than watching summaryOpen itself)
@@ -174,17 +150,14 @@ export default function CheckoutPage() {
     e.preventDefault()
     const code = couponInput.trim()
     setPromoCode(code)
+    // The customer has moved on from a rejected offer.
+    dismissOfferError()
     if (!code) {
       setCouponMessage(null)
     } else if (addressSelection) {
       // The preview effect above re-runs on this promoCode change and will replace this with
       // the backend-confirmed result (success, no-discount, or a real invalid-code error).
       setCouponMessage({ type: 'info', text: 'Wird geprüft…' })
-      // FUTURE (upsell): with no address there is no preview call, and UPSELL10 used to be
-      // confirmed client-side here. Removed for launch — claiming "Rabatt angewendet" for a code
-      // the server has not accepted is exactly the promise we cannot keep yet.
-      // } else if (calcUpsellDiscount(totalPrice, code) > 0) {
-      //   setCouponMessage({ type: 'success', text: '✓ Rabatt angewendet' })
     } else {
       setCouponMessage({ type: 'info', text: 'Wird bei der Bestellung geprüft.' })
     }
@@ -230,28 +203,26 @@ export default function CheckoutPage() {
 
       // Exactly one of savedAddressId / shippingAddress — never both, never neither. See
       // docs/superpowers/specs/2026-08-05-checkout-address-design.md §2.
-      const order = await orderApi.create({
-        items: cartItems.map((item) => ({
-          listingId: Number(item.defaultListingId!),
-          quantity: item.quantity,
-        })),
-        ...(addressSelection.mode === 'saved'
-          ? { savedAddressId: addressSelection.id }
-          : { shippingAddress: toShippingAddressDto(addressSelection.address) }),
-        discountCode: promoCode.trim() || undefined,
-      })
+      const order = await orderApi.create(
+        buildOrderRequest(cartItems, addressSelection, promoCode, upsellOfferId),
+      )
 
       if (!order.checkoutUrl) {
         setError('Kein Zahlungslink erhalten. Bitte versuche es erneut.')
         return
       }
 
-      // (The upsell code is cleared on mount now, not only here — see the FUTURE note above.)
       // The cart is NOT cleared here: Mollie returns the customer after a failed or cancelled
       // payment too. The confirmation page clears it once this exact order is confirmed paid.
       rememberPendingCheckout(order.orderNumber ?? String(order.id))
       window.location.href = order.checkoutUrl
     } catch (err) {
+      // 422 with an offer: no order was created. Show why, and re-price without the offer.
+      if (upsellOfferId != null && err instanceof FetchError && err.status === 422) {
+        setError(err.serverMessage ?? err.message)
+        removeOffer()
+        return
+      }
       const notReleased =
         err instanceof FetchError &&
         err.status === 409 &&
@@ -534,6 +505,7 @@ export default function CheckoutPage() {
                     accordion (if collapsed) and jumps straight to the Gutscheincode field below.
                     Phone-only (<md) — from md up the summary (and its Gutscheincode field) is
                     always expanded already, so this shortcut has nothing to do. */}
+                {upsellOfferId == null && (
                 <button
                   type="button"
                   onClick={handleAddDiscountClick}
@@ -544,6 +516,7 @@ export default function CheckoutPage() {
                   </svg>
                   Rabatt hinzufügen
                 </button>
+                )}
 
                 <div className="bg-enunas-off-white p-6">
 
@@ -665,8 +638,12 @@ export default function CheckoutPage() {
 
                       {displayDiscount > 0 && (
                         <div className="flex justify-between font-league-spartan text-xs text-enunas-success">
-                          <span>{preview?.discountCode ? `Rabatt (${preview.discountCode})` : 'Rabatt'}</span>
-                          <span>−{formatEuro(displayDiscount)}</span>
+                          <span>
+                            {offerDiscount > 0
+                              ? 'Exklusiv-Rabatt (-10 %)'
+                              : preview?.discountCode ? `Rabatt (${preview.discountCode})` : 'Rabatt'}
+                          </span>
+                          <span>−{formatEuro(offerDiscount > 0 ? offerDiscount : displayDiscount)}</span>
                         </div>
                       )}
                       <div className="flex justify-between font-league-spartan text-sm text-enunas-black pt-3 border-t border-enunas-gray-light">
@@ -678,39 +655,22 @@ export default function CheckoutPage() {
                       </p>
                     </div>
 
-                    {/* Coupon code — applying it re-runs the preview effect above, which is what
-                        actually confirms or rejects the code against the backend. */}
-                    <form onSubmit={handleApplyCoupon} className="flex gap-2 pt-4 mt-4 border-t border-enunas-gray-light">
-                      <input
-                        ref={couponInputRef}
-                        type="text"
-                        name="coupon"
-                        placeholder="Gutscheincode"
-                        value={couponInput}
-                        onChange={e => {
-                          setCouponInput(e.target.value)
-                          // An emptied field removes the code from the order too — otherwise a
-                          // rejected code keeps being sent and blocks payment.
-                          if (!e.target.value.trim()) { setPromoCode(''); setCouponMessage(null) }
-                        }}
-                        className="flex-1 min-w-0 border border-enunas-gray-light px-3 py-2.5 font-league-spartan text-xs text-enunas-black bg-white focus:outline-none focus:border-enunas-purple transition-colors duration-200"
-                      />
-                      <button
-                        type="submit"
-                        className="flex-shrink-0 font-league-spartan text-[11px] uppercase tracking-[0.15em] text-enunas-purple border border-enunas-purple px-4 hover:bg-enunas-purple hover:text-white transition-colors duration-200"
-                      >
-                        Anwenden
-                      </button>
-                    </form>
-                    {couponMessage && (
-                      <p
-                        className={`font-league-spartan text-[11px] mt-2 ${
-                          couponMessage.type === 'success' ? 'text-enunas-success' : 'text-enunas-gray-medium'
-                        }`}
-                      >
-                        {couponMessage.text}
-                      </p>
-                    )}
+                    <DiscountField
+                      offerApplied={upsellOfferId != null}
+                      offerDiscounted={offerDiscount > 0}
+                      offerError={offerError}
+                      onRemoveOffer={removeOffer}
+                      inputRef={couponInputRef}
+                      value={couponInput}
+                      onChange={value => {
+                        setCouponInput(value)
+                        // An emptied field removes the code from the order too — otherwise a
+                        // rejected code keeps being sent and blocks payment.
+                        if (!value.trim()) { setPromoCode(''); setCouponMessage(null) }
+                      }}
+                      onApply={handleApplyCoupon}
+                      message={couponMessage}
+                    />
                 </div>
                 </div>
               </div>

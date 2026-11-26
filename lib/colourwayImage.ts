@@ -14,3 +14,17 @@ export function colourwayCoverImage(
   const own = images.filter(i => i.productColorId === colorId)
   return (own.find(i => i.primary) ?? own[0])?.url ?? fallback
 }
+
+/**
+ * The gallery for one colourway: its own images plus the shared (untagged) ones, primary first.
+ * The full list when that leaves nothing, or when there is no per-image colour metadata.
+ */
+export function colourwayGallery(
+  images: ApiProductImageObject[] | undefined,
+  colorId: number | null,
+  allImages: string[],
+): string[] {
+  const matches = (images ?? []).filter(i => i.productColorId == null || i.productColorId === colorId)
+  if (matches.length === 0) return allImages
+  return matches.sort((a, b) => Number(b.primary) - Number(a.primary)).map(i => i.url)
+}

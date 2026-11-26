@@ -1,121 +1,229 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useParams, useRouter, notFound } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Lock } from 'lucide-react'
-import { resolveProductWithMeta } from '@/lib/api'
-import { resolvePromoPricing } from '@/lib/pricing'
-import { UPSELL_ENABLED } from '@/lib/featureFlags'
+import { orderApi, productApi, listingApi } from '@/lib/api'
+import { useCart } from '@/app/context/CartContext'
+import { useAuth } from '@/app/context/AuthContext'
+import { resolveAccountName } from '@/lib/accountName'
+import { colourwayCoverImage, colourwayGallery } from '@/lib/colourwayImage'
+import { formatEuro } from '@/lib/format'
+import {
+  formatCountdown,
+  rememberAppliedOffer,
+  offerSizeOptions,
+  offerPriceForListing,
+  type OfferSizeOption,
+} from '@/lib/upsellOffer'
+import { useOfferCountdown } from '@/hooks/use-offer-countdown'
+import type { ApiOrder, LiveOffer } from '@/types/api'
 import CartFooter from '@/app/(root)/cart/components/CartFooter'
+import ImageGallery from '@/app/(root)/bekleidung/[brand]/[slug]/components/ImageGallery'
+import BrandLink from '@/app/(root)/bekleidung/[brand]/[slug]/components/BrandLink'
+import GenderBadge from '@/app/(root)/bekleidung/[brand]/[slug]/components/GenderBadge'
+import SizeSelector from '@/app/(root)/bekleidung/[brand]/[slug]/components/SizeSelector'
+import { PdpAccordion } from '@/app/(root)/bekleidung/[brand]/[slug]/components/ProductDetails'
+import type { Gender } from '@/app/(root)/bekleidung/[brand]/[slug]/types/product'
+import { effectiveReturnPeriodDays } from '@/lib/returnPolicy'
 
-const DISCOUNT_PCT = 10
-const COUNTDOWN_SECONDS = 10 * 60
+// Length of the offer window; only used to draw the progress bar. The deadline is the API's.
+const OFFER_WINDOW_MS = 10 * 60 * 1000
 
-// ── Countdown ─────────────────────────────────────────────────────────────────
+interface LoadedOffer {
+  offer: LiveOffer
+  options: OfferSizeOption[]
+}
 
-const STORAGE_KEY = 'enunas-angebot-start'
+function Spinner() {
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-enunas-gray-light border-t-enunas-purple rounded-full animate-spin motion-reduce:animate-none" />
+    </div>
+  )
+}
 
-function useCountdown(totalSeconds: number) {
-  const [remaining, setRemaining] = useState<number>(() => {
-    if (typeof window === 'undefined') return totalSeconds
-    const stored = sessionStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      const elapsed = Math.floor((Date.now() - parseInt(stored, 10)) / 1000)
-      return Math.max(0, totalSeconds - elapsed)
-    }
-    sessionStorage.setItem(STORAGE_KEY, String(Date.now()))
-    return totalSeconds
-  })
+// The product page's CTA: Cormorant label between two hairlines that draw in on hover.
+const CTA_CLASS =
+  'group relative block w-full max-w-[540px] overflow-hidden text-center text-white font-cormorant font-normal tracking-[0.04em] transition-colors duration-300 ease-out-expo'
+const CTA_STYLE = { padding: 'clamp(13px, 3.4vw, 22px) 32px', fontSize: 'clamp(15px, 4vw, 22px)' }
 
-  useEffect(() => {
-    if (remaining <= 0) return
-    const id = setInterval(() => {
-      const stored = sessionStorage.getItem(STORAGE_KEY)
-      if (!stored) return
-      const elapsed = Math.floor((Date.now() - parseInt(stored, 10)) / 1000)
-      setRemaining(Math.max(0, totalSeconds - elapsed))
-    }, 1000)
-    return () => clearInterval(id)
-  }, [totalSeconds, remaining])
+function CtaLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <span className="absolute left-1/2 -translate-x-1/2 top-[10%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[75%]" />
+      <span className="relative z-10">{children}</span>
+      <span className="absolute left-1/2 -translate-x-1/2 bottom-[10%] w-full h-[1px] bg-white/70 transition-all duration-500 ease-out group-hover:w-[75%]" />
+    </>
+  )
+}
 
-  const m = String(Math.floor(remaining / 60)).padStart(2, '0')
-  const s = String(remaining % 60).padStart(2, '0')
-  return { display: `${m}:${s}`, expired: remaining <= 0, remaining }
+/** `fraction` is the share of the offer window still left, 0–1. */
+function OfferCard({ firstName, percent, countdown, fraction }: {
+  /** Empty when no name is known. */
+  firstName: string
+  percent: number
+  countdown: string
+  fraction: number
+}) {
+  return (
+    <section
+      aria-label="Persönliches Angebot"
+      className="relative w-full max-w-[540px] overflow-hidden rounded border border-[#E4DDEA] bg-[#F7F5F9] px-5 pt-5 pb-[18px] text-left font-league-spartan before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-enunas-purple"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <span className="min-w-0 [overflow-wrap:anywhere] text-[11px] font-semibold uppercase tracking-[0.12em] text-enunas-purple">
+          {firstName ? `${firstName}, du wurdest ausgewählt` : 'Du wurdest ausgewählt'}
+        </span>
+        <span className="flex shrink-0 items-center gap-1.5 text-xs text-enunas-gray-medium">
+          Noch{' '}
+          <b className="rounded-[3px] border border-[#E4DDEA] bg-white px-2 py-[3px] text-[13px] font-semibold tabular-nums text-enunas-purple">
+            {countdown}
+          </b>
+        </span>
+      </div>
+      <div className="flex items-center gap-4 mt-4 mb-3.5">
+        <div className="whitespace-nowrap font-cormorant text-[46px] font-medium leading-none tracking-[-0.01em] text-enunas-purple">
+          −{percent}&nbsp;%
+        </div>
+        <div className="border-l border-[#E4DDEA] pl-4 text-sm text-enunas-gray-dark" style={{ lineHeight: 1.45 }}>
+          <strong className="block font-semibold text-enunas-black">Nur für ausgewählte Kunden</strong>
+          Dieses Angebot haben nicht alle erhalten und ist nicht öffentlich einlösbar.
+        </div>
+      </div>
+      <div className="h-[3px] overflow-hidden rounded-sm bg-[#E4DDEA]">
+        {/* Linear on purpose: the bar tracks the clock. */}
+        <i
+          className="block h-full w-full origin-left bg-enunas-purple transition-transform duration-1000 ease-linear motion-reduce:transition-none"
+          style={{ transform: `scaleX(${fraction})` }}
+        />
+      </div>
+    </section>
+  )
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function AngebotPage() {
-  // The promo page is the entry point of the upsell flow: it writes UPSELL10 to localStorage and
-  // sends the visitor to checkout with it applied. While the feature is switched off the route
-  // 404s, so a shared link cannot hand out a discount.
-  if (!UPSELL_ENABLED) notFound()
+  return (
+    <Suspense fallback={<Spinner />}>
+      <AngebotContent />
+    </Suspense>
+  )
+}
 
+function AngebotContent() {
   const params = useParams<{ brand: string; slug: string }>()
+  const orderNumber = useSearchParams().get('order')
   const router = useRouter()
-  const { display, expired, remaining } = useCountdown(COUNTDOWN_SECONDS)
+  const { addToCart } = useCart()
 
-  const [product, setProduct] = useState<Awaited<ReturnType<typeof resolveProductWithMeta>> | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [selectedImage, setSelectedImage] = useState(0)
+  const [data, setData] = useState<LoadedOffer | null>(null)
+  const [openAccordion, setOpenAccordion] = useState<string | null>('details')
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [added, setAdded] = useState(false)
   const [sizeError, setSizeError] = useState(false)
 
+  const remaining = useOfferCountdown(data?.offer.deadline ?? null)
+
+  // A profile can lack a name (signup asks for none) — then this order's shipping address has it.
+  const { customer, isLoading: authLoading } = useAuth()
+  const [orderAddress, setOrderAddress] = useState<ApiOrder['shippingAddress']>()
+  const hasProfileName = Boolean(customer?.firstName?.trim())
   useEffect(() => {
-    resolveProductWithMeta(params.slug)
-      .then(p => { setProduct(p); setLoading(false) })
-      .catch(() => setLoading(false))
-  }, [params.slug])
+    if (!orderNumber || authLoading || hasProfileName) return
+    let cancelled = false
+    orderApi
+      .getByOrderNumber(orderNumber)
+      .then(order => { if (!cancelled) setOrderAddress(order?.shippingAddress) })
+      .catch(() => {}) // no name — the card keeps its neutral headline
+    return () => {
+      cancelled = true
+    }
+  }, [orderNumber, authLoading, hasProfileName])
+  const { firstName } = resolveAccountName(customer, orderAddress)
 
-  // `product.price` is the effective price and can already be a markdown, so it must not be
-  // used as the strike-through figure nor as the base for the promo — see resolvePromoPricing.
-  const { promoPrice, listPrice } = resolvePromoPricing(
-    product?.price ?? 0,
-    product?.originalPrice,
-    DISCOUNT_PCT,
-  )
-  const images = product?.images ?? []
-  const sizes = product?.sizes ?? []
+  useEffect(() => {
+    let cancelled = false
+    // No offer to show (never rolled, foreign order, redeemed, product gone): go back.
+    const leave = () => {
+      if (cancelled) return
+      router.replace(
+        orderNumber
+          ? `/orders/${encodeURIComponent(orderNumber)}/confirmation`
+          : `/bekleidung/${params.brand}/${params.slug}`,
+      )
+    }
 
-  const progressPct = ((COUNTDOWN_SECONDS - remaining) / COUNTDOWN_SECONDS) * 100
+    async function load() {
+      if (!orderNumber) return leave()
+      const offer = await orderApi.getUpsellOffer(orderNumber)
+      if (offer === null || offer === 'pending') return leave()
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-enunas-gray-light border-t-enunas-purple rounded-full animate-spin" />
-      </div>
-    )
-  }
+      const variants = offer.product.variants ?? []
+      let options = offerSizeOptions(
+        variants,
+        await productApi.getListings(offer.product.id).catch(() => []),
+        offer.listingId,
+      )
+      // Without the full list, the offered listing alone is still buyable.
+      if (options.length === 0) {
+        options = offerSizeOptions(variants, [await listingApi.getById(offer.listingId)], offer.listingId)
+      }
+      if (options.length === 0) return leave()
+      if (!cancelled) setData({ offer, options })
+    }
 
-  if (!product) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="font-league-spartan text-sm text-enunas-gray-medium">Angebot nicht gefunden.</p>
-      </div>
-    )
-  }
+    load().catch(leave)
+    return () => {
+      cancelled = true
+    }
+  }, [orderNumber, params.brand, params.slug, router])
+
+  if (!data || remaining === null) return <Spinner />
+
+  const { offer, options } = data
+  const { product, percent: discountPct } = offer
+  const expired = remaining === 0
+  const display = formatCountdown(remaining)
+  const selected = options.find(o => o.variant.size === selectedSize) ?? null
+  // All options share one colourway: the offered listing's.
+  const offeredOption = options.find(o => Number(o.listing.id) === offer.listingId) ?? options[0]
+  const { listPrice, offerPrice } = offerPriceForListing(offer, (selected ?? offeredOption).listing)
+
+  const { color, colorId = null } = offeredOption.variant
+  const colour = product.colours.find(c => c.name === color)
+  const images = colourwayGallery(product.imageObjects, colorId, product.images)
+
+  const progressPct = Math.min(100, Math.max(0, ((OFFER_WINDOW_MS - remaining) / OFFER_WINDOW_MS) * 100))
+
+  const toggleAccordion = (key: string) => setOpenAccordion(prev => (prev === key ? null : key))
 
   function handleCta() {
-    if (!selectedSize) {
+    if (expired) return
+    if (!selected) {
       setSizeError(true)
       setTimeout(() => setSizeError(false), 2000)
       return
     }
+    // The cart carries the list price: the discount is a separate line the backend computes.
+    addToCart({
+      productId: product.id,
+      name: product.name,
+      brand: product.brandName,
+      price: listPrice,
+      currency: 'EUR',
+      size: selected.variant.size,
+      color: colour ? { id: colour.id ?? colour.name, name: colour.name, hex: colour.hex } : undefined,
+      image: colourwayCoverImage(product.imageObjects, colorId, images[0] ?? ''),
+      defaultListingId: String(selected.listing.id),
+      stockQuantity: selected.variant.stockQuantity,
+      productPath: `/bekleidung/${params.brand}/${product.slug}`,
+    })
+    rememberAppliedOffer(offer.offerId)
     setAdded(true)
-    // FUTURE (upsell): this handed UPSELL10 to the checkout through localStorage. Removed for
-    // launch along with the checkout side that read it — a code written here outlived the visit
-    // and silently discounted later, unrelated orders. This whole route 404s while the feature is
-    // off (see the UPSELL_ENABLED guard above), so nothing reaches this line today.
-    //
-    // UPSELL10 is applied by the backend against the cart subtotal, which for an already
-    // reduced product is the sale price — attaching it there would stack the promo on top of
-    // the markdown and charge less than either price the customer was shown.
-    // if (!alreadyReduced) {
-    //   localStorage.setItem(UPSELL_CODE_STORAGE_KEY, 'UPSELL10')
-    // }
-    setTimeout(() => router.push('/checkout?upsell=true'), 800)
+    setTimeout(() => router.push('/checkout'), 800)
   }
 
   return (
@@ -125,7 +233,7 @@ export default function AngebotPage() {
       <div className="fixed top-0 left-0 right-0 z-50 bg-enunas-purple text-white" style={{ height: '44px' }}>
         <div className="relative overflow-hidden h-full">
           <div
-            className="absolute inset-0 bg-enunas-purple-dark transition-all duration-1000"
+            className="absolute inset-0 bg-enunas-purple-dark"
             style={{ width: `${progressPct}%` }}
           />
           <div className="relative z-10 h-full flex items-center justify-center gap-3 px-4">
@@ -174,102 +282,63 @@ export default function AngebotPage() {
         </div>
       </nav>
 
-      {/* ── Main content ──────────────────────────────────────────────────────── */}
+      {/* ── Main content — same grid and column as the product page ────────────── */}
       <div className="flex-1" style={{ paddingTop: '108px' }}>
-        <div className="max-w-[1280px] mx-auto px-6 lg:px-12 pt-8 pb-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2">
 
-            {/* ── Left: Images ────────────────────────────────────────────────── */}
-            <div className="lg:sticky lg:top-[130px]">
-              <div className="relative overflow-hidden aspect-[3/4] bg-enunas-off-white">
-                {images[selectedImage] && (
-                  <img
-                    src={images[selectedImage]}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-                <div
-                  className="absolute top-4 left-4 bg-enunas-error text-white font-league-spartan px-3 py-1.5"
-                  style={{ fontSize: '10px', letterSpacing: '0.12em' }}
-                >
-                  −{DISCOUNT_PCT}% EXKLUSIV
-                </div>
+          {/* ── Left: Gallery ─────────────────────────────────────────────────── */}
+          <div>
+            <ImageGallery images={images} productName={product.name} />
+          </div>
+
+          {/* ── Right: Info + CTA ─────────────────────────────────────────────── */}
+          <div className="flex flex-col items-center text-center px-6 pt-10 pb-16 sm:px-12 md:px-10 lg:px-14 md:pt-14 md:pb-20">
+              <div className="flex items-center gap-3.5 mb-3.5">
+                <BrandLink brand={product.brandName} />
+                <GenderBadge gender={(product.gender as Gender) ?? null} />
               </div>
 
-              {images.length > 1 && (
-                <div className="flex gap-2 mt-3">
-                  {images.map((img, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedImage(i)}
-                      className="relative overflow-hidden aspect-square flex-1 bg-enunas-off-white"
-                      style={{
-                        outline: i === selectedImage ? '1.5px solid #370E4D' : '1.5px solid transparent',
-                        outlineOffset: '1px',
-                      }}
-                    >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* ── Right: Info + CTA ───────────────────────────────────────────── */}
-            <div>
-              {/* Brand */}
-              <p className="font-league-spartan text-xs text-enunas-purple tracking-[0.2em] uppercase mb-1 pb-2"
-                style={{ borderBottom: '1px solid #370E4D', display: 'inline-block' }}>
-                {product.brandName}
-              </p>
-
-              {/* Name */}
               <h1
-                className="font-cormorant text-4xl lg:text-5xl font-light text-enunas-black mt-4 mb-6"
-                style={{ letterSpacing: '0.01em', lineHeight: 1.05 }}
+                className="font-cormorant font-light text-enunas-black mb-8"
+                style={{ fontSize: '38px', lineHeight: 1.1 }}
               >
                 {product.name}
               </h1>
 
-              {/* Pricing */}
-              <div className="mb-6">
-                <div className="flex items-baseline gap-4 mb-1">
+              {/* Price */}
+              <div className="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 mb-8">
+                <span
+                  className={`font-league-spartan font-light ${expired ? 'text-enunas-black' : 'text-enunas-purple'}`}
+                  style={{ fontSize: '22px' }}
+                >
+                  {formatEuro(expired ? listPrice : offerPrice)}
+                </span>
+                {!expired && (
                   <span
-                    className="font-cormorant font-light"
-                    style={{ fontSize: 'clamp(30px, 5vw, 46px)', color: '#8B1E3F' }}
+                    className="font-league-spartan text-enunas-gray-medium line-through decoration-enunas-purple"
+                    style={{ fontSize: '17px', textDecorationThickness: '1.5px' }}
                   >
-                    {promoPrice.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                    {formatEuro(listPrice)}
                   </span>
-                  <span className="font-league-spartan text-lg text-enunas-gray-medium line-through">
-                    {listPrice.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
-                  </span>
-                </div>
-                <p className="font-league-spartan text-[10px] text-enunas-gray-medium tracking-[0.1em] uppercase">
-                  inkl. MwSt. · zzgl. Versand · Nur für dich
-                </p>
+                )}
+                <span className="font-league-spartan text-xs tracking-[0.02em] text-enunas-gray-medium">
+                  inkl. MwSt.
+                </span>
               </div>
 
-              {/* Urgency callout */}
+              {/* Offer card */}
               {!expired && (
-                <div
-                  className="mb-8 px-5 py-4"
-                  style={{ background: 'rgba(139, 30, 63, 0.05)', borderLeft: '2px solid #8B1E3F' }}
-                >
-                  <p className="font-cormorant italic text-base text-enunas-black leading-relaxed">
-                    Dieses Angebot wurde nicht an jeden verschickt — du wurdest ausgewählt.
-                    Es läuft in{' '}
-                    <span className="font-cormorant not-italic tabular-nums" style={{ color: '#8B1E3F' }}>
-                      {display}
-                    </span>{' '}
-                    ab.
-                  </p>
-                </div>
+                <OfferCard
+                  firstName={firstName}
+                  percent={discountPct}
+                  countdown={display}
+                  fraction={1 - progressPct / 100}
+                />
               )}
 
               {expired && (
                 <div
-                  className="mb-8 px-5 py-4"
+                  className="w-full max-w-[540px] mb-8 px-5 py-4 text-left"
                   style={{ background: 'rgba(107,107,107,0.06)', borderLeft: '2px solid #6B6B6B' }}
                 >
                   <p className="font-cormorant italic text-base text-enunas-gray-medium leading-relaxed">
@@ -278,119 +347,78 @@ export default function AngebotPage() {
                 </div>
               )}
 
-              {/* Size selector */}
-              {sizes.length > 0 && (
-                <div className="mb-6">
-                  <p className="font-league-spartan text-[10px] tracking-[0.2em] uppercase text-enunas-gray-medium mb-3">
-                    Größe wählen
-                    {sizeError && (
-                      <span className="ml-3 text-enunas-error normal-case tracking-normal">
-                        — Bitte wähle eine Größe
-                      </span>
-                    )}
+              {/* Sizes — nothing to pick once the offer is over */}
+              {!expired && (
+                <>
+                  <SizeSelector
+                    variants={options.map(o => ({ ...o.variant, weightGrams: o.variant.weightGrams ?? 0 }))}
+                    selectedColor={color}
+                    selectedSize={selectedSize}
+                    onSizeSelect={size => { setSelectedSize(size); setSizeError(false) }}
+                  />
+                  <p role="alert" className="min-h-5 mb-3 font-league-spartan text-xs text-enunas-error">
+                    {sizeError ? 'Bitte wähle eine Größe' : ''}
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {sizes.map(size => (
-                      <button
-                        key={size}
-                        onClick={() => { setSelectedSize(size); setSizeError(false) }}
-                        className="font-league-spartan text-xs tracking-[0.08em] transition-all duration-200"
-                        style={{
-                          padding: '10px 18px',
-                          border: selectedSize === size
-                            ? '1.5px solid #370E4D'
-                            : sizeError
-                            ? '1.5px solid #8B1E3F'
-                            : '1px solid #E8E8E8',
-                          background: selectedSize === size ? '#370E4D' : 'white',
-                          color: selectedSize === size ? 'white' : '#0A0A0A',
-                        }}
-                      >
-                        {size}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                </>
               )}
 
-              {/* CTA button — two white lines + shimmer */}
+              {/* CTA */}
               {!expired ? (
-                <div className="w-full">
-                  <button
-                    onClick={handleCta}
-                    disabled={added}
-                    className="group relative w-full overflow-hidden"
-                    style={{
-                      padding: '18px 48px',
-                      background: added ? '#1A5A3C' : '#370E4D',
-                      fontFamily: 'var(--font-league-spartan)',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      letterSpacing: '0.18em',
-                      color: 'white',
-                      textTransform: 'uppercase',
-                      transition: 'background-color 300ms',
-                    }}
-                    onMouseEnter={e => { if (!added) (e.currentTarget as HTMLElement).style.backgroundColor = '#250838' }}
-                    onMouseLeave={e => { if (!added) (e.currentTarget as HTMLElement).style.backgroundColor = '#370E4D' }}
-                  >
-                    <span className="absolute left-1/2 -translate-x-1/2 top-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
-                    <span className="relative z-10">
-                      {added ? '✓ Zum Warenkorb hinzugefügt' : `Jetzt zugreifen — ${DISCOUNT_PCT}% sparen`}
-                    </span>
-                    <span className="absolute left-1/2 -translate-x-1/2 bottom-[14%] w-full h-[1px] bg-white/60 transition-all duration-500 ease-out group-hover:w-[70%]" />
-                  </button>
-                </div>
+                <button
+                  onClick={handleCta}
+                  disabled={added}
+                  className={`${CTA_CLASS} ${added ? 'bg-enunas-success' : 'bg-enunas-purple hover:bg-enunas-purple-dark'}`}
+                  style={CTA_STYLE}
+                >
+                  <CtaLabel>
+                    {added ? '✓ Zum Warenkorb hinzugefügt' : `Jetzt zugreifen — ${discountPct}% sparen`}
+                  </CtaLabel>
+                </button>
               ) : (
                 <Link
                   href={`/bekleidung/${params.brand}/${params.slug}`}
-                  className="block w-full py-5 font-league-spartan text-sm tracking-[0.18em] uppercase text-center text-enunas-purple border border-enunas-purple hover:bg-enunas-purple hover:text-white transition-colors duration-300"
+                  className={`${CTA_CLASS} bg-enunas-purple hover:bg-enunas-purple-dark`}
+                  style={CTA_STYLE}
                 >
-                  Zum regulären Preis ansehen
+                  <CtaLabel>Zum regulären Preis ansehen</CtaLabel>
                 </Link>
               )}
 
               {/* Decline — directly below button */}
-              <div className="mt-4 text-center">
-                <Link
-                  href="/bekleidung"
-                  className="font-league-spartan text-[10px] text-enunas-gray-medium tracking-[0.12em] uppercase hover:text-enunas-black transition-colors duration-200"
+              <Link
+                href="/bekleidung"
+                className="mt-5 mb-6 font-league-spartan text-[11px] text-enunas-gray-medium tracking-[0.15em] uppercase hover:text-enunas-black transition-colors duration-200"
+              >
+                {expired ? 'Weiter einkaufen' : 'Nein danke, ich verzichte auf das Angebot'}
+              </Link>
+
+              {/* Accordions */}
+              <div className="w-full max-w-[560px] text-left mt-4">
+                {product.description && (
+                  <PdpAccordion
+                    id="details"
+                    title="Produktdetails"
+                    open={openAccordion === 'details'}
+                    onToggle={() => toggleAccordion('details')}
+                  >
+                    <p className="font-cormorant text-base text-enunas-gray-dark" style={{ lineHeight: 1.7 }}>
+                      {product.description}
+                    </p>
+                  </PdpAccordion>
+                )}
+                <PdpAccordion
+                  id="shipping"
+                  title="Versand & Rückgabe"
+                  open={openAccordion === 'shipping'}
+                  onToggle={() => toggleAccordion('shipping')}
+                  isLast
                 >
-                  Nein danke, ich verzichte auf das Angebot
-                </Link>
-              </div>
-
-              {/* Trust signals */}
-              <div className="mt-8 pt-6 border-t border-enunas-gray-light space-y-2.5">
-                {[
-                  '14 Tage Rückgaberecht',
-                  'SSL-verschlüsselte Zahlung',
-                ].map(item => (
-                  <div key={item} className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded-full border border-enunas-success flex items-center justify-center flex-shrink-0">
-                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                        <path d="M1.5 4L3 5.5L6.5 2" stroke="#1A5A3C" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                    <span className="font-league-spartan text-[11px] text-enunas-gray-medium tracking-[0.08em]">
-                      {item}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Product description */}
-              {product.description && (
-                <div className="mt-8 pt-6 border-t border-enunas-gray-light">
-                  <p className="font-league-spartan text-[10px] tracking-[0.2em] uppercase text-enunas-gray-medium mb-3">
-                    Über dieses Produkt
+                  <p className="font-cormorant text-base text-enunas-gray-dark" style={{ lineHeight: 1.7 }}>
+                    {effectiveReturnPeriodDays(product.returnPeriodDays)} Tage Rückgaberecht ab Erhalt der Ware.
+                    SSL-verschlüsselte Zahlung.
                   </p>
-                  <p className="font-cormorant text-base text-enunas-gray-dark leading-relaxed">
-                    {product.description}
-                  </p>
-                </div>
-              )}
-            </div>
+                </PdpAccordion>
+              </div>
           </div>
         </div>
       </div>

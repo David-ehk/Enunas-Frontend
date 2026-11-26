@@ -1,5 +1,6 @@
 'use client'
 
+import type { ProductSort } from '@/lib/productSorts'
 import { useState, useEffect, type RefObject } from 'react'
 import SortDropdown from './SortDropdown'
 import CatalogueDropdown from './CatalogueDropdown'
@@ -19,6 +20,8 @@ interface BlurFilterBarProps {
   onOpenAt: (section: string) => void
   sortValue: string
   onSort: (id: string) => void
+  /** Defaults to STANDARD_SORTS. */
+  sorts?: ProductSort[]
   catalogueValue: string
   onCatalogue: (id: string) => void
 }
@@ -153,6 +156,7 @@ export default function BlurFilterBar({
   onOpenFilter,
   sortValue,
   onSort,
+  sorts,
   catalogueValue,
   onCatalogue,
 }: BlurFilterBarProps) {
@@ -279,6 +283,7 @@ export default function BlurFilterBar({
             position: 'relative',
           }}>
             <SortDropdown
+              sorts={sorts}
               value={sortValue}
               onChange={onSort}
               align="right"
@@ -354,7 +359,7 @@ export default function BlurFilterBar({
         <Divider />
 
         <div style={{ padding: '0 20px 0 16px', display: 'flex', alignItems: 'center' }}>
-          <SortDropdown value={sortValue} onChange={onSort} align="right" dropUp />
+          <SortDropdown sorts={sorts} value={sortValue} onChange={onSort} align="right" dropUp />
         </div>
 
       </div>

@@ -1,7 +1,6 @@
 // Pure checkout pricing math, extracted from app/(root)/checkout/page.tsx so it can be unit
 // tested in isolation. These functions decide nothing the server doesn't re-verify — the
-// only live discount code (UPSELL10) is auto-attached and the backend is the source of truth
-// for money. Keep this free of React / side effects.
+// backend is the source of truth for money. Keep this free of React / side effects.
 
 /** The backend's GLOBAL_DEFAULT shipping rate, charged once per brand in the order. */
 export const STANDARD_SHIPPING = 5
@@ -17,16 +16,6 @@ export const STANDARD_SHIPPING = 5
  */
 export function estimateShipping(items: { brand: string }[]): number {
   return new Set(items.map(i => i.brand)).size * STANDARD_SHIPPING
-}
-
-/**
- * The only client-known discount: UPSELL10 = 10% off the subtotal, rounded to cents.
- * Case- and whitespace-insensitive. Any other code yields no discount.
- */
-export function calcUpsellDiscount(subtotal: number, code: string): number {
-  return code.trim().toUpperCase() === 'UPSELL10'
-    ? Math.round(subtotal * 0.1 * 100) / 100
-    : 0
 }
 
 /**
@@ -62,37 +51,4 @@ export function listingPriceView(
     return { current: discountPrice, original: price }
   }
   return { current: price, original: null }
-}
-
-/**
- * What the /angebot promo page should quote for a product.
- *
- * `price` is the effective price the shop charges — already the markdown when a sale is running
- * — and `originalPrice` is that sale's pre-discount figure (non-null is itself the "on sale"
- * signal). The promo is quoted off the undiscounted list price, and it deliberately does NOT
- * compound on top of a markdown the shop is already running: doing so quotes a saving the
- * customer was never meant to get, and UPSELL10 is applied by the backend against the cart
- * subtotal, so a stacked promo silently under-charges.
- *
- * - Not on sale → promo = price − pct, struck through with `price` (unchanged behaviour).
- * - Already on sale → promo = the shop's own sale price, struck through with the real
- *   `originalPrice`. The strike-through is then the genuine list price rather than a markdown
- *   mislabelled as one.
- */
-export function resolvePromoPricing(
-  price: number,
-  originalPrice: number | null | undefined,
-  discountPct: number,
-): { promoPrice: number; listPrice: number; alreadyReduced: boolean } {
-  const alreadyReduced = originalPrice != null
-  const listPrice = alreadyReduced ? originalPrice : price
-  const promoPrice = alreadyReduced
-    ? price
-    : Math.round(price * (1 - discountPct / 100) * 100) / 100
-  return { promoPrice, listPrice, alreadyReduced }
-}
-
-/** subtotal + shipping − discount. */
-export function calcFinalTotal(subtotal: number, shipping: number, discount: number): number {
-  return subtotal + shipping - discount
 }

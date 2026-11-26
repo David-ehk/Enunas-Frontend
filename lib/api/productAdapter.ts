@@ -4,6 +4,8 @@ import { colourwayCoverImage } from '@/lib/colourwayImage';
 
 export interface ProductCardShape {
   id: string;
+  /** The product this card shows. Several colourway cards share one; `id` differs per card. */
+  productId: string;
   imgURL: string;
   brandName: string;
   productName: string;
@@ -98,6 +100,7 @@ export function apiProductToCardShape(p: ApiProduct): ProductCardShape {
   const preview = p.preview ?? false;
   return {
     id: p.id,
+    productId: p.id,
     imgURL: p.images?.[0] ?? '',
     brandName: p.brandName,
     productName: p.name,

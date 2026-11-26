@@ -5,11 +5,11 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 export const CATALOGUE_OPTIONS = [
-  { id: 'star',         label: 'Star',         color: '#0A0A0A', href: '/bekleidung/star'         },
   { id: 'streetwear',   label: 'Streetwear',   color: '#0011A5', href: '/bekleidung/streetwear'   },
   { id: 'experimental', label: 'Experimental', color: '#6C169C', href: '/bekleidung/experimental' },
   { id: 'athleisure',   label: 'Athleisure',   color: '#C01B1B', href: '/bekleidung/athleisure'   },
   { id: 'culture',      label: 'Culture',       color: '#EA9575', href: '/bekleidung/cultural'     },
+  { id: 'star',         label: 'Star',         color: '#0A0A0A', href: '/bekleidung/star'         },
 ]
 
 interface CatalogueDropdownProps {
@@ -26,20 +26,30 @@ export default function CatalogueDropdown({
   dropUp = false,
 }: CatalogueDropdownProps) {
   const [open, setOpen] = useState(false)
+  // The entry under the pointer or keyboard focus; the row highlight glides to it.
+  const [hovered, setHovered] = useState<number | null>(null)
   const ref = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
 
   // Detect active from current route first, fall back to prop value
   const activeId = CATALOGUE_OPTIONS.find(o => pathname === o.href)?.id ?? value ?? ''
   const activeOption = CATALOGUE_OPTIONS.find(o => o.id === activeId)
+  const activeIndex = CATALOGUE_OPTIONS.findIndex(o => o.id === activeId)
+  // At rest the highlight sits on the current line, or hides when there is none.
+  const highlight = hovered ?? activeIndex
 
   useEffect(() => {
     if (!open) return
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
     document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', handler)
+      document.removeEventListener('keydown', onKey)
+    }
   }, [open])
 
   const isActive = !!activeId
@@ -51,6 +61,7 @@ export default function CatalogueDropdown({
       {/* ── Trigger ── */}
       <button
         onClick={() => setOpen(p => !p)}
+        aria-expanded={open}
         style={{
           background: 'none',
           border: 'none',
@@ -87,73 +98,45 @@ export default function CatalogueDropdown({
 
       {/* ── Dropdown panel ── */}
       <div
-        aria-hidden={!open}
+        className="catalogue-menu"
+        data-open={open}
+        data-direction={dropUp ? 'up' : 'down'}
+        // Closed entries must not be reachable by keyboard or screen reader.
+        inert={!open}
+        onMouseLeave={() => setHovered(null)}
         style={{
-          position: 'absolute',
           ...(dropUp ? { bottom: 'calc(100% + 16px)' } : { top: 'calc(100% + 18px)' }),
           ...(align === 'right' ? { right: 0 } : { left: 0 }),
-          zIndex: 200,
-          pointerEvents: open ? 'auto' : 'none',
-          display: 'flex',
-          flexDirection: 'column',
         }}
       >
+        <span
+          aria-hidden
+          className="catalogue-menu-highlight"
+          style={{
+            opacity: highlight >= 0 ? 1 : 0,
+            transform: `translateY(calc(${Math.max(highlight, 0)} * var(--catalogue-row)))`,
+            // The highlight's edge bar takes the line's own colour.
+            color: CATALOGUE_OPTIONS[Math.max(highlight, 0)].color,
+          }}
+        />
         {CATALOGUE_OPTIONS.map((opt, i) => {
           const isItemActive = activeId === opt.id
-          const isLast       = i === CATALOGUE_OPTIONS.length - 1
-          const delay        = `${i * 0.05}s`
-
-          const borderTop    = !dropUp && i === 0 ? '1px solid #E8E8E8' : 'none'
-          const borderBottom = dropUp && isLast
-            ? '1px solid rgba(232,232,232,0.9)'
-            : !isLast
-            ? '1px solid #F0EFEA'
-            : 'none'
 
           return (
             <Link
               key={opt.id}
               href={opt.href}
               onClick={() => { onChange?.(isItemActive ? '' : opt.id); setOpen(false) }}
-              style={{
-                background: '#fff',
-                textDecoration: 'none',
-                border: 'none',
-                borderTop,
-                borderBottom,
-                cursor: 'pointer',
-                padding: '12px 24px 12px 16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                fontFamily: "'League Spartan', sans-serif",
-                fontSize: 10,
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
-                whiteSpace: 'nowrap',
-                color: isItemActive ? opt.color : '#0A0A0A',
-                fontWeight: isItemActive ? 600 : 400,
-                opacity: open ? 1 : 0,
-                transform: open
-                  ? 'translateY(0px)'
-                  : dropUp ? 'translateY(5px)' : 'translateY(-5px)',
-                transition: [
-                  `opacity 0.45s cubic-bezier(0.39,0.575,0.565,1) ${delay}`,
-                  `transform 0.45s cubic-bezier(0.16,1,0.3,1) ${delay}`,
-                  'color 150ms',
-                ].join(', '),
-              }}
+              onMouseEnter={() => setHovered(i)}
+              onFocus={() => setHovered(i)}
+              onBlur={() => setHovered(null)}
+              aria-current={isItemActive ? 'page' : undefined}
+              className="catalogue-menu-item"
+              data-highlighted={highlight === i}
+              style={{ transitionDelay: `${i * 50}ms` }}
             >
               {/* Category colour dot */}
-              <span style={{
-                width: 7,
-                height: 7,
-                borderRadius: '50%',
-                background: opt.color,
-                flexShrink: 0,
-                opacity: isItemActive ? 1 : 0.55,
-                transition: 'opacity 150ms ease',
-              }} />
+              <span className="catalogue-menu-dot" style={{ background: opt.color }} />
               {opt.label}
             </Link>
           )

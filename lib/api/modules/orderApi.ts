@@ -1,5 +1,6 @@
 import { fetcher } from '../fetcher';
-import type { ApiOrder, ApiPage, ReturnReason, ShippingSnapshot, ShippingCalculationMethod } from '@/types/api';
+import type { ApiOrder, ApiPage, ReturnReason, ShippingSnapshot, ShippingCalculationMethod, UpsellOfferResult } from '@/types/api';
+import { toUpsellOffer, type UpsellOfferResponse } from '../upsellOfferAdapter';
 
 // Mirrors backend OrderItemRequestDto
 interface CreateOrderItemDto {
@@ -29,6 +30,8 @@ export interface CreateOrderDto {
   savedAddressId?: number;
   notes?: string;
   discountCode?: string;
+  // Never together with discountCode — the backend answers 422.
+  upsellOfferId?: number;
 }
 
 // Mirrors backend ReturnRequestDto
@@ -62,11 +65,18 @@ export interface OrderPreviewResponseDto {
   subtotal: number;
   discountCode?: string;
   discountAmount?: number;
+  upsellOfferId?: number | null;
+  /** Gross, already included in discountAmount. */
+  upsellDiscountAmount?: number | null;
+  /** German; when set, the figures do NOT include the offer discount. */
+  upsellError?: string | null;
   shippingBreakdown: ShippingBreakdownLine[];
   shippingTotal: number;
   total: number;
   currency: string;
 }
+
+const upsellOfferPath = (orderNumber: string) => `/orders/${encodeURIComponent(orderNumber)}/upsell-offer`;
 
 export const orderApi = {
   async getMyOrders(page = 0, size = 10): Promise<ApiPage<ApiOrder>> {
@@ -94,6 +104,16 @@ export const orderApi = {
   // renders is guaranteed to match what create() actually charges.
   async preview(dto: CreateOrderDto): Promise<OrderPreviewResponseDto> {
     return fetcher<OrderPreviewResponseDto>('/orders/preview', { method: 'POST', body: JSON.stringify(dto) });
+  },
+
+  // Idempotent: the first call for a paid order rolls once, later calls return the stored result.
+  async rollUpsellOffer(orderNumber: string): Promise<UpsellOfferResult> {
+    return toUpsellOffer(await fetcher<UpsellOfferResponse>(upsellOfferPath(orderNumber), { method: 'POST' }));
+  },
+
+  // 404 when the order was never rolled.
+  async getUpsellOffer(orderNumber: string): Promise<UpsellOfferResult> {
+    return toUpsellOffer(await fetcher<UpsellOfferResponse>(upsellOfferPath(orderNumber)));
   },
 
   async requestReturn(orderId: string | number, dto: ReturnRequestDto): Promise<ApiOrder> {

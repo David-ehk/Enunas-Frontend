@@ -431,6 +431,10 @@ export interface ApiOrder {
   discountCode?: string;
   discountAmount?: number;
   discountPercent?: number;
+  // Set only when the post-purchase offer was used. discountCode is then null and
+  // discountAmount equals upsellDiscountAmount.
+  upsellOfferId?: number | null;
+  upsellDiscountAmount?: number | null;
   notes?: string;
   checkoutUrl?: string;
   // Canonical returns model: one entry per brand returning items on this order.
@@ -456,6 +460,22 @@ export interface ApiOrder {
   // Mollie refund transaction ID when admin cancels a PAID order.
   refundTransactionId?: string | null;
 }
+
+// A post-purchase offer that passed toUpsellOffer(): complete, with a product to show.
+export interface LiveOffer {
+  offerId: number;
+  percent: number;
+  product: ApiProduct;
+  listingId: number;
+  // Both are for ONE unit of listingId.
+  listPrice: number;
+  offerPrice: number;
+  /** Monotonic time (performance.now()) at which it expires; already past for an expired one. */
+  deadline: number;
+}
+
+// 'pending' = not eligible yet (ask again); null = there is no offer to show.
+export type UpsellOfferResult = LiveOffer | 'pending' | null;
 
 export interface ApiWardrobeItem {
   id: string;
@@ -710,4 +730,15 @@ export interface UpdateDiscountRequest {
   validUntil?: string | null;
   maxUses?: number | null;
   active?: boolean;
+}
+
+// ── Storefront curation (Schaufenster) ─────────────────────────────────────────
+
+export type Segment = 'streetwear' | 'cultural' | 'athleisure' | 'experimental' | 'star';
+
+/** Ids are strings here; product objects carry numeric ids from the API, so compare via String(). */
+export interface CurationData {
+  trendy: string[];
+  drops: string[];
+  recommendations: Record<Segment, string[]>;
 }

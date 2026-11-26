@@ -1,5 +1,6 @@
 'use client'
 
+import { STANDARD_SORTS, type ProductSort } from '@/lib/productSorts'
 import React, { useState } from 'react'
 import type { ProductCardShape } from '@/lib/api'
 
@@ -25,6 +26,8 @@ export interface FilterSidebarProps {
   resetFilters:    () => void
   resultCount:     number
   availableMarken: string[]
+  /** Defaults to STANDARD_SORTS. */
+  sorts?:          ProductSort[]
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -66,18 +69,7 @@ export const FARBEN = [
 
 export const GROESSEN = ['XS','S','M','L','XL','XXL','28','30','32','34','36','38','40','42','44','46']
 
-export const SORT_OPTIONS = [
-  { id: 'neu',       label: 'Neuheiten'         },
-  { id: 'preis-auf', label: 'Preis aufsteigend' },
-  { id: 'preis-ab',  label: 'Preis absteigend'  },
-  { id: 'name',      label: 'Name A–Z'          },
-]
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-export function parsePriceNum(price: string): number {
-  return parseFloat(price.replace('€', '').replace(',', '.').trim()) || 0
-}
 
 export function genderMatchesProduct(selected: ('damen' | 'herren')[], p: ProductCardShape): boolean {
   if (selected.length === 0) return true
@@ -291,7 +283,7 @@ function Section({
 export default function FilterSidebar({
   open, onClose, filters, setFilters,
   openSections, toggleSection, toggleFilter, resetFilters,
-  resultCount, availableMarken,
+  resultCount, availableMarken, sorts = STANDARD_SORTS,
 }: FilterSidebarProps) {
 
   return (
@@ -465,7 +457,7 @@ export default function FilterSidebar({
           </Section>
 
           <Section label="Sortieren nach" animDelay={250} revealed={open} isOpen={openSections.includes('sortieren')} hasActive={false} onToggle={() => toggleSection('sortieren')}>
-            {SORT_OPTIONS.map(s => (
+            {sorts.map(s => (
               <CheckRow
                 key={s.id}
                 checked={filters.sortieren === s.id}

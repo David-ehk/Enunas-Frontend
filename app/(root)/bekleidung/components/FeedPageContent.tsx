@@ -7,9 +7,9 @@ import { productApi, apiProductToColourwayCards } from '@/lib/api'
 import type { ProductCardShape } from '@/lib/api'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { generateSlug } from '@/lib/product'
-import FilterSidebar, { FilterState, CATEGORIES, catMatchesProduct, parsePriceNum, genderMatchesProduct } from './FilterSidebar'
+import FilterSidebar, { FilterState, CATEGORIES, catMatchesProduct, genderMatchesProduct } from './FilterSidebar'
+import { STANDARD_SORTS, resolveSort, type ProductSort } from '@/lib/productSorts'
 import { partitionPreview } from '@/lib/preview'
-import { byNewest } from '@/lib/newestProducts'
 import SortDropdown from './SortDropdown'
 import BlurFilterBar from './BlurFilterBar'
 import CategoryNavigation from './CategoryNavigation'
@@ -25,6 +25,9 @@ interface Props {
   emptyStateMessage?: string
   /** How preview ("Coming Soon") products are placed. Default 'show' (live first, then preview). */
   previewMode?: import('@/lib/preview').PreviewMode
+  /** The sort menu; its first entry is the default. `null` while the page is still building
+   *  the list, which keeps the loading state up so the grid never reorders on screen. */
+  sorts?: ProductSort[] | null
 }
 
 function ProductSkeleton() {
@@ -38,7 +41,8 @@ function ProductSkeleton() {
   )
 }
 
-export default function FeedPageContent({ basePath, HeroComponent, brandFilter, emptyStateMessage, previewMode = 'show' }: Props) {
+export default function FeedPageContent({ basePath, HeroComponent, brandFilter, emptyStateMessage, previewMode = 'show', sorts = STANDARD_SORTS }: Props) {
+  const sortList = sorts ?? STANDARD_SORTS
   const searchParams = useSearchParams()
   const isMobile     = useIsMobile()
   const filterBarRef = useRef<HTMLDivElement>(null)
@@ -57,7 +61,8 @@ export default function FeedPageContent({ basePath, HeroComponent, brandFilter, 
   }, [])
 
   const [allProducts, setAllProducts] = useState<ProductCardShape[]>([])
-  const [loading, setLoading]         = useState(true)
+  const [productsLoading, setProductsLoading] = useState(true)
+  const loading = productsLoading || sorts === null
 
   const [activeCat, setActiveCat] = useState(() => {
     const cat = searchParams.get('cat')
@@ -70,8 +75,10 @@ export default function FeedPageContent({ basePath, HeroComponent, brandFilter, 
   const [filterOpen, setFilterOpen]     = useState(false)
   const [openSections, setOpenSections] = useState<string[]>(['kategorien'])
   const [filters, setFilters]           = useState<FilterState>({
-    kategorien: [], farben: [], groessen: [], marken: [], sortieren: 'neu', catalogue: '',
+    kategorien: [], farben: [], groessen: [], marken: [], sortieren: '', catalogue: '',
   })
+  // '' means "not chosen yet": the list's first sort applies.
+  const activeSort = resolveSort(sortList, filters.sortieren)
 
   useEffect(() => {
     const cat = searchParams.get('cat')
@@ -84,7 +91,7 @@ export default function FeedPageContent({ basePath, HeroComponent, brandFilter, 
     productApi.list({ size: 200 })
       .then(r => setAllProducts(r.content.flatMap(apiProductToColourwayCards)))
       .catch(() => setAllProducts([]))
-      .finally(() => setLoading(false))
+      .finally(() => setProductsLoading(false))
   }, [])
 
   useEffect(() => {
@@ -117,12 +124,8 @@ export default function FeedPageContent({ basePath, HeroComponent, brandFilter, 
     ))
     if (filters.groessen.length > 0)    r = r.filter(p => p.sizes?.some(s => filters.groessen.includes(s)))
     if (filters.marken.length > 0)      r = r.filter(p => filters.marken.includes(p.brandName))
-    if (filters.sortieren === 'preis-auf')      r = [...r].sort((a, b) => parsePriceNum(a.price) - parsePriceNum(b.price))
-    else if (filters.sortieren === 'preis-ab')  r = [...r].sort((a, b) => parsePriceNum(b.price) - parsePriceNum(a.price))
-    else if (filters.sortieren === 'name')      r = [...r].sort((a, b) => a.productName.localeCompare(b.productName))
-    else if (filters.sortieren === 'neu')       r = [...r].sort(byNewest)
-    return partitionPreview(r, previewMode)
-  }, [brandScopedProducts, activeCat, gender, filters, previewMode])
+    return partitionPreview(activeSort.apply(r), previewMode)
+  }, [brandScopedProducts, activeCat, gender, filters, previewMode, activeSort])
 
   const activeFilterCount = filters.kategorien.length + filters.farben.length + filters.groessen.length + filters.marken.length
 
@@ -133,7 +136,7 @@ export default function FeedPageContent({ basePath, HeroComponent, brandFilter, 
     })
 
   const resetFilters = () =>
-    setFilters({ kategorien: [], farben: [], groessen: [], marken: [], sortieren: 'neu', catalogue: '' })
+    setFilters({ kategorien: [], farben: [], groessen: [], marken: [], sortieren: '', catalogue: '' })
 
   const toggleGender = (g: 'damen' | 'herren') =>
     setGender(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g])
@@ -218,7 +221,8 @@ export default function FeedPageContent({ basePath, HeroComponent, brandFilter, 
           </button>
           <span style={{ width: 1, height: 12, background: '#D8D8D8', flexShrink: 0 }} />
           <SortDropdown
-            value={filters.sortieren}
+            sorts={sortList}
+            value={activeSort.id}
             onChange={(id) => setFilters(prev => ({ ...prev, sortieren: id }))}
             align="right"
           />
@@ -286,7 +290,7 @@ export default function FeedPageContent({ basePath, HeroComponent, brandFilter, 
       <FilterSidebar
         open={filterOpen}
         onClose={() => setFilterOpen(false)}
-        filters={filters}
+        filters={{ ...filters, sortieren: activeSort.id }}
         setFilters={setFilters}
         openSections={openSections}
         toggleSection={toggleSection}
@@ -294,6 +298,7 @@ export default function FeedPageContent({ basePath, HeroComponent, brandFilter, 
         resetFilters={resetFilters}
         resultCount={visibleProducts.length}
         availableMarken={availableMarken}
+        sorts={sortList}
       />
 
       <BlurFilterBar
@@ -303,8 +308,9 @@ export default function FeedPageContent({ basePath, HeroComponent, brandFilter, 
         activeFilterCount={activeFilterCount}
         onOpenFilter={() => setFilterOpen(true)}
         onOpenAt={openAt}
-        sortValue={filters.sortieren}
+        sortValue={activeSort.id}
         onSort={(id) => setFilters(prev => ({ ...prev, sortieren: id }))}
+        sorts={sortList}
         catalogueValue=""
         onCatalogue={() => {}}
       />
