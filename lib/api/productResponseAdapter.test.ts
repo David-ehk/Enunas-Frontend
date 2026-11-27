@@ -179,3 +179,10 @@ describe('completeTheLookProducts', () => {
     expect(adaptProduct(base as never).completeTheLookProducts).toBeUndefined()
   })
 })
+
+describe('adaptProduct product type', () => {
+  it('carries productType through when the backend sends it', () => {
+    expect(adaptProduct(raw({ productType: 'PANTS' })).productType).toBe('PANTS')
+    expect(adaptProduct(raw()).productType).toBeUndefined()
+  })
+})

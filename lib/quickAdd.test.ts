@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { variantColours, sizeChoices, buildCartLine, quickAdd } from './quickAdd'
+import { variantColours, sizeChoices, buildCartLine, quickAdd, savedColour } from './quickAdd'
 import { FetchError } from './api/fetcher'
 import type { ApiProduct, ApiListing } from '@/types/api'
 import type { CartItem } from '@/app/context/CartContext'
@@ -91,5 +91,17 @@ describe('quickAdd', () => {
     const { result, addToCart } = run({ cartItems: [held] })
     await expect(result).resolves.toEqual({ status: 'atLimit' })
     expect(addToCart).not.toHaveBeenCalled()
+  })
+})
+
+describe('savedColour', () => {
+  it('takes the colour the favourite was saved in, ignoring case', () => {
+    expect(savedColour(product, '/bekleidung/x/track-jacket?color=white')).toBe('White')
+  })
+
+  it('falls back to the first colour with stock', () => {
+    const blackGone = { ...product, variants: [variant(1, 'Black', 'M', 0), variant(3, 'White', 'M', 4)] } as ApiProduct
+    expect(savedColour(blackGone, '/bekleidung/x/track-jacket')).toBe('White')
+    expect(savedColour(product, '/bekleidung/x/track-jacket?color=Green')).toBe('Black')
   })
 })

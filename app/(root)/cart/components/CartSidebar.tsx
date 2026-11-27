@@ -1,15 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useCart } from '@/app/context/CartContext'
 import { useWishlist } from '@/app/context/WishlistContext'
 import Image from 'next/image'
 import Link from 'next/link'
 import { estimateShipping } from '@/lib/pricing'
 import { pickSuggestions } from '@/lib/cartSuggestions'
+import { hasMoreBelow } from '@/lib/scrollHint'
 import { generateSlug } from '@/lib/product'
 import { useCartShelf } from './useCartShelf'
 import CartProductRow from './CartProductRow'
+import WishFavourites from './WishFavourites'
 
 /* ─────────────────────────────────────────────────────────────────
    CSS from design_handoff_cart/cart/cart.css — embedded so it loads
@@ -83,6 +85,23 @@ const css = `
 
 
 /* Item list */
+.enu-cart-scroll { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.enu-more {
+  position: absolute; left: 50%; bottom: 12px; margin-left: -20px; z-index: 2;
+  width: 40px; height: 40px; border-radius: 50%; padding: 0; cursor: pointer;
+  display: grid; place-items: center; color: #0A0A0A;
+  /* Liquid glass, as on the gallery's GlassCursor. */
+  background: radial-gradient(circle at 30% 24%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.14) 55%, rgba(255,255,255,0.06) 100%);
+  -webkit-backdrop-filter: blur(7px) saturate(1.7); backdrop-filter: blur(7px) saturate(1.7);
+  border: 1px solid rgba(255,255,255,0.75);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -10px 18px rgba(10,10,10,0.08), 0 8px 24px rgba(10,10,10,0.1);
+  opacity: 0; transform: translateY(8px); visibility: hidden;
+  transition: opacity 300ms var(--ease-q), transform 500ms var(--ease), visibility 300ms;
+}
+.enu-more[data-show="true"] { opacity: 1; transform: translateY(0); visibility: visible; }
+.enu-more svg { animation: enuNudge 3200ms var(--ease-q) infinite; }
+@keyframes enuNudge { 0%, 100% { transform: translateY(-1px); } 50% { transform: translateY(2px); } }
+.enu-more:focus-visible { outline: 1px solid var(--acc); outline-offset: 2px; }
 .enu-cart-body {
   flex: 1; overflow-y: auto; padding: 6px 30px 24px; background: #F5F5F0;
   scrollbar-width: none;
@@ -227,6 +246,29 @@ const css = `
 .enu-pick a:focus-visible, .enu-pick button:focus-visible {
   outline: 1px solid var(--acc); outline-offset: 2px;
 }
+.enu-pick-colour { font-size: 11px; color: var(--muted); margin-top: 10px; }
+
+/* Upsell rows as "[ ] Name hinzufügen", in the drawer and on /cart */
+.enu-upsell {
+  display: flex; flex-direction: column; gap: 16px; padding-top: 32px;
+  --acc: #370E4D; --hair-c: #E8E8E8; --muted: #6B6B6B; --faint: #9A9A93; --panel: #F5F5F0;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1); --ease-q: cubic-bezier(0.25, 1, 0.5, 1);
+  font-family: var(--font-league-spartan), system-ui, sans-serif;
+}
+.enu-upsell .enu-pick { border-color: #0A0A0A; padding: 14px; }
+.enu-upsell .enu-pick-add {
+  display: flex; align-items: flex-start; gap: 10px; text-align: left;
+  color: #0A0A0A; font-size: 11px; letter-spacing: 0.14em; line-height: 1.5;
+}
+.enu-pick-box {
+  position: relative; flex: none; width: 14px; height: 14px; margin-top: 1px; border: 1px solid #0A0A0A;
+}
+.enu-pick-box::after {
+  content: ""; position: absolute; inset: 2px; background: var(--acc);
+  opacity: 0; transition: opacity 240ms var(--ease-q);
+}
+.enu-pick-box[data-open="true"]::after { opacity: 1; }
+
 .enu-wish-all { display: flex; justify-content: center; padding-top: 12px; }
 .enu-wish-all a {
   color: var(--acc); text-decoration: none; display: inline-flex; align-items: center; gap: 9px;
@@ -344,6 +386,7 @@ const css = `
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .enu-more, .enu-more svg { animation: none !important; transition: none !important; }
   .enu-item { animation: none !important; opacity: 1 !important; transform: none !important; }
   .enu-pick-choice { animation: none !important; opacity: 1 !important; transform: none !important; }
   .enu-pick-media img { transition: none !important; }
@@ -511,7 +554,44 @@ export default function CartSidebar() {
 
   const shelf = useCartShelf(isCartOpen && (cartItems.length > 0 || wishlistItems.length > 0))
   const suggestions = shelf ? pickSuggestions(cartItems, shelf.products, shelf.curation) : []
-  const productById = new Map(shelf?.products.map(p => [String(p.id), p]))
+
+  // The "more below" arrow over the list, only while there are recommendations to scroll to.
+  const bodyRef = useRef<HTMLDivElement>(null)
+  const [moreBelow, setMoreBelow] = useState(false)
+  const showMore = moreBelow && activeTab === 'cart' && cartItems.length > 0 && suggestions.length > 0
+
+  useEffect(() => {
+    const body = bodyRef.current
+    if (!body) return
+    const update = () => setMoreBelow(hasMoreBelow(body))
+    update()
+    body.addEventListener('scroll', update, { passive: true })
+    // The list grows on its own (suggestions arriving, a size picker opening) and the drawer
+    // resizes with the screen.
+    const content = new MutationObserver(update)
+    content.observe(body, { childList: true, subtree: true })
+    const size = new ResizeObserver(update)
+    size.observe(body)
+    return () => {
+      body.removeEventListener('scroll', update)
+      content.disconnect()
+      size.disconnect()
+    }
+  }, [])
+
+  function scrollMore() {
+    const body = bodyRef.current
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    body?.scrollBy({ top: body.clientHeight * 0.8, behavior: still ? 'auto' : 'smooth' })
+  }
+
+  // Counts the openings, so the favourites are matched afresh each time the drawer opens.
+  const [visit, setVisit] = useState(0)
+  const [wasOpen, setWasOpen] = useState(isCartOpen)
+  if (wasOpen !== isCartOpen) {
+    setWasOpen(isCartOpen)
+    if (isCartOpen) setVisit(visit + 1)
+  }
 
   function handleRemove(id: string) {
     setRemovingId(id)
@@ -583,7 +663,8 @@ export default function CartSidebar() {
         {/* Free-shipping bar — re-enable once per-product shipping is configured */}
 
         {/* ── Body ── */}
-        <div className="enu-cart-body">
+        <div className="enu-cart-scroll">
+        <div className="enu-cart-body" ref={bodyRef}>
           {activeTab === 'cart' ? (
             cartItems.length > 0 ? (
               <>
@@ -601,8 +682,8 @@ export default function CartSidebar() {
                   ))}
                 </div>
                 {suggestions.length > 0 && (
-                  <section className="enu-picks" aria-label="Das könnte dir gefallen">
-                    <h3 className="enu-picks-title">Das könnte dir gefallen</h3>
+                  <section className="enu-upsell" aria-label="Empfohlen für dich">
+                    <h3 className="enu-picks-title">Empfohlen für dich</h3>
                     {suggestions.map((p) => (
                       <CartProductRow
                         key={p.id}
@@ -613,6 +694,7 @@ export default function CartSidebar() {
                         href={`/bekleidung/${generateSlug(p.brandName)}/${p.slug}`}
                         product={p}
                         onNavigate={closeCart}
+                        upsell
                       />
                     ))}
                   </section>
@@ -630,21 +712,13 @@ export default function CartSidebar() {
             )
           ) : wishlistItems.length > 0 ? (
             <div className="enu-picks">
-              {wishlistItems.map((saved) => {
-                const product = productById.get(String(saved.id))
-                return (
-                  <CartProductRow
-                    key={saved.id}
-                    image={saved.imgURL}
-                    brand={saved.brandName}
-                    name={saved.productName}
-                    price={product?.preview ? null : product?.available ? fmt(product.price) : saved.price}
-                    href={saved.href}
-                    product={product}
-                    onNavigate={closeCart}
-                  />
-                )
-              })}
+              <WishFavourites
+                key={visit}
+                favourites={wishlistItems}
+                products={shelf?.products ?? []}
+                formatPrice={fmt}
+                onNavigate={closeCart}
+              />
               <div className="enu-wish-all">
                 <Link href="/saved-lists" onClick={closeCart}>
                   Wunschliste ansehen <ArrowIcon />
@@ -658,6 +732,19 @@ export default function CartSidebar() {
               <div className="enu-e-sub">Tippe auf das Herz, um Lieblingsstücke hier zu sammeln.</div>
             </div>
           )}
+        </div>
+        <button
+          type="button"
+          className="enu-more"
+          data-show={showMore}
+          onClick={scrollMore}
+          aria-label="Weitere Empfehlungen anzeigen"
+        >
+          {/* The chevron of the product page's "Produktdetails" rows. */}
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M3 6l5 5 5-5" />
+          </svg>
+        </button>
         </div>
 
         {/* ── Summary footer ── */}

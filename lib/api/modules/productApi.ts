@@ -31,6 +31,9 @@ export interface PagedProducts {
   page: number;
 }
 
+// One request's worth when loading a whole list. `listAll` asks for as many as it takes.
+const BATCH_SIZE = 100;
+
 function mockToApiProduct(m: (typeof mockProducts)[number]): ApiProduct {
   return {
     id: m.id,
@@ -98,11 +101,32 @@ export const productApi = {
     return adaptProduct(await fetcher<RawProductResponse>(`/products/slug/${slug}`));
   },
 
-  async search(keyword: string): Promise<PagedProducts> {
-    const raw = await fetcher<RawPagedProducts>(
-      `/products/search?keyword=${encodeURIComponent(keyword)}`,
-    );
+  async search(
+    keyword: string,
+    params: Pick<ProductSearchParams, 'page' | 'size' | 'sort'> = {},
+  ): Promise<PagedProducts> {
+    const qs = new URLSearchParams({ keyword });
+    Object.entries(params).forEach(([k, v]) => qs.set(k, String(v)));
+    const raw = await fetcher<RawPagedProducts>(`/products/search?${qs}`);
     return sellableOnly(raw, raw.content.map(adaptProduct));
+  },
+
+  /**
+   * The whole catalogue, or every result for `keyword`, loaded in batches: the first one says how
+   * many there are, the rest load in parallel. For pages that filter and sort in the browser,
+   * which is only correct over the complete list. Rejects if any batch fails.
+   */
+  async listAll(keyword?: string): Promise<ApiProduct[]> {
+    // The backend's default order is not fixed; without one, pages can repeat or skip products.
+    const batch = (page: number) => {
+      const params = { page, size: BATCH_SIZE, sort: 'id,asc' };
+      return keyword ? productApi.search(keyword, params) : productApi.list(params);
+    };
+    const first = await batch(0);
+    const rest = await Promise.all(
+      Array.from({ length: Math.max(0, first.totalPages - 1) }, (_, i) => batch(i + 1)),
+    );
+    return [first, ...rest].flatMap(p => p.content);
   },
 
   // Public: GET /products/** is permitAll. Anonymous callers get the browse-gated view, which

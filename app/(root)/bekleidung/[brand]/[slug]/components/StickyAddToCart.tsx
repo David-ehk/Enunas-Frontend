@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, type RefObject } from 'react'
+import { useBottomBarGlass } from '@/hooks/use-bottom-bar-glass'
 
 interface StickyAddToCartProps {
   productName: string
@@ -12,6 +13,10 @@ interface StickyAddToCartProps {
   ctaMuted?: boolean
   onCta: () => void
   watchRef: RefObject<HTMLButtonElement | null>
+  /** Phones: the same row as part of the page, on screen from the start. */
+  inline?: boolean
+  /** Fades the inline row out. It keeps its space, so nothing below it moves. */
+  dismissed?: boolean
 }
 
 export default function StickyAddToCart({
@@ -23,8 +28,11 @@ export default function StickyAddToCart({
   ctaMuted = false,
   onCta,
   watchRef,
+  inline = false,
+  dismissed = false,
 }: StickyAddToCartProps) {
   const [visible, setVisible] = useState(false)
+  const glass = useBottomBarGlass()
 
   useEffect(() => {
     const onScroll = () => {
@@ -44,15 +52,17 @@ export default function StickyAddToCart({
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-enunas-gray-light"
-      style={{
+      className={inline
+        ? `md:hidden border-b border-enunas-gray-light transition-[opacity,visibility] duration-300 ease-out-expo ${dismissed ? 'invisible opacity-0' : ''}`
+        : `${glass} fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-enunas-gray-light`}
+      style={inline ? undefined : {
         transform: visible ? 'translateY(0)' : 'translateY(calc(100% + env(safe-area-inset-bottom)))',
         visibility: visible ? 'visible' : 'hidden',
         pointerEvents: visible ? 'auto' : 'none',
         // Hide only after the slide-out finishes, so the exit animation still plays.
         transition: `transform 500ms var(--ease-out-expo), visibility 0s ${visible ? '0s' : '500ms'}`,
       }}
-      aria-hidden={!visible}
+      aria-hidden={inline ? dismissed : !visible}
     >
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 py-3 sm:py-4 flex items-center gap-3 sm:gap-6">
         <div className="flex-1 min-w-0">

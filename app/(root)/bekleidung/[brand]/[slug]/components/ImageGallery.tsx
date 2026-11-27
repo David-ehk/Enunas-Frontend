@@ -285,7 +285,7 @@ function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, on
   if (images.length === 0) {
     return (
       <div
-        className="relative w-full h-[60vh] md:h-[100vh] flex flex-col items-center justify-center"
+        className="relative w-full h-[calc(100svh-186px)] md:h-[100vh] flex flex-col items-center justify-center"
         style={{ background: '#F5F5F0' }}
       >
         <GalleryActions saved={saved} onToggleSaved={onToggleSaved} justSaved={justSaved} onShare={onShare} shareCopied={shareCopied} />
@@ -314,11 +314,11 @@ function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, on
   }
 
   return (
-    <div className="relative w-full h-[60vh] md:h-[100vh]">
+    <div className="relative w-full h-[calc(100svh-186px)] md:h-[100vh]">
       <GalleryActions saved={saved} onToggleSaved={onToggleSaved} justSaved={justSaved} onShare={onShare} shareCopied={shareCopied} />
 
       {/* Quadrat-Indikator - Unten auf Mobile, Links auf Desktop */}
-      <div className="absolute z-20 bottom-4 left-1/2 -translate-x-1/2 flex flex-row gap-3 md:bottom-auto md:left-4 md:top-1/2 md:-translate-y-1/2 md:translate-x-0 md:flex-col">
+      <div className="absolute z-20 bottom-8 md:bottom-4 left-1/2 -translate-x-1/2 flex flex-row gap-3 md:bottom-auto md:left-4 md:top-1/2 md:-translate-y-1/2 md:translate-x-0 md:flex-col">
         {images.map((_, index) => (
           <button
             key={index}

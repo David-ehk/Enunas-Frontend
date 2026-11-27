@@ -30,6 +30,8 @@ export interface ProductCardShape {
   catalogue?: string[];
   category?: string;
   subcategory?: string;
+  productType?: string;
+  outfitSlot?: string;
   gender?: string;
 }
 
@@ -119,6 +121,8 @@ export function apiProductToCardShape(p: ApiProduct): ProductCardShape {
     catalogue: p.catalogue,
     category: p.category,
     subcategory: p.subcategory,
+    productType: p.productType,
+    outfitSlot: p.outfitSlot,
     gender: p.gender,
     preview,
     releaseDate: p.releaseDate ?? null,

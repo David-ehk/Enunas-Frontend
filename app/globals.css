@@ -474,6 +474,25 @@ main {
 [data-glass-cursor="on"], [data-glass-cursor="on"] * { cursor: none !important; }
 
 /* ============================================
+   BOTTOM BAR UNDERLAP
+   Some mobile browsers keep painting the page below a bar fixed to the bottom edge. This glass
+   strip hangs under the bar and frosts whatever would show there. Where the browser has no such
+   gap it is off screen. Safari is left out (see hooks/use-bottom-bar-glass.ts).
+   ============================================ */
+.bottom-bar-glass::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 140px;
+  background: rgba(255, 255, 255, 0.55);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  pointer-events: none;
+}
+
+/* ============================================
    CATALOGUE MENU
    Twin of the Sortieren menu beside it (square white rows, hairlines, same entrance), plus one
    highlight that glides between rows. Only transform and opacity animate.
@@ -530,7 +549,7 @@ main {
   transform: translateY(0);
 }
 
-.catalogue-menu-item[aria-current="page"] {
+.catalogue-menu-item[aria-current] {
   font-weight: 600;
 }
 
@@ -564,13 +583,6 @@ main {
   background: currentColor;
 }
 
-/* Section heading inside the phone's Sortieren menu: same row height, not a choice. */
-.catalogue-menu-label {
-  font-size: 9px;
-  letter-spacing: 0.28em;
-  color: var(--color-enunas-gray-medium);
-}
-
 .catalogue-menu-dot {
   width: 7px;
   height: 7px;
@@ -582,3 +594,55 @@ main {
 .catalogue-menu-item[data-highlighted="true"] .catalogue-menu-dot {
   transform: scale(1.3);
 }
+
+/* ============================================
+   SWIPE CUE
+   A slowly drifting chevron on the photo's lower edge: there is more below.
+   ============================================ */
+.scroll-cue {
+  width: 40px; height: 40px; margin-left: -20px; padding: 0; z-index: 1;
+  display: grid; place-items: center; cursor: pointer; color: #0A0A0A;
+  background: none; border: 0;
+  opacity: 0; visibility: hidden;
+  transition: opacity 300ms var(--ease-out-quart), visibility 300ms;
+}
+.scroll-cue[data-show="true"] { opacity: 1; visibility: visible; }
+.scroll-cue svg { animation: scrollCueDrift 3200ms var(--ease-out-quart) infinite; }
+@keyframes scrollCueDrift { 0%, 100% { transform: translateY(-1px); } 50% { transform: translateY(2px); } }
+
+/* ============================================
+   SIZE SHEET (components/SizeSheet.tsx)
+   Slides up from the bottom and back down. From tablet width it is a centred card that lifts in.
+   .size-wheel is the iPhone-style wheel inside it (components/SizeWheel.tsx).
+   ============================================ */
+/* Beige frosted glass: the page behind is softened, and its colours show through the sheet. */
+.size-sheet {
+  background: rgba(245, 245, 240, 0.8);
+  -webkit-backdrop-filter: blur(30px) saturate(1.4);
+  backdrop-filter: blur(30px) saturate(1.4);
+}
+.size-sheet-scrim {
+  background: rgba(10, 8, 14, 0.2);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.size-sheet[data-state="open"] { animation: sizeSheetUp 900ms var(--ease-out-expo) both; }
+.size-sheet[data-state="closed"] { animation: sizeSheetDown 450ms var(--ease-out-quart) both; }
+.size-sheet-scrim[data-state="open"] { animation: sizeScrimIn 500ms var(--ease-out-quart) both; }
+.size-sheet-scrim[data-state="closed"] { animation: sizeScrimOut 450ms var(--ease-out-quart) both; }
+.size-wheel {
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(transparent, #000 28%, #000 72%, transparent);
+  mask-image: linear-gradient(transparent, #000 28%, #000 72%, transparent);
+}
+.size-wheel::-webkit-scrollbar { display: none; }
+@keyframes sizeSheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes sizeSheetDown { from { transform: translateY(0); } to { transform: translateY(100%); } }
+@keyframes sizeScrimIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sizeScrimOut { from { opacity: 1; } to { opacity: 0; } }
+@media (min-width: 768px) {
+  .size-sheet[data-state="open"] { animation-name: sizeCardIn; animation-duration: 500ms; }
+  .size-sheet[data-state="closed"] { animation-name: sizeCardOut; animation-duration: 250ms; }
+}
+@keyframes sizeCardIn { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes sizeCardOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(12px); } }

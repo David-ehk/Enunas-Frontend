@@ -82,8 +82,10 @@ export function genderMatchesProduct(selected: ('damen' | 'herren')[], p: Produc
 }
 
 export function catMatchesProduct(catId: string, p: ProductCardShape): boolean {
-  const slot = (p.category ?? '').toUpperCase()
-  const type = (p.subcategory ?? '').toUpperCase()
+  // Live products say CLOTHING as their category; slot and type are separate fields. Mock data
+  // still carries them as category / subcategory.
+  const slot = (p.outfitSlot ?? p.category ?? '').toUpperCase()
+  const type = (p.productType ?? p.subcategory ?? '').toUpperCase()
   const MAP: Record<string, { slots: string[]; types: string[] }> = {
     oberteile:   { slots: ['TOP'],                   types: ['T_SHIRT', 'LONGSLEEVE', 'HOODIE', 'ZIP_HOODIE', 'SWEATER'] },
     hoodies:     { slots: [],                        types: ['HOODIE', 'ZIP_HOODIE'] },

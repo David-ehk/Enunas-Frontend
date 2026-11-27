@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard';
-import { RecItem } from './ProductCard';
+import { cardDetails, type RecItem } from './ProductCard';
 import Rail from './Rail';
 
 interface RecRowProps {
@@ -33,6 +33,7 @@ export default function RecRow({ title, titleAccent, items, allHref = '#', allLa
         {items.map((item) => (
           <div key={item.href + item.name} className="snap-start shrink-0 basis-[58%] sm:basis-[34%] lg:basis-[23.5%]">
             <PopularProductCard
+              {...cardDetails(item.product)}
               imgURL={item.image ?? ''}
               brandName={item.brand}
               productName={item.name}
@@ -43,6 +44,7 @@ export default function RecRow({ title, titleAccent, items, allHref = '#', allLa
               createdAt={new Date(0)}
               preview={item.preview}
               releaseDate={item.releaseDate}
+              quickAddProduct={item.product}
             />
           </div>
         ))}

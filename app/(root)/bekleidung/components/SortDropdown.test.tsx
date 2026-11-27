@@ -10,83 +10,73 @@ vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => true }))
 
 afterEach(cleanup)
 
-// Queries by role skip closed (inert/hidden) content only if asked to, so each test opens the menu.
 const open = () => fireEvent.click(screen.getByText('Sortieren', { selector: 'button' }))
-const lineLinks = () =>
-  [...document.querySelectorAll('a[href^="/bekleidung/"]')].map(a => a.textContent)
+const menu = () => document.querySelector<HTMLElement>('.catalogue-menu')!
+const highlight = () => document.querySelector<HTMLElement>('.catalogue-menu-highlight')!
+const rows = () => [...document.querySelectorAll('.catalogue-menu-item')].map(r => r.textContent)
 
-describe('Sortieren with the catalogue lines', () => {
-  const renderMenu = () => {
-    const onSort = vi.fn()
-    const onLine = vi.fn()
-    render(
-      <SortDropdown sorts={BROWSE_SORTS} value="empfohlen" onChange={onSort}
-        catalogue={{ value: '', onChange: onLine }} />,
-    )
-    open()
-    return { onSort, onLine }
+describe('Sortieren in the Catalogue menu design', () => {
+  const renderMenu = (value = BROWSE_SORTS[0].id) => {
+    const onChange = vi.fn()
+    render(<SortDropdown sorts={BROWSE_SORTS} value={value} onChange={onChange} />)
+    return onChange
   }
 
-  it('lists the sorts, then the five lines with Star last', () => {
+  it('lists only the sorts, as Catalogue menu rows', () => {
     renderMenu()
-
-    for (const sort of BROWSE_SORTS) expect(screen.getByRole('button', { name: sort.label })).toBeTruthy()
-    expect(lineLinks()).toEqual(['Streetwear', 'Experimental', 'Athleisure', 'Culture', 'Star'])
-    const lastSort = screen.getByRole('button', { name: BROWSE_SORTS.at(-1)!.label })
-    const firstLine = screen.getByRole('link', { name: 'Streetwear' })
-    expect(lastSort.compareDocumentPosition(firstLine) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-  })
-
-  it('reports a chosen sort and a chosen line separately', () => {
-    const { onSort, onLine } = renderMenu()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Preis aufsteigend' }))
-    expect(onSort).toHaveBeenCalledWith('preis-auf')
-    expect(onLine).not.toHaveBeenCalled()
-
-    open()
-    const culture = screen.getByRole('link', { name: 'Culture' })
-    expect(culture.getAttribute('href')).toBe('/bekleidung/cultural')
-    fireEvent.click(culture)
-    expect(onLine).toHaveBeenCalledWith('culture')
-    expect(onSort).toHaveBeenCalledTimes(1)
-  })
-
-  it('stays a plain sort menu when no catalogue is passed', () => {
-    render(<SortDropdown sorts={BROWSE_SORTS} value="empfohlen" onChange={() => {}} />)
     open()
 
-    expect(lineLinks()).toEqual([])
+    expect(rows()).toEqual(BROWSE_SORTS.map(s => s.label))
+    expect(document.querySelectorAll('a')).toHaveLength(0)
+  })
+
+  it('rests the highlight on the current sort and lets it follow the pointer', () => {
+    renderMenu(BROWSE_SORTS[1].id)
+    open()
+    expect(highlight().style.transform).toContain('1 * var(--catalogue-row)')
+
+    fireEvent.mouseEnter(screen.getByRole('button', { name: BROWSE_SORTS[2].label }))
+    expect(highlight().style.transform).toContain('2 * var(--catalogue-row)')
+
+    fireEvent.mouseLeave(menu())
+    expect(highlight().style.transform).toContain('1 * var(--catalogue-row)')
+  })
+
+  it('reports the chosen sort and closes', () => {
+    const onChange = renderMenu()
+    open()
+
+    fireEvent.click(screen.getByRole('button', { name: BROWSE_SORTS[2].label }))
+    expect(onChange).toHaveBeenCalledWith(BROWSE_SORTS[2].id)
+    expect(menu().dataset.open).toBe('false')
+  })
+
+  it('keeps the closed menu out of reach', () => {
+    renderMenu()
+    expect(menu().hasAttribute('inert')).toBe(true)
+    open()
+    expect(menu().hasAttribute('inert')).toBe(false)
   })
 })
 
 describe('phone scroll bar', () => {
-  const renderBar = (catalogueInSort?: boolean) =>
+  it('has no catalogue lines in Sortieren', () => {
     render(
       <BlurFilterBar watchRef={{ current: null }} selectedGenders={[]} onGenderToggle={() => {}}
-        activeFilterCount={0} onOpenFilter={() => {}} onOpenAt={() => {}} sortValue="empfohlen"
-        onSort={() => {}} sorts={BROWSE_SORTS} catalogueValue="" onCatalogue={() => {}}
-        catalogueInSort={catalogueInSort} />,
+        activeFilterCount={0} onOpenFilter={() => {}} onOpenAt={() => {}} sortValue={BROWSE_SORTS[0].id}
+        onSort={() => {}} sorts={BROWSE_SORTS} catalogueValue="" onCatalogue={() => {}} />,
     )
 
-  it('offers the lines in Sortieren only on pages that ask for it', () => {
-    renderBar(true)
-    expect(lineLinks()).toHaveLength(5)
-    cleanup()
-
-    renderBar()
-    expect(lineLinks()).toEqual([])
+    expect(rows()).toEqual(BROWSE_SORTS.map(s => s.label))
   })
 })
 
 describe('closed menus leave nothing visible', () => {
-  const highlight = () => document.querySelector<HTMLElement>('.catalogue-menu-highlight')!
-
   it.each([
-    ['Sortieren', <SortDropdown key="s" sorts={BROWSE_SORTS} value="empfohlen" onChange={() => {}} catalogue={{ value: '', onChange: () => {} }} />],
+    ['Sortieren', <SortDropdown key="s" sorts={BROWSE_SORTS} value={BROWSE_SORTS[0].id} onChange={() => {}} />],
     ['Star', <CatalogueDropdown key="c" value="star" />],
-  ])('shows the highlight of the "%s" menu only while it is open', (trigger, menu) => {
-    render(menu)
+  ])('shows the highlight of the "%s" menu only while it is open', (trigger, element) => {
+    render(element)
     expect(highlight().style.opacity).toBe('0')
 
     fireEvent.click(screen.getByText(trigger, { selector: 'button' }))

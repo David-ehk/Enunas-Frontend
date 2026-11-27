@@ -9,6 +9,7 @@ import CartItemRow from './components/CartItemRow'
 import CartSummary from './components/CartSummary'
 import EmptyCart from './components/EmptyCart'
 import CartSimilarProducts from './components/CartSimilarProducts'
+import CartUpsell from './components/CartUpsell'
 
 export default function CartPage() {
   const { cartItems, itemCount, totalPrice, clearCart } = useCart()
@@ -39,6 +40,8 @@ export default function CartPage() {
               {cartItems.map((item) => (
                 <CartItemRow key={item.id} item={item} />
               ))}
+
+              <CartUpsell />
 
               <div className="flex justify-between items-center pt-6 flex-wrap gap-3">
                 <button

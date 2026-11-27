@@ -103,6 +103,7 @@ function toRecItem(p: ApiProduct): RecItem {
     image: p.images?.[0],
     preview: p.preview ?? false,
     releaseDate: p.releaseDate ?? null,
+    product: p,
   }
 }
 
@@ -197,7 +198,7 @@ async function ProductPage({ params, searchParams }: ProductPageProps) {
       />
       <CompleteTheLook items={relatedItems} heroImage={product.images[0]} />
       <MoreFromBrand brand={product.brandName} items={brandItems} />
-      <CuratedRecommendations excludeId={resolved.id} />
+      <CuratedRecommendations excludeId={resolved.id} quickAdd />
     </div>
   )
 }

@@ -6,11 +6,11 @@ import Link from 'next/link'
 import { useCart } from '@/app/context/CartContext'
 import { productApi } from '@/lib/api'
 import { isSoldOut } from '@/lib/cartSuggestions'
-import { quickAdd, sizeChoices, variantColours, type QuickAddResult } from '@/lib/quickAdd'
+import { quickAdd, savedColour, sizeChoices, variantColours, type QuickAddResult } from '@/lib/quickAdd'
 import type { ApiProduct } from '@/types/api'
 
-/** A suggestion or favourite in the cart drawer. Styles live in CartSidebar's stylesheet. */
-export default function CartProductRow({ image, brand, name, price, href, product, onNavigate }: {
+/** A suggestion or favourite, in the cart drawer and on /cart. Styles live in CartSidebar's stylesheet. */
+export default function CartProductRow({ image, brand, name, price, href, product, onNavigate, lockColour, upsell }: {
   image: string
   brand: string
   name: string
@@ -19,6 +19,10 @@ export default function CartProductRow({ image, brand, name, price, href, produc
   /** Live catalogue data. Without it the row is only a link: stock and sizes are unknown. */
   product?: ApiProduct
   onNavigate: () => void
+  /** Favourites keep the colour they were saved in. */
+  lockColour?: boolean
+  /** The /cart page's checkbox row: "[ ] Name hinzufügen". */
+  upsell?: boolean
 }) {
   const { cartItems, addToCart } = useCart()
   const [choosing, setChoosing] = useState(false)
@@ -29,11 +33,14 @@ export default function CartProductRow({ image, brand, name, price, href, produc
   const busy = useRef(false)
 
   const colours = product ? variantColours(product) : []
-  const colour = pickedColour
-    ?? colours.find(c => product && sizeChoices(product, c).some(s => !s.unavailable))
-    ?? colours[0]
+  const colour = pickedColour ?? (product ? savedColour(product, lockColour ? href : '') ?? '' : '')
 
-  const status = !product ? null : product.preview ? 'Coming Soon' : isSoldOut(product) ? 'Ausverkauft' : null
+  const inCart = !!product && cartItems.some(i => i.productId === String(product.id))
+  const status = !product ? null
+    : inCart ? 'Im Warenkorb'
+    : product.preview ? 'Coming Soon'
+    : isSoldOut(product) ? 'Ausverkauft'
+    : null
   const canAdd = !!product && !status && product.available && colours.length > 0
 
   async function add(size: string, fromColour: string) {
@@ -68,10 +75,12 @@ export default function CartProductRow({ image, brand, name, price, href, produc
         <div className="enu-pick-top">
           <div style={{ minWidth: 0 }}>
             <div className="enu-item-brand">{brand}</div>
-            <Link href={href} onClick={onNavigate} className="enu-pick-name">{name}</Link>
+            {!upsell && <Link href={href} onClick={onNavigate} className="enu-pick-name">{name}</Link>}
           </div>
           {price && <div className="enu-pick-price">{price}</div>}
         </div>
+
+        {upsell && !canAdd && <Link href={href} onClick={onNavigate} className="enu-pick-name">{name}</Link>}
 
         {status && <div className="enu-pick-status">{status}</div>}
 
@@ -83,13 +92,16 @@ export default function CartProductRow({ image, brand, name, price, href, produc
             disabled={pending}
             aria-expanded={product.variants?.length === 1 ? undefined : choosing}
           >
-            + Hinzufügen
+            {upsell
+              ? <><span className="enu-pick-box" data-open={choosing} aria-hidden />{name} hinzufügen</>
+              : '+ Hinzufügen'}
           </button>
         )}
 
         {canAdd && choosing && (
           <div className="enu-pick-choice">
-            {colours.length > 1 && (
+            {lockColour && colours.length > 1 && <div className="enu-pick-colour">Farbe: {colour}</div>}
+            {!lockColour && colours.length > 1 && (
               <div className="enu-pick-options" role="group" aria-label="Farbe">
                 {colours.map(c => (
                   <button
@@ -122,7 +134,6 @@ export default function CartProductRow({ image, brand, name, price, href, produc
         )}
 
         <div className="enu-pick-note" aria-live="polite">
-          {result === 'added' && 'Im Warenkorb'}
           {result === 'atLimit' && 'Maximale Menge im Warenkorb'}
           {result === 'login' && (
             <Link href="/account" onClick={onNavigate}>Zum Hinzufügen bitte anmelden</Link>

@@ -72,10 +72,29 @@ describe('pickSuggestions', () => {
     expect(ids(top)).toEqual(['13'])
   })
 
-  it('returns [] for empty cart, null curation, or nothing eligible', () => {
+  const dated = (id: string, day: string, over: Partial<ApiProduct> = {}) =>
+    product(id, ['athleisure'], { createdAt: `2026-03-${day}T10:00:00`, ...over })
+  // Deliberately not in date order.
+  const arrivals = [dated('21', '02'), dated('22', '09'), dated('23', '05'), dated('24', '07')]
+
+  it('shows the 3 most recent products when the admin picked none, or the picks cannot load', () => {
+    const products = [cartPiece, ...arrivals]
+    expect(ids(pickSuggestions([line('1')], products, curation({})))).toEqual(['22', '24', '23'])
+    expect(ids(pickSuggestions([line('1')], products, null))).toEqual(['22', '24', '23'])
+  })
+
+  it('only counts buyable products that are not in the cart as most recent', () => {
+    const inCart = dated('31', '28')
+    const unavailable = dated('32', '27', { available: false })
+    const preview = dated('33', '26', { preview: true })
+    const soldOut = dated('34', '25', { variants: [{ id: 3, sku: '34', color: 'Black', colorFamily: 'BLACK', size: 'M', stockQuantity: 0 }] })
+    const out = pickSuggestions([line('31')], [inCart, unavailable, preview, soldOut, ...arrivals], curation({}))
+    expect(ids(out)).toEqual(['22', '24', '23'])
+  })
+
+  it('returns [] for an empty cart or when nothing can be bought', () => {
     const full = curation({ athleisure: ['11'] })
     expect(pickSuggestions([], [cartPiece, ...pool], full)).toEqual([])
-    expect(pickSuggestions([line('1')], [cartPiece, ...pool], null)).toEqual([])
-    expect(pickSuggestions([line('1')], [cartPiece, ...pool], curation({}))).toEqual([])
+    expect(pickSuggestions([line('1')], [cartPiece], curation({}))).toEqual([])
   })
 })

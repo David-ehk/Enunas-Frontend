@@ -59,6 +59,8 @@ export interface RawProductResponse {
   preview?: boolean;
   description?: string;
   category?: string;
+  productType?: string;
+  outfitSlot?: string;
   catalogueCategory?: string[];
   gender?: string;
   material?: string;
@@ -176,6 +178,8 @@ export function adaptProduct(raw: RawProductResponse): ApiProduct {
     releaseDate: raw.releaseDate || null,
     preview: raw.preview ?? false,
     category: (raw.category ?? '').toLowerCase(),
+    productType: raw.productType || undefined,
+    outfitSlot: raw.outfitSlot || undefined,
     gender: raw.gender,
     images,
     ...(imageObjects ? { imageObjects } : {}),

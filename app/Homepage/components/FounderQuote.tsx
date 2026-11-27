@@ -1,8 +1,7 @@
 "use client"
-import { useRef } from 'react'
 import { useScrollAnimation } from '@/hooks/use-scroll-animation'
-import { useRobustAutoplay } from '@/hooks/use-robust-autoplay'
 import { cn } from '@/lib/utils'
+import BackgroundVideo from './BackgroundVideo'
 
 const LINES = [
   'F*ck looking ordinary',
@@ -13,8 +12,6 @@ const PILL_VIDEO = 'https://5btl2wh3w0.ufs.sh/f/XBXTuU9dmEWbpR5K1iOCwcgFKdqleIRy
 
 export default function FounderQuote() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 })
-  const videoRef = useRef<HTMLVideoElement>(null)
-  useRobustAutoplay(videoRef)
 
   const revealClass = cn(
     'transition-all duration-1200 ease-out-expo',
@@ -29,14 +26,9 @@ export default function FounderQuote() {
       // Own stacking context, so the text's blend mode only ever sees the video behind it.
       style={{ isolation: 'isolate' }}
     >
-      <video
-        ref={videoRef}
+      <BackgroundVideo
         src={PILL_VIDEO}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
+        pauseOnReducedMotion
         aria-hidden
         className="absolute inset-0 h-full w-full object-cover"
         // Own compositing layer: Safari only blends text over video reliably when both are layers.

@@ -51,7 +51,8 @@ const LeagueSpartan = localFont({
       style: 'normal'
     }
   ],
-  variable: "--font-league-spartan"
+  variable: "--font-league-spartan",
+  preload: false
 })
 
 const CormorantGaramond = localFont({
@@ -107,7 +108,9 @@ const CormorantGaramond = localFont({
       style: 'italic'
     }
   ],
-  variable: "--font-Cormorant-Garamond"
+  variable: "--font-Cormorant-Garamond",
+  // Both families: preloading all 19 files held back the homepage hero video (see layout.test.ts).
+  preload: false
 })
 
 

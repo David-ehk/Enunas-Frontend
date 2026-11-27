@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react'
 import PopularProductCard from '@/app/Homepage/components/PopularProductCard'
-import type { RecItem } from './ProductCard'
+import { cardDetails, type RecItem } from './ProductCard'
 
 interface CompleteTheLookProps {
   items: RecItem[]
@@ -10,7 +10,8 @@ interface CompleteTheLookProps {
 }
 
 /**
- * "Vervollständige den Look" — look photo beside a horizontally scrolling product row, with the
+ * "Vervollständige den Look" — a horizontally scrolling product row with the look photo to its
+ * right (left out on phones, where it only repeats the product photo), with the
  * article count next to the title and a thin progress track that follows the scroll position.
  */
 export default function CompleteTheLook({ items, heroImage }: CompleteTheLookProps) {
@@ -65,7 +66,7 @@ export default function CompleteTheLook({ items, heroImage }: CompleteTheLookPro
       {/* md:items-center puts the product column at the vertical middle of the tall outfit photo. */}
       <div className={showHero ? 'grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start md:items-center' : ''}>
         {showHero && (
-          <div className="relative aspect-[2/3] bg-enunas-off-white overflow-hidden">
+          <div className="relative hidden md:block aspect-[2/3] bg-enunas-off-white overflow-hidden md:order-last">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={heroImage} alt="Outfit" className="absolute inset-0 w-full h-full object-cover" />
           </div>
@@ -97,6 +98,7 @@ export default function CompleteTheLook({ items, heroImage }: CompleteTheLookPro
                 }`}
               >
                 <PopularProductCard
+                  {...cardDetails(item.product)}
                   imgURL={item.image ?? ''}
                   brandName={item.brand}
                   productName={item.name}
@@ -107,6 +109,7 @@ export default function CompleteTheLook({ items, heroImage }: CompleteTheLookPro
                   createdAt={new Date(0)}
                   preview={item.preview}
                   releaseDate={item.releaseDate}
+                  quickAddProduct={item.product}
                 />
               </li>
             ))}

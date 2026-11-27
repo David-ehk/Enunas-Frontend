@@ -107,3 +107,76 @@ describe('productApi.getListings', () => {
     await expect(productApi.getListings('7')).resolves.toEqual([])
   })
 })
+
+describe('productApi.listAll', () => {
+  beforeEach(() => { vi.stubEnv('NEXT_PUBLIC_API_URL', 'https://api.test') })
+  afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals() })
+
+  /** A backend with `total` sellable products that pages like the real one. */
+  const backend = (total: number, failingPage?: number) => {
+    const urls: URL[] = []
+    vi.stubGlobal('fetch', vi.fn(async (input: string) => {
+      const url = new URL(input)
+      urls.push(url)
+      const page = Number(url.searchParams.get('page') ?? 0)
+      const size = Number(url.searchParams.get('size') ?? 20)
+      if (page === failingPage) return new Response('{}', { status: 500 })
+      const content = Array.from({ length: Math.max(0, Math.min(size, total - page * size)) }, (_, i) => ({
+        id: page * size + i + 1, name: 'P', slug: 'p', price: 10, brandName: 'B',
+        status: 'ACTIVE', createdAt: '2026-01-01T00:00:00Z', variants: [],
+      }))
+      return new Response(JSON.stringify({
+        content, totalElements: total, totalPages: Math.ceil(total / size), size, page,
+      }), { status: 200 })
+    }))
+    return urls
+  }
+
+  const ids = (from: number, to: number) => Array.from({ length: to - from + 1 }, (_, i) => String(from + i))
+
+  it('returns every product past the old 200 limit, in page order', async () => {
+    const urls = backend(250)
+
+    const all = await productApi.listAll()
+
+    expect(all.map(p => String(p.id))).toEqual(ids(1, 250))
+    expect(urls.map(u => u.searchParams.get('page'))).toEqual(['0', '1', '2'])
+  })
+
+  it('asks for batches of 100 in a fixed order, so pages cannot overlap', async () => {
+    const urls = backend(150)
+
+    await productApi.listAll()
+
+    expect(urls).toHaveLength(2)
+    for (const url of urls) {
+      expect(url.pathname).toBe('/products')
+      expect(url.searchParams.get('size')).toBe('100')
+      expect(url.searchParams.get('sort')).toBe('id,asc')
+    }
+  })
+
+  it('needs one request while the catalogue fits in one batch', async () => {
+    const urls = backend(10)
+
+    await expect(productApi.listAll()).resolves.toHaveLength(10)
+    expect(urls).toHaveLength(1)
+  })
+
+  it('pages through search results too, not just the first 20', async () => {
+    const urls = backend(130)
+
+    await expect(productApi.listAll('black tee')).resolves.toHaveLength(130)
+    expect(urls).toHaveLength(2)
+    for (const url of urls) {
+      expect(url.pathname).toBe('/products/search')
+      expect(url.searchParams.get('keyword')).toBe('black tee')
+    }
+  })
+
+  it('fails as a whole instead of returning part of the catalogue', async () => {
+    backend(250, 1)
+
+    await expect(productApi.listAll()).rejects.toThrow()
+  })
+})

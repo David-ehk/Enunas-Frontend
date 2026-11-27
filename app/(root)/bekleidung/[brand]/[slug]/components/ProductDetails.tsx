@@ -13,11 +13,14 @@ import SizeGuideRow from './SizeGuideRow'
 import StockIndicator from './StockIndicator'
 import PflegeAccordionContent from './PflegeAccordionContent'
 import StickyAddToCart from './StickyAddToCart'
+import SizeSheet from '@/components/SizeSheet'
+import { isSizeUnavailable } from '@/lib/sizeAvailability'
+import { usePdpSnap } from '@/hooks/use-pdp-snap'
 import ComingSoonCountdown from '@/components/ComingSoonCountdown'
 import { formatReleaseDate, previewReleaseMs } from '@/lib/preview'
 import Link from 'next/link'
 import { X } from 'lucide-react'
-import { Product, findVariant, uniqueColors } from '../types/product'
+import { Product, findVariant, sortedSizes, uniqueColors } from '../types/product'
 import type { Color } from '@/lib/color'
 import { useCart } from '@/app/context/CartContext'
 import { useAuth } from '@/app/context/AuthContext'
@@ -133,6 +136,8 @@ export default function ProductDetails({
   const { isAuthenticated } = useAuth()
   const router = useRouter()
   const ctaRef = useRef<HTMLButtonElement>(null)
+  const detailsRef = useRef<HTMLDivElement>(null)
+  const { atTop, scrollToStop } = usePdpSnap(detailsRef)
   const { addToCart, openCart } = useCart()
   const { isSaved, toggle: toggleWishlist } = useWishlist()
 
@@ -368,21 +373,56 @@ export default function ProductDetails({
   return (
     <>
       {/* ── PDP grid — full-bleed so gallery touches the left edge ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2">
+      {/* Not a grid on phones: a grid cell would end the gallery's sticky range at the photo. */}
+      <div className="md:grid md:grid-cols-2">
 
           {/* LEFT — Gallery + Breadcrumb */}
-          <div>
-            <ImageGallery
-              key={selectedColorId ?? 'all'}
-              images={galleryImages}
-              productName={product.name}
-              saved={saved}
-              onToggleSaved={handleToggleSaved}
-              justSaved={justSaved}
-              onShare={handleShare}
-              shareCopied={shareCopied}
-            />
-            <nav className="px-6 sm:px-8 py-4 sm:py-[22px]">
+          <div className="max-md:contents">
+            {/* Phones: the photo stays put under the header while everything after it slides over
+                it as one block. */}
+            <div className="max-md:sticky max-md:top-[54px] max-md:z-0">
+              <ImageGallery
+                key={selectedColorId ?? 'all'}
+                images={galleryImages}
+                productName={product.name}
+                saved={saved}
+                onToggleSaved={handleToggleSaved}
+                justSaved={justSaved}
+                onShare={handleShare}
+                shareCopied={shareCopied}
+              />
+            </div>
+            {/* Phones: buy row on the first screen, with the swipe cue on the photo's edge. */}
+            {/* Its white fades out with the row, and then lets taps through to the photo. */}
+            <div className={`relative z-10 md:hidden transition-colors duration-300 ease-out-expo ${atTop ? 'bg-white' : 'bg-transparent pointer-events-none'}`}>
+              <button
+                type="button"
+                onClick={scrollToStop}
+                aria-label="Weiter zu den Produktdetails"
+                className="scroll-cue absolute left-1/2 -top-[33px]"
+                data-show={atTop}
+              >
+                {/* The chevron of the "Produktdetails" rows. */}
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M3 6l5 5 5-5" />
+                </svg>
+              </button>
+              <div className="pt-3">
+                <StickyAddToCart
+                  inline
+                  dismissed={!atTop}
+                  productName={product.name}
+                  formattedPrice={livePreview && product.releaseDate ? `Kommt am ${formatReleaseDate(product.releaseDate)}` : formattedPrice}
+                  selectedSize={livePreview ? null : selectedSize}
+                  ctaLabel={ctaLabel}
+                  isOutOfStock={ctaDisabled}
+                  ctaMuted={ctaMuted}
+                  onCta={handleCta}
+                  watchRef={ctaRef}
+                />
+              </div>
+            </div>
+            <nav className="px-6 sm:px-8 py-4 sm:py-[22px] max-md:relative max-md:z-10 max-md:bg-white">
               <ol
                 className="flex items-center flex-wrap gap-x-2.5 gap-y-1 sm:gap-x-3 text-enunas-gray-medium"
                 style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '13px', letterSpacing: '0.02em' }}
@@ -405,7 +445,7 @@ export default function ProductDetails({
           </div>
 
           {/* RIGHT — Details */}
-          <div className="flex flex-col items-center text-center px-6 pt-10 pb-16 sm:px-12 md:px-10 lg:px-14 md:pt-14 md:pb-20">
+          <div className="flex flex-col items-center text-center px-6 pt-10 pb-16 sm:px-12 md:px-10 lg:px-14 md:pt-14 md:pb-20 max-md:relative max-md:z-10 max-md:bg-white">
             {/* 1. Brand + Gender */}
             <div className="flex items-center gap-3.5 mb-3.5">
               <BrandLink brand={product.brandName} />
@@ -592,7 +632,7 @@ export default function ProductDetails({
             <StockIndicator stockQuantity={selectedVariant?.stockQuantity} />
 
             {/* 12. Accordions */}
-            <div className="w-full max-w-[560px] text-left mt-4">
+            <div ref={detailsRef} className="w-full max-w-[560px] text-left mt-4">
 
               <PdpAccordion
                 id="details"
@@ -678,69 +718,22 @@ export default function ProductDetails({
         watchRef={ctaRef}
       />
 
-      {/* ── Size selection modal ─────────────────────────── */}
-      {showSizeModal && (
-        <div
-          className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center"
-          onClick={() => setShowSizeModal(false)}
-        >
-          <div
-            className="bg-white w-full sm:max-w-md relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-8 py-5 border-b border-enunas-gray-light">
-              <h3
-                className="text-xs uppercase tracking-[0.15em] text-enunas-black"
-                style={{ fontFamily: 'var(--font-league-spartan)' }}
-              >
-                Größe auswählen
-              </h3>
-              <button
-                onClick={() => setShowSizeModal(false)}
-                className="p-1 text-enunas-gray-medium hover:text-enunas-black transition-colors duration-200"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="px-8 pt-6 pb-4">
-              <p className="text-sm text-enunas-gray-medium" style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                {product.name}
-              </p>
-            </div>
-            <div className="px-8 pb-8">
-              <div className="flex flex-wrap gap-2">
-                {uniqueColors(product.variants)
-                  .flatMap(color =>
-                    product.variants
-                      .filter(v => v.color === color && v.stockQuantity > 0)
-                      .map(v => v.size)
-                  )
-                  .filter((s, i, a) => a.indexOf(s) === i)
-                  .map((size) => {
-                    const cols = 4
-                    return (
-                      <button
-                        key={size}
-                        onClick={() => {
-                          setSelectedSize(size)
-                          setShowSizeModal(false)
-                          handleAddToCart(size)
-                        }}
-                        className="py-3.5 text-center text-sm text-enunas-black border border-enunas-gray-light hover:border-enunas-purple-dark hover:bg-enunas-purple-dark hover:text-white transition-all duration-200"
-                        style={{
-                          fontFamily: 'var(--font-league-spartan)',
-                          width: `calc((100% - ${(cols - 1) * 8}px) / ${cols})`,
-                        }}
-                      >
-                        {size}
-                      </button>
-                    )
-                  })}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ── Size selection sheet, the same as the cards' quick add ── */}
+      <SizeSheet
+        open={showSizeModal}
+        onOpenChange={setShowSizeModal}
+        productName={product.name}
+        label={colorsForSelector.length > 1 && selectedColor ? selectedColor.name : 'Größe'}
+        sizes={sortedSizes(product.variants).map(size => ({
+          size,
+          unavailable: isSizeUnavailable(findVariant(product.variants, selectedColor?.name ?? null, size), livePreview),
+        }))}
+        onConfirm={size => {
+          setSelectedSize(size)
+          setShowSizeModal(false)
+          handleAddToCart(size)
+        }}
+      />
 
       {/* ── "Not so fast" note — see NOTES ─────────────────── */}
       {note && (

@@ -15,9 +15,11 @@ interface Props {
   dark?: boolean
   /** 'feed' matches the "Neue Arrivals" section styling (homepage). */
   variant?: 'default' | 'feed'
+  /** Product page only: a quick-add "+" on phone cards (default variant). */
+  quickAdd?: boolean
 }
 
-export default function CuratedRecommendations({ excludeId, title = 'Das könnte dir auch gefallen', dark = false, variant = 'default' }: Props) {
+export default function CuratedRecommendations({ excludeId, title = 'Das könnte dir auch gefallen', dark = false, variant = 'default', quickAdd = false }: Props) {
   const [products, setProducts] = useState<ApiProduct[]>([])
   const [expanded, setExpanded] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -132,7 +134,7 @@ export default function CuratedRecommendations({ excludeId, title = 'Das könnte
       <Rail label={title}>
         {products.map(product => (
           <div key={product.id} className="snap-start shrink-0 basis-[58%] sm:basis-[34%] lg:basis-[23.5%]">
-            <PopularProductCard {...apiProductToCardShape(product)} />
+            <PopularProductCard {...apiProductToCardShape(product)} quickAddProduct={quickAdd ? product : undefined} />
           </div>
         ))}
       </Rail>

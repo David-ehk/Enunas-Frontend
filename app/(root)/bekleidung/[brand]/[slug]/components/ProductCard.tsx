@@ -1,5 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import type { ApiProduct } from '@/types/api';
+import { apiProductToCardShape } from '@/lib/api/productAdapter';
 import { formatReleaseDateShort } from '@/lib/preview';
 
 export interface RecItem {
@@ -20,6 +22,15 @@ export interface RecItem {
   preview?: boolean;
   /** ISO "YYYY-MM-DD" release date; shown instead of a price when `preview`. */
   releaseDate?: string | null;
+  /** The catalogue product behind the card, when known; enables quick add. */
+  product?: ApiProduct;
+}
+
+/** What a card needs beyond the row item: the hover state's sizes and tags, and "Ausverkauft". */
+export function cardDetails(product?: ApiProduct) {
+  if (!product) return {};
+  const { sizes, catalogue, soldOut } = apiProductToCardShape(product);
+  return { sizes, catalogue, soldOut };
 }
 
 interface ProductCardProps {

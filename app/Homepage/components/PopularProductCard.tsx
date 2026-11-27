@@ -10,6 +10,8 @@ import { SEGMENT_LABELS } from "@/lib/product"
 import { sortSegments } from "@/lib/segmentOrder"
 import ComingSoonCountdown from "@/components/ComingSoonCountdown"
 import { formatReleaseDateShort } from "@/lib/preview"
+import CardQuickAdd from "./CardQuickAdd"
+import type { ApiProduct } from "@/types/api"
 
 interface ProductColour {
   hex: string;
@@ -66,6 +68,8 @@ interface PopularProductCardProps {
   soldOut?: boolean;
   /** ISO "YYYY-MM-DD"; required visual data when `preview` is true. */
   releaseDate?: string | null;
+  /** Live catalogue data; gives the card a quick-add "+" on phones. */
+  quickAddProduct?: ApiProduct;
 }
 
 const isNewProduct = (createdAt: Date | string): boolean => {
@@ -90,7 +94,8 @@ const PopularProductCard = ({
   categories = [],
   catalogue = [],
   preview = false,
-  releaseDate = null
+  releaseDate = null,
+  quickAddProduct
 }: PopularProductCardProps) => {
   // Use catalogue if categories is empty. Always shown Streetwear-first, then the rest in the
   // fixed segment order — never whatever order the backend returned them in.
@@ -139,7 +144,7 @@ const PopularProductCard = ({
 
   return (
     <div
-      className="flex flex-1 flex-col w-full group"
+      className="relative flex flex-1 flex-col w-full group"
       onMouseEnter={() => canHover && setIsHovered(true)}
       onMouseLeave={() => canHover && setIsHovered(false)}
     >
@@ -362,6 +367,8 @@ const PopularProductCard = ({
           </div>
         </div>
       </Link>
+
+      {quickAddProduct && <CardQuickAdd product={quickAddProduct} href={href} />}
     </div>
   )
 }

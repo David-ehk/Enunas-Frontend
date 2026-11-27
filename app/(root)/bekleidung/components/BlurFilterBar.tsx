@@ -5,6 +5,7 @@ import { useState, useEffect, type RefObject } from 'react'
 import SortDropdown from './SortDropdown'
 import CatalogueDropdown from './CatalogueDropdown'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useBottomBarGlass } from '@/hooks/use-bottom-bar-glass'
 
 const GENDER_ACCENT: Record<'damen' | 'herren', string> = {
   damen:  '#C41E3A',
@@ -24,8 +25,6 @@ interface BlurFilterBarProps {
   sorts?: ProductSort[]
   catalogueValue: string
   onCatalogue: (id: string) => void
-  /** On phones, offers the catalogue lines inside Sortieren (the bar has no Catalogue button). */
-  catalogueInSort?: boolean
 }
 
 // ── Desktop sub-components ────────────────────────────────────────────────────
@@ -161,10 +160,10 @@ export default function BlurFilterBar({
   sorts,
   catalogueValue,
   onCatalogue,
-  catalogueInSort = false,
 }: BlurFilterBarProps) {
   const [visible, setVisible] = useState(false)
   const isMobile = useIsMobile()
+  const glass = useBottomBarGlass()
 
   useEffect(() => {
     const onScroll = () => {
@@ -186,6 +185,7 @@ export default function BlurFilterBar({
     return (
       <div
         aria-hidden={!visible}
+        className={glass}
         style={{
           position: 'fixed',
           bottom: 0,
@@ -193,7 +193,9 @@ export default function BlurFilterBar({
           right: 0,
           zIndex: 50,
           pointerEvents: visible ? 'auto' : 'none',
-          transition: 'transform 450ms cubic-bezier(0.16, 1, 0.3, 1)',
+          // Hide only after the slide-out finishes, so the exit animation still plays.
+          visibility: visible ? 'visible' : 'hidden',
+          transition: `transform 450ms cubic-bezier(0.16, 1, 0.3, 1), visibility 0s ${visible ? '0s' : '450ms'}`,
           transform: visible ? 'translateY(0)' : 'translateY(100%)',
         }}
       >
@@ -291,7 +293,6 @@ export default function BlurFilterBar({
               onChange={onSort}
               align="right"
               dropUp
-              catalogue={catalogueInSort ? { value: catalogueValue, onChange: onCatalogue } : undefined}
             />
           </div>
 

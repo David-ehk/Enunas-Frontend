@@ -25,6 +25,15 @@ export function sizeChoices(p: ApiProduct, colour: string): { size: string; unav
   }))
 }
 
+/** The colour a favourite is added in: the one in its saved link, else the first with stock. */
+export function savedColour(p: ApiProduct, href: string): string | undefined {
+  const colours = variantColours(p)
+  const wanted = new URLSearchParams(href.split('?')[1]).get('color')?.toLowerCase()
+  return colours.find(c => c.toLowerCase() === wanted)
+    ?? colours.find(c => sizeChoices(p, c).some(s => !s.unavailable))
+    ?? colours[0]
+}
+
 export function buildCartLine(
   p: ApiProduct,
   colour: string,

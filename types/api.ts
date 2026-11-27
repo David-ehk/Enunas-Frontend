@@ -287,6 +287,10 @@ export interface ApiProduct {
   currency?: string;
   category: string;
   subcategory?: string;
+  /** Garment type, e.g. HOODIE or PANTS. The live `category` only says CLOTHING. */
+  productType?: string;
+  /** Where it is worn, e.g. TOP, BOTTOM or OUTERWEAR. */
+  outfitSlot?: string;
   gender?: string;
   images: string[];
   /** Same images as `images`, but each carrying its colourway link + primary flag. Present only

@@ -13,6 +13,10 @@ import CategoryNavigation from './components/CategoryNavigation'
 import FilterSidebar, { FilterState, CATEGORIES, catMatchesProduct, genderMatchesProduct } from './components/FilterSidebar'
 import { BROWSE_SORTS, resolveSort } from '@/lib/productSorts'
 import { partitionPreview } from '@/lib/preview'
+import { useRevealInBatches } from '@/hooks/use-reveal-in-batches'
+
+// Divisible by both grid widths (2 and 4 columns), so a batch never ends mid-row.
+const CARDS_PER_BATCH = 24
 
 // ── Loading Skeletons ─────────────────────────────────────────────────────────
 
@@ -89,10 +93,17 @@ function BekleidungContent() {
     // Re-show the loading state whenever the search query changes and we refetch.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
-    const p = searchQuery
-      ? productApi.search(searchQuery).then(r => r.content.map(apiProductToCardShape))
-      : productApi.list({ size: 200 }).then(r => r.content.map(apiProductToCardShape))
-    p.then(setAllProducts).catch(() => setAllProducts([])).finally(() => setLoading(false))
+    // A slower answer to an earlier search must not replace the current one.
+    let stale = false
+    productApi.listAll(searchQuery)
+      .then(all => all.map(apiProductToCardShape))
+      .catch(() => [])
+      .then(cards => {
+        if (stale) return
+        setAllProducts(cards)
+        setLoading(false)
+      })
+    return () => { stale = true }
   }, [searchQuery])
 
   useEffect(() => {
@@ -121,6 +132,8 @@ function BekleidungContent() {
     if (filters.catalogue)              r = r.filter(p => (p.catalogue ?? []).some(c => c.toLowerCase() === filters.catalogue.toLowerCase()))
     return partitionPreview(activeSort.apply(r), 'show')
   }, [allProducts, activeCat, gender, filters, activeSort])
+
+  const { shown, hasMore, showMore, sentinelRef, startRef } = useRevealInBatches(visibleProducts, CARDS_PER_BATCH)
 
   const activeFilterCount = filters.kategorien.length + filters.farben.length + filters.groessen.length + filters.marken.length
 
@@ -301,18 +314,17 @@ function BekleidungContent() {
             value={activeSort.id}
             onChange={(id) => setFilters(prev => ({ ...prev, sortieren: id }))}
             align="right"
-            catalogue={isMobile
-              ? { value: filters.catalogue, onChange: (id) => setFilters(prev => ({ ...prev, catalogue: id })) }
-              : undefined}
           />
         </div>
       </div>
 
       {/* ── Product grid ── */}
-      <section style={{
+      <section ref={startRef} style={{
         maxWidth: 1800,
         margin: '0 auto',
         padding: isMobile ? '24px 16px 72px' : '40px 48px 96px',
+        // Keeps the first row clear of the header and the sticky category strip.
+        scrollMarginTop: navH + 56,
       }}>
         {loading ? (
           <div style={{
@@ -357,9 +369,22 @@ function BekleidungContent() {
             gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
             columnGap: isMobile ? 12 : 16, rowGap: isMobile ? 36 : 52,
           }}>
-            {visibleProducts.map(p => (
+            {shown.map(p => (
               <PopularProductCard key={p.id} {...p} />
             ))}
+          </div>
+        )}
+        {!loading && hasMore && (
+          // Loads by itself as it nears the screen; the button covers keyboard use.
+          <div ref={sentinelRef} style={{ textAlign: 'center', paddingTop: 44 }}>
+            <button onClick={showMore} style={{
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase',
+              color: '#0A0A0A', fontFamily: 'inherit', padding: '26px 0 2px',
+              borderBottom: '1px solid #0A0A0A',
+            }}>
+              Mehr anzeigen
+            </button>
           </div>
         )}
       </section>
@@ -392,7 +417,6 @@ function BekleidungContent() {
         onSort={(id) => setFilters(prev => ({ ...prev, sortieren: id }))}
         catalogueValue={filters.catalogue}
         onCatalogue={(id) => setFilters(prev => ({ ...prev, catalogue: id }))}
-        catalogueInSort
       />
     </div>
   )

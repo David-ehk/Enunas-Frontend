@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { STANDARD_SORTS, type ProductSort } from '@/lib/productSorts'
-import SortCataloguePanel, { type CatalogueChoice } from './SortCataloguePanel'
 
 interface SortDropdownProps {
   /** Defaults to STANDARD_SORTS. */
@@ -11,8 +10,6 @@ interface SortDropdownProps {
   onChange: (id: string) => void
   align?: 'left' | 'right'
   dropUp?: boolean
-  /** Phones have no Catalogue button: passing this puts the catalogue lines into this menu. */
-  catalogue?: CatalogueChoice
 }
 
 export default function SortDropdown({
@@ -21,10 +18,13 @@ export default function SortDropdown({
   onChange,
   align = 'right',
   dropUp = false,
-  catalogue,
 }: SortDropdownProps) {
   const [open, setOpen] = useState(false)
+  // The entry under the pointer or keyboard focus; the row highlight glides to it.
+  const [hovered, setHovered] = useState<number | null>(null)
   const ref = useRef<HTMLDivElement>(null)
+  // At rest the highlight sits on the current sort.
+  const highlight = hovered ?? sorts.findIndex(o => o.id === value)
 
   useEffect(() => {
     if (!open) return
@@ -86,92 +86,45 @@ export default function SortDropdown({
         </svg>
       </button>
 
-      {catalogue ? (
-        <SortCataloguePanel
-          open={open}
-          onClose={() => setOpen(false)}
-          sorts={sorts}
-          value={value}
-          onSort={onChange}
-          catalogue={catalogue}
-          align={align}
-          dropUp={dropUp}
-        />
-      ) : (
-      /* ── Dropdown panel ──
-          No outer border or shadow — the container is transparent.
-          Each item carries its own background so items are readable,
-          and the first item has a borderTop that visually anchors the
-          list to the filter bar's bottom border line ("die Linie darunter").
-      ── */
+      {/* ── Dropdown panel — the Catalogue menu's design ── */}
       <div
-        aria-hidden={!open}
+        className="catalogue-menu"
+        data-open={open}
+        data-direction={dropUp ? 'up' : 'down'}
+        // Closed entries must not be reachable by keyboard or screen reader.
+        inert={!open}
+        onMouseLeave={() => setHovered(null)}
         style={{
-          position: 'absolute',
-          ...(dropUp
-            ? { bottom: 'calc(100% + 16px)' }
-            : { top: 'calc(100% + 18px)' }),
+          ...(dropUp ? { bottom: 'calc(100% + 16px)' } : { top: 'calc(100% + 18px)' }),
           ...(align === 'right' ? { right: 0 } : { left: 0 }),
-          zIndex: 200,
-          pointerEvents: open ? 'auto' : 'none',
-          display: 'flex',
-          flexDirection: 'column',
-          // No background, no border, no shadow on the container itself
         }}
       >
-        {sorts.map((opt, i) => {
-          const isActive = value === opt.id
-          const isLast   = i === sorts.length - 1
-          const delay    = `${i * 0.05}s`
-
-          // Anchor line: top of first item connects to the filter bar border;
-          // last item of a dropUp list connects to the BlurFilterBar top border.
-          const borderTop    = !dropUp && i === 0
-            ? '1px solid #E8E8E8'
-            : 'none'
-          const borderBottom = dropUp && isLast
-            ? '1px solid rgba(232,232,232,0.9)'
-            : !isLast
-            ? '1px solid #F0EFEA'
-            : 'none'
-
-          return (
-            <button
-              key={opt.id}
-              onClick={() => { onChange(opt.id); setOpen(false) }}
-              style={{
-                background: '#fff',
-                border: 'none',
-                borderTop,
-                borderBottom,
-                cursor: 'pointer',
-                padding: '12px 28px 12px 20px',
-                textAlign: align === 'right' ? 'right' : 'left',
-                fontFamily: "'League Spartan', sans-serif",
-                fontSize: 10,
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
-                whiteSpace: 'nowrap',
-                color: isActive ? '#370E4D' : '#0A0A0A',
-                fontWeight: isActive ? 600 : 400,
-                // Staggered fade + slide — Cult Gaia inspired
-                opacity: open ? 1 : 0,
-                transform: open
-                  ? 'translateY(0px)'
-                  : dropUp ? 'translateY(5px)' : 'translateY(-5px)',
-                transition: [
-                  `opacity 0.45s cubic-bezier(0.39,0.575,0.565,1) ${delay}`,
-                  `transform 0.45s cubic-bezier(0.16,1,0.3,1) ${delay}`,
-                  'color 150ms',
-                ].join(', '),
-              }}
-            >
-              {opt.label}
-            </button>
-          )
-        })}
+        <span
+          aria-hidden
+          className="catalogue-menu-highlight"
+          style={{
+            opacity: open && highlight >= 0 ? 1 : 0,
+            transform: `translateY(calc(${Math.max(highlight, 0)} * var(--catalogue-row)))`,
+            color: '#370E4D',
+          }}
+        />
+        {sorts.map((opt, i) => (
+          <button
+            key={opt.id}
+            type="button"
+            onClick={() => { onChange(opt.id); setHovered(null); setOpen(false) }}
+            onMouseEnter={() => setHovered(i)}
+            onFocus={() => setHovered(i)}
+            onBlur={() => setHovered(null)}
+            aria-current={value === opt.id ? 'true' : undefined}
+            className="catalogue-menu-item"
+            data-highlighted={highlight === i}
+            style={{ transitionDelay: `${i * 50}ms` }}
+          >
+            {opt.label}
+          </button>
+        ))}
       </div>
-      )}
     </div>
   )
 }

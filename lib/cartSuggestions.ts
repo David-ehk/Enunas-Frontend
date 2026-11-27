@@ -28,22 +28,30 @@ export function isSoldOut(p: ApiProduct): boolean {
   return !!p.variants?.length && p.variants.every(v => v.stockQuantity === 0)
 }
 
-/** Up to three buyable picks from the highest-ranked style that has any. Styles are not mixed. */
+/**
+ * Up to three buyable picks from the highest-ranked style that has any; styles are not mixed.
+ * Without any admin pick, the three most recent buyable products.
+ */
 export function pickSuggestions(
   lines: CartLine[],
   products: ApiProduct[],
   curation: CurationData | null,
 ): ApiProduct[] {
-  if (!curation) return []
+  if (lines.length === 0) return []
   const byId = new Map(products.map(p => [String(p.id), p]))
   const inCart = new Set(lines.map(l => String(l.productId)))
 
+  const buyable = (p: ApiProduct) => !inCart.has(String(p.id)) && p.available && !p.preview && !isSoldOut(p)
+
   for (const style of rankCartStyles(lines, products)) {
-    const picks = (curation.recommendations[style] ?? []).flatMap(id => {
+    const picks = (curation?.recommendations[style] ?? []).flatMap(id => {
       const p = byId.get(String(id))
-      return p && !inCart.has(String(id)) && p.available && !p.preview && !isSoldOut(p) ? [p] : []
+      return p && buyable(p) ? [p] : []
     })
     if (picks.length > 0) return picks.slice(0, MAX_PICKS)
   }
-  return []
+  return products
+    .filter(buyable)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, MAX_PICKS)
 }

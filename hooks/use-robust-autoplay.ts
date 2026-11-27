@@ -10,19 +10,23 @@ import { useEffect, type RefObject } from 'react'
  * - Some mobile browsers (iOS Low Power Mode, Android Data Saver) reject autoplay outright as a
  *   policy decision rather than a buffering one, so a `canplaythrough` retry alone can't unblock
  *   that either — the first tap/scroll/click anywhere on the page is used as a last-resort kick.
- * - `prefers-reduced-motion` pauses the video instead of forcing playback, and is re-checked live
- *   so a mid-session OS setting change takes effect without a reload.
+ * - With `pauseOnReducedMotion`, `prefers-reduced-motion` pauses the video instead of forcing
+ *   playback, and is re-checked live so a mid-session OS setting change takes effect without a reload.
+ * - `enabled` holds everything back until the video has a source to play.
  */
-export function useRobustAutoplay(videoRef: RefObject<HTMLVideoElement | null>): void {
+export function useRobustAutoplay(
+  videoRef: RefObject<HTMLVideoElement | null>,
+  { enabled = true, pauseOnReducedMotion = true }: { enabled?: boolean; pauseOnReducedMotion?: boolean } = {},
+): void {
   useEffect(() => {
     const video = videoRef.current
-    if (!video) return
+    if (!video || !enabled) return
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
     const tryPlay = () => { video.play().catch(() => {}) }
 
     const sync = () => {
-      if (reduced.matches) {
+      if (pauseOnReducedMotion && reduced.matches) {
         video.pause()
         return
       }
@@ -46,5 +50,5 @@ export function useRobustAutoplay(videoRef: RefObject<HTMLVideoElement | null>):
       reduced.removeEventListener('change', sync)
       events.forEach(event => document.removeEventListener(event, tryPlay))
     }
-  }, [videoRef])
+  }, [videoRef, enabled, pauseOnReducedMotion])
 }
