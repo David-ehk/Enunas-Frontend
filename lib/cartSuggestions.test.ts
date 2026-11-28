@@ -13,10 +13,11 @@ function product(id: string, catalogue: string[], over: Partial<ApiProduct> = {}
 
 const line = (productId: string, quantity = 1) => ({ productId, quantity })
 
-function curation(rec: Partial<CurationData['recommendations']>): CurationData {
+function curation(cartUpsell?: string[], rec: Partial<CurationData['recommendations']> = {}): CurationData {
   return {
     trendy: [], drops: [],
     recommendations: { streetwear: [], cultural: [], athleisure: [], experimental: [], star: [], ...rec },
+    ...(cartUpsell ? { cartUpsell } : {}),
   }
 }
 
@@ -48,7 +49,7 @@ describe('pickSuggestions', () => {
   const pool = ['11', '12', '13', '14', '15'].map(id => product(id, ['athleisure']))
 
   it('returns at most 3 in Schaufenster order', () => {
-    const out = pickSuggestions([line('1')], [cartPiece, ...pool], curation({ athleisure: ['15', '12', '14', '11', '13'] }))
+    const out = pickSuggestions([line('1')], [cartPiece, ...pool], curation(['15', '12', '14', '11', '13']))
     expect(ids(out)).toEqual(['15', '12', '14'])
   })
 
@@ -57,19 +58,11 @@ describe('pickSuggestions', () => {
     const unavailable = product('3', [], { available: false })
     const preview = product('4', [], { preview: true })
     const good = product('5', [])
-    const out = pickSuggestions([line('1')], [cartPiece, soldOut, unavailable, preview, good],
-      curation({ athleisure: ['1', '2', '3', '4', '99', '5'] }))
+    // Buyable but not picked: a partly usable list is not topped up with it.
+    const notPicked = product('6', [])
+    const out = pickSuggestions([line('1')], [cartPiece, soldOut, unavailable, preview, good, notPicked],
+      curation(['1', '2', '3', '4', '99', '5']))
     expect(ids(out)).toEqual(['5'])
-  })
-
-  it('falls back to the next style without mixing', () => {
-    const second = product('2', ['streetwear'])
-    const out = pickSuggestions([line('1', 2), line('2', 1)], [cartPiece, second, ...pool],
-      curation({ athleisure: ['99'], streetwear: ['11', '12'] }))
-    expect(ids(out)).toEqual(['11', '12'])
-    const top = pickSuggestions([line('1', 2), line('2', 1)], [cartPiece, second, ...pool],
-      curation({ athleisure: ['13'], streetwear: ['11', '12'] }))
-    expect(ids(top)).toEqual(['13'])
   })
 
   const dated = (id: string, day: string, over: Partial<ApiProduct> = {}) =>
@@ -79,8 +72,19 @@ describe('pickSuggestions', () => {
 
   it('shows the 3 most recent products when the admin picked none, or the picks cannot load', () => {
     const products = [cartPiece, ...arrivals]
-    expect(ids(pickSuggestions([line('1')], products, curation({})))).toEqual(['22', '24', '23'])
+    expect(ids(pickSuggestions([line('1')], products, curation([])))).toEqual(['22', '24', '23'])
+    expect(ids(pickSuggestions([line('1')], products, curation()))).toEqual(['22', '24', '23'])
     expect(ids(pickSuggestions([line('1')], products, null))).toEqual(['22', '24', '23'])
+  })
+
+  it('shows the most recent products when no pick can be used', () => {
+    const out = pickSuggestions([line('1')], [cartPiece, ...arrivals], curation(['1', '99']))
+    expect(ids(out)).toEqual(['22', '24', '23'])
+  })
+
+  it('ignores the style lists', () => {
+    const out = pickSuggestions([line('1')], [cartPiece, ...pool, ...arrivals], curation([], { athleisure: ['11', '12'] }))
+    expect(ids(out)).toEqual(['22', '24', '23'])
   })
 
   it('only counts buyable products that are not in the cart as most recent', () => {
@@ -88,13 +92,13 @@ describe('pickSuggestions', () => {
     const unavailable = dated('32', '27', { available: false })
     const preview = dated('33', '26', { preview: true })
     const soldOut = dated('34', '25', { variants: [{ id: 3, sku: '34', color: 'Black', colorFamily: 'BLACK', size: 'M', stockQuantity: 0 }] })
-    const out = pickSuggestions([line('31')], [inCart, unavailable, preview, soldOut, ...arrivals], curation({}))
+    const out = pickSuggestions([line('31')], [inCart, unavailable, preview, soldOut, ...arrivals], curation())
     expect(ids(out)).toEqual(['22', '24', '23'])
   })
 
   it('returns [] for an empty cart or when nothing can be bought', () => {
-    const full = curation({ athleisure: ['11'] })
+    const full = curation(['11'])
     expect(pickSuggestions([], [cartPiece, ...pool], full)).toEqual([])
-    expect(pickSuggestions([line('1')], [cartPiece], curation({}))).toEqual([])
+    expect(pickSuggestions([line('1')], [cartPiece], curation())).toEqual([])
   })
 })

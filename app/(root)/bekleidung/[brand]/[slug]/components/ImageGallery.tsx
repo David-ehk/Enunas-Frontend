@@ -17,6 +17,8 @@ interface ImageGalleryProps {
   /** Brief "Link kopiert" acknowledgment when Web Share isn't available and the URL was
       copied to the clipboard instead. */
   shareCopied?: boolean;
+  /** Phones: set once the page has swiped up over the photos; shows an X that goes back. */
+  onBackToPhotos?: () => void;
 }
 
 // Heart + share, overlaid top-right on the hero image — same spot and same heart used on
@@ -226,7 +228,7 @@ function ZoomViewer({ images, productName, start, onClose }: {
   )
 }
 
-function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, onShare, shareCopied }: ImageGalleryProps) {
+function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, onShare, shareCopied, onBackToPhotos }: ImageGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [zoomStart, setZoomStart] = useState<ZoomStart | null>(null)
   const closeZoom = useCallback((lastIndex: number) => {
@@ -285,7 +287,7 @@ function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, on
   if (images.length === 0) {
     return (
       <div
-        className="relative w-full h-[calc(100svh-186px)] md:h-[100vh] flex flex-col items-center justify-center"
+        className="relative w-full h-[calc(100svh-176px)] sm:h-[calc(100svh-222px)] md:h-[100vh] flex flex-col items-center justify-center"
         style={{ background: '#F5F5F0' }}
       >
         <GalleryActions saved={saved} onToggleSaved={onToggleSaved} justSaved={justSaved} onShare={onShare} shareCopied={shareCopied} />
@@ -314,7 +316,9 @@ function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, on
   }
 
   return (
-    <div className="relative w-full h-[calc(100svh-186px)] md:h-[100vh]">
+    // Phones: header, photo, buy row and breadcrumb fill the first screen
+    // (54 + 70 + 52px, from sm 70 + 88 + 64px).
+    <div className="relative w-full h-[calc(100svh-176px)] sm:h-[calc(100svh-222px)] md:h-[100vh]">
       <GalleryActions saved={saved} onToggleSaved={onToggleSaved} justSaved={justSaved} onShare={onShare} shareCopied={shareCopied} />
 
       {/* Quadrat-Indikator - Unten auf Mobile, Links auf Desktop */}
@@ -372,10 +376,24 @@ function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, on
         type="button"
         onClick={() => setZoomStart({ index: activeIndex, fx: 0.5, fy: 0.5 })}
         aria-label="Bild vergrößern"
-        className="absolute top-3 left-3 z-20 p-2 text-white mix-blend-difference focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+        className={`absolute top-4 left-4 z-30 w-8 h-8 rounded-full bg-white/70 backdrop-blur-sm flex items-center justify-center text-enunas-black hover:bg-white/90 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-enunas-purple ${onBackToPhotos ? 'max-md:hidden' : ''}`}
       >
         <ZoomIcon />
       </button>
+
+      {/* Takes the zoom button's place. */}
+      {onBackToPhotos && (
+        <button
+          type="button"
+          onClick={onBackToPhotos}
+          aria-label="Zurück zu den Produktfotos"
+          className="absolute top-4 left-4 z-30 md:hidden w-8 h-8 rounded-full bg-white/70 backdrop-blur-sm flex items-center justify-center text-enunas-black animate-fade-in focus-visible:outline focus-visible:outline-2 focus-visible:outline-enunas-purple"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden>
+            <path d="M2.5 2.5l9 9M11.5 2.5l-9 9" />
+          </svg>
+        </button>
+      )}
 
       <GlassCursor targetRef={containerRef} mode="plus" />
 

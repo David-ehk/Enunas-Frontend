@@ -745,4 +745,5 @@ export interface CurationData {
   trendy: string[];
   drops: string[];
   recommendations: Record<Segment, string[]>;
+  cartUpsell?: string[];
 }

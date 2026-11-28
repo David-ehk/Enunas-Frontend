@@ -35,6 +35,8 @@ export function usePdpSnap(stopRef: RefObject<HTMLElement | null>) {
     if (stopRef.current) glideTo(lockFor(stopRef.current))
   }, [stopRef])
 
+  const scrollToTop = useCallback(() => glideTo(0), [])
+
   useEffect(() => {
     // Only a finger arms it, so scripted scrolling is never redirected.
     let from: number | null = null
@@ -100,5 +102,5 @@ export function usePdpSnap(stopRef: RefObject<HTMLElement | null>) {
     }
   }, [stopRef])
 
-  return { atTop, scrollToStop }
+  return { atTop, scrollToStop, scrollToTop }
 }

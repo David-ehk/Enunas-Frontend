@@ -1,4 +1,5 @@
-// Which Schaufenster recommendations the cart drawer shows: the cart's dominant style decides.
+// Which products the cart suggests (the Schaufenster's cartUpsell picks), plus the cart's style
+// ranking that the cart favourites use.
 import { productSegments, SEGMENT_LABELS } from './product'
 import type { ApiProduct, CurationData, Segment } from '@/types/api'
 
@@ -29,8 +30,8 @@ export function isSoldOut(p: ApiProduct): boolean {
 }
 
 /**
- * Up to three buyable picks from the highest-ranked style that has any; styles are not mixed.
- * Without any admin pick, the three most recent buyable products.
+ * Up to three buyable cartUpsell picks in the admin's order, not topped up.
+ * Without a usable pick, the three most recent buyable products.
  */
 export function pickSuggestions(
   lines: CartLine[],
@@ -43,13 +44,11 @@ export function pickSuggestions(
 
   const buyable = (p: ApiProduct) => !inCart.has(String(p.id)) && p.available && !p.preview && !isSoldOut(p)
 
-  for (const style of rankCartStyles(lines, products)) {
-    const picks = (curation?.recommendations[style] ?? []).flatMap(id => {
-      const p = byId.get(String(id))
-      return p && buyable(p) ? [p] : []
-    })
-    if (picks.length > 0) return picks.slice(0, MAX_PICKS)
-  }
+  const picks = (curation?.cartUpsell ?? []).flatMap(id => {
+    const p = byId.get(String(id))
+    return p && buyable(p) ? [p] : []
+  })
+  if (picks.length > 0) return picks.slice(0, MAX_PICKS)
   return products
     .filter(buyable)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())

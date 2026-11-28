@@ -11,7 +11,7 @@ interface CompleteTheLookProps {
 
 /**
  * "Vervollständige den Look" — a horizontally scrolling product row with the look photo to its
- * right (left out on phones, where it only repeats the product photo), with the
+ * right (above it on phones), with the
  * article count next to the title and a thin progress track that follows the scroll position.
  */
 export default function CompleteTheLook({ items, heroImage }: CompleteTheLookProps) {
@@ -66,7 +66,7 @@ export default function CompleteTheLook({ items, heroImage }: CompleteTheLookPro
       {/* md:items-center puts the product column at the vertical middle of the tall outfit photo. */}
       <div className={showHero ? 'grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start md:items-center' : ''}>
         {showHero && (
-          <div className="relative hidden md:block aspect-[2/3] bg-enunas-off-white overflow-hidden md:order-last">
+          <div className="relative aspect-[2/3] bg-enunas-off-white overflow-hidden md:order-last">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={heroImage} alt="Outfit" className="absolute inset-0 w-full h-full object-cover" />
           </div>

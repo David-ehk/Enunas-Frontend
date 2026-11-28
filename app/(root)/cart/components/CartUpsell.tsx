@@ -7,7 +7,7 @@ import { generateSlug } from '@/lib/product'
 import CartProductRow from './CartProductRow'
 import { useCartShelf } from './useCartShelf'
 
-/** Schaufenster picks for the cart's main style, listed under the items on /cart. */
+/** The Schaufenster's cart picks, else the newest products, listed under the items on /cart. */
 export default function CartUpsell() {
   const { cartItems } = useCart()
   const shelf = useCartShelf(cartItems.length > 0)

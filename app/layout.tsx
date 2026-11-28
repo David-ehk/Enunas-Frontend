@@ -6,47 +6,47 @@ import { PostHogProvider } from "./providers";
 const LeagueSpartan = localFont({
   src: [
     {
-      path: './fonts/LeagueSpartan-Thin.ttf',
+      path: './fonts/LeagueSpartan-Thin.woff2',
       weight: '100',
       style: 'normal'
     },
     {
-      path: './fonts/LeagueSpartan-ExtraLight.ttf',
+      path: './fonts/LeagueSpartan-ExtraLight.woff2',
       weight: '200',
       style: 'normal'
     },
     {
-      path: './fonts/LeagueSpartan-Light.ttf',
+      path: './fonts/LeagueSpartan-Light.woff2',
       weight: '300',
       style: 'normal'
     },
     {
-      path: './fonts/LeagueSpartan-Regular.ttf',
+      path: './fonts/LeagueSpartan-Regular.woff2',
       weight: '400',
       style: 'normal'
     },
     {
-      path: './fonts/LeagueSpartan-Medium.ttf',
+      path: './fonts/LeagueSpartan-Medium.woff2',
       weight: '500',
       style: 'normal'
     },
     {
-      path: './fonts/LeagueSpartan-SemiBold.ttf',
+      path: './fonts/LeagueSpartan-SemiBold.woff2',
       weight: '600',
       style: 'normal'
     },
     {
-      path: './fonts/LeagueSpartan-Bold.ttf',
+      path: './fonts/LeagueSpartan-Bold.woff2',
       weight: '700',
       style: 'normal'
     },
     {
-      path: './fonts/LeagueSpartan-ExtraBold.ttf',
+      path: './fonts/LeagueSpartan-ExtraBold.woff2',
       weight: '800',
       style: 'normal'
     },
     {
-      path: './fonts/LeagueSpartan-Black.ttf',
+      path: './fonts/LeagueSpartan-Black.woff2',
       weight: '900',
       style: 'normal'
     }
@@ -58,52 +58,52 @@ const LeagueSpartan = localFont({
 const CormorantGaramond = localFont({
   src: [
     {
-      path: './fonts/CormorantGaramond-Light.ttf',
+      path: './fonts/CormorantGaramond-Light.woff2',
       weight: '300',
       style: 'normal'
     },
     {
-      path: './fonts/CormorantGaramond-LightItalic.ttf',
+      path: './fonts/CormorantGaramond-LightItalic.woff2',
       weight: '300',
       style: 'italic'
     },
     {
-      path: './fonts/CormorantGaramond-Regular.ttf',
+      path: './fonts/CormorantGaramond-Regular.woff2',
       weight: '400',
       style: 'normal'
     },
     {
-      path: './fonts/CormorantGaramond-SemiBold.ttf',
+      path: './fonts/CormorantGaramond-SemiBold.woff2',
       weight: '600',
       style: 'normal'
     },
     {
-      path: './fonts/CormorantGaramond-SemiBoldItalic.ttf',
+      path: './fonts/CormorantGaramond-SemiBoldItalic.woff2',
       weight: '600',
       style: 'italic'
     },
     {
-      path: './fonts/CormorantGaramond-Medium.ttf',
+      path: './fonts/CormorantGaramond-Medium.woff2',
       weight: '500',
       style: 'normal'
     },
     {
-      path: './fonts/CormorantGaramond-MediumItalic.ttf',
+      path: './fonts/CormorantGaramond-MediumItalic.woff2',
       weight: '500',
       style: 'italic'
     },
     {
-      path: './fonts/CormorantGaramond-Bold.ttf',
+      path: './fonts/CormorantGaramond-Bold.woff2',
       weight: '700',
       style: 'normal'
     },
     {
-      path: './fonts/CormorantGaramond-BoldItalic.ttf',
+      path: './fonts/CormorantGaramond-BoldItalic.woff2',
       weight: '700',
       style: 'italic'
     },
     {
-      path: './fonts/CormorantGaramond-Italic.ttf',
+      path: './fonts/CormorantGaramond-Italic.woff2',
       weight: '400',
       style: 'italic'
     }

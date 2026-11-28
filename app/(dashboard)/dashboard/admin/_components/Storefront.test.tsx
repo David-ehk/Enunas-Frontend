@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import Storefront from './Storefront'
 import { storefrontApi } from '@/lib/api'
-import type { CurationData } from '@/types/api'
+import type { AdminApiProduct, CurationData } from '@/types/api'
 
 const saved: CurationData = {
   trendy: [],
@@ -65,5 +65,57 @@ describe('Storefront curation editor', () => {
     await act(async () => { fireEvent.click(saveButton()!) })
     expect(screen.getByRole('alert').textContent).toContain('Unbekannte Produkt-ID')
     expect(screen.getByText('Kuratierte Auswahl')).toBeTruthy()
+  })
+})
+
+describe('Warenkorb tab', () => {
+  const products = [1, 2, 3, 4].map(id => (
+    { id, name: `Produkt ${id}`, brandName: 'Marke', images: [], status: 'ACTIVE' } as unknown as AdminApiProduct
+  ))
+
+  async function open(loaded: CurationData) {
+    vi.spyOn(storefrontApi.admin, 'getCuration').mockResolvedValue(loaded)
+    const save = vi.spyOn(storefrontApi.admin, 'saveCuration').mockImplementation(async c => c)
+    await act(async () => { render(<Storefront products={products} />) })
+    return save
+  }
+
+  const openCartTab = () => fireEvent.click(screen.getByRole('button', { name: 'Warenkorb' }))
+
+  it('saves picks to cartUpsell and leaves the other lists alone', async () => {
+    const save = await open({ ...saved, trendy: ['3'], cartUpsell: [] })
+
+    openCartTab()
+    expect(screen.getByText('Erscheint im Warenkorb unter „Empfohlen für dich“')).toBeTruthy()
+    fireEvent.click(screen.getByText('Produkt 1'))
+    fireEvent.click(screen.getByText('Produkt 2'))
+    await act(async () => { fireEvent.click(saveButton()!) })
+
+    expect(save).toHaveBeenCalledWith({ ...saved, trendy: ['3'], cartUpsell: ['1', '2'] })
+  })
+
+  it('keeps the saved cart picks when saving from another tab', async () => {
+    const save = await open({ ...saved, cartUpsell: ['2'] })
+
+    fireEvent.click(screen.getByText('Produkt 1'))
+    await act(async () => { fireEvent.click(saveButton()!) })
+
+    expect(save).toHaveBeenCalledWith({ ...saved, trendy: ['1'], cartUpsell: ['2'] })
+  })
+
+  it('opens empty when the response has no cartUpsell', async () => {
+    await open(saved)
+
+    openCartTab()
+    expect(screen.getByText('Produkte hierher ziehen oder links anklicken')).toBeTruthy()
+  })
+
+  it('marks the first 3 as shown in the cart', async () => {
+    await open({ ...saved, cartUpsell: ['1', '2', '3', '4'] })
+
+    openCartTab()
+    expect(screen.getByText('Direkt sichtbar (1–3)')).toBeTruthy()
+    expect(screen.getByText('+1 als Ersatz')).toBeTruthy()
+    expect(screen.getByText('Ersatz, falls oben etwas fehlt')).toBeTruthy()
   })
 })

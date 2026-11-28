@@ -137,7 +137,7 @@ export default function ProductDetails({
   const router = useRouter()
   const ctaRef = useRef<HTMLButtonElement>(null)
   const detailsRef = useRef<HTMLDivElement>(null)
-  const { atTop, scrollToStop } = usePdpSnap(detailsRef)
+  const { atTop, scrollToStop, scrollToTop } = usePdpSnap(detailsRef)
   const { addToCart, openCart } = useCart()
   const { isSaved, toggle: toggleWishlist } = useWishlist()
 
@@ -390,6 +390,7 @@ export default function ProductDetails({
                 justSaved={justSaved}
                 onShare={handleShare}
                 shareCopied={shareCopied}
+                onBackToPhotos={atTop ? undefined : scrollToTop}
               />
             </div>
             {/* Phones: buy row on the first screen, with the swipe cue on the photo's edge. */}
@@ -407,20 +408,18 @@ export default function ProductDetails({
                   <path d="M3 6l5 5 5-5" />
                 </svg>
               </button>
-              <div className="pt-3">
-                <StickyAddToCart
-                  inline
-                  dismissed={!atTop}
-                  productName={product.name}
-                  formattedPrice={livePreview && product.releaseDate ? `Kommt am ${formatReleaseDate(product.releaseDate)}` : formattedPrice}
-                  selectedSize={livePreview ? null : selectedSize}
-                  ctaLabel={ctaLabel}
-                  isOutOfStock={ctaDisabled}
-                  ctaMuted={ctaMuted}
-                  onCta={handleCta}
-                  watchRef={ctaRef}
-                />
-              </div>
+              <StickyAddToCart
+                inline
+                dismissed={!atTop}
+                productName={product.name}
+                formattedPrice={livePreview && product.releaseDate ? `Kommt am ${formatReleaseDate(product.releaseDate)}` : formattedPrice}
+                selectedSize={livePreview ? null : selectedSize}
+                ctaLabel={ctaLabel}
+                isOutOfStock={ctaDisabled}
+                ctaMuted={ctaMuted}
+                onCta={handleCta}
+                watchRef={ctaRef}
+              />
             </div>
             <nav className="px-6 sm:px-8 py-4 sm:py-[22px] max-md:relative max-md:z-10 max-md:bg-white">
               <ol
@@ -445,7 +444,7 @@ export default function ProductDetails({
           </div>
 
           {/* RIGHT — Details */}
-          <div className="flex flex-col items-center text-center px-6 pt-10 pb-16 sm:px-12 md:px-10 lg:px-14 md:pt-14 md:pb-20 max-md:relative max-md:z-10 max-md:bg-white">
+          <div className="flex flex-col items-center text-center px-6 pt-4 pb-16 sm:px-12 md:px-10 lg:px-14 md:pt-14 md:pb-20 max-md:relative max-md:z-10 max-md:bg-white">
             {/* 1. Brand + Gender */}
             <div className="flex items-center gap-3.5 mb-3.5">
               <BrandLink brand={product.brandName} />

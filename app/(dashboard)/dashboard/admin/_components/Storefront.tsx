@@ -10,7 +10,7 @@ import { PageHeader, SearchInput, SelectFilter } from './shared'
 import { isProductLive } from '@/lib/product'
 import { adminProductCover } from '@/lib/adminProductCover'
 
-type SectionTab = 'trendy' | 'drops' | 'recommendations'
+type SectionTab = 'trendy' | 'drops' | 'recommendations' | 'cartUpsell'
 type DragState =
   | { type: 'left'; id: string }
   | { type: 'right'; id: string }
@@ -21,6 +21,7 @@ const SECTION_TABS: { id: SectionTab; label: string }[] = [
   { id: 'trendy',          label: 'Trendy' },
   { id: 'drops',           label: 'Drops' },
   { id: 'recommendations', label: 'Empfehlungen' },
+  { id: 'cartUpsell',      label: 'Warenkorb' },
 ]
 
 const SEGMENTS: { id: Segment; label: string; desc: string }[] = [
@@ -34,12 +35,14 @@ const SEGMENTS: { id: Segment; label: string; desc: string }[] = [
 function getIds(c: CurationData, section: SectionTab, seg: Segment): string[] {
   if (section === 'trendy') return c.trendy
   if (section === 'drops')  return c.drops
+  if (section === 'cartUpsell') return c.cartUpsell ?? []
   return c.recommendations[seg] ?? []
 }
 
 function setIds(c: CurationData, section: SectionTab, seg: Segment, ids: string[]): CurationData {
   if (section === 'trendy') return { ...c, trendy: ids }
   if (section === 'drops')  return { ...c, drops: ids }
+  if (section === 'cartUpsell') return { ...c, cartUpsell: ids }
   return { ...c, recommendations: { ...c.recommendations, [seg]: ids } }
 }
 
@@ -370,6 +373,7 @@ function CurationEditor({ initial, approved }: { initial: CurationData; approved
   }
 
   const currentSegment = SEGMENTS.find(s => s.id === segment)
+  const fold = section === 'cartUpsell' ? 3 : 4
 
   return (
     // Inert while saving: the server's response replaces the state, so an edit made meanwhile
@@ -400,6 +404,13 @@ function CurationEditor({ initial, approved }: { initial: CurationData; approved
         <p className="text-[10px] text-[#9B9B9B] uppercase tracking-[0.1em]"
           style={{ fontFamily: 'var(--font-league-spartan)' }}>
           Erscheint ganz oben auf /trendy
+        </p>
+      )}
+
+      {section === 'cartUpsell' && (
+        <p className="text-[10px] text-[#9B9B9B] uppercase tracking-[0.1em]"
+          style={{ fontFamily: 'var(--font-league-spartan)' }}>
+          Erscheint im Warenkorb unter „Empfohlen für dich“
         </p>
       )}
 
@@ -515,13 +526,13 @@ function CurationEditor({ initial, approved }: { initial: CurationData; approved
               <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: '#370E4D' }} />
               <span className="text-[9px] font-semibold uppercase tracking-[0.1em]"
                 style={{ fontFamily: 'var(--font-league-spartan)', color: '#370E4D' }}>
-                Direkt sichtbar (1–4)
+                Direkt sichtbar (1–{fold})
               </span>
             </span>
-            {selectedProducts.length > 4 && (
+            {selectedProducts.length > fold && (
               <span className="text-[9px] text-[#9B9B9B]"
                 style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                +{selectedProducts.length - 4} auf Klick
+                +{selectedProducts.length - fold} {section === 'cartUpsell' ? 'als Ersatz' : 'auf Klick'}
               </span>
             )}
           </div>
@@ -547,18 +558,18 @@ function CurationEditor({ initial, approved }: { initial: CurationData; approved
                         product={p}
                         index={i}
                         isDragOver={dragOverIndex === i}
-                        isAboveFold={i < 4}
+                        isAboveFold={i < fold}
                         onRemove={() => remove(String(p.id))}
                         onDragStart={e => handleRightDragStart(e, String(p.id))}
                         onDragOver={e => handleItemDragOver(e, i)}
                         onDrop={e => handleItemDrop(e, String(p.id))}
                       />
-                      {i === 3 && selectedProducts.length > 4 && (
+                      {i === fold - 1 && selectedProducts.length > fold && (
                         <div className="flex items-center gap-2 py-1.5 px-1">
                           <div className="flex-1 h-px" style={{ background: '#E8E8E8' }} />
                           <span className="text-[9px] uppercase tracking-[0.14em] text-[#9B9B9B] shrink-0"
                             style={{ fontFamily: 'var(--font-league-spartan)' }}>
-                            nur auf „Weitere anzeigen“
+                            {section === 'cartUpsell' ? 'Ersatz, falls oben etwas fehlt' : 'nur auf „Weitere anzeigen“'}
                           </span>
                           <div className="flex-1 h-px" style={{ background: '#E8E8E8' }} />
                         </div>
