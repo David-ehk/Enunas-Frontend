@@ -3,16 +3,15 @@
 import { useCallback, useEffect, useState, type RefObject } from 'react'
 import { snapTarget } from '@/lib/pdpSnap'
 
-/** Space left under the "Produktdetails" row at the stop. */
-const BELOW_ROW_PX = 8
 /** Scrolling has stopped, momentum included, after this long without a scroll event. */
 const IDLE_MS = 120
 
-// Measured on each use: the mobile browser's toolbar changes the screen height.
-// The stop puts the first row of `section` (its "Produktdetails" header) at the bottom edge.
-const lockFor = (section: HTMLElement) => {
-  const row = section.querySelector('button') ?? section
-  return Math.round(row.getBoundingClientRect().bottom + window.scrollY - window.innerHeight + BELOW_ROW_PX)
+// The stop is measured from the top: the breadcrumb has just gone behind the navbar, so the brand
+// sits under it with the breadcrumb's usual spacing, whatever the screen height. Measured on each
+// use, because the navbar's height changes with the screen width.
+const lockFor = (breadcrumb: HTMLElement) => {
+  const navbar = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0
+  return Math.round(breadcrumb.getBoundingClientRect().bottom + window.scrollY - navbar)
 }
 
 function glideTo(top: number) {
@@ -21,7 +20,7 @@ function glideTo(top: number) {
 }
 
 /** Phones only: after a swipe, glides the product page to the full photo or to the stop. */
-export function usePdpSnap(stopRef: RefObject<HTMLElement | null>) {
+export function usePdpSnap(breadcrumbRef: RefObject<HTMLElement | null>) {
   // Whether the page still rests on the full photo, for the swipe cue.
   const [atTop, setAtTop] = useState(true)
   useEffect(() => {
@@ -32,8 +31,8 @@ export function usePdpSnap(stopRef: RefObject<HTMLElement | null>) {
   }, [])
 
   const scrollToStop = useCallback(() => {
-    if (stopRef.current) glideTo(lockFor(stopRef.current))
-  }, [stopRef])
+    if (breadcrumbRef.current) glideTo(lockFor(breadcrumbRef.current))
+  }, [breadcrumbRef])
 
   const scrollToTop = useCallback(() => glideTo(0), [])
 
@@ -44,16 +43,16 @@ export function usePdpSnap(stopRef: RefObject<HTMLElement | null>) {
     let timer = 0
 
     const settle = () => {
-      const section = stopRef.current
+      const breadcrumb = breadcrumbRef.current
       const start = from
       from = null
       released = false
-      if (start === null || !section || !window.matchMedia('(max-width: 767px)').matches) return
+      if (start === null || !breadcrumb || !window.matchMedia('(max-width: 767px)').matches) return
       const to = window.scrollY
       // A tap or a sideways swipe through the photos.
       if (to === start) return
 
-      const target = snapTarget({ from: start, to, lock: lockFor(section) })
+      const target = snapTarget({ from: start, to, lock: lockFor(breadcrumb) })
       if (target !== null) glideTo(target)
     }
 
@@ -74,9 +73,9 @@ export function usePdpSnap(stopRef: RefObject<HTMLElement | null>) {
     const onScroll = () => {
       if (!released) return
       // Momentum from above is caught as it reaches the stop, so it does not run past and return.
-      const section = stopRef.current
-      if (section && from !== null && window.matchMedia('(max-width: 767px)').matches) {
-        const lock = lockFor(section)
+      const breadcrumb = breadcrumbRef.current
+      if (breadcrumb && from !== null && window.matchMedia('(max-width: 767px)').matches) {
+        const lock = lockFor(breadcrumb)
         if (from < lock - 1 && window.scrollY > lock + 1) {
           from = null
           released = false
@@ -100,7 +99,7 @@ export function usePdpSnap(stopRef: RefObject<HTMLElement | null>) {
       window.removeEventListener('touchcancel', onEnd)
       window.removeEventListener('scroll', onScroll)
     }
-  }, [stopRef])
+  }, [breadcrumbRef])
 
   return { atTop, scrollToStop, scrollToTop }
 }

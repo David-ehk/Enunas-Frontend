@@ -248,26 +248,48 @@ const css = `
 }
 .enu-pick-colour { font-size: 11px; color: var(--muted); margin-top: 10px; }
 
-/* Upsell rows as "[ ] Name hinzufügen", in the drawer and on /cart */
+/* Upsell rows with their sizes under the name, in the drawer and on /cart */
 .enu-upsell {
   display: flex; flex-direction: column; gap: 16px; padding-top: 32px;
   --acc: #370E4D; --hair-c: #E8E8E8; --muted: #6B6B6B; --faint: #9A9A93; --panel: #F5F5F0;
   --ease: cubic-bezier(0.16, 1, 0.3, 1); --ease-q: cubic-bezier(0.25, 1, 0.5, 1);
   font-family: var(--font-league-spartan), system-ui, sans-serif;
 }
-.enu-upsell .enu-pick { border-color: #0A0A0A; padding: 14px; }
-.enu-upsell .enu-pick-add {
-  display: flex; align-items: flex-start; gap: 10px; text-align: left;
-  color: #0A0A0A; font-size: 11px; letter-spacing: 0.14em; line-height: 1.5;
+.enu-upsell .enu-picks-title { font-size: 13px; color: #2D2D2D; }
+.enu-upsell .enu-pick {
+  border-color: #0A0A0A; padding: 14px; transition: border-color 240ms var(--ease-q);
+  /* A row that replaces an added one arrives softly. */
+  animation: enuPickIn 520ms var(--ease) backwards;
 }
-.enu-pick-box {
-  position: relative; flex: none; width: 14px; height: 14px; margin-top: 1px; border: 1px solid #0A0A0A;
+@keyframes enuPickIn { from { opacity: 0; transform: translateY(6px); } }
+.enu-picked {
+  display: flex; align-items: center; gap: 8px; margin-top: 8px;
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #2D2D2D;
 }
-.enu-pick-box::after {
-  content: ""; position: absolute; inset: 2px; background: var(--acc);
-  opacity: 0; transition: opacity 240ms var(--ease-q);
+.enu-picked-swatch { width: 12px; height: 12px; flex: none; border: 1px solid #0A0A0A; }
+/* The outline turns purple while the row is in use. */
+.enu-upsell .enu-pick:focus-within, .enu-upsell .enu-pick:active { border-color: var(--acc); }
+.enu-sizes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.enu-size {
+  min-width: 42px; height: 34px; padding: 0 10px; cursor: pointer;
+  background: transparent; border: 1px solid var(--hair-c); color: #0A0A0A;
+  font-family: var(--font-league-spartan), system-ui, sans-serif; font-size: 11px; letter-spacing: 0.08em;
+  transition: background-color 220ms var(--ease-q), border-color 220ms var(--ease-q), color 220ms var(--ease-q);
 }
-.enu-pick-box[data-open="true"]::after { opacity: 1; }
+/* The tapped size takes the size sheet's washed beige, a shade deeper so it shows on this beige. */
+.enu-size:active:not(:disabled), .enu-size[aria-busy="true"] { background: #E7E6DC; border-color: #CFCEC2; }
+.enu-size:disabled { cursor: wait; }
+.enu-size[data-sold-out="true"] {
+  cursor: not-allowed; color: var(--faint);
+  background: linear-gradient(to top right, transparent calc(50% - 0.5px), #D6D6D0 50%, transparent calc(50% + 0.5px));
+}
+@media (hover: hover) {
+  .enu-upsell .enu-pick:hover { border-color: var(--acc); }
+  .enu-size:hover:not(:disabled) { background: #EDECE4; border-color: #CFCEC2; }
+}
+.enu-sizes-hint {
+  margin-top: 8px; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+}
 
 .enu-wish-all { display: flex; justify-content: center; padding-top: 12px; }
 .enu-wish-all a {
@@ -389,6 +411,7 @@ const css = `
   .enu-more, .enu-more svg { animation: none !important; transition: none !important; }
   .enu-item { animation: none !important; opacity: 1 !important; transform: none !important; }
   .enu-pick-choice { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .enu-upsell .enu-pick { animation: none !important; }
   .enu-pick-media img { transition: none !important; }
   .enu-pick:hover .enu-pick-media img { transform: none !important; }
 }

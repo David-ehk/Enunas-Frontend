@@ -16,6 +16,14 @@ describe('ImageGallery back-to-photos button', () => {
     expect(close()).toBeNull()
   })
 
+  it('is offered on a product without photos too', () => {
+    const onBackToPhotos = vi.fn()
+    render(<ImageGallery images={[]} productName="Jacke" onBackToPhotos={onBackToPhotos} />)
+
+    fireEvent.click(close()!)
+    expect(onBackToPhotos).toHaveBeenCalledTimes(1)
+  })
+
   it('is offered once the page has swiped up, and asks to go back', () => {
     const onBackToPhotos = vi.fn()
     render(<ImageGallery images={['/a.jpg']} productName="Jacke" onBackToPhotos={onBackToPhotos} />)

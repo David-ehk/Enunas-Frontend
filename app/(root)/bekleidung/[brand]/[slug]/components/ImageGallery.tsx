@@ -284,6 +284,19 @@ function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, on
     })
   }
 
+  const backButton = onBackToPhotos && (
+    <button
+      type="button"
+      onClick={onBackToPhotos}
+      aria-label="Zurück zu den Produktfotos"
+      className="absolute top-4 left-4 z-30 md:hidden w-8 h-8 rounded-full bg-white/70 backdrop-blur-sm flex items-center justify-center text-enunas-black animate-fade-in focus-visible:outline focus-visible:outline-2 focus-visible:outline-enunas-purple"
+    >
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden>
+        <path d="M2.5 2.5l9 9M11.5 2.5l-9 9" />
+      </svg>
+    </button>
+  )
+
   if (images.length === 0) {
     return (
       <div
@@ -291,6 +304,7 @@ function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, on
         style={{ background: '#F5F5F0' }}
       >
         <GalleryActions saved={saved} onToggleSaved={onToggleSaved} justSaved={justSaved} onShare={onShare} shareCopied={shareCopied} />
+        {backButton}
         <svg
           width="48" height="48" viewBox="0 0 48 48" fill="none"
           style={{ opacity: 0.18, marginBottom: '16px' }}
@@ -382,18 +396,7 @@ function ImageGallery({ images, productName, saved, onToggleSaved, justSaved, on
       </button>
 
       {/* Takes the zoom button's place. */}
-      {onBackToPhotos && (
-        <button
-          type="button"
-          onClick={onBackToPhotos}
-          aria-label="Zurück zu den Produktfotos"
-          className="absolute top-4 left-4 z-30 md:hidden w-8 h-8 rounded-full bg-white/70 backdrop-blur-sm flex items-center justify-center text-enunas-black animate-fade-in focus-visible:outline focus-visible:outline-2 focus-visible:outline-enunas-purple"
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden>
-            <path d="M2.5 2.5l9 9M11.5 2.5l-9 9" />
-          </svg>
-        </button>
-      )}
+      {backButton}
 
       <GlassCursor targetRef={containerRef} mode="plus" />
 

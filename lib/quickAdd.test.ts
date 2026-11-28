@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { variantColours, sizeChoices, buildCartLine, quickAdd, savedColour } from './quickAdd'
+import { variantColours, sizeChoices, buildCartLine, quickAdd, savedColour, pictureChoice } from './quickAdd'
 import { FetchError } from './api/fetcher'
 import type { ApiProduct, ApiListing } from '@/types/api'
 import type { CartItem } from '@/app/context/CartContext'
@@ -34,6 +34,36 @@ describe('variant choices', () => {
       { size: 'M', unavailable: false },
       { size: 'L', unavailable: true },
     ])
+  })
+})
+
+describe('pictureChoice', () => {
+  // `product` has Black first; its only tagged photo is White's.
+  const photos = { ...product, images: ['white.jpg'] } as ApiProduct
+
+  it('takes the colour the first photo shows', () => {
+    expect(pictureChoice(photos)).toEqual({ colour: 'White', image: 'white.jpg' })
+  })
+
+  it('moves to a colour with stock, and to its photo, when the pictured one is sold out', () => {
+    const p = {
+      ...product,
+      images: ['white.jpg', 'black.jpg'],
+      imageObjects: [
+        { url: 'white.jpg', productColorId: 52, primary: true },
+        { url: 'black.jpg', productColorId: 51, primary: true },
+      ],
+      variants: [
+        { ...variant(2, 'Black', 'M', 2), colorId: 51 },
+        { ...variant(3, 'White', 'M', 0), colorId: 52 },
+      ],
+    } as unknown as ApiProduct
+    expect(pictureChoice(p)).toEqual({ colour: 'Black', image: 'black.jpg' })
+  })
+
+  it('takes the first colour with stock when photos have no colour', () => {
+    const p = { ...product, images: ['cover.jpg'], imageObjects: [] } as unknown as ApiProduct
+    expect(pictureChoice(p)).toEqual({ colour: 'Black', image: 'cover.jpg' })
   })
 })
 

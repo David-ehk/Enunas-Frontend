@@ -1,5 +1,5 @@
-// The product page on phones has two resting places: the full photo (0) and `lock`, at
-// "Produktdetails". A swipe never comes to rest between them, and one coming from above stops at
+// The product page on phones has two resting places: the full photo (0) and `lock`, where the
+// breadcrumb has just gone behind the navbar. A swipe never comes to rest between them, and one coming from above stops at
 // `lock` however hard it was; from there downwards scrolling is free.
 
 /** Below this the finger barely moved, so it is not read as a direction. */

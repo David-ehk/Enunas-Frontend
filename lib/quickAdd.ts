@@ -34,6 +34,23 @@ export function savedColour(p: ApiProduct, href: string): string | undefined {
     ?? colours[0]
 }
 
+/**
+ * The colourway a suggestion offers, with its photo: the one the first photo shows. When that one
+ * is sold out or unknown, the first colour with stock, shown with its own photo.
+ */
+export function pictureChoice(p: ApiProduct): { colour: string; image: string } {
+  const first = p.images[0] ?? ''
+  const buyable = (c: string) => sizeChoices(p, c).some(s => !s.unavailable)
+  const shownId = p.imageObjects?.find(i => i.url === first)?.productColorId
+  const shown = shownId != null ? p.variants?.find(v => v.colorId === shownId)?.color : undefined
+  if (shown && buyable(shown)) return { colour: shown, image: first }
+
+  const colours = variantColours(p)
+  const colour = colours.find(buyable) ?? colours[0] ?? ''
+  const colorId = p.variants?.find(v => v.color === colour)?.colorId ?? null
+  return { colour, image: colourwayCoverImage(p.imageObjects, colorId, first) }
+}
+
 export function buildCartLine(
   p: ApiProduct,
   colour: string,

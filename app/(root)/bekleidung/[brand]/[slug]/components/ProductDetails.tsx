@@ -136,8 +136,8 @@ export default function ProductDetails({
   const { isAuthenticated } = useAuth()
   const router = useRouter()
   const ctaRef = useRef<HTMLButtonElement>(null)
-  const detailsRef = useRef<HTMLDivElement>(null)
-  const { atTop, scrollToStop, scrollToTop } = usePdpSnap(detailsRef)
+  const breadcrumbRef = useRef<HTMLElement>(null)
+  const { atTop, scrollToStop, scrollToTop } = usePdpSnap(breadcrumbRef)
   const { addToCart, openCart } = useCart()
   const { isSaved, toggle: toggleWishlist } = useWishlist()
 
@@ -421,7 +421,7 @@ export default function ProductDetails({
                 watchRef={ctaRef}
               />
             </div>
-            <nav className="px-6 sm:px-8 py-4 sm:py-[22px] max-md:relative max-md:z-10 max-md:bg-white">
+            <nav ref={breadcrumbRef} className="px-6 sm:px-8 py-4 sm:py-[22px] max-md:relative max-md:z-10 max-md:bg-white">
               <ol
                 className="flex items-center flex-wrap gap-x-2.5 gap-y-1 sm:gap-x-3 text-enunas-gray-medium"
                 style={{ fontFamily: 'var(--font-league-spartan)', fontSize: '13px', letterSpacing: '0.02em' }}
@@ -631,7 +631,7 @@ export default function ProductDetails({
             <StockIndicator stockQuantity={selectedVariant?.stockQuantity} />
 
             {/* 12. Accordions */}
-            <div ref={detailsRef} className="w-full max-w-[560px] text-left mt-4">
+            <div className="w-full max-w-[560px] text-left mt-4">
 
               <PdpAccordion
                 id="details"
